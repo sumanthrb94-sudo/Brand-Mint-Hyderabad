@@ -47,11 +47,11 @@
   </g>
 
   <!-- Headline -->
-  <text x="72" y="320" font-family="Instrument Serif, Times New Roman, serif" font-size="96" fill="#0B1F1A" letter-spacing="-3">We mint <tspan font-style="italic" fill="#294A40">brands</tspan> that</text>
-  <text x="72" y="408" font-family="Instrument Serif, Times New Roman, serif" font-size="96" font-style="italic" fill="url(#grad-text)" letter-spacing="-3">compound.</text>
+  <text x="72" y="318" font-family="Instrument Serif, Times New Roman, serif" font-size="92" fill="#0B1F1A" letter-spacing="-2.5">We mint <tspan font-style="italic" fill="#294A40">brands</tspan></text>
+  <text x="72" y="402" font-family="Instrument Serif, Times New Roman, serif" font-size="92" fill="#0B1F1A" letter-spacing="-2.5">that <tspan font-style="italic" fill="url(#grad-text)">compound.</tspan></text>
 
   <!-- Sub -->
-  <text x="72" y="468" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#5D7368">Custom websites &amp; bespoke tools for ambitious teams.</text>
+  <text x="72" y="466" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#5D7368">Custom websites &amp; bespoke tools for ambitious teams.</text>
 
   <!-- Footer line -->
   <line x1="72" y1="552" x2="1128" y2="552" stroke="#D8E0D4"/>
