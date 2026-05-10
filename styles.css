@@ -655,7 +655,7 @@ main {
 
 /* ---------- WORK ---------- */
 .section--dark {
-  background: linear-gradient(180deg, #0b1f1a 0%, #08161220 100%);
+  background: linear-gradient(180deg, #0b1f1a 0%, #081612 100%);
   color: var(--cream);
   max-width: none;
   border-radius: 0;
@@ -693,7 +693,10 @@ main {
   color: var(--mint-2);
 }
 .section--dark .section-head p {
-  color: rgba(214, 245, 230, 0.7);
+  color: rgba(245, 250, 245, 0.78);
+}
+.section--dark .section-head h2 {
+  color: var(--cream);
 }
 .section--dark > .section-head,
 .section--dark > .work {
@@ -713,18 +716,22 @@ main {
   gap: 22px;
 }
 .case {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(124, 246, 200, 0.14);
+  background: linear-gradient(180deg, #0d2520 0%, #081612 100%);
+  border: 1px solid rgba(124, 246, 200, 0.16);
   border-radius: var(--radius-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, border-color 0.3s, background 0.3s;
+  transition: transform 0.3s ease, border-color 0.3s, background 0.3s,
+    box-shadow 0.3s;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 40px -20px rgba(0, 0, 0, 0.4);
 }
 .case:hover {
   transform: translateY(-4px);
-  border-color: rgba(124, 246, 200, 0.3);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(124, 246, 200, 0.32);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 30px 60px -20px rgba(0, 0, 0, 0.5);
 }
 .case-visual {
   height: 260px;
@@ -880,20 +887,24 @@ main {
 .tag {
   font-family: var(--mono);
   font-size: 11.5px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--mint-2);
 }
 .case-body h3 {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: 28px;
+  font-size: 30px;
   margin: 0;
   letter-spacing: -0.015em;
+  color: var(--cream);
+  line-height: 1.1;
 }
 .case-body p {
   margin: 0;
-  color: rgba(214, 245, 230, 0.7);
-  font-size: 15px;
+  color: rgba(245, 250, 245, 0.84);
+  font-size: 15.5px;
+  line-height: 1.55;
 }
 .metrics {
   margin: 14px 0 0;
@@ -912,15 +923,16 @@ main {
   font-family: var(--mono);
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(214, 245, 230, 0.55);
+  letter-spacing: 0.08em;
+  color: rgba(245, 250, 245, 0.7);
 }
 .metrics dd {
   font-family: var(--serif);
-  font-size: 24px;
+  font-size: 26px;
   margin: 0;
   color: var(--mint-2);
   letter-spacing: -0.01em;
+  line-height: 1.1;
 }
 
 /* ---------- PROCESS ---------- */
