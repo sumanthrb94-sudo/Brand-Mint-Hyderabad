@@ -483,6 +483,7 @@ export function renderSidebar(activeId, badges = {}) {
         {
           class: "nav-link" + (it.id === activeId ? " active" : ""),
           href: it.route,
+          onclick: () => toggleSidebar(false),
         },
         [it.icon, h("span", { text: it.label })]
       );
@@ -502,15 +503,68 @@ export function renderSidebar(activeId, badges = {}) {
 export function renderTopbar({ breadcrumb, title, actions }) {
   const root = document.getElementById("topbar");
   clear(root);
+
+  const burger = h("button", {
+    class: "nav-toggle",
+    "aria-label": "Toggle navigation",
+    onclick: () => toggleSidebar(),
+    html:
+      '<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">' +
+      '<path d="M3 5h12M3 9h12M3 13h12"/></svg>',
+  });
+  root.appendChild(burger);
+
   root.appendChild(
     h("div", {}, [
       breadcrumb && h("div", { class: "breadcrumb", text: breadcrumb }),
       h("h1", { text: title }),
     ])
   );
-  if (actions && actions.length) {
-    root.appendChild(h("div", { class: "topbar-actions" }, actions));
+
+  const trigger = h(
+    "button",
+    {
+      class: "palette-trigger",
+      onclick: () => window.bm?.openPalette?.(),
+      "aria-label": "Open command palette",
+    },
+    [
+      h("svg", {
+        viewBox: "0 0 16 16",
+        html:
+          '<circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.4"/>' +
+          '<path d="M11 11l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+      }),
+      h("span", { class: "palette-trigger-label", text: "Search or run a command…" }),
+      h("span", { class: "palette-trigger-kbd", text: kbdHint() }),
+    ]
+  );
+
+  const actionBox = h("div", { class: "topbar-actions" }, [trigger]);
+  if (actions && actions.length) actions.forEach((a) => actionBox.appendChild(a));
+  root.appendChild(actionBox);
+}
+
+function kbdHint() {
+  if (typeof navigator !== "undefined" && /Mac|iPhone|iPad/i.test(navigator.platform)) return "⌘K";
+  return "Ctrl K";
+}
+
+export function toggleSidebar(force) {
+  const sidebar = document.getElementById("sidebar");
+  if (!sidebar) return;
+  let backdrop = document.getElementById("sidebar-backdrop");
+  if (!backdrop) {
+    backdrop = h("div", {
+      id: "sidebar-backdrop",
+      class: "sidebar-backdrop",
+      onclick: () => toggleSidebar(false),
+    });
+    document.body.appendChild(backdrop);
   }
+  const open = force == null ? !sidebar.classList.contains("open") : !!force;
+  sidebar.classList.toggle("open", open);
+  backdrop.classList.toggle("show", open);
 }
 
 /* ---------- Icons ---------- */
