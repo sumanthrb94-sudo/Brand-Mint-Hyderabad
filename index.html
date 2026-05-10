@@ -460,15 +460,16 @@
             --bm-emerald-deep: #008f6b;
             --bm-gold: #c9a14a;
             --bm-gold-soft: #e6c987;
-            --bm-ink: #0a0e0c;
-            --bm-ink-2: #141a17;
+            --bm-ink: #0b1f1a;
+            --bm-ink-2: #14352d;
+            --bm-ink-deep: #06140f;
             --bm-cream: #f5f1ea;
             --bm-mist: rgba(245, 241, 234, 0.55);
             --bm-line: rgba(245, 241, 234, 0.08);
 
-            background: var(--bm-ink);
+            background: linear-gradient(160deg, #0b1f1a 0%, #14352d 100%);
             color: var(--bm-cream);
-            padding: 120px 24px 140px;
+            padding: 72px 24px 88px;
             position: relative;
             overflow: hidden;
             font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
@@ -514,35 +515,35 @@
           }
           .bm-clients__title {
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-            font-weight: 400;
-            font-size: clamp(38px, 6vw, 68px);
+            font-weight: 600;
+            font-size: clamp(30px, 4.4vw, 52px);
             line-height: 1.05;
             letter-spacing: -0.02em;
             max-width: 880px;
-            margin-bottom: 28px;
+            margin: 0 0 20px;
           }
           .bm-clients__title em {
             font-style: italic;
             color: var(--bm-gold);
           }
           .bm-clients__lede {
-            font-size: 17px;
-            line-height: 1.7;
+            font-size: 16px;
+            line-height: 1.6;
             color: var(--bm-mist);
             max-width: 620px;
-            margin-bottom: 80px;
+            margin: 0 0 48px;
           }
           .bm-clients__featured {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-bottom: 100px;
+            gap: 18px;
+            margin-bottom: 56px;
           }
           .bm-card {
-            background: linear-gradient(165deg, var(--bm-ink-2) 0%, #0c1310 100%);
+            background: linear-gradient(165deg, var(--bm-ink-deep) 0%, #081913 100%);
             border: 1px solid var(--bm-line);
             border-radius: 4px;
-            padding: 40px 32px 36px;
+            padding: 28px 24px 26px;
             position: relative;
             overflow: hidden;
             transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -569,42 +570,42 @@
           .bm-card__num {
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
             font-style: italic;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--bm-gold);
             letter-spacing: 0.1em;
-            margin-bottom: 28px;
+            margin-bottom: 18px;
             display: block;
           }
           .bm-card__name {
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-            font-size: 30px;
-            font-weight: 500;
+            font-size: 24px;
+            font-weight: 600;
             letter-spacing: -0.01em;
             line-height: 1.15;
-            margin: 0 0 6px;
+            margin: 0 0 4px;
           }
           .bm-card__category {
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 500;
-            letter-spacing: 0.24em;
+            letter-spacing: 0.22em;
             text-transform: uppercase;
             color: var(--bm-emerald);
-            margin-bottom: 24px;
+            margin-bottom: 16px;
           }
           .bm-card__quote {
-            font-size: 15px;
-            line-height: 1.6;
+            font-size: 14px;
+            line-height: 1.55;
             color: var(--bm-mist);
-            margin-bottom: 32px;
-            min-height: 96px;
+            margin-bottom: 20px;
+            min-height: 80px;
           }
           .bm-card__meta {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            padding-top: 24px;
+            gap: 14px;
+            padding-top: 18px;
             border-top: 1px solid var(--bm-line);
-            margin-bottom: 24px;
+            margin-bottom: 18px;
           }
           .bm-card__meta-label {
             font-size: 10px;
@@ -642,12 +643,12 @@
           .bm-roster__heading {
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
             font-style: italic;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--bm-gold);
             letter-spacing: 0.16em;
             text-transform: uppercase;
-            margin-bottom: 32px;
-            padding-bottom: 16px;
+            margin: 0 0 22px;
+            padding-bottom: 12px;
             border-bottom: 1px solid var(--bm-line);
           }
           .bm-roster {
@@ -658,7 +659,7 @@
             border: 1px solid var(--bm-line);
           }
           .bm-roster__item {
-            background: var(--bm-ink);
+            background: var(--bm-ink-deep);
             padding: 36px 28px;
             transition: background 0.4s ease;
             cursor: default;

@@ -270,11 +270,11 @@ main {
 .section {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: clamp(72px, 10vw, 140px) var(--pad);
+  padding: clamp(56px, 7vw, 96px) var(--pad);
 }
 .section-head {
   max-width: 760px;
-  margin-bottom: clamp(40px, 5vw, 64px);
+  margin-bottom: clamp(28px, 3.5vw, 48px);
 }
 .kicker {
   display: inline-block;
@@ -290,10 +290,10 @@ main {
 }
 .section-head h2 {
   font-family: var(--serif);
-  font-size: clamp(34px, 5vw, 60px);
-  line-height: 1.05;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.06;
   letter-spacing: -0.02em;
-  margin: 0 0 18px;
+  margin: 0 0 14px;
   font-weight: 400;
 }
 .section-head h2 em {
@@ -310,10 +310,10 @@ main {
 .hero {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: clamp(48px, 8vw, 96px) var(--pad) clamp(40px, 6vw, 80px);
+  padding: clamp(28px, 4vw, 56px) var(--pad) clamp(24px, 3.5vw, 48px);
   display: grid;
   grid-template-columns: 1.15fr 1fr;
-  gap: clamp(32px, 5vw, 72px);
+  gap: clamp(28px, 4vw, 56px);
   align-items: center;
 }
 .hero-inner {
@@ -351,10 +351,10 @@ main {
 .hero-title {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(54px, 8vw, 108px);
-  line-height: 0.96;
+  font-size: clamp(38px, 5.2vw, 72px);
+  line-height: 1.02;
   letter-spacing: -0.03em;
-  margin: 22px 0 22px;
+  margin: 16px 0 14px;
 }
 .hero-title em {
   font-style: italic;
@@ -368,10 +368,10 @@ main {
   font-style: italic;
 }
 .hero-sub {
-  font-size: clamp(16px, 1.4vw, 19px);
+  font-size: clamp(15px, 1.3vw, 18px);
   color: var(--muted);
   max-width: 56ch;
-  margin: 0 0 32px;
+  margin: 0 0 22px;
 }
 .hero-cta {
   display: flex;
@@ -382,8 +382,8 @@ main {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
-  margin-top: 56px;
-  padding-top: 28px;
+  margin-top: 32px;
+  padding-top: 20px;
   border-top: 1px solid var(--line);
 }
 .hero-meta div {
@@ -612,10 +612,10 @@ main {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 26px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   transition: transform 0.25s ease, border-color 0.25s, box-shadow 0.25s;
   position: relative;
 }
@@ -655,9 +655,9 @@ main {
 .service h3 {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: 26px;
+  font-size: 22px;
   letter-spacing: -0.015em;
-  margin: 8px 0 0;
+  margin: 4px 0 0;
 }
 .service p {
   margin: 0;
@@ -1654,19 +1654,19 @@ main {
 .impact {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: clamp(56px, 8vw, 96px) var(--pad) clamp(40px, 6vw, 72px);
+  padding: clamp(40px, 5vw, 72px) var(--pad) clamp(28px, 3.5vw, 48px);
 }
 .impact-head {
   max-width: 760px;
-  margin-bottom: clamp(28px, 4vw, 48px);
+  margin-bottom: clamp(20px, 2.5vw, 36px);
 }
 .impact-head h2 {
   font-family: var(--serif);
   font-weight: 400;
-  font-size: clamp(28px, 4vw, 44px);
+  font-size: clamp(24px, 3.2vw, 36px);
   line-height: 1.1;
   letter-spacing: -0.02em;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   color: var(--ink);
 }
 .impact-head h2 em {
@@ -1688,10 +1688,10 @@ main {
 }
 .impact-grid li {
   background: var(--white);
-  padding: clamp(28px, 3.2vw, 44px) clamp(22px, 2.6vw, 32px);
+  padding: clamp(22px, 2.5vw, 32px) clamp(18px, 2vw, 26px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   position: relative;
   transition: background 0.25s;
 }
@@ -1711,8 +1711,8 @@ main {
 }
 .impact-num {
   font-family: var(--serif);
-  font-size: clamp(48px, 6.5vw, 84px);
-  line-height: 0.95;
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 0.98;
   letter-spacing: -0.04em;
   color: var(--ink);
   background: linear-gradient(180deg, var(--ink) 0%, var(--mint-3) 100%);
