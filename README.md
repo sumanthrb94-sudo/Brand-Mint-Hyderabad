@@ -36,7 +36,7 @@ The repo is already configured for Vercel via `vercel.json` — no build step.
 1. Go to https://vercel.com/new
 2. Import the `sumanthrb94-sudo/Brand-Mint.` repo
 3. Framework preset: **Other** · Root directory: `./` · Build command: leave empty · Output directory: `./`
-4. Deploy. You'll get a URL like `https://brand-mint.vercel.app`.
+4. Deploy. Production URL: <https://brand-mint-sdmk.vercel.app>.
 
 **Option B — Vercel CLI**
 
@@ -46,11 +46,12 @@ vercel login
 vercel --prod
 ```
 
-### After deploy: fix the link preview
+### Updating the link preview URL
 
-Open `index.html` and replace every occurrence of `https://brand-mint.vercel.app`
-with your actual deployed URL (or your custom domain). These tags drive what
-WhatsApp, iMessage, Facebook, Slack, and Twitter render when the link is shared:
+The Open Graph URLs in `index.html` are wired to <https://brand-mint-sdmk.vercel.app>.
+If you swap to a custom domain (e.g. `brandmint.studio`), find/replace every
+occurrence in `index.html`. These tags drive what WhatsApp, iMessage, Facebook,
+Slack, and Twitter render when the link is shared:
 
 - `<link rel="canonical">`
 - `<meta property="og:url">`
