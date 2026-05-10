@@ -34,7 +34,7 @@ The repo is already configured for Vercel via `vercel.json` — no build step.
 **Option A — Vercel dashboard (recommended)**
 
 1. Go to https://vercel.com/new
-2. Import the `sumanthrb94-sudo/Brand-Mint.` repo
+2. Import the `sumanthrb94-sudo/BrandMint-Hyderabad` repo
 3. Framework preset: **Other** · Root directory: `./` · Build command: leave empty · Output directory: `./`
 4. Deploy. Production URL: <https://brand-mint-sdmk.vercel.app>.
 
