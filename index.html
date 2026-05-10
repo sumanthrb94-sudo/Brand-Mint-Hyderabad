@@ -35,7 +35,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Poppins:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -451,153 +451,411 @@
         </div>
       </section>
 
-      <!-- WORK -->
-      <section class="section section--dark" id="work">
-        <header class="section-head">
-          <span class="kicker">02 — Selected work</span>
-          <h2>A snapshot of recent client launches.</h2>
-          <p>
-            Brands we've shipped for, across India and the UK. Currently in
-            build: <strong>live.ai</strong> — an AI platform launching later
-            this year.
+      <!-- WORK / CLIENTS -->
+      <section class="bm-clients" id="work">
+        <style>
+          /* ─── SCOPED STYLES ─── */
+          .bm-clients {
+            --bm-emerald: #00c897;
+            --bm-emerald-deep: #008f6b;
+            --bm-gold: #c9a14a;
+            --bm-gold-soft: #e6c987;
+            --bm-ink: #0a0e0c;
+            --bm-ink-2: #141a17;
+            --bm-cream: #f5f1ea;
+            --bm-mist: rgba(245, 241, 234, 0.55);
+            --bm-line: rgba(245, 241, 234, 0.08);
+
+            background: var(--bm-ink);
+            color: var(--bm-cream);
+            padding: 120px 24px 140px;
+            position: relative;
+            overflow: hidden;
+            font-family: "Poppins", system-ui, sans-serif;
+          }
+          .bm-clients::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(
+                ellipse 1200px 600px at 15% 20%,
+                rgba(0, 200, 151, 0.08),
+                transparent 60%
+              ),
+              radial-gradient(
+                ellipse 800px 400px at 90% 80%,
+                rgba(201, 161, 74, 0.06),
+                transparent 60%
+              );
+            pointer-events: none;
+          }
+          .bm-clients__inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+          }
+          .bm-clients__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--bm-emerald);
+            margin-bottom: 24px;
+          }
+          .bm-clients__eyebrow::before {
+            content: "";
+            width: 32px;
+            height: 1px;
+            background: var(--bm-emerald);
+          }
+          .bm-clients__title {
+            font-family: "Lora", Georgia, serif;
+            font-weight: 400;
+            font-size: clamp(38px, 6vw, 68px);
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            max-width: 880px;
+            margin-bottom: 28px;
+          }
+          .bm-clients__title em {
+            font-style: italic;
+            color: var(--bm-gold);
+          }
+          .bm-clients__lede {
+            font-size: 17px;
+            line-height: 1.7;
+            color: var(--bm-mist);
+            max-width: 620px;
+            margin-bottom: 80px;
+          }
+          .bm-clients__featured {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 100px;
+          }
+          .bm-card {
+            background: linear-gradient(165deg, var(--bm-ink-2) 0%, #0c1310 100%);
+            border: 1px solid var(--bm-line);
+            border-radius: 4px;
+            padding: 40px 32px 36px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+              border-color 0.5s ease;
+          }
+          .bm-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--bm-emerald), transparent);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+          }
+          .bm-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0, 200, 151, 0.25);
+          }
+          .bm-card:hover::after {
+            opacity: 1;
+          }
+          .bm-card__num {
+            font-family: "Lora", Georgia, serif;
+            font-style: italic;
+            font-size: 13px;
+            color: var(--bm-gold);
+            letter-spacing: 0.1em;
+            margin-bottom: 28px;
+            display: block;
+          }
+          .bm-card__name {
+            font-family: "Lora", Georgia, serif;
+            font-size: 30px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            line-height: 1.15;
+            margin: 0 0 6px;
+          }
+          .bm-card__category {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: var(--bm-emerald);
+            margin-bottom: 24px;
+          }
+          .bm-card__quote {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--bm-mist);
+            margin-bottom: 32px;
+            min-height: 96px;
+          }
+          .bm-card__meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding-top: 24px;
+            border-top: 1px solid var(--bm-line);
+            margin-bottom: 24px;
+          }
+          .bm-card__meta-label {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(245, 241, 234, 0.4);
+            margin-bottom: 6px;
+          }
+          .bm-card__meta-value {
+            font-size: 14px;
+            color: var(--bm-cream);
+          }
+          .bm-card__link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--bm-gold);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            transition: gap 0.3s ease, color 0.3s ease;
+          }
+          .bm-card__link:hover {
+            gap: 16px;
+            color: var(--bm-gold-soft);
+          }
+          .bm-card__link span {
+            transition: transform 0.3s ease;
+          }
+          .bm-card__link:hover span {
+            transform: translateX(4px);
+          }
+          .bm-roster__heading {
+            font-family: "Lora", Georgia, serif;
+            font-style: italic;
+            font-size: 14px;
+            color: var(--bm-gold);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--bm-line);
+          }
+          .bm-roster {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--bm-line);
+            border: 1px solid var(--bm-line);
+          }
+          .bm-roster__item {
+            background: var(--bm-ink);
+            padding: 36px 28px;
+            transition: background 0.4s ease;
+            cursor: default;
+          }
+          .bm-roster__item:hover {
+            background: var(--bm-ink-2);
+          }
+          .bm-roster__name {
+            font-family: "Lora", Georgia, serif;
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            margin-bottom: 8px;
+            color: var(--bm-cream);
+          }
+          .bm-roster__tag {
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--bm-emerald);
+            margin-bottom: 16px;
+          }
+          .bm-roster__desc {
+            font-size: 13px;
+            line-height: 1.65;
+            color: var(--bm-mist);
+            margin: 0;
+          }
+          @media (max-width: 980px) {
+            .bm-clients {
+              padding: 80px 20px 100px;
+            }
+            .bm-clients__lede {
+              margin-bottom: 56px;
+            }
+            .bm-clients__featured {
+              grid-template-columns: 1fr;
+              gap: 16px;
+              margin-bottom: 72px;
+            }
+            .bm-card {
+              padding: 32px 24px 28px;
+            }
+            .bm-card__quote {
+              min-height: auto;
+            }
+            .bm-roster {
+              grid-template-columns: 1fr;
+            }
+            .bm-roster__item {
+              padding: 28px 24px;
+            }
+          }
+          @media (min-width: 981px) and (max-width: 1180px) {
+            .bm-roster {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+        </style>
+
+        <div class="bm-clients__inner">
+          <span class="bm-clients__eyebrow">Selected Work · 2024–2026</span>
+          <h2 class="bm-clients__title">
+            Brands we've built, scaled, and <em>shipped.</em>
+          </h2>
+          <p class="bm-clients__lede">
+            From a £20M UK e-commerce platform to a luxury real estate
+            curation brand operating across Hyderabad and Dubai — Brand Mint
+            partners with founders who want craft and conversion in the same
+            breath.
           </p>
-        </header>
 
-        <div class="work">
-          <article class="case case--featured">
-            <div class="case-visual case-visual--featured">
-              <span class="featured-badge">— Featured launch</span>
-              <span class="featured-monogram" aria-hidden="true">TC</span>
-              <span class="featured-type">
-                Tr&eacute;sor
-                <em>Couture</em>
-              </span>
-              <span class="featured-rule" aria-hidden="true"></span>
-              <span class="featured-tagline">Couture house · India</span>
-            </div>
-            <div class="case-body case-body--featured">
-              <span class="tag">Luxury · Couture · E-commerce</span>
-              <h3>Tr&eacute;sor Couture</h3>
-              <p>
-                Identity system and flagship e-commerce for a luxury couture
-                house. Bespoke serif lockup, an editorial lookbook engine,
-                and a checkout designed to respect the price tag — premium
-                imagery, slow scroll, no clutter.
+          <div class="bm-clients__featured">
+            <article class="bm-card">
+              <span class="bm-card__num">01 / Featured</span>
+              <h3 class="bm-card__name">Mobile Phone Market UK</h3>
+              <div class="bm-card__category">E-commerce · Consumer Electronics</div>
+              <p class="bm-card__quote">
+                A UK consumer electronics marketplace built to operate at
+                £20M–£50M revenue scale — full e-commerce platform, catalog
+                architecture, and conversion-grade storefront.
               </p>
-              <dl class="metrics">
-                <div><dt>Region</dt><dd>India</dd></div>
-                <div><dt>Service</dt><dd>Brand + E-commerce</dd></div>
-                <div><dt>Status</dt><dd>Live</dd></div>
-              </dl>
-            </div>
-          </article>
-
-          <article class="case">
-            <div class="case-visual case-visual--1">
-              <div class="case-screen">
-                <div class="case-bar"></div>
-                <div class="case-row">
-                  <div class="case-col"></div>
-                  <div class="case-col case-col--accent"></div>
-                  <div class="case-col"></div>
+              <div class="bm-card__meta">
+                <div>
+                  <div class="bm-card__meta-label">Market</div>
+                  <div class="bm-card__meta-value">United Kingdom</div>
                 </div>
-                <div class="case-line"></div>
-                <div class="case-line case-line--short"></div>
+                <div>
+                  <div class="bm-card__meta-label">Scale</div>
+                  <div class="bm-card__meta-value">£20M–£50M</div>
+                </div>
               </div>
-            </div>
-            <div class="case-body">
-              <span class="tag">D2C · Bakery · India</span>
-              <h3>Jora Bakes <span class="case-link">jorabakes.in</span></h3>
-              <p>
-                E-commerce site for a small-batch Indian bakery. Inventory-aware
-                ordering, daily-bake scheduling, and a brand system that
-                travels from packaging to product photography.
-              </p>
-              <dl class="metrics">
-                <div><dt>Region</dt><dd>India</dd></div>
-                <div><dt>Service</dt><dd>Brand + Site</dd></div>
-                <div><dt>Status</dt><dd>Live</dd></div>
-              </dl>
-            </div>
-          </article>
+              <a href="#" class="bm-card__link">View case study <span>→</span></a>
+            </article>
 
-          <article class="case">
-            <div class="case-visual case-visual--2">
-              <div class="case-pill">mobilephonemarket.co.uk</div>
-              <div class="case-blocks">
-                <div class="case-block"></div>
-                <div class="case-block case-block--tall"></div>
-                <div class="case-block case-block--mid"></div>
-                <div class="case-block"></div>
+            <article class="bm-card">
+              <span class="bm-card__num">02 / Featured</span>
+              <h3 class="bm-card__name">The Green Team</h3>
+              <div class="bm-card__category">Luxury Real Estate · Curation</div>
+              <p class="bm-card__quote">
+                A luxury real estate curation brand operating across
+                Hyderabad and Dubai — full brand system, website, and a
+                20-post Instagram engine for premium developments.
+              </p>
+              <div class="bm-card__meta">
+                <div>
+                  <div class="bm-card__meta-label">Markets</div>
+                  <div class="bm-card__meta-value">Hyderabad · Dubai</div>
+                </div>
+                <div>
+                  <div class="bm-card__meta-label">Scope</div>
+                  <div class="bm-card__meta-value">Brand · Web · Ads</div>
+                </div>
               </div>
-            </div>
-            <div class="case-body">
-              <span class="tag">E-commerce · UK</span>
-              <h3>Mobile Phone Market <span class="case-link">mobilephonemarket.co.uk</span></h3>
-              <p>
-                Marketplace storefront for a UK mobile phone retailer.
-                Product filtering, inventory sync, and a high-conversion
-                mobile checkout — built and shipped from Hyderabad.
-              </p>
-              <dl class="metrics">
-                <div><dt>Region</dt><dd>United Kingdom</dd></div>
-                <div><dt>Service</dt><dd>E-commerce</dd></div>
-                <div><dt>Status</dt><dd>Live</dd></div>
-              </dl>
-            </div>
-          </article>
+              <a href="#" class="bm-card__link">View case study <span>→</span></a>
+            </article>
 
-          <article class="case">
-            <div class="case-visual case-visual--3">
-              <div class="case-orb"></div>
-              <div class="case-orb case-orb--alt"></div>
-              <div class="case-type">The Green Team</div>
-            </div>
-            <div class="case-body">
-              <span class="tag">Brand · Marketing site</span>
-              <h3>The Green Team</h3>
-              <p>
-                Identity and a marketing site for a sustainability-led team.
-                Editorial layout, custom illustration, and a content system
-                the team can update themselves without touching code.
+            <article class="bm-card">
+              <span class="bm-card__num">03 / Featured</span>
+              <h3 class="bm-card__name">SimplySip Elixirs</h3>
+              <div class="bm-card__category">D2C · Cold-Pressed Wellness</div>
+              <p class="bm-card__quote">
+                A cold-pressed juice brand turned into a luxury wellness
+                label — full e-commerce, Razorpay checkout, ad creative, and
+                a print-ready menu system.
               </p>
-              <dl class="metrics">
-                <div><dt>Service</dt><dd>Brand + Site</dd></div>
-                <div><dt>Build</dt><dd>5 wk</dd></div>
-                <div><dt>Status</dt><dd>Live</dd></div>
-              </dl>
-            </div>
-          </article>
-
-          <article class="case">
-            <div class="case-visual case-visual--4">
-              <div class="case-chart">
-                <span style="--h:30%"></span>
-                <span style="--h:55%"></span>
-                <span style="--h:42%"></span>
-                <span style="--h:78%"></span>
-                <span style="--h:65%"></span>
-                <span style="--h:90%"></span>
-                <span style="--h:72%"></span>
+              <div class="bm-card__meta">
+                <div>
+                  <div class="bm-card__meta-label">Location</div>
+                  <div class="bm-card__meta-value">Hyderabad</div>
+                </div>
+                <div>
+                  <div class="bm-card__meta-label">Domain</div>
+                  <div class="bm-card__meta-value">simplysip.in</div>
+                </div>
               </div>
-            </div>
-            <div class="case-body">
-              <span class="tag">D2C · Beverage · India</span>
-              <h3>SimplySip <span class="case-link">simplysip.in</span></h3>
-              <p>
-                Storefront and brand system for an Indian D2C beverage brand.
-                Fast product launches, a clean subscriber experience, and
-                integrated payments — built to scale with the catalogue.
+              <a href="#" class="bm-card__link">View case study <span>→</span></a>
+            </article>
+          </div>
+
+          <div class="bm-roster__heading">— The full roster</div>
+
+          <div class="bm-roster">
+            <div class="bm-roster__item">
+              <div class="bm-roster__name">Mobile Phone Market UK</div>
+              <div class="bm-roster__tag">E-commerce</div>
+              <p class="bm-roster__desc">
+                Mid-tier UK consumer electronics marketplace. Full platform
+                build, projected revenue £20M–£50M.
               </p>
-              <dl class="metrics">
-                <div><dt>Region</dt><dd>India</dd></div>
-                <div><dt>Service</dt><dd>E-commerce</dd></div>
-                <div><dt>Status</dt><dd>Live</dd></div>
-              </dl>
             </div>
-          </article>
+            <div class="bm-roster__item">
+              <div class="bm-roster__name">The Green Team</div>
+              <div class="bm-roster__tag">Real Estate</div>
+              <p class="bm-roster__desc">
+                Luxury real estate curation across Hyderabad and Dubai.
+                Channel partner for Agartha, Syl Residences, and MODCON.
+              </p>
+            </div>
+            <div class="bm-roster__item">
+              <div class="bm-roster__name">SimplySip Elixirs</div>
+              <div class="bm-roster__tag">D2C Wellness</div>
+              <p class="bm-roster__desc">
+                Cold-pressed juice studio in Hyderabad. Brand identity,
+                e-commerce, Meta Ads creative, menu brochure system.
+              </p>
+            </div>
+            <div class="bm-roster__item">
+              <div class="bm-roster__name">Jora Bakes</div>
+              <div class="bm-roster__tag">D2C Bakery</div>
+              <p class="bm-roster__desc">
+                Artisan bakery storefront on jorabakes.in. Next.js, Firebase
+                Auth with phone OTP, Razorpay checkout, deployed on Vercel.
+              </p>
+            </div>
+            <div class="bm-roster__item">
+              <div class="bm-roster__name">Inventory Manager</div>
+              <div class="bm-roster__tag">SaaS Platform</div>
+              <p class="bm-roster__desc">
+                Multichannel commerce hub in the ChannelGrabber tradition.
+                One SKU, every marketplace, real-time stock — designed
+                end-to-end.
+              </p>
+            </div>
+            <div class="bm-roster__item">
+              <div class="bm-roster__name">Tresor Couture</div>
+              <div class="bm-roster__tag">Fashion · Textiles</div>
+              <p class="bm-roster__desc">
+                Premium fabric house identity. Folded-cloth mark, brushed-gold
+                palette, an aesthetic built to live next to the Hermès orange.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
+
 
       <!-- PROCESS -->
       <section class="section" id="process">
