@@ -47,8 +47,8 @@
   </g>
 
   <!-- Headline -->
-  <text x="72" y="318" font-family="Instrument Serif, Times New Roman, serif" font-size="92" fill="#0B1F1A" letter-spacing="-2.5">We mint <tspan font-style="italic" fill="#294A40">brands</tspan></text>
-  <text x="72" y="402" font-family="Instrument Serif, Times New Roman, serif" font-size="92" fill="#0B1F1A" letter-spacing="-2.5">that <tspan font-style="italic" fill="url(#grad-text)">compound.</tspan></text>
+  <text x="72" y="318" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="92" fill="#0B1F1A" letter-spacing="-2.5">We mint <tspan font-style="italic" fill="#294A40">brands</tspan></text>
+  <text x="72" y="402" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="92" fill="#0B1F1A" letter-spacing="-2.5">that <tspan font-style="italic" fill="url(#grad-text)">compound.</tspan></text>
 
   <!-- Sub -->
   <text x="72" y="466" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#5D7368">Custom websites &amp; bespoke tools for ambitious teams.</text>
@@ -70,7 +70,7 @@
     <!-- Big metric tile -->
     <rect x="20" y="56" width="280" height="148" rx="14" fill="rgba(255,255,255,0.04)" stroke="rgba(124,246,200,0.18)"/>
     <text x="36" y="84" font-family="JetBrains Mono, ui-monospace, monospace" font-size="11" fill="rgba(214,245,230,0.55)" letter-spacing="1.2">QUARTERLY REVENUE</text>
-    <text x="36" y="128" font-family="Instrument Serif, serif" font-size="40" fill="#7CF6C8">+₹42.6 Cr</text>
+    <text x="36" y="128" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="40" fill="#7CF6C8">+₹42.6 Cr</text>
     <!-- chart -->
     <path d="M36 188 L70 178 L104 182 L138 162 L172 168 L206 142 L240 138 L274 118 L300 110" stroke="#7CF6C8" stroke-width="2" fill="none"/>
     <path d="M36 188 L70 178 L104 182 L138 162 L172 168 L206 142 L240 138 L274 118 L300 110 L300 196 L36 196 Z" fill="url(#line)"/>
@@ -78,10 +78,10 @@
     <!-- Two small tiles -->
     <rect x="20" y="216" width="134" height="46" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(124,246,200,0.18)"/>
     <text x="34" y="234" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="rgba(214,245,230,0.55)" letter-spacing="1.2">SESSIONS</text>
-    <text x="34" y="254" font-family="Instrument Serif, serif" font-size="20" fill="#7CF6C8">28.4k</text>
+    <text x="34" y="254" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="20" fill="#7CF6C8">28.4k</text>
 
     <rect x="166" y="216" width="134" height="46" rx="10" fill="url(#mark)"/>
     <text x="180" y="234" font-family="JetBrains Mono, ui-monospace, monospace" font-size="10" fill="rgba(11,31,26,0.6)" letter-spacing="1.2">BRAND MINT</text>
-    <text x="180" y="254" font-family="Instrument Serif, serif" font-size="20" fill="#0B1F1A">Live</text>
+    <text x="180" y="254" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="20" fill="#0B1F1A">Live</text>
   </g>
 </svg>

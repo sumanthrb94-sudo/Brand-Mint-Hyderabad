@@ -21,13 +21,42 @@
   --radius-lg: 28px;
   --maxw: 1200px;
   --pad: clamp(20px, 4vw, 56px);
-  --serif: "Instrument Serif", "Times New Roman", serif;
+  --display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --serif: var(--display);
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Display weight calibration for Plus Jakarta Sans.
+   Existing rules that set font-weight: 400 on display headings were tuned
+   for Instrument Serif. Plus Jakarta at 400 reads thin at hero/section
+   sizes, so bump to 600 for headlines and 500 for editorial body. */
+.hero-title,
+.section-head h2,
+.impact-head h2,
+.impact-num,
+.service h3,
+.case-body h3,
+.featured-type,
+.case-type,
+.case-body--featured h3,
+.process h3,
+.split-text h2,
+.leader h3,
+.faq summary,
+.cta-text h2,
+.metrics dd,
+.hero-meta strong {
+  font-weight: 600;
+}
+.quote blockquote,
+.featured-monogram {
+  font-weight: 500;
 }
 html {
   scroll-behavior: smooth;
