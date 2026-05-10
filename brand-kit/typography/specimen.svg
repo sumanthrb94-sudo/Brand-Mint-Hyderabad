@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif">
+  <rect width="1200" height="800" fill="#F5F1EA"/>
+
+  <text x="64" y="80" font-size="40" font-weight="600" letter-spacing="-0.02em" fill="#0A0E0C">Brand Mint — Type System</text>
+  <text x="64" y="108" font-size="14" font-weight="500" letter-spacing="0.18em" fill="#0A0E0C" opacity="0.55">PLUS JAKARTA SANS · INTER · JETBRAINS MONO</text>
+  <line x1="64" y1="132" x2="1136" y2="132" stroke="#0A0E0C" stroke-opacity="0.10"/>
+
+  <!-- Display -->
+  <text x="64" y="178" font-size="11" font-weight="600" letter-spacing="0.22em" fill="#0A0E0C" opacity="0.55">DISPLAY · PLUS JAKARTA SANS 600 · -0.03em</text>
+  <text x="64" y="246" font-size="60" font-weight="600" letter-spacing="-0.03em" fill="#0A0E0C">We mint <tspan font-style="italic">brands</tspan> that compound.</text>
+
+  <!-- Section -->
+  <text x="64" y="310" font-size="11" font-weight="600" letter-spacing="0.22em" fill="#0A0E0C" opacity="0.55">SECTION · PLUS JAKARTA SANS 600 · -0.02em</text>
+  <text x="64" y="358" font-size="40" font-weight="600" letter-spacing="-0.02em" fill="#0A0E0C">Built in Hyderabad. Booked through Q3.</text>
+
+  <!-- Editorial blockquote -->
+  <text x="64" y="412" font-size="11" font-weight="600" letter-spacing="0.22em" fill="#0A0E0C" opacity="0.55">EDITORIAL · PLUS JAKARTA SANS 500 · -0.01em</text>
+  <text x="64" y="464" font-size="30" font-weight="500" letter-spacing="-0.01em" font-style="italic" fill="#0A0E0C">"They shipped in six weeks what our last agency promised in six months."</text>
+
+  <!-- Body -->
+  <text x="64" y="514" font-size="11" font-weight="600" letter-spacing="0.22em" fill="#0A0E0C" opacity="0.55">BODY · INTER 400 · 17px</text>
+  <text x="64" y="552" font-size="17" font-weight="400" fill="#0A0E0C">A small senior studio in HITEC City. We design and engineer custom websites, internal tools,</text>
+  <text x="64" y="578" font-size="17" font-weight="400" fill="#0A0E0C">brand systems, and the AI integrations that quietly run behind them. Every engagement is led</text>
+  <text x="64" y="604" font-size="17" font-weight="400" fill="#0A0E0C">by an 8+ year operator. No interns at the table.</text>
+
+  <!-- Eyebrow + numerals -->
+  <text x="64" y="664" font-size="11" font-weight="600" letter-spacing="0.22em" fill="#0A0E0C" opacity="0.55">EYEBROW · INTER 600 · 0.18em</text>
+  <text x="64" y="700" font-size="14" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C">● BUILT IN HYDERABAD · NOW BOOKING Q3 2026</text>
+
+  <text x="640" y="664" font-size="11" font-weight="600" letter-spacing="0.22em" fill="#0A0E0C" opacity="0.55">NUMERALS · JETBRAINS MONO 500 · 0.06em</text>
+  <text x="640" y="700" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20" font-weight="500" letter-spacing="0.06em" fill="#10B981">+₹42.6 Cr · 28.4k · Q3 2026</text>
+
+  <line x1="64" y1="732" x2="1136" y2="732" stroke="#0A0E0C" stroke-opacity="0.10"/>
+  <text x="64" y="768" font-size="13" fill="#0A0E0C" opacity="0.55">Use one italic emphasis per headline. Numerals always in JetBrains Mono. Body never below 14px.</text>
+</svg>

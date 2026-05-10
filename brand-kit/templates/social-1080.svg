@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F5F1EA"/>
+      <stop offset="100%" stop-color="#E9E2D3"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7CF6C8"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+
+  <!-- Eyebrow -->
+  <text x="80" y="120" font-size="22" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C">● BUILT IN HYDERABAD</text>
+
+  <!-- Headline -->
+  <text x="80" y="380" font-size="100" font-weight="600" letter-spacing="-0.03em" fill="#0A0E0C">We mint</text>
+  <text x="80" y="500" font-size="100" font-weight="600" letter-spacing="-0.03em" font-style="italic" fill="#0A0E0C">brands</text>
+  <text x="80" y="620" font-size="100" font-weight="600" letter-spacing="-0.03em" fill="#0A0E0C">that <tspan fill="#10B981">compound.</tspan></text>
+
+  <!-- Body -->
+  <text x="80" y="780" font-size="26" font-weight="400" fill="#0A0E0C" opacity="0.62">Custom websites and internal tools, engineered for</text>
+  <text x="80" y="816" font-size="26" font-weight="400" fill="#0A0E0C" opacity="0.62">founders who'd rather ship than slide-deck.</text>
+
+  <!-- Footer line -->
+  <line x1="80" y1="940" x2="1000" y2="940" stroke="#0A0E0C" stroke-opacity="0.10"/>
+
+  <!-- Brand mark + URL -->
+  <g transform="translate(80, 970)">
+    <circle cx="32" cy="32" r="32" fill="url(#mark)"/>
+    <path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <text x="80" y="42" font-size="26" font-weight="600" letter-spacing="-0.02em" fill="#0A0E0C">Brand Mint</text>
+  </g>
+  <text x="1000" y="1012" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20" letter-spacing="0.06em" fill="#0A0E0C" opacity="0.62">brandmint.studio</text>
+</svg>

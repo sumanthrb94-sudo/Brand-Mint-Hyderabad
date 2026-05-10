@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" width="1200" height="720" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif">
+  <rect width="1200" height="720" fill="#F5F1EA"/>
+
+  <!-- Header -->
+  <text x="64" y="80" font-size="40" font-weight="600" letter-spacing="-0.02em" fill="#0A0E0C">Brand Mint — Colour System</text>
+  <text x="64" y="108" font-size="14" font-weight="500" letter-spacing="0.18em" fill="#0A0E0C" opacity="0.55">PRIMARY · NEUTRALS · ACCENTS</text>
+
+  <!-- Mint scale -->
+  <g transform="translate(64, 160)">
+    <rect width="240" height="180" rx="8" fill="#D6F5E6"/>
+    <text x="20" y="32" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C" opacity="0.62">MINT 1</text>
+    <text x="20" y="158" font-size="22" font-weight="600" fill="#0A0E0C">#D6F5E6</text>
+  </g>
+  <g transform="translate(320, 160)">
+    <rect width="240" height="180" rx="8" fill="#7CF6C8"/>
+    <text x="20" y="32" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C" opacity="0.62">MINT 2</text>
+    <text x="20" y="158" font-size="22" font-weight="600" fill="#0A0E0C">#7CF6C8</text>
+  </g>
+  <g transform="translate(576, 160)">
+    <rect width="240" height="180" rx="8" fill="#10B981"/>
+    <text x="20" y="32" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#F5F1EA">MINT 3 · PRIMARY</text>
+    <text x="20" y="158" font-size="22" font-weight="600" fill="#F5F1EA">#10B981</text>
+  </g>
+  <g transform="translate(832, 160)">
+    <rect width="240" height="180" rx="8" fill="#047857"/>
+    <text x="20" y="32" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#F5F1EA">MINT 4</text>
+    <text x="20" y="158" font-size="22" font-weight="600" fill="#F5F1EA">#047857</text>
+  </g>
+
+  <!-- Neutrals -->
+  <g transform="translate(64, 360)">
+    <rect width="240" height="180" rx="8" fill="#0A0E0C"/>
+    <text x="20" y="32" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#F5F1EA">INK</text>
+    <text x="20" y="158" font-size="22" font-weight="600" fill="#F5F1EA">#0A0E0C</text>
+  </g>
+  <g transform="translate(320, 360)">
+    <rect width="240" height="180" rx="8" fill="#FFFFFF" stroke="#0A0E0C" stroke-opacity="0.10"/>
+    <text x="20" y="32" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C" opacity="0.62">WHITE</text>
+    <text x="20" y="158" font-size="22" font-weight="600" fill="#0A0E0C">#FFFFFF</text>
+  </g>
+  <g transform="translate(576, 360)">
+    <rect width="240" height="180" rx="8" fill="#F5F1EA" stroke="#0A0E0C" stroke-opacity="0.10"/>
+    <text x="20" y="32" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C" opacity="0.62">PAPER</text>
+    <text x="20" y="158" font-size="22" font-weight="600" fill="#0A0E0C">#F5F1EA</text>
+  </g>
+  <g transform="translate(832, 360)">
+    <rect width="240" height="180" rx="8" fill="#C9A14A"/>
+    <text x="20" y="32" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C">GOLD</text>
+    <text x="20" y="158" font-size="22" font-weight="600" fill="#0A0E0C">#C9A14A</text>
+  </g>
+
+  <!-- Dark interlude band -->
+  <g transform="translate(64, 564)">
+    <rect width="1008" height="120" rx="8" fill="#0B1F1A"/>
+    <rect width="1008" height="120" rx="8" fill="url(#interludeGrad)"/>
+    <defs>
+      <linearGradient id="interludeGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#0B1F1A"/>
+        <stop offset="100%" stop-color="#14352D"/>
+      </linearGradient>
+    </defs>
+    <text x="24" y="36" font-size="12" font-weight="600" letter-spacing="0.18em" fill="#C9A14A">DARK INTERLUDE — SCOPED</text>
+    <text x="24" y="80" font-size="20" font-weight="500" fill="#F5F1EA">#0B1F1A → #14352D · cards on #06140F · emerald CTA #00C897 · gold accent #C9A14A</text>
+  </g>
+</svg>

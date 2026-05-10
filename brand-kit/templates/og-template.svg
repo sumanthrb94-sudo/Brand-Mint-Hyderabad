@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5F1EA"/>
+      <stop offset="100%" stop-color="#E5E0D2"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7CF6C8"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Mark + brand -->
+  <g transform="translate(80, 80)">
+    <circle cx="28" cy="28" r="28" fill="url(#mark)"/>
+    <path d="M16 39V18l12 10 12-10v21" stroke="#0B1F1A" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <text x="74" y="38" font-size="28" font-weight="600" letter-spacing="-0.02em" fill="#0A0E0C">Brand Mint</text>
+  </g>
+
+  <!-- Eyebrow chip -->
+  <rect x="76" y="200" width="430" height="38" rx="19" fill="#FFFFFF" stroke="#0A0E0C" stroke-opacity="0.10"/>
+  <text x="96" y="225" font-size="14" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C">● PLACEHOLDER · EYEBROW · UPDATE ME</text>
+
+  <!-- Headline -->
+  <text x="76" y="340" font-size="64" font-weight="600" letter-spacing="-0.03em" fill="#0A0E0C">Headline goes here in</text>
+  <text x="76" y="412" font-size="64" font-weight="600" letter-spacing="-0.03em" fill="#0A0E0C">two <tspan font-style="italic">tight</tspan> lines, max.</text>
+
+  <!-- Subline -->
+  <text x="76" y="478" font-size="22" font-weight="400" fill="#0A0E0C" opacity="0.62">Optional one-line subhead with concrete benefit or proof point.</text>
+
+  <!-- Footer -->
+  <line x1="76" y1="540" x2="1124" y2="540" stroke="#0A0E0C" stroke-opacity="0.10"/>
+  <text x="76" y="582" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20" letter-spacing="0.06em" fill="#0A0E0C">brandmint.studio</text>
+  <text x="1124" y="582" text-anchor="end" font-size="14" font-weight="600" letter-spacing="0.18em" fill="#0A0E0C" opacity="0.55">DIGITAL MEDIA &amp; MARKETING — STUDIO</text>
+</svg>
