@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/admin/styles.css" />
+    <link rel="stylesheet" href="/admin/styles.css?v=3" />
   </head>
   <body class="admin">
     <div id="auth-gate" class="auth-gate" hidden>
@@ -75,6 +75,36 @@
     <div id="toast" class="toast" hidden></div>
     <div id="modal-root"></div>
 
-    <script type="module" src="/admin/app.js"></script>
+    <script>
+      // Bulletproof Skip + Reset handlers — wired inline so they keep
+      // working even if /admin/app.js fails to load or is stale in cache.
+      (function () {
+        var SESSION_KEY = "bm.admin.v1.session";
+        var HASH_KEY = "bm.admin.v1.passhash";
+        var skipBtn = document.getElementById("auth-skip");
+        var resetLink = document.getElementById("auth-reset");
+        if (skipBtn) {
+          skipBtn.addEventListener("click", function () {
+            var expires = Date.now() + 12 * 60 * 60 * 1000;
+            try { localStorage.setItem(SESSION_KEY, String(expires)); } catch (e) {}
+            location.reload();
+          });
+        }
+        if (resetLink) {
+          resetLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            try { localStorage.removeItem(HASH_KEY); } catch (e2) {}
+            var err = document.getElementById("auth-err");
+            if (err) {
+              err.hidden = false;
+              err.style.color = "var(--mint-3)";
+              err.textContent = "Passcode reset. Use brandmint2026.";
+            }
+          });
+        }
+      })();
+    </script>
+
+    <script type="module" src="/admin/app.js?v=3"></script>
   </body>
 </html>
