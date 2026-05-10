@@ -48,10 +48,16 @@
           <span>Passcode</span>
         </label>
         <button class="btn btn-primary" type="submit">Unlock</button>
+        <button id="auth-skip" class="btn btn-ghost" type="button">
+          Skip — continue without passcode
+        </button>
         <p id="auth-err" class="auth-err" hidden>Wrong passcode. Try again.</p>
         <p class="auth-hint">
           First time? Default passcode is
           <code>brandmint2026</code>. Change it in Settings after first login.
+          <br />
+          Locked out?
+          <a href="#" id="auth-reset">Reset passcode to default</a>.
         </p>
       </form>
     </div>

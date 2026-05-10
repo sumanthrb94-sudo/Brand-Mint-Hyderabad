@@ -86,7 +86,10 @@ function showGate() {
   const form = document.getElementById("auth-form");
   const input = document.getElementById("auth-input");
   const err = document.getElementById("auth-err");
+  const skip = document.getElementById("auth-skip");
+  const reset = document.getElementById("auth-reset");
   err.hidden = true;
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     err.hidden = true;
@@ -98,6 +101,21 @@ function showGate() {
       err.hidden = false;
       input.select();
     }
+  });
+
+  skip.addEventListener("click", async () => {
+    auth.startSession();
+    await boot();
+  });
+
+  reset.addEventListener("click", (e) => {
+    e.preventDefault();
+    auth.resetToDefault();
+    err.hidden = true;
+    input.value = "";
+    input.placeholder = " ";
+    toast("Passcode reset. Default is brandmint2026.");
+    input.focus();
   });
 }
 

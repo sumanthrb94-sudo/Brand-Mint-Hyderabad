@@ -30,8 +30,16 @@ export const auth = {
   async verify(plain) {
     const stored = localStorage.getItem(HASH_KEY);
     const compareTo = stored || (await sha256(DEFAULT_PASS));
-    const hash = await sha256(plain);
-    return hash === compareTo;
+    // Mobile keyboards often add a trailing space or autocapitalize the first
+    // letter. Try the literal input first, then forgiving variants.
+    const candidates = [plain, plain.trim(), plain.trim().toLowerCase()];
+    for (const c of candidates) {
+      if ((await sha256(c)) === compareTo) return true;
+    }
+    return false;
+  },
+  resetToDefault() {
+    localStorage.removeItem(HASH_KEY);
   },
   startSession() {
     const expires = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
