@@ -899,6 +899,22 @@ main {
   letter-spacing: -0.015em;
   color: var(--cream);
   line-height: 1.1;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.case-link {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--mint-2);
+  background: rgba(124, 246, 200, 0.1);
+  border: 1px solid rgba(124, 246, 200, 0.22);
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 500;
 }
 .case-body p {
   margin: 0;
