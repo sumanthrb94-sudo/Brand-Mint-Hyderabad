@@ -78,63 +78,20 @@ async function renderRoute() {
   }
 }
 
-/* ---------- Auth gate ---------- */
-
-function showGate() {
-  document.getElementById("auth-gate").hidden = false;
-  document.getElementById("app").hidden = true;
-  const form = document.getElementById("auth-form");
-  const input = document.getElementById("auth-input");
-  const err = document.getElementById("auth-err");
-  const skip = document.getElementById("auth-skip");
-  const reset = document.getElementById("auth-reset");
-  err.hidden = true;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    err.hidden = true;
-    const ok = await auth.verify(input.value);
-    if (ok) {
-      auth.startSession();
-      await boot();
-    } else {
-      err.hidden = false;
-      input.select();
-    }
-  });
-
-  skip.addEventListener("click", async () => {
-    auth.startSession();
-    await boot();
-  });
-
-  reset.addEventListener("click", (e) => {
-    e.preventDefault();
-    auth.resetToDefault();
-    err.hidden = true;
-    input.value = "";
-    input.placeholder = " ";
-    toast("Passcode reset. Default is brandmint2026.");
-    input.focus();
-  });
-}
+/* ---------- Init ---------- */
 
 async function boot() {
-  document.getElementById("auth-gate").hidden = true;
+  const gate = document.getElementById("auth-gate");
+  if (gate) gate.hidden = true;
   document.getElementById("app").hidden = false;
   seedIfEmpty();
   await renderRoute();
 }
 
-/* ---------- Init ---------- */
-
 window.addEventListener("hashchange", renderRoute);
 
-if (auth.isSessionValid()) {
-  await boot();
-} else {
-  showGate();
-}
+// Auth disabled — always boot straight into the dashboard.
+await boot();
 
 // Expose for debugging in the console
 window.bm = { db, auth, ctx };
