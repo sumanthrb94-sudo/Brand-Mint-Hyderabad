@@ -156,8 +156,16 @@ code {
   border-bottom: 1px solid var(--line);
 }
 .sidebar-brand svg {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s;
+}
+.sidebar-brand:hover svg {
+  transform: rotate(-8deg) scale(1.08);
+  box-shadow: 0 6px 22px rgba(16, 185, 129, 0.45);
 }
 .sidebar-brand span {
   font-family: var(--display);

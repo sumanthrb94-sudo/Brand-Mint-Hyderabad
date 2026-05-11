@@ -7,11 +7,17 @@
 
 /* ---------- DOM helpers ---------- */
 
+const SVG_NS = "http://www.w3.org/2000/svg";
+const SVG_TAGS =
+  /^(svg|path|circle|rect|g|line|polyline|polygon|ellipse|text|tspan|defs|linearGradient|radialGradient|stop|use|symbol|mask|clipPath|marker|filter)$/i;
+
 export function h(tag, attrs = {}, children = []) {
-  const el = document.createElement(tag);
+  const el = SVG_TAGS.test(tag)
+    ? document.createElementNS(SVG_NS, tag)
+    : document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) {
     if (v == null || v === false) continue;
-    if (k === "class") el.className = v;
+    if (k === "class") el.setAttribute("class", v);
     else if (k === "html") el.innerHTML = v;
     else if (k === "text") el.textContent = v;
     else if (k.startsWith("on") && typeof v === "function")
