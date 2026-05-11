@@ -528,7 +528,7 @@ export function renderTopbar({ breadcrumb, title, actions }) {
           viewBox: "0 0 14 14",
           html: '<path d="M9 3L5 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
         }),
-        h("span", { text: "Site" }),
+        h("span", { text: "Back to home page" }),
       ]
     )
   );
