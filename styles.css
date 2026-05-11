@@ -194,6 +194,31 @@ button {
   right: 0;
 }
 
+.nav-admin {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px !important;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 13px !important;
+  color: var(--ink) !important;
+  background: var(--mint-1);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.nav-admin:hover {
+  background: var(--mint-3);
+  color: white !important;
+  border-color: var(--mint-3);
+}
+.nav-admin::after {
+  display: none !important;
+}
+.nav-admin svg {
+  flex-shrink: 0;
+}
+
 .nav-toggle {
   display: none;
   flex-direction: column;

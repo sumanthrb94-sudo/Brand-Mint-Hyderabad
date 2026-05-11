@@ -515,6 +515,25 @@ export function renderTopbar({ breadcrumb, title, actions }) {
   root.appendChild(burger);
 
   root.appendChild(
+    h(
+      "a",
+      {
+        class: "topbar-back",
+        href: "/",
+        "aria-label": "Back to Brand Mint public site",
+        title: "Back to public site",
+      },
+      [
+        h("svg", {
+          viewBox: "0 0 14 14",
+          html: '<path d="M9 3L5 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+        }),
+        h("span", { text: "Site" }),
+      ]
+    )
+  );
+
+  root.appendChild(
     h("div", {}, [
       breadcrumb && h("div", { class: "breadcrumb", text: breadcrumb }),
       h("h1", { text: title }),
