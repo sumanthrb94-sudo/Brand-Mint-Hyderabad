@@ -79,6 +79,26 @@
         <a href="#work">Work</a>
         <a href="#process">Process</a>
         <a href="#about">Studio</a>
+
+        <a href="#" class="nav-signin" data-auth-action="open-login" data-auth-show="signed-out">
+          Log in
+        </a>
+        <a href="#" class="nav-signup" data-auth-action="open-signup" data-auth-show="signed-out">
+          Sign up
+        </a>
+
+        <button type="button" class="nav-userchip" id="nav-userchip" data-auth-show="signed-in" hidden>
+          <span class="nav-userchip-avatar" data-auth-user-initial>?</span>
+          <span data-auth-user-name>Account</span>
+          <div class="nav-userchip-menu" role="menu">
+            <div class="um-head">
+              <div class="label">Signed in as</div>
+              <div class="email" data-auth-user-email>—</div>
+            </div>
+            <button type="button" data-auth-action="signout">Sign out</button>
+          </div>
+        </button>
+
         <a href="#contact" class="btn btn--ghost">Start a project</a>
       </nav>
 
@@ -1260,5 +1280,19 @@
     </footer>
 
     <script src="script.js" defer></script>
+    <script type="module" src="/auth/marketing.js?v=1"></script>
+    <script>
+      // Dropdown for the signed-in user chip.
+      document.addEventListener("click", function (e) {
+        var chip = document.getElementById("nav-userchip");
+        if (!chip) return;
+        if (chip.contains(e.target)) {
+          if (e.target.closest(".nav-userchip-menu")) return;
+          chip.classList.toggle("open");
+        } else {
+          chip.classList.remove("open");
+        }
+      });
+    </script>
   </body>
 </html>

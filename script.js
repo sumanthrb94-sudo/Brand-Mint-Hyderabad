@@ -123,6 +123,7 @@
       button.disabled = true;
       labelEl.textContent = "Sending…";
 
+      const authUser = window.bmAuth?.getUser?.();
       const payload = {
         name,
         company: (data.get("company") || "").toString().trim() || null,
@@ -132,8 +133,9 @@
         budget: (data.get("budget") || "").toString().trim() || null,
         message: (data.get("message") || "").toString().trim() || null,
         status: "new",
-        score: 50,
-        source: "Site contact form",
+        score: authUser ? 65 : 50,
+        source: authUser ? "Signed-in inquiry" : "Site contact form",
+        user_id: authUser?.id || null,
       };
 
       try {

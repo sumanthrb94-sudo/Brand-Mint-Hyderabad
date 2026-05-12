@@ -246,6 +246,256 @@ button {
   transform: translateY(-9px) rotate(-45deg);
 }
 
+/* ---------- AUTH BUTTONS IN NAV ---------- */
+.nav-signin {
+  display: inline-flex !important;
+  align-items: center;
+  padding: 6px 4px !important;
+  font-weight: 500;
+  font-size: 14px !important;
+  color: var(--muted) !important;
+}
+.nav-signin::after { display: none !important; }
+.nav-signin:hover { color: var(--ink) !important; }
+.nav-signup {
+  display: inline-flex !important;
+  align-items: center;
+  padding: 6px 14px !important;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  font-size: 13px !important;
+  font-weight: 500;
+  background: var(--ink);
+  color: var(--paper) !important;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-signup::after { display: none !important; }
+.nav-signup:hover {
+  background: transparent;
+  color: var(--ink) !important;
+}
+.nav-userchip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 4px 4px !important;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  font-size: 13px !important;
+  font-weight: 500;
+  color: var(--ink) !important;
+  cursor: pointer;
+  position: relative;
+}
+.nav-userchip::after { display: none !important; }
+.nav-userchip:hover { border-color: rgba(10, 14, 12, 0.18); }
+.nav-userchip-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: linear-gradient(140deg, var(--mint-2), var(--mint-3));
+  color: #0b1f1a;
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.nav-userchip-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 24px 60px rgba(10, 14, 12, 0.12);
+  padding: 6px;
+  min-width: 220px;
+  display: none;
+  z-index: 30;
+}
+.nav-userchip.open .nav-userchip-menu { display: block; }
+.nav-userchip-menu .um-head {
+  padding: 8px 12px 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+.nav-userchip-menu .um-head .label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 2px;
+}
+.nav-userchip-menu .um-head .email {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-userchip-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.nav-userchip-menu button:hover { background: rgba(10, 14, 12, 0.04); }
+
+/* ---------- AUTH MODAL ---------- */
+.bm-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 31, 26, 0.55);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+  padding: 24px;
+  animation: bm-auth-fade 0.18s ease-out;
+}
+@keyframes bm-auth-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.bm-auth-card {
+  background: var(--white);
+  border-radius: 14px;
+  width: min(440px, 100%);
+  padding: 36px 32px 26px;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(11, 31, 26, 0.35);
+  text-align: left;
+  animation: bm-auth-rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes bm-auth-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.bm-auth-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+}
+.bm-auth-close:hover { background: rgba(10, 14, 12, 0.04); color: var(--ink); }
+.bm-auth-mark {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 18px;
+}
+.bm-auth-card h2 {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+.bm-auth-sub {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+.bm-auth-field {
+  position: relative;
+  display: block;
+  margin-bottom: 14px;
+}
+.bm-auth-field input {
+  width: 100%;
+  padding: 22px 14px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  font-size: 15px;
+  color: var(--ink);
+  font-family: var(--sans);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.bm-auth-field input:focus {
+  outline: none;
+  border-color: var(--mint-3);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+.bm-auth-field > span {
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  color: var(--faint);
+  font-size: 14px;
+  pointer-events: none;
+  transition: transform 0.15s, color 0.15s, font-size 0.15s;
+  background: var(--white);
+  padding: 0 4px;
+}
+.bm-auth-field input:focus + span,
+.bm-auth-field input:not(:placeholder-shown) + span {
+  transform: translateY(-14px);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mint-4);
+  font-weight: 600;
+}
+.bm-auth-submit {
+  width: 100%;
+  margin-top: 4px;
+}
+.bm-auth-status {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--mint-4);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+}
+.bm-auth-status.err {
+  background: rgba(226, 59, 59, 0.08);
+  color: #b91c1c;
+  border-color: rgba(226, 59, 59, 0.22);
+}
+.bm-auth-switch {
+  text-align: center;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.bm-auth-switch a {
+  color: var(--mint-4);
+  font-weight: 500;
+}
+.bm-auth-foot {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--faint);
+  margin: 14px 0 0;
+  line-height: 1.5;
+}
+
 /* ---------- BUTTONS ---------- */
 .btn {
   display: inline-flex;
