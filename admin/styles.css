@@ -283,6 +283,59 @@ code {
   align-items: center;
   gap: 10px;
 }
+.sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: default;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.sync-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.sync-pill.ok {
+  color: var(--mint-3);
+  border-color: rgba(16, 185, 129, 0.22);
+  background: rgba(16, 185, 129, 0.06);
+}
+.sync-pill.ok .sync-pill-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+.sync-pill.warn {
+  color: var(--warn);
+  border-color: rgba(214, 161, 56, 0.28);
+  background: rgba(214, 161, 56, 0.10);
+}
+.sync-pill.err {
+  color: var(--danger);
+  border-color: rgba(226, 59, 59, 0.28);
+  background: rgba(226, 59, 59, 0.08);
+  cursor: pointer;
+}
+.sync-pill.err:hover {
+  background: rgba(226, 59, 59, 0.14);
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@media (max-width: 720px) {
+  .sync-pill-label { display: none; }
+  .sync-pill { padding: 4px; gap: 0; }
+}
+
 .topbar-back {
   display: inline-flex;
   align-items: center;

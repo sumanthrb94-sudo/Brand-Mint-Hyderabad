@@ -565,9 +565,70 @@ export function renderTopbar({ breadcrumb, title, actions }) {
     ]
   );
 
-  const actionBox = h("div", { class: "topbar-actions" }, [trigger]);
+  const syncPill = buildSyncPill();
+  const actionBox = h("div", { class: "topbar-actions" }, [syncPill, trigger]);
   if (actions && actions.length) actions.forEach((a) => actionBox.appendChild(a));
   root.appendChild(actionBox);
+}
+
+let pillUnsub = null;
+function buildSyncPill() {
+  const pill = h("button", {
+    class: "sync-pill",
+    type: "button",
+    "aria-label": "Sync status",
+  });
+  pill.appendChild(h("span", { class: "sync-pill-dot" }));
+  const label = h("span", { class: "sync-pill-label" });
+  pill.appendChild(label);
+
+  function update(snap) {
+    pill.title = snap.lastError
+      ? `Last error: ${snap.lastError}`
+      : snap.lastSyncAt
+        ? `Last synced ${new Date(snap.lastSyncAt).toLocaleTimeString()}`
+        : "Not yet synced";
+    pill.classList.remove("ok", "warn", "err");
+    if (!snap.remote) {
+      pill.classList.add("warn");
+      label.textContent = "Local only";
+    } else if (!snap.online) {
+      pill.classList.add("warn");
+      label.textContent = "Offline";
+    } else if (snap.errors > 0) {
+      pill.classList.add("err");
+      label.textContent = `${snap.errors} sync error${snap.errors > 1 ? "s" : ""}`;
+    } else {
+      pill.classList.add("ok");
+      label.textContent = "Synced";
+    }
+  }
+
+  // Pull current state via the global handle exposed in app.js. Defer one
+  // tick because window.bm is set after the first renderTopbar() runs.
+  queueMicrotask(() => {
+    const dbRef = window.bm?.db;
+    if (!dbRef) return;
+    update(dbRef.status());
+    if (pillUnsub) pillUnsub();
+    pillUnsub = dbRef.subscribe(update);
+    pill.addEventListener("click", () => {
+      if (dbRef.status().errors > 0) {
+        dbRef.resetSyncErrors();
+      }
+    });
+  });
+
+  window.addEventListener("online", () => {
+    const dbRef = window.bm?.db;
+    if (dbRef) update(dbRef.status());
+  });
+  window.addEventListener("offline", () => {
+    const dbRef = window.bm?.db;
+    if (dbRef) update(dbRef.status());
+  });
+
+  return pill;
 }
 
 function kbdHint() {

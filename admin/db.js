@@ -33,6 +33,30 @@ const cache = {
 };
 
 let syncErrors = 0;
+let lastSyncAt = null;
+let lastError = null;
+const listeners = new Set();
+
+function emit() {
+  const snap = status();
+  for (const fn of listeners) {
+    try {
+      fn(snap);
+    } catch (e) {
+      console.error("[db] subscriber threw", e);
+    }
+  }
+}
+
+function status() {
+  return {
+    remote: isConfigured(),
+    online: typeof navigator !== "undefined" ? navigator.onLine : true,
+    errors: syncErrors,
+    lastError,
+    lastSyncAt,
+  };
+}
 
 /* ---------- case conversion ---------- */
 
@@ -105,15 +129,29 @@ export async function hydrate() {
     if (settingsErr) throw settingsErr;
     cache.settings = settingsRow ? fromDbRow(settingsRow) : null;
     persist("settings");
+    lastSyncAt = new Date().toISOString();
+    emit();
     return { remote: true };
   } catch (e) {
     console.error("[db] hydrate failed, using local cache only", e);
     syncErrors++;
+    lastError = e?.message || String(e);
+    emit();
     return { remote: false, error: e };
   }
 }
 
 /* ---------- async writers ---------- */
+
+function recordSuccess() {
+  lastSyncAt = new Date().toISOString();
+  emit();
+}
+function recordFailure(op, e) {
+  syncErrors++;
+  lastError = `${op}: ${e?.message || String(e)}`;
+  emit();
+}
 
 async function pushInsert(table, row) {
   if (!isConfigured()) return;
@@ -124,9 +162,10 @@ async function pushInsert(table, row) {
       ...toDbRow(row),
     });
     if (error) throw error;
+    recordSuccess();
   } catch (e) {
     console.error(`[db] insert ${table} failed`, e);
-    syncErrors++;
+    recordFailure(`insert ${table}`, e);
   }
 }
 async function pushUpdate(table, id, patch) {
@@ -135,9 +174,10 @@ async function pushUpdate(table, id, patch) {
     const sb = await getClient();
     const { error } = await sb.from(table).update(toDbRow(patch)).eq("id", id);
     if (error) throw error;
+    recordSuccess();
   } catch (e) {
     console.error(`[db] update ${table} failed`, e);
-    syncErrors++;
+    recordFailure(`update ${table}`, e);
   }
 }
 async function pushDelete(table, id) {
@@ -146,9 +186,10 @@ async function pushDelete(table, id) {
     const sb = await getClient();
     const { error } = await sb.from(table).delete().eq("id", id);
     if (error) throw error;
+    recordSuccess();
   } catch (e) {
     console.error(`[db] delete ${table} failed`, e);
-    syncErrors++;
+    recordFailure(`delete ${table}`, e);
   }
 }
 async function pushSettings(patch) {
@@ -160,9 +201,10 @@ async function pushSettings(patch) {
       ...toDbRow({ ...patch, id: undefined }),
     });
     if (error) throw error;
+    recordSuccess();
   } catch (e) {
     console.error("[db] settings upsert failed", e);
-    syncErrors++;
+    recordFailure("settings upsert", e);
   }
 }
 
@@ -275,6 +317,16 @@ export const db = {
     localStorage.removeItem(NS + "settings");
   },
   hydrate,
+  status,
+  subscribe(fn) {
+    listeners.add(fn);
+    return () => listeners.delete(fn);
+  },
+  resetSyncErrors() {
+    syncErrors = 0;
+    lastError = null;
+    emit();
+  },
   get syncErrors() {
     return syncErrors;
   },
