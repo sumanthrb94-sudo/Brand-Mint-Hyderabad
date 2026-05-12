@@ -85,7 +85,10 @@ async function boot() {
   const gate = document.getElementById("auth-gate");
   if (gate) gate.hidden = true;
   document.getElementById("app").hidden = false;
-  seedIfEmpty();
+  document.getElementById("view").innerHTML =
+    '<div class="view-loading">Loading your data…</div>';
+  await db.hydrate();
+  await seedIfEmpty();
   await renderRoute();
 }
 

@@ -1,56 +1,185 @@
 /**
- * Brand Mint Admin — Data Layer
+ * Brand Mint Admin — Data layer.
  *
- * LocalStorage-backed CRUD with a clean abstraction. To migrate to Supabase
- * later, swap the internals of get/list/create/update/remove. Callers only
- * use the exported db.* API, never localStorage directly.
+ * Offline-first Supabase sync wrapper. Keeps a synchronous in-memory cache
+ * mirrored to localStorage so the existing modules don't need to be async.
  *
- * Schema: every collection is an array of {id, createdAt, updatedAt, ...rest}.
+ * Lifecycle:
+ *   1. boot() awaits db.hydrate()  -> pulls every row from Supabase into cache
+ *   2. cache mirrors to localStorage so a refresh comes up instantly
+ *   3. db.list/get serve from cache (sync, instant)
+ *   4. db.create/update/remove patch cache + localStorage immediately, then
+ *      fire-and-forget push to Supabase. On push failure the local change
+ *      stays; console.error is emitted and an offline-write counter increments
+ *      so the topbar can surface it later.
+ *
+ * Key handling: app uses camelCase, DB uses snake_case. We auto-convert at
+ * the row boundary. JSON values (line_items, bank, pricing) pass through
+ * unchanged.
  */
 
-const NS = "bm.admin.v1.";
-const COLLECTIONS = [
-  "leads",
-  "projects",
-  "clients",
-  "invoices",
-  "content",
-  "settings",
-];
+import { getClient, isConfigured } from "/admin/supabase.js";
 
-function key(name) {
-  return NS + name;
+const NS = "bm.admin.v2.";
+const COLLECTIONS = ["leads", "projects", "clients", "invoices", "content"];
+
+const cache = {
+  leads: [],
+  projects: [],
+  clients: [],
+  invoices: [],
+  content: [],
+  settings: null,
+};
+
+let syncErrors = 0;
+
+/* ---------- case conversion ---------- */
+
+const toSnake = (s) => s.replace(/[A-Z]/g, (c) => "_" + c.toLowerCase());
+const toCamel = (s) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+
+function toDbRow(obj) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (k === "id" || k === "createdAt") continue; // server-managed for some flows
+    out[toSnake(k)] = v;
+  }
+  return out;
 }
-function readAll(name) {
+function fromDbRow(row) {
+  if (!row) return row;
+  const out = {};
+  for (const [k, v] of Object.entries(row)) out[toCamel(k)] = v;
+  return out;
+}
+
+/* ---------- local cache mirror ---------- */
+
+function loadFromLocal() {
   try {
-    const raw = localStorage.getItem(key(name));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    for (const t of COLLECTIONS) {
+      const raw = localStorage.getItem(NS + t);
+      cache[t] = raw ? JSON.parse(raw) : [];
+    }
+    const s = localStorage.getItem(NS + "settings");
+    cache.settings = s ? JSON.parse(s) : null;
   } catch {
-    return [];
+    for (const t of COLLECTIONS) cache[t] = [];
+    cache.settings = null;
   }
 }
-function writeAll(name, rows) {
-  localStorage.setItem(key(name), JSON.stringify(rows));
+function persist(table) {
+  try {
+    if (table === "settings") {
+      localStorage.setItem(NS + "settings", JSON.stringify(cache.settings));
+    } else {
+      localStorage.setItem(NS + table, JSON.stringify(cache[table]));
+    }
+  } catch (e) {
+    console.warn("[db] persist failed", e);
+  }
 }
-function nextId() {
-  return (
-    Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
-  ).toUpperCase();
+
+/* ---------- hydration ---------- */
+
+export async function hydrate() {
+  loadFromLocal();
+  if (!isConfigured()) {
+    console.warn("[db] Supabase not configured; running in local-only mode");
+    return { remote: false };
+  }
+  try {
+    const sb = await getClient();
+    for (const t of COLLECTIONS) {
+      const { data, error } = await sb.from(t).select("*");
+      if (error) throw error;
+      cache[t] = (data || []).map(fromDbRow);
+      persist(t);
+    }
+    const { data: settingsRow, error: settingsErr } = await sb
+      .from("settings")
+      .select("*")
+      .eq("id", "singleton")
+      .maybeSingle();
+    if (settingsErr) throw settingsErr;
+    cache.settings = settingsRow ? fromDbRow(settingsRow) : null;
+    persist("settings");
+    return { remote: true };
+  } catch (e) {
+    console.error("[db] hydrate failed, using local cache only", e);
+    syncErrors++;
+    return { remote: false, error: e };
+  }
 }
-function now() {
+
+/* ---------- async writers ---------- */
+
+async function pushInsert(table, row) {
+  if (!isConfigured()) return;
+  try {
+    const sb = await getClient();
+    const { error } = await sb.from(table).insert({
+      id: row.id,
+      ...toDbRow(row),
+    });
+    if (error) throw error;
+  } catch (e) {
+    console.error(`[db] insert ${table} failed`, e);
+    syncErrors++;
+  }
+}
+async function pushUpdate(table, id, patch) {
+  if (!isConfigured()) return;
+  try {
+    const sb = await getClient();
+    const { error } = await sb.from(table).update(toDbRow(patch)).eq("id", id);
+    if (error) throw error;
+  } catch (e) {
+    console.error(`[db] update ${table} failed`, e);
+    syncErrors++;
+  }
+}
+async function pushDelete(table, id) {
+  if (!isConfigured()) return;
+  try {
+    const sb = await getClient();
+    const { error } = await sb.from(table).delete().eq("id", id);
+    if (error) throw error;
+  } catch (e) {
+    console.error(`[db] delete ${table} failed`, e);
+    syncErrors++;
+  }
+}
+async function pushSettings(patch) {
+  if (!isConfigured()) return;
+  try {
+    const sb = await getClient();
+    const { error } = await sb.from("settings").upsert({
+      id: "singleton",
+      ...toDbRow({ ...patch, id: undefined }),
+    });
+    if (error) throw error;
+  } catch (e) {
+    console.error("[db] settings upsert failed", e);
+    syncErrors++;
+  }
+}
+
+/* ---------- sync API ---------- */
+
+function nowIso() {
   return new Date().toISOString();
+}
+function newId() {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 }
 
 export const db = {
-  /** Read one row by id, or null. */
-  get(collection, id) {
-    return readAll(collection).find((r) => r.id === id) || null;
-  },
-  /** Read all rows in a collection, optionally filtered. */
-  list(collection, filter) {
-    const rows = readAll(collection);
+  list(table, filter) {
+    const rows = cache[table] || [];
     if (typeof filter === "function") return rows.filter(filter);
     if (filter && typeof filter === "object") {
       return rows.filter((r) =>
@@ -59,89 +188,105 @@ export const db = {
     }
     return rows;
   },
-  /** Insert a new row. Returns the new row with id/createdAt. */
-  create(collection, data) {
-    const rows = readAll(collection);
+  get(table, id) {
+    return (cache[table] || []).find((r) => r.id === id) || null;
+  },
+  create(table, data) {
     const row = {
-      id: nextId(),
-      createdAt: now(),
-      updatedAt: now(),
+      id: newId(),
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
       ...data,
     };
-    rows.unshift(row);
-    writeAll(collection, rows);
+    cache[table] = [row, ...cache[table]];
+    persist(table);
+    pushInsert(table, row);
     return row;
   },
-  /** Patch a row by id. Returns the updated row, or null if not found. */
-  update(collection, id, patch) {
-    const rows = readAll(collection);
-    const idx = rows.findIndex((r) => r.id === id);
+  update(table, id, patch) {
+    const idx = cache[table].findIndex((r) => r.id === id);
     if (idx === -1) return null;
-    rows[idx] = { ...rows[idx], ...patch, updatedAt: now() };
-    writeAll(collection, rows);
-    return rows[idx];
+    const next = { ...cache[table][idx], ...patch, updatedAt: nowIso() };
+    cache[table][idx] = next;
+    persist(table);
+    pushUpdate(table, id, { ...patch, updatedAt: next.updatedAt });
+    return next;
   },
-  /** Delete a row. Returns true if deleted. */
-  remove(collection, id) {
-    const rows = readAll(collection);
-    const next = rows.filter((r) => r.id !== id);
-    if (next.length === rows.length) return false;
-    writeAll(collection, next);
+  remove(table, id) {
+    const before = cache[table].length;
+    cache[table] = cache[table].filter((r) => r.id !== id);
+    if (cache[table].length === before) return false;
+    persist(table);
+    pushDelete(table, id);
     return true;
   },
-  /** Bulk replace a collection (used by import). */
-  replace(collection, rows) {
-    writeAll(collection, rows);
+  replace(table, rows) {
+    cache[table] = rows;
+    persist(table);
   },
-  /** Settings is a singleton object, not a collection. */
   settings: {
     get() {
-      try {
-        const raw = localStorage.getItem(key("settings"));
-        return raw ? JSON.parse(raw) : null;
-      } catch {
-        return null;
-      }
+      return cache.settings;
     },
     set(patch) {
-      const cur = this.get() || {};
-      const next = { ...cur, ...patch, updatedAt: now() };
-      localStorage.setItem(key("settings"), JSON.stringify(next));
-      return next;
+      cache.settings = {
+        ...(cache.settings || {}),
+        ...patch,
+        updatedAt: nowIso(),
+      };
+      persist("settings");
+      pushSettings(cache.settings);
+      return cache.settings;
     },
   },
-  /** Dump everything for a JSON export. */
   exportAll() {
-    const dump = { exportedAt: now(), version: 1, data: {} };
-    for (const c of COLLECTIONS) {
-      if (c === "settings") {
-        dump.data.settings = this.settings.get() || {};
-      } else {
-        dump.data[c] = readAll(c);
-      }
-    }
-    return dump;
+    return {
+      exportedAt: nowIso(),
+      version: 2,
+      data: {
+        leads: cache.leads,
+        projects: cache.projects,
+        clients: cache.clients,
+        invoices: cache.invoices,
+        content: cache.content,
+        settings: cache.settings || {},
+      },
+    };
   },
-  /** Import a previously-exported JSON dump. */
   importAll(dump) {
     if (!dump || !dump.data) throw new Error("Invalid dump");
-    for (const c of COLLECTIONS) {
-      if (c === "settings" && dump.data.settings) {
-        localStorage.setItem(key("settings"), JSON.stringify(dump.data.settings));
-      } else if (Array.isArray(dump.data[c])) {
-        writeAll(c, dump.data[c]);
+    for (const t of COLLECTIONS) {
+      if (Array.isArray(dump.data[t])) {
+        cache[t] = dump.data[t];
+        persist(t);
       }
     }
+    if (dump.data.settings) {
+      cache.settings = dump.data.settings;
+      persist("settings");
+    }
   },
-  /** Wipe all admin data. */
   wipe() {
-    for (const c of COLLECTIONS) localStorage.removeItem(key(c));
+    for (const t of COLLECTIONS) {
+      cache[t] = [];
+      localStorage.removeItem(NS + t);
+    }
+    cache.settings = null;
+    localStorage.removeItem(NS + "settings");
+  },
+  hydrate,
+  get syncErrors() {
+    return syncErrors;
+  },
+  get isRemote() {
+    return isConfigured();
   },
 };
 
-/** Seed first-run demo data so the dashboard isn't empty on first login. */
-export function seedIfEmpty() {
-  if (db.settings.get()) return; // already seeded
+/* ---------- seed ---------- */
+
+export async function seedIfEmpty() {
+  if (cache.settings || cache.leads.length || cache.clients.length) return;
 
   db.settings.set({
     studioName: "Brand Mint",
@@ -161,11 +306,9 @@ export function seedIfEmpty() {
       seo: 75000,
       ai: 200000,
     },
-    passcodeHash: null,
   });
 
-  // Demo leads
-  const demoLeads = [
+  const leads = [
     {
       name: "Aarav Mehta",
       company: "Lume D2C",
@@ -230,10 +373,9 @@ export function seedIfEmpty() {
       source: "Referral",
     },
   ];
-  demoLeads.forEach((l) => db.create("leads", l));
+  leads.forEach((l) => db.create("leads", l));
 
-  // Demo projects
-  const demoProjects = [
+  const projects = [
     {
       name: "Verdant Foods — Marketing site",
       client: "Verdant Foods",
@@ -275,10 +417,9 @@ export function seedIfEmpty() {
       owner: "Sumanth",
     },
   ];
-  demoProjects.forEach((p) => db.create("projects", p));
+  projects.forEach((p) => db.create("projects", p));
 
-  // Demo clients
-  const demoClients = [
+  const clients = [
     {
       name: "Verdant Foods",
       contact: "Rahul Bhat",
@@ -316,10 +457,9 @@ export function seedIfEmpty() {
       lifetimeValue: 480000,
     },
   ];
-  demoClients.forEach((c) => db.create("clients", c));
+  clients.forEach((c) => db.create("clients", c));
 
-  // Demo invoices
-  const demoInvoices = [
+  const invoices = [
     {
       number: "BM-2026-001",
       client: "Verdant Foods",
@@ -364,9 +504,8 @@ export function seedIfEmpty() {
       status: "draft",
     },
   ];
-  demoInvoices.forEach((i) => db.create("invoices", i));
+  invoices.forEach((i) => db.create("invoices", i));
 
-  // Demo content calendar
   const today = new Date();
   const fmt = (d) => d.toISOString().slice(0, 10);
   const addDays = (n) => {
@@ -374,7 +513,7 @@ export function seedIfEmpty() {
     d.setDate(d.getDate() + n);
     return fmt(d);
   };
-  const demoContent = [
+  const content = [
     {
       date: addDays(0),
       title: "Case study: Verdant Foods +47% conversion",
@@ -418,5 +557,5 @@ export function seedIfEmpty() {
       status: "draft",
     },
   ];
-  demoContent.forEach((c) => db.create("content", c));
+  content.forEach((c) => db.create("content", c));
 }

@@ -73,10 +73,31 @@
     });
   }
 
-  // Contact form — client-side validation + faux submit
+  // Contact form — POSTs to Supabase `leads`, falls back to mailto on error.
+  const SUPABASE_URL = "https://ycdfgtljxqrhyobnwwbz.supabase.co";
+  const SUPABASE_ANON_KEY =
+    "sb_publishable_ddoQWG7ZWqNwTRJFBdfbHA_HoX48n1l";
+
+  async function sendLeadToSupabase(payload) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`Supabase ${res.status}: ${text}`);
+    }
+  }
+
   if (form) {
     const status = form.querySelector(".form-status");
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       status.classList.remove("is-error");
 
@@ -97,34 +118,54 @@
       }
 
       const button = form.querySelector("button[type=submit]");
-      const original = button.querySelector(".btn-label").textContent;
+      const labelEl = button.querySelector(".btn-label");
+      const original = labelEl.textContent;
       button.disabled = true;
-      button.querySelector(".btn-label").textContent = "Sending…";
+      labelEl.textContent = "Sending…";
 
-      // No backend yet — simulate the round-trip and fall back to a mailto.
-      setTimeout(() => {
+      const payload = {
+        name,
+        company: (data.get("company") || "").toString().trim() || null,
+        email,
+        phone: (data.get("phone") || "").toString().trim() || null,
+        project_type: type,
+        budget: (data.get("budget") || "").toString().trim() || null,
+        message: (data.get("message") || "").toString().trim() || null,
+        status: "new",
+        score: 50,
+        source: "Site contact form",
+      };
+
+      try {
+        await sendLeadToSupabase(payload);
         button.disabled = false;
-        button.querySelector(".btn-label").textContent = original;
+        labelEl.textContent = original;
         status.textContent =
           "Thanks — we'll be in touch within one business day.";
         form.reset();
-
+      } catch (err) {
+        console.error("[contact] Supabase insert failed, falling back to mailto", err);
+        button.disabled = false;
+        labelEl.textContent = original;
+        status.textContent =
+          "Opening your mail app — send us the message and we'll reply within one business day.";
+        form.reset();
         const subject = encodeURIComponent(
-          `New project inquiry — ${data.get("type") || "Brand Mint"}`
+          `New project inquiry — ${type || "Brand Mint"}`
         );
         const body = encodeURIComponent(
           [
             `Name: ${name}`,
             `Email: ${email}`,
-            `Company: ${data.get("company") || "—"}`,
-            `Type: ${data.get("type") || "—"}`,
-            `Budget: ${data.get("budget") || "—"}`,
+            `Company: ${payload.company || "—"}`,
+            `Type: ${payload.project_type || "—"}`,
+            `Budget: ${payload.budget || "—"}`,
             "",
-            data.get("message") || "",
+            payload.message || "",
           ].join("\n")
         );
         window.location.href = `mailto:hello@brandmint.studio?subject=${subject}&body=${body}`;
-      }, 700);
+      }
     });
   }
 })();
