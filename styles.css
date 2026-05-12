@@ -247,49 +247,53 @@ button {
 }
 
 /* ---------- AUTH BUTTONS IN NAV ---------- */
-.nav-signin {
-  display: inline-flex !important;
+/* Scoped under .nav-links so we win specificity vs `.nav-links a` without
+   needing !important. [hidden] is honoured globally below. */
+.nav-links .nav-signin {
+  display: inline-flex;
   align-items: center;
-  padding: 6px 4px !important;
+  padding: 6px 4px;
   font-weight: 500;
-  font-size: 14px !important;
-  color: var(--muted) !important;
+  font-size: 14px;
+  color: var(--muted);
 }
-.nav-signin::after { display: none !important; }
-.nav-signin:hover { color: var(--ink) !important; }
-.nav-signup {
-  display: inline-flex !important;
+.nav-links .nav-signin::after { display: none; }
+.nav-links .nav-signin:hover { color: var(--ink); }
+
+.nav-links .nav-signup {
+  display: inline-flex;
   align-items: center;
-  padding: 6px 14px !important;
+  justify-content: center;
+  padding: 6px 14px;
   border: 1px solid var(--ink);
   border-radius: 999px;
-  font-size: 13px !important;
+  font-size: 13px;
   font-weight: 500;
   background: var(--ink);
-  color: var(--paper) !important;
+  color: var(--paper);
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.nav-signup::after { display: none !important; }
-.nav-signup:hover {
+.nav-links .nav-signup::after { display: none; }
+.nav-links .nav-signup:hover {
   background: transparent;
-  color: var(--ink) !important;
+  color: var(--ink);
 }
-.nav-userchip {
-  display: inline-flex !important;
+
+.nav-links .nav-userchip {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 12px 4px 4px !important;
+  padding: 4px 12px 4px 4px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--white);
-  font-size: 13px !important;
+  font-size: 13px;
   font-weight: 500;
-  color: var(--ink) !important;
+  color: var(--ink);
   cursor: pointer;
   position: relative;
+  font-family: inherit;
 }
-.nav-userchip::after { display: none !important; }
-.nav-userchip:hover { border-color: rgba(10, 14, 12, 0.18); }
 .nav-userchip-avatar {
   width: 26px;
   height: 26px;
@@ -315,6 +319,7 @@ button {
   min-width: 220px;
   display: none;
   z-index: 30;
+  text-align: left;
 }
 .nav-userchip.open .nav-userchip-menu { display: block; }
 .nav-userchip-menu .um-head {
@@ -352,6 +357,42 @@ button {
   font: inherit;
 }
 .nav-userchip-menu button:hover { background: rgba(10, 14, 12, 0.04); }
+
+/* hidden attribute must always win regardless of nav-link display rules */
+.nav-links [hidden],
+[data-auth-show][hidden] { display: none !important; }
+
+@media (max-width: 720px) {
+  /* In the mobile drawer, lay out auth buttons as full-width rows like the
+     other nav items. The dropdown collapses inline below the chip. */
+  .nav-links .nav-signin,
+  .nav-links .nav-signup,
+  .nav-links .nav-userchip {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+  .nav-links .nav-signup {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .nav-links .nav-userchip {
+    position: static;
+  }
+  .nav-links .nav-userchip-menu {
+    position: static;
+    top: auto;
+    right: auto;
+    box-shadow: none;
+    border: 0;
+    background: transparent;
+    padding: 8px 0 0;
+    min-width: 0;
+    width: 100%;
+  }
+}
 
 /* ---------- AUTH MODAL ---------- */
 .bm-auth-overlay {

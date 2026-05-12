@@ -37,16 +37,21 @@ function dispatchState() {
   for (const el of document.querySelectorAll("[data-auth-user-email]")) {
     el.textContent = _user?.email || "";
   }
+  const displayName =
+    _user?.user_metadata?.name ||
+    _user?.user_metadata?.full_name ||
+    _user?.email?.split("@")[0] ||
+    "";
   for (const el of document.querySelectorAll("[data-auth-user-initial]")) {
-    el.textContent = initialFor(_user?.email || _user?.user_metadata?.name);
+    el.textContent = initialFor(displayName || _user?.email);
   }
   for (const el of document.querySelectorAll("[data-auth-user-name]")) {
-    const name = _user?.user_metadata?.name;
-    el.textContent = name || _user?.email?.split("@")[0] || "";
+    el.textContent = displayName || "Account";
   }
 }
 function initialFor(s) {
-  return (s || "?").trim().charAt(0).toUpperCase() || "?";
+  const ch = (s || "").trim().charAt(0).toUpperCase();
+  return ch || "·";
 }
 
 async function bootstrap() {
