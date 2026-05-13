@@ -8,9 +8,12 @@
  */
 
 import { auth } from "/admin/auth.js";
-import { db, seedIfEmpty } from "/admin/db.js";
+import { db, seedIfEmpty, setToastHandle } from "/admin/db.js";
 import { renderSidebar, renderTopbar, mount, h, toast } from "/admin/components.js";
 import { openPalette } from "/admin/palette.js";
+
+// Let the data layer surface sync errors via the topbar toast.
+setToastHandle(toast);
 
 const routes = {
   dashboard: () => import("/admin/modules/dashboard.js"),

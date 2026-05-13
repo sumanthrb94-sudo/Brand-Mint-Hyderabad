@@ -23,6 +23,26 @@ import { getClient, isConfigured } from "/admin/supabase.js";
 const NS = "bm.admin.v2.";
 const COLLECTIONS = ["leads", "projects", "clients", "invoices", "content"];
 
+// Optional toast handle, set by admin/app.js after components.js loads.
+let toastFn = null;
+export function setToastHandle(fn) { toastFn = fn; }
+function toastIfAvailable(msg) {
+  if (typeof toastFn === "function") {
+    try { toastFn(msg, 4200); } catch (_) {}
+  }
+}
+
+// Per-table change listeners. Modules subscribe to re-render when their
+// table changes (locally or via Postgres Changes).
+const tableListeners = new Map();
+function emitTable(table) {
+  const set = tableListeners.get(table);
+  if (!set) return;
+  for (const fn of set) {
+    try { fn(table); } catch (e) { console.error("[db] table listener", e); }
+  }
+}
+
 const cache = {
   leads: [],
   projects: [],
@@ -131,6 +151,8 @@ export async function hydrate() {
     persist("settings");
     lastSyncAt = new Date().toISOString();
     emit();
+    for (const t of COLLECTIONS) emitTable(t);
+    subscribeRealtime();
     return { remote: true };
   } catch (e) {
     console.error("[db] hydrate failed, using local cache only", e);
@@ -139,6 +161,75 @@ export async function hydrate() {
     emit();
     return { remote: false, error: e };
   }
+}
+
+/* ---------- Realtime ---------- */
+
+let realtimeBound = false;
+async function subscribeRealtime() {
+  if (realtimeBound || !isConfigured()) return;
+  realtimeBound = true;
+  try {
+    const sb = await getClient();
+    const ch = sb.channel("bm-admin-realtime");
+    for (const t of COLLECTIONS) {
+      ch.on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: t },
+        (payload) => applyRealtimeEvent(t, payload),
+      );
+    }
+    ch.on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "settings" },
+      (payload) => {
+        if (payload.eventType === "DELETE") {
+          cache.settings = null;
+        } else {
+          cache.settings = fromDbRow(payload.new);
+        }
+        persist("settings");
+        emit();
+      },
+    );
+    ch.subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        console.info("[db] realtime channel subscribed");
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        console.warn("[db] realtime channel", status);
+      }
+    });
+  } catch (e) {
+    console.warn("[db] realtime setup failed", e);
+    realtimeBound = false;
+  }
+}
+
+function applyRealtimeEvent(table, payload) {
+  const list = cache[table] || [];
+  if (payload.eventType === "INSERT") {
+    const incoming = fromDbRow(payload.new);
+    if (!list.find((r) => r.id === incoming.id)) {
+      cache[table] = [incoming, ...list];
+    }
+  } else if (payload.eventType === "UPDATE") {
+    const incoming = fromDbRow(payload.new);
+    const idx = list.findIndex((r) => r.id === incoming.id);
+    if (idx === -1) cache[table] = [incoming, ...list];
+    else {
+      // Last-write-wins by updatedAt to avoid clobbering a fresh local edit.
+      const local = list[idx];
+      const localTs = Date.parse(local.updatedAt || 0) || 0;
+      const remoteTs = Date.parse(incoming.updatedAt || 0) || 0;
+      if (remoteTs >= localTs) cache[table][idx] = incoming;
+    }
+  } else if (payload.eventType === "DELETE") {
+    const oldId = payload.old?.id;
+    if (oldId) cache[table] = list.filter((r) => r.id !== oldId);
+  }
+  persist(table);
+  emitTable(table);
+  emit();
 }
 
 /* ---------- async writers ---------- */
@@ -154,7 +245,7 @@ function recordFailure(op, e) {
 }
 
 async function pushInsert(table, row) {
-  if (!isConfigured()) return;
+  if (!isConfigured()) return { ok: true, local: true };
   try {
     const sb = await getClient();
     const { error } = await sb.from(table).insert({
@@ -163,33 +254,39 @@ async function pushInsert(table, row) {
     });
     if (error) throw error;
     recordSuccess();
+    return { ok: true };
   } catch (e) {
     console.error(`[db] insert ${table} failed`, e);
     recordFailure(`insert ${table}`, e);
+    return { ok: false, error: e };
   }
 }
 async function pushUpdate(table, id, patch) {
-  if (!isConfigured()) return;
+  if (!isConfigured()) return { ok: true, local: true };
   try {
     const sb = await getClient();
     const { error } = await sb.from(table).update(toDbRow(patch)).eq("id", id);
     if (error) throw error;
     recordSuccess();
+    return { ok: true };
   } catch (e) {
     console.error(`[db] update ${table} failed`, e);
     recordFailure(`update ${table}`, e);
+    return { ok: false, error: e };
   }
 }
 async function pushDelete(table, id) {
-  if (!isConfigured()) return;
+  if (!isConfigured()) return { ok: true, local: true };
   try {
     const sb = await getClient();
     const { error } = await sb.from(table).delete().eq("id", id);
     if (error) throw error;
     recordSuccess();
+    return { ok: true };
   } catch (e) {
     console.error(`[db] delete ${table} failed`, e);
     recordFailure(`delete ${table}`, e);
+    return { ok: false, error: e };
   }
 }
 async function pushSettings(patch) {
@@ -242,7 +339,30 @@ export const db = {
     };
     cache[table] = [row, ...cache[table]];
     persist(table);
-    pushInsert(table, row);
+    emit();
+    emitTable(table);
+    pushInsert(table, row).then((res) => {
+      if (res?.ok === false) {
+        toastIfAvailable(`Saved locally — sync failed (${res.error?.message || "see console"}).`);
+      }
+    });
+    return row;
+  },
+  // Awaitable variant — used by forms that want to know push succeeded.
+  async createAsync(table, data) {
+    const row = {
+      id: newId(),
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      ...data,
+    };
+    cache[table] = [row, ...cache[table]];
+    persist(table);
+    emit();
+    const res = await pushInsert(table, row);
+    if (res?.ok === false && isConfigured()) {
+      throw res.error || new Error("Insert failed");
+    }
     return row;
   },
   update(table, id, patch) {
@@ -251,7 +371,26 @@ export const db = {
     const next = { ...cache[table][idx], ...patch, updatedAt: nowIso() };
     cache[table][idx] = next;
     persist(table);
-    pushUpdate(table, id, { ...patch, updatedAt: next.updatedAt });
+    emit();
+    emitTable(table);
+    pushUpdate(table, id, { ...patch, updatedAt: next.updatedAt }).then((res) => {
+      if (res?.ok === false) {
+        toastIfAvailable(`Saved locally — sync failed (${res.error?.message || "see console"}).`);
+      }
+    });
+    return next;
+  },
+  async updateAsync(table, id, patch) {
+    const idx = cache[table].findIndex((r) => r.id === id);
+    if (idx === -1) return null;
+    const next = { ...cache[table][idx], ...patch, updatedAt: nowIso() };
+    cache[table][idx] = next;
+    persist(table);
+    emit();
+    const res = await pushUpdate(table, id, { ...patch, updatedAt: next.updatedAt });
+    if (res?.ok === false && isConfigured()) {
+      throw res.error || new Error("Update failed");
+    }
     return next;
   },
   remove(table, id) {
@@ -259,7 +398,13 @@ export const db = {
     cache[table] = cache[table].filter((r) => r.id !== id);
     if (cache[table].length === before) return false;
     persist(table);
-    pushDelete(table, id);
+    emit();
+    emitTable(table);
+    pushDelete(table, id).then((res) => {
+      if (res?.ok === false) {
+        toastIfAvailable(`Deleted locally — sync failed (${res.error?.message || "see console"}).`);
+      }
+    });
     return true;
   },
   replace(table, rows) {
@@ -321,6 +466,14 @@ export const db = {
   subscribe(fn) {
     listeners.add(fn);
     return () => listeners.delete(fn);
+  },
+  // Per-table subscription. fn(table) fires whenever the cache for the
+  // given table changes — local mutations OR incoming Postgres Changes.
+  onTable(table, fn) {
+    let set = tableListeners.get(table);
+    if (!set) { set = new Set(); tableListeners.set(table, set); }
+    set.add(fn);
+    return () => set.delete(fn);
   },
   resetSyncErrors() {
     syncErrors = 0;

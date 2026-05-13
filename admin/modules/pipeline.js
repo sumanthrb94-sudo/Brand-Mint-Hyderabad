@@ -11,6 +11,7 @@ import {
   confirm,
   field,
   formToObject,
+  bindSubmit,
   renderTopbar,
   inr,
   dateShort,
@@ -246,16 +247,18 @@ export async function render(ctx) {
       footer,
     });
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    bindSubmit(form, async () => {
       const v = formToObject(form);
-      if (!v.name?.trim()) return ctx.toast("Name is required.");
+      if (!v.name?.trim()) {
+        ctx.toast("Name is required.");
+        return;
+      }
       v.value = Number(v.value || 0);
       if (isNew) {
-        db.create("projects", v);
+        await db.createAsync("projects", v);
         ctx.toast("Project created.");
       } else {
-        db.update("projects", project.id, v);
+        await db.updateAsync("projects", project.id, v);
         ctx.toast("Saved.");
       }
       instance.close();
@@ -267,6 +270,12 @@ export async function render(ctx) {
 
   const params = new URLSearchParams((location.hash.split("?")[1] || ""));
   redraw();
+
+  const unsub = db.onTable("projects", () => {
+    if (root.isConnected) redraw();
+    else unsub();
+  });
+
   if (params.get("new") === "1") openForm(null);
   else if (params.get("id")) {
     const p = db.get("projects", params.get("id"));

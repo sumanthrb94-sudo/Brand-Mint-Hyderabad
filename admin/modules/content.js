@@ -12,6 +12,7 @@ import {
   confirm,
   field,
   formToObject,
+  bindSubmit,
   renderTopbar,
   dateShort,
 } from "/admin/components.js";
@@ -223,15 +224,17 @@ export async function render(ctx) {
       footer,
     });
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    bindSubmit(form, async () => {
       const v = formToObject(form);
-      if (!v.title?.trim() || !v.date) return ctx.toast("Title and date are required.");
+      if (!v.title?.trim() || !v.date) {
+        ctx.toast("Title and date are required.");
+        return;
+      }
       if (isNew) {
-        db.create("content", v);
+        await db.createAsync("content", v);
         ctx.toast("Post added.");
       } else {
-        db.update("content", post.id, v);
+        await db.updateAsync("content", post.id, v);
         ctx.toast("Saved.");
       }
       instance.close();
@@ -240,6 +243,11 @@ export async function render(ctx) {
   }
 
   redraw();
+
+  const unsub = db.onTable("content", () => {
+    if (root.isConnected) redraw();
+    else unsub();
+  });
 
   const params = new URLSearchParams(location.hash.split("?")[1] || "");
   if (params.get("new") === "1") openForm(null, ymd(new Date()));

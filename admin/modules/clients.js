@@ -425,5 +425,14 @@ export async function render(ctx) {
   fullRender();
   setTimeout(handleUrlIntent, 0);
 
+  const unsub = db.onTable("clients", () => {
+    if (root.isConnected) fullRender();
+    else unsub();
+  });
+  const unsubProjects = db.onTable("projects", () => {
+    if (root.isConnected) fullRender();
+    else unsubProjects();
+  });
+
   return root;
 }
