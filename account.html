@@ -17,24 +17,37 @@
     />
     <link rel="stylesheet" href="/styles.css?v=auth4" />
 
-    <!-- Auth preflight: matches index.html so we don't flash the wrong UI. -->
+    <!-- Auth preflight: matches index.html. Demo session takes precedence. -->
     <script>
       (function () {
+        var html = document.documentElement;
         try {
-          var ref = "ycdfgtljxqrhyobnwwbz";
-          var keys = ["sb-" + ref + "-auth-token", "sb-auth-token"];
-          for (var i = 0; i < keys.length; i++) {
-            var raw = localStorage.getItem(keys[i]);
-            if (!raw) continue;
-            var parsed = JSON.parse(raw);
-            var expSec = (parsed && (parsed.expires_at || (parsed.currentSession && parsed.currentSession.expires_at))) || 0;
-            if (expSec * 1000 > Date.now()) {
-              document.documentElement.setAttribute("data-auth-state", "signed-in");
+          var raw = localStorage.getItem("bm.demo.session");
+          if (raw) {
+            var demo = JSON.parse(raw);
+            if (demo && demo.user && (demo.expires_at || 0) * 1000 > Date.now()) {
+              html.setAttribute("data-auth-state", "signed-in");
+              html.setAttribute("data-auth-role", demo.user.role || "user");
               return;
             }
           }
         } catch (e) {}
-        document.documentElement.setAttribute("data-auth-state", "signed-out");
+        try {
+          var ref = "ycdfgtljxqrhyobnwwbz";
+          var keys = ["sb-" + ref + "-auth-token", "sb-auth-token"];
+          for (var i = 0; i < keys.length; i++) {
+            var rawSb = localStorage.getItem(keys[i]);
+            if (!rawSb) continue;
+            var parsed = JSON.parse(rawSb);
+            var expSec = (parsed && (parsed.expires_at || (parsed.currentSession && parsed.currentSession.expires_at))) || 0;
+            if (expSec * 1000 > Date.now()) {
+              html.setAttribute("data-auth-state", "signed-in");
+              html.setAttribute("data-auth-role", "user");
+              return;
+            }
+          }
+        } catch (e) {}
+        html.setAttribute("data-auth-state", "signed-out");
       })();
     </script>
 
@@ -337,6 +350,11 @@
 
       async function loadInquiries(user) {
         if (!user) return;
+        if (user.isDemo) {
+          inquiriesMount.innerHTML =
+            '<p class="bm-acct-empty">Demo account — no live inquiries to show. Submit one via the <a href="/#contact" style="color:var(--mint-4);text-decoration:underline;">contact form</a> to test the pipeline.</p>';
+          return;
+        }
         try {
           const sb = await window.bmAuth.getClient();
           const { data, error } = await sb

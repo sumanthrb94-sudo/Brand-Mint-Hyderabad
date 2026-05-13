@@ -250,15 +250,42 @@ button {
 }
 
 /* ---------- AUTH STATE VISIBILITY (no-flash) ----------
-   The <html data-auth-state> attribute is set synchronously in <head> from a
-   localStorage hint, then reconciled async by auth/marketing.js. Elements with
-   [data-auth-show] are hidden by default and only revealed when the state
-   matches — so the page never flashes the wrong UI. */
+   The <html data-auth-state> and <html data-auth-role> attributes are set
+   synchronously in <head> from a localStorage hint, then reconciled async by
+   auth/marketing.js. Elements with [data-auth-show] are hidden by default and
+   only revealed when the state matches — so the page never flashes the wrong
+   UI. */
 [data-auth-show] { display: none !important; }
 html[data-auth-state="signed-in"]  [data-auth-show="signed-in"],
-html[data-auth-state="signed-out"] [data-auth-show="signed-out"] {
+html[data-auth-state="signed-out"] [data-auth-show="signed-out"],
+html[data-auth-role="admin"]       [data-auth-show="admin"] {
   display: inline-flex !important;
 }
+
+/* ---------- ADMIN NAV LINK ---------- */
+.nav-links .nav-admin {
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mint-4);
+  background: rgba(16, 185, 129, 0.08);
+  letter-spacing: 0.02em;
+}
+.nav-links .nav-admin::after { display: none; }
+.nav-links .nav-admin:hover {
+  background: rgba(16, 185, 129, 0.16);
+  color: var(--mint-3);
+}
+.nav-links .nav-admin svg { opacity: 0.9; }
+
+.um-item--admin {
+  color: var(--mint-4) !important;
+}
+.um-item--admin svg { opacity: 0.95; }
 
 /* ---------- AUTH BUTTONS IN NAV ---------- */
 .nav-links .nav-signin {

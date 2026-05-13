@@ -27,15 +27,34 @@
     <div id="modal-root"></div>
 
     <script>
-      // Auth is disabled. Always start with a fresh long session so the
-      // module's gate logic is bypassed regardless of cache state.
-      try {
-        localStorage.setItem(
-          "bm.admin.v1.session",
-          String(Date.now() + 365 * 24 * 60 * 60 * 1000)
-        );
-      } catch (e) {}
+      // Admin gate: only an authenticated admin (demo session with role=admin)
+      // can load the dashboard. Non-admins are bounced back to the home page
+      // with the login modal open.
+      (function () {
+        function bounce() {
+          try { sessionStorage.setItem("bm.openAuthOnHome", "1"); } catch (e) {}
+          window.location.replace("/?signin=1");
+        }
+        try {
+          var raw = localStorage.getItem("bm.demo.session");
+          if (!raw) return bounce();
+          var demo = JSON.parse(raw);
+          var live = demo && demo.user &&
+            (demo.expires_at || 0) * 1000 > Date.now();
+          if (!live) {
+            localStorage.removeItem("bm.demo.session");
+            return bounce();
+          }
+          if (demo.user.role !== "admin") return bounce();
+          // Bridge to the existing admin module's session key so its internal
+          // gate is satisfied for the duration of the demo session.
+          localStorage.setItem(
+            "bm.admin.v1.session",
+            String((demo.expires_at || 0) * 1000)
+          );
+        } catch (e) { bounce(); }
+      })();
     </script>
-    <script type="module" src="/admin/app.js?v=10"></script>
+    <script type="module" src="/admin/app.js?v=11"></script>
   </body>
 </html>

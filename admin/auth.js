@@ -52,5 +52,8 @@ export const auth = {
   },
   endSession() {
     localStorage.removeItem(SESSION_KEY);
+    // Clear the demo-auth session too so admin sign-out fully signs out the
+    // user, not just locks the admin module.
+    localStorage.removeItem("bm.demo.session");
   },
 };

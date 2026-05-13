@@ -3,6 +3,21 @@
 Marketing site for **Brand Mint**, a digital media & marketing studio that
 builds custom websites and bespoke internal tools.
 
+## Demo accounts (testing only)
+
+Three hard-coded accounts are wired into the auth modal for staging. Drop the
+password field and an email-only submit falls back to a real Supabase magic
+link. **Replace these with real auth before going live.**
+
+| Email | Password | Role |
+|---|---|---|
+| `admin@brandmint.studio` | `Admin@2026` | **admin** — sees the Admin nav link, can open `/admin` |
+| `team@brandmint.studio` | `Team@2026` | user |
+| `client@brandmint.studio` | `Client@2026` | user |
+
+Sign-out from anywhere (nav chip, `/account`, or admin topbar) clears the
+demo session everywhere.
+
 ## Stack
 
 - Static HTML / CSS / JS — no build step
