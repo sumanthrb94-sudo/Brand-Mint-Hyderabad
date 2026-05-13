@@ -438,11 +438,11 @@ function openAuthModal(mode = "login") {
   function cleanup() {
     if (torn) return;
     torn = true;
-    document.removeEventListener("keydown", onKey);
-    overlay.removeEventListener("click", onBackdrop);
-    overlay.remove();
-    document.body.style.overflow = "";
-    if (opener && typeof opener.focus === "function") opener.focus();
+    try { document.removeEventListener("keydown", onKey); } catch (_) {}
+    try { overlay.removeEventListener("click", onBackdrop); } catch (_) {}
+    try { if (overlay.isConnected) overlay.remove(); } catch (_) {}
+    try { document.body.style.overflow = ""; } catch (_) {}
+    try { if (opener && typeof opener.focus === "function") opener.focus(); } catch (_) {}
   }
   overlay._cleanup = cleanup;
 
@@ -501,23 +501,37 @@ function openAuthModal(mode = "login") {
     // Path A — password supplied: try demo accounts.
     if (password) {
       submitBtn.disabled = true; submitLabel.textContent = "Signing in…";
+
+      // Verify is the only step that can legitimately fail. Anything that
+      // happens AFTER a successful verify (session write, DOM updates,
+      // modal teardown) is post-success and must never surface as a
+      // sign-in failure in the form.
+      let user = null;
       try {
-        const user = await verifyDemo(email, password);
-        if (user) {
-          setDemoSession(user);
-          applyState(user);
-          toast(`Signed in${user.role === "admin" ? " (admin)" : ""} — welcome, ${user.user_metadata.full_name.split(" ")[0]}.`);
-          cleanup();
-          return;
-        }
-        submitBtn.disabled = false; submitLabel.textContent = "Continue";
-        showStatus("Email or password didn't match. Leave the password blank for a magic link.", { error: true });
-        passEl.focus(); passEl.select();
+        user = await verifyDemo(email, password);
       } catch (err) {
         console.error("[auth] demo verify", err);
         submitBtn.disabled = false; submitLabel.textContent = "Continue";
         showStatus("Couldn't sign you in. Try again.", { error: true });
+        return;
       }
+
+      if (!user) {
+        submitBtn.disabled = false; submitLabel.textContent = "Continue";
+        showStatus("Email or password didn't match. Leave the password blank for a magic link.", { error: true });
+        passEl.focus(); passEl.select();
+        return;
+      }
+
+      // Success. Persist + close the modal BEFORE updating shared state,
+      // so no downstream listener can throw and leave the modal stuck.
+      try { setDemoSession(user); } catch (err) { console.error("[auth] setDemoSession", err); }
+      try { cleanup(); } catch (err) { console.error("[auth] cleanup", err); }
+      try { applyState(user); } catch (err) { console.error("[auth] applyState", err); }
+      try {
+        const first = (user.user_metadata?.full_name || user.email || "").split(/[\s@]/)[0];
+        toast(`Signed in${user.role === "admin" ? " (admin)" : ""} — welcome, ${first}.`);
+      } catch (err) { console.error("[auth] toast", err); }
       return;
     }
 
