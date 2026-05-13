@@ -13,6 +13,9 @@
   --gold-2: #e8d49c;
   --cream: #fbfaf2;
   --white: #ffffff;
+  --paper: #fbfaf2;
+  --faint: #8a9b91;
+  --mint-4: #047857;
   --shadow-sm: 0 1px 2px rgba(11, 31, 26, 0.06),
     0 4px 14px rgba(11, 31, 26, 0.05);
   --shadow-md: 0 8px 30px rgba(11, 31, 26, 0.1);
@@ -246,11 +249,19 @@ button {
   transform: translateY(-9px) rotate(-45deg);
 }
 
+/* ---------- AUTH STATE VISIBILITY (no-flash) ----------
+   The <html data-auth-state> attribute is set synchronously in <head> from a
+   localStorage hint, then reconciled async by auth/marketing.js. Elements with
+   [data-auth-show] are hidden by default and only revealed when the state
+   matches — so the page never flashes the wrong UI. */
+[data-auth-show] { display: none !important; }
+html[data-auth-state="signed-in"]  [data-auth-show="signed-in"],
+html[data-auth-state="signed-out"] [data-auth-show="signed-out"] {
+  display: inline-flex !important;
+}
+
 /* ---------- AUTH BUTTONS IN NAV ---------- */
-/* Scoped under .nav-links so we win specificity vs `.nav-links a` without
-   needing !important. [hidden] is honoured globally below. */
 .nav-links .nav-signin {
-  display: inline-flex;
   align-items: center;
   padding: 6px 4px;
   font-weight: 500;
@@ -259,9 +270,13 @@ button {
 }
 .nav-links .nav-signin::after { display: none; }
 .nav-links .nav-signin:hover { color: var(--ink); }
+.nav-links .nav-signin:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
 
 .nav-links .nav-signup {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 6px 14px;
@@ -278,12 +293,20 @@ button {
   background: transparent;
   color: var(--ink);
 }
+.nav-links .nav-signup:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 3px;
+}
 
+.nav-userchip-wrap {
+  position: relative;
+  align-items: center;
+}
 .nav-links .nav-userchip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 12px 4px 4px;
+  padding: 3px 10px 3px 3px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--white);
@@ -291,8 +314,20 @@ button {
   font-weight: 500;
   color: var(--ink);
   cursor: pointer;
-  position: relative;
   font-family: inherit;
+  line-height: 1;
+  max-width: 220px;
+}
+.nav-links .nav-userchip:hover { border-color: var(--ink-2); }
+.nav-links .nav-userchip:focus-visible {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+}
+.nav-userchip-name {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .nav-userchip-avatar {
   width: 26px;
@@ -307,23 +342,39 @@ button {
   font-size: 12px;
   flex-shrink: 0;
 }
+.nav-userchip-caret {
+  opacity: 0.6;
+  transition: transform 0.15s ease;
+}
+.nav-userchip[aria-expanded="true"] .nav-userchip-caret {
+  transform: rotate(180deg);
+}
+
 .nav-userchip-menu {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 24px 60px rgba(10, 14, 12, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(10, 14, 12, 0.14);
   padding: 6px;
-  min-width: 220px;
-  display: none;
+  min-width: 240px;
   z-index: 30;
   text-align: left;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.12s ease, transform 0.12s ease, visibility 0s linear 0.12s;
 }
-.nav-userchip.open .nav-userchip-menu { display: block; }
+.nav-userchip-wrap.open .nav-userchip-menu {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
 .nav-userchip-menu .um-head {
-  padding: 8px 12px 10px;
+  padding: 10px 12px 12px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 4px;
 }
@@ -341,13 +392,15 @@ button {
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.nav-userchip-menu button {
+.nav-userchip-menu .um-item {
   width: 100%;
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  border-radius: 6px;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
   font-size: 13px;
   color: var(--ink);
   background: transparent;
@@ -355,19 +408,33 @@ button {
   cursor: pointer;
   text-align: left;
   font: inherit;
+  text-decoration: none;
 }
-.nav-userchip-menu button:hover { background: rgba(10, 14, 12, 0.04); }
-
-/* hidden attribute must always win regardless of nav-link display rules */
-.nav-links [hidden],
-[data-auth-show][hidden] { display: none !important; }
+.nav-userchip-menu .um-item:hover,
+.nav-userchip-menu .um-item:focus-visible {
+  background: rgba(10, 14, 12, 0.05);
+  outline: none;
+}
+.nav-userchip-menu .um-item svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+.nav-userchip-menu .um-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 6px;
+}
 
 @media (max-width: 720px) {
-  /* In the mobile drawer, lay out auth buttons as full-width rows like the
-     other nav items. The dropdown collapses inline below the chip. */
+  /* In the mobile drawer, the auth controls become full-width rows. */
+  html[data-auth-state="signed-in"]  [data-auth-show="signed-in"],
+  html[data-auth-state="signed-out"] [data-auth-show="signed-out"] {
+    display: flex !important;
+  }
   .nav-links .nav-signin,
-  .nav-links .nav-signup,
-  .nav-links .nav-userchip {
+  .nav-links .nav-signup {
     width: 100%;
     justify-content: flex-start;
     padding: 12px 14px;
@@ -378,10 +445,21 @@ button {
     background: var(--ink);
     color: var(--paper);
   }
-  .nav-links .nav-userchip {
+  .nav-userchip-wrap {
+    width: 100%;
     position: static;
   }
-  .nav-links .nav-userchip-menu {
+  .nav-links .nav-userchip {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    font-size: 15px;
+    border-radius: 8px;
+    max-width: none;
+  }
+  .nav-userchip-name { max-width: none; }
+  .nav-userchip-caret { margin-left: auto; }
+  .nav-userchip-menu {
     position: static;
     top: auto;
     right: auto;
@@ -391,8 +469,43 @@ button {
     padding: 8px 0 0;
     min-width: 0;
     width: 100%;
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition: none;
+    display: none;
   }
+  .nav-userchip-wrap.open .nav-userchip-menu { display: block; }
 }
+
+/* ---------- TOAST ---------- */
+.bm-toast-stack {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+  pointer-events: none;
+}
+.bm-toast {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 12px 32px rgba(10, 14, 12, 0.25);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: auto;
+  max-width: 88vw;
+}
+.bm-toast.is-visible { opacity: 1; transform: translateY(0); }
+.bm-toast.is-error { background: #7a1f1f; }
 
 /* ---------- AUTH MODAL ---------- */
 .bm-auth-overlay {

@@ -39,7 +39,30 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=auth3" />
+    <link rel="stylesheet" href="styles.css?v=auth4" />
+
+    <!-- Auth preflight: sets <html data-auth-state> before first paint so the
+         nav never flashes the wrong sign-in/sign-out UI. The async Supabase
+         client in /auth/marketing.js reconciles this with the live session. -->
+    <script>
+      (function () {
+        try {
+          var ref = "ycdfgtljxqrhyobnwwbz";
+          var keys = ["sb-" + ref + "-auth-token", "sb-auth-token"];
+          for (var i = 0; i < keys.length; i++) {
+            var raw = localStorage.getItem(keys[i]);
+            if (!raw) continue;
+            var parsed = JSON.parse(raw);
+            var expSec = (parsed && (parsed.expires_at || (parsed.currentSession && parsed.currentSession.expires_at))) || 0;
+            if (expSec * 1000 > Date.now()) {
+              document.documentElement.setAttribute("data-auth-state", "signed-in");
+              return;
+            }
+          }
+        } catch (e) {}
+        document.documentElement.setAttribute("data-auth-state", "signed-out");
+      })();
+    </script>
 
     <script type="application/ld+json">
       {
@@ -142,17 +165,50 @@
           Sign up
         </a>
 
-        <button type="button" class="nav-userchip" id="nav-userchip" data-auth-show="signed-in" hidden>
-          <span class="nav-userchip-avatar" data-auth-user-initial>?</span>
-          <span data-auth-user-name>Account</span>
-          <div class="nav-userchip-menu" role="menu">
+        <div class="nav-userchip-wrap" id="nav-userchip-wrap" data-auth-show="signed-in">
+          <button
+            type="button"
+            class="nav-userchip"
+            id="nav-userchip"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="nav-userchip-menu"
+          >
+            <span class="nav-userchip-avatar" data-auth-user-initial aria-hidden="true">·</span>
+            <span class="nav-userchip-name" data-auth-user-name>Account</span>
+            <svg class="nav-userchip-caret" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+              <path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="nav-userchip-menu" id="nav-userchip-menu" role="menu" aria-labelledby="nav-userchip">
             <div class="um-head">
               <div class="label">Signed in as</div>
               <div class="email" data-auth-user-email>—</div>
             </div>
-            <button type="button" data-auth-action="signout">Sign out</button>
+            <a class="um-item" role="menuitem" href="/account">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <circle cx="8" cy="6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M3.5 13c.8-2 2.5-3 4.5-3s3.7 1 4.5 3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              Account
+            </a>
+            <a class="um-item" role="menuitem" href="#contact">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M2.5 4.5h11v7h-11z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M2.5 5.5l5.5 3.5 5.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              Contact studio
+            </a>
+            <div class="um-divider" role="separator"></div>
+            <button type="button" class="um-item" role="menuitem" data-auth-action="signout">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M9 3H4v10h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M8 8h6m0 0l-2-2m2 2l-2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              Sign out
+            </button>
           </div>
-        </button>
+        </div>
 
         <a href="#contact" class="btn btn--ghost">Start a project</a>
       </nav>
@@ -1336,8 +1392,8 @@
       </div>
     </footer>
 
-    <script src="script.js?v=auth3" defer></script>
-    <script type="module" src="/auth/marketing.js?v=3"></script>
+    <script src="script.js?v=auth4" defer></script>
+    <script type="module" src="/auth/marketing.js?v=auth4"></script>
 
     <!-- Vercel Web Analytics (zero-config; enable in Vercel dashboard → Analytics). -->
     <script>
@@ -1349,18 +1405,5 @@
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
-    <script>
-      // Dropdown for the signed-in user chip.
-      document.addEventListener("click", function (e) {
-        var chip = document.getElementById("nav-userchip");
-        if (!chip) return;
-        if (chip.contains(e.target)) {
-          if (e.target.closest(".nav-userchip-menu")) return;
-          chip.classList.toggle("open");
-        } else {
-          chip.classList.remove("open");
-        }
-      });
-    </script>
   </body>
 </html>

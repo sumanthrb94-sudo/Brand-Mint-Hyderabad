@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1f1a" />
+    <meta name="robots" content="noindex" />
+    <title>Account — Brand Mint</title>
+    <link rel="canonical" href="https://brand-mint-sdmk.vercel.app/account" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css?v=auth4" />
+
+    <!-- Auth preflight: matches index.html so we don't flash the wrong UI. -->
+    <script>
+      (function () {
+        try {
+          var ref = "ycdfgtljxqrhyobnwwbz";
+          var keys = ["sb-" + ref + "-auth-token", "sb-auth-token"];
+          for (var i = 0; i < keys.length; i++) {
+            var raw = localStorage.getItem(keys[i]);
+            if (!raw) continue;
+            var parsed = JSON.parse(raw);
+            var expSec = (parsed && (parsed.expires_at || (parsed.currentSession && parsed.currentSession.expires_at))) || 0;
+            if (expSec * 1000 > Date.now()) {
+              document.documentElement.setAttribute("data-auth-state", "signed-in");
+              return;
+            }
+          }
+        } catch (e) {}
+        document.documentElement.setAttribute("data-auth-state", "signed-out");
+      })();
+    </script>
+
+    <style>
+      .bm-acct {
+        position: relative;
+        z-index: 2;
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 64px var(--pad) 120px;
+      }
+      .bm-acct-back {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 28px;
+      }
+      .bm-acct-back:hover { color: var(--ink); }
+
+      .bm-acct-head {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 32px;
+      }
+      .bm-acct-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 999px;
+        background: linear-gradient(140deg, var(--mint-2), var(--mint-3));
+        color: #0b1f1a;
+        display: grid;
+        place-items: center;
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 28px;
+        flex-shrink: 0;
+      }
+      .bm-acct-head h1 {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: clamp(28px, 4vw, 36px);
+        margin: 0 0 4px;
+        letter-spacing: -0.01em;
+      }
+      .bm-acct-head .bm-acct-sub {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .bm-acct-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+      @media (min-width: 720px) {
+        .bm-acct-grid { grid-template-columns: 1fr 1fr; }
+        .bm-acct-card--wide { grid-column: 1 / -1; }
+      }
+      .bm-acct-card {
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 22px 20px;
+      }
+      .bm-acct-card h2 {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 16px;
+        margin: 0 0 14px;
+        letter-spacing: -0.005em;
+      }
+      .bm-acct-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+      .bm-acct-row:last-child { border-bottom: 0; }
+      .bm-acct-row .k { color: var(--muted); }
+      .bm-acct-row .v {
+        color: var(--ink);
+        font-weight: 500;
+        max-width: 60%;
+        text-align: right;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .bm-acct-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+      .bm-acct-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 16px;
+        border-radius: 999px;
+        font-size: 13.5px;
+        font-weight: 500;
+        background: var(--ink);
+        color: var(--paper);
+        border: 1px solid var(--ink);
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .bm-acct-btn--ghost {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--line);
+      }
+      .bm-acct-btn--danger {
+        background: transparent;
+        color: #b91c1c;
+        border-color: rgba(185, 28, 28, 0.3);
+      }
+      .bm-acct-btn--danger:hover { background: rgba(185, 28, 28, 0.06); }
+
+      .bm-acct-inquiries { list-style: none; padding: 0; margin: 0; }
+      .bm-acct-inquiries li {
+        padding: 14px 0;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+      }
+      .bm-acct-inquiries li:last-child { border-bottom: 0; }
+      .bm-acct-inquiries .who {
+        font-weight: 500;
+        margin: 0 0 4px;
+        font-size: 14.5px;
+      }
+      .bm-acct-inquiries .meta {
+        color: var(--muted);
+        font-size: 12.5px;
+        font-family: var(--mono);
+        letter-spacing: 0.04em;
+      }
+      .bm-acct-inquiries .msg {
+        color: var(--ink-2);
+        font-size: 13.5px;
+        margin: 6px 0 0;
+        line-height: 1.5;
+        max-width: 520px;
+      }
+      .bm-acct-inquiries .pill {
+        align-self: flex-start;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--mint-4);
+        white-space: nowrap;
+      }
+      .bm-acct-empty {
+        color: var(--muted);
+        font-size: 14px;
+        padding: 12px 0;
+      }
+
+      .bm-acct-gate {
+        max-width: 460px;
+        margin: 96px auto;
+        text-align: center;
+        background: var(--white);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 40px 32px;
+      }
+      .bm-acct-gate h1 {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 24px;
+        margin: 0 0 8px;
+      }
+      .bm-acct-gate p {
+        color: var(--muted);
+        font-size: 14.5px;
+        margin: 0 0 22px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="orb orb--1" aria-hidden="true"></div>
+    <div class="orb orb--2" aria-hidden="true"></div>
+
+    <main class="bm-acct" id="bm-acct" hidden>
+      <a class="bm-acct-back" href="/">← Brand Mint</a>
+
+      <div class="bm-acct-head">
+        <div class="bm-acct-avatar" data-auth-user-initial>·</div>
+        <div>
+          <h1 data-auth-user-name>Account</h1>
+          <p class="bm-acct-sub" data-auth-user-email>—</p>
+        </div>
+      </div>
+
+      <div class="bm-acct-grid">
+        <section class="bm-acct-card">
+          <h2>Profile</h2>
+          <div class="bm-acct-row">
+            <span class="k">Email</span>
+            <span class="v" data-auth-user-email>—</span>
+          </div>
+          <div class="bm-acct-row">
+            <span class="k">Member since</span>
+            <span class="v" id="bm-acct-since">—</span>
+          </div>
+          <div class="bm-acct-row">
+            <span class="k">Last sign-in</span>
+            <span class="v" id="bm-acct-last">—</span>
+          </div>
+        </section>
+
+        <section class="bm-acct-card">
+          <h2>Session</h2>
+          <p style="margin:0 0 14px;color:var(--muted);font-size:13.5px;line-height:1.6;">
+            You're signed in via a magic link. There's no password to manage.
+            Sessions refresh automatically; sign out below to end this one
+            everywhere it's active on this device.
+          </p>
+          <div class="bm-acct-actions">
+            <button type="button" class="bm-acct-btn bm-acct-btn--ghost" data-auth-action="signout">
+              Sign out
+            </button>
+          </div>
+        </section>
+
+        <section class="bm-acct-card bm-acct-card--wide">
+          <h2>Your inquiries</h2>
+          <div id="bm-acct-inquiries-mount">
+            <p class="bm-acct-empty">Loading your inquiries…</p>
+          </div>
+        </section>
+
+        <section class="bm-acct-card bm-acct-card--wide">
+          <h2>Privacy &amp; data</h2>
+          <p style="margin:0 0 16px;color:var(--muted);font-size:13.5px;line-height:1.6;">
+            Under India's DPDP Act and our
+            <a href="/privacy" style="color:var(--mint-4);text-decoration:underline;">privacy policy</a>,
+            you can request access, correction, or deletion of the personal
+            data we hold for you. We respond within 30 days.
+          </p>
+          <div class="bm-acct-actions">
+            <a class="bm-acct-btn bm-acct-btn--ghost" href="mailto:hello@brandmint.studio?subject=Data%20access%20request">
+              Request my data
+            </a>
+            <a class="bm-acct-btn bm-acct-btn--danger" id="bm-acct-delete" href="#">
+              Delete my account
+            </a>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <section class="bm-acct-gate" id="bm-acct-gate" hidden>
+      <h1>Sign in to view your account</h1>
+      <p>Magic-link sign-in. No password to remember.</p>
+      <button type="button" class="bm-acct-btn" data-auth-action="open-login">
+        Send me a magic link
+      </button>
+    </section>
+
+    <script type="module">
+      import "/auth/marketing.js?v=auth4";
+
+      const main = document.getElementById("bm-acct");
+      const gate = document.getElementById("bm-acct-gate");
+      const since = document.getElementById("bm-acct-since");
+      const last = document.getElementById("bm-acct-last");
+      const inquiriesMount = document.getElementById("bm-acct-inquiries-mount");
+      const deleteLink = document.getElementById("bm-acct-delete");
+
+      function fmt(date) {
+        if (!date) return "—";
+        try {
+          return new Date(date).toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+        } catch (e) { return "—"; }
+      }
+
+      async function loadInquiries(user) {
+        if (!user) return;
+        try {
+          const sb = await window.bmAuth.getClient();
+          const { data, error } = await sb
+            .from("leads")
+            .select("id, project_type, budget, status, message, created_at")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(20);
+          if (error) throw error;
+          renderInquiries(data || []);
+        } catch (err) {
+          console.warn("[account] inquiries", err);
+          inquiriesMount.innerHTML =
+            '<p class="bm-acct-empty">We couldn’t load your inquiries right now. Try again in a moment.</p>';
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      function renderInquiries(rows) {
+        if (!rows.length) {
+          inquiriesMount.innerHTML =
+            '<p class="bm-acct-empty">No inquiries yet. <a href="/#contact" style="color:var(--mint-4);text-decoration:underline;">Start a conversation →</a></p>';
+          return;
+        }
+        const items = rows.map((r) => `
+          <li>
+            <div>
+              <p class="who">${escapeHtml(r.project_type || "Inquiry")}${r.budget ? ` · ${escapeHtml(r.budget)}` : ""}</p>
+              <p class="meta">${fmt(r.created_at)}</p>
+              ${r.message ? `<p class="msg">${escapeHtml(r.message.slice(0, 240))}${r.message.length > 240 ? "…" : ""}</p>` : ""}
+            </div>
+            <span class="pill">${escapeHtml(r.status || "new")}</span>
+          </li>
+        `).join("");
+        inquiriesMount.innerHTML = `<ul class="bm-acct-inquiries">${items}</ul>`;
+      }
+
+      function render(user) {
+        if (!user) {
+          main.hidden = true;
+          gate.hidden = false;
+          return;
+        }
+        gate.hidden = true;
+        main.hidden = false;
+        since.textContent = fmt(user.created_at);
+        last.textContent = fmt(user.last_sign_in_at);
+        loadInquiries(user);
+      }
+
+      window.bmAuth.onChange(render);
+
+      deleteLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        const user = window.bmAuth.getUser();
+        const subject = encodeURIComponent("Account deletion request");
+        const body = encodeURIComponent(
+          `Please delete the Brand Mint account for ${user?.email || "[your email]"}.\n\nUser ID: ${user?.id || "[unknown]"}\n\nI understand my data will be removed within 30 days.`,
+        );
+        window.location.href = `mailto:hello@brandmint.studio?subject=${subject}&body=${body}`;
+      });
+    </script>
+  </body>
+</html>
