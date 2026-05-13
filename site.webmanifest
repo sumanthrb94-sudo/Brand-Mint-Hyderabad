@@ -1,0 +1,24 @@
+{
+  "name": "Brand Mint Studio",
+  "short_name": "Brand Mint",
+  "description": "Senior digital studio in Hyderabad. Custom websites and bespoke internal tools for ambitious teams.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1f1a",
+  "theme_color": "#0b1f1a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

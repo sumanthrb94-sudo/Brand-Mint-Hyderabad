@@ -32,6 +32,7 @@
     <meta name="twitter:image" content="https://brand-mint-sdmk.vercel.app/og-image.png" />
     <meta name="twitter:image:alt" content="Brand Mint — Hyderabad's premium digital studio." />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -39,6 +40,60 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css?v=auth3" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://brand-mint-sdmk.vercel.app/#organization",
+            "name": "Brand Mint Studio",
+            "legalName": "Brand Mint Studio Pvt. Ltd.",
+            "url": "https://brand-mint-sdmk.vercel.app/",
+            "logo": "https://brand-mint-sdmk.vercel.app/og-image.png",
+            "image": "https://brand-mint-sdmk.vercel.app/og-image.png",
+            "description": "Senior digital studio in Hyderabad building custom websites and bespoke internal tools for ambitious teams.",
+            "email": "hello@brandmint.studio",
+            "telephone": "+91-77999-34943",
+            "areaServed": ["IN", "AE", "SA", "GB", "US"],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Hyderabad",
+              "addressRegion": "Telangana",
+              "addressCountry": "IN"
+            },
+            "sameAs": []
+          },
+          {
+            "@type": "LocalBusiness",
+            "@id": "https://brand-mint-sdmk.vercel.app/#localbusiness",
+            "name": "Brand Mint Studio",
+            "url": "https://brand-mint-sdmk.vercel.app/",
+            "image": "https://brand-mint-sdmk.vercel.app/og-image.png",
+            "telephone": "+91-77999-34943",
+            "email": "hello@brandmint.studio",
+            "priceRange": "₹₹₹",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "HITEC City",
+              "addressLocality": "Hyderabad",
+              "addressRegion": "Telangana",
+              "postalCode": "500081",
+              "addressCountry": "IN"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://brand-mint-sdmk.vercel.app/#website",
+            "url": "https://brand-mint-sdmk.vercel.app/",
+            "name": "Brand Mint",
+            "publisher": { "@id": "https://brand-mint-sdmk.vercel.app/#organization" },
+            "inLanguage": "en-IN"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div class="grain" aria-hidden="true"></div>
@@ -1271,6 +1326,8 @@
           <a href="#process">Process</a>
           <a href="#about">Studio</a>
           <a href="#contact">Contact</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
         </nav>
         <div class="footer-meta">
           <span>© <span id="year"></span> Brand Mint Studio Pvt. Ltd. · HITEC City, Hyderabad</span>
@@ -1281,6 +1338,17 @@
 
     <script src="script.js?v=auth3" defer></script>
     <script type="module" src="/auth/marketing.js?v=3"></script>
+
+    <!-- Vercel Web Analytics (zero-config; enable in Vercel dashboard → Analytics). -->
+    <script>
+      window.va =
+        window.va ||
+        function () {
+          (window.vaq = window.vaq || []).push(arguments);
+        };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
     <script>
       // Dropdown for the signed-in user chip.
       document.addEventListener("click", function (e) {
