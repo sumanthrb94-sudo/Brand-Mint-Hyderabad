@@ -11,6 +11,7 @@ import {
   confirm,
   field,
   formToObject,
+  bindSubmit,
   renderTopbar,
   inr,
   inrFull,
@@ -432,10 +433,12 @@ export async function render(ctx) {
       wide: true,
     });
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    bindSubmit(form, async () => {
       const v = formToObject(form);
-      if (!v.number?.trim() || !v.client?.trim()) return ctx.toast("Number and client are required.");
+      if (!v.number?.trim() || !v.client?.trim()) {
+        ctx.toast("Number and client are required.");
+        return;
+      }
       const gstRate = Number(v.gstRate || 0);
       const { subtotal, gst, total } = recalc(data.lineItems, gstRate);
       const payload = {
@@ -448,10 +451,10 @@ export async function render(ctx) {
         paidOn: v.status === "paid" ? v.paidOn || todayISO() : null,
       };
       if (isNew) {
-        db.create("invoices", payload);
+        await db.createAsync("invoices", payload);
         ctx.toast("Invoice created.");
       } else {
-        db.update("invoices", invoice.id, payload);
+        await db.updateAsync("invoices", invoice.id, payload);
         ctx.toast("Saved.");
       }
       instance.close();
@@ -596,6 +599,11 @@ export async function render(ctx) {
     const i = db.get("invoices", params.get("id"));
     if (i) openPreview(i);
   }
+
+  const unsub = db.onTable("invoices", () => {
+    if (root.isConnected) redraw();
+    else unsub();
+  });
 
   return root;
 }

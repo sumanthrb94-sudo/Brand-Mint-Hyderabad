@@ -59,6 +59,8 @@ export function toast(msg, ms = 2400) {
 
 /* ---------- Modal ---------- */
 
+let modalSeq = 0;
+
 export function modal({ title, body, footer, wide = false }) {
   const root = document.getElementById("modal-root");
   clear(root);
@@ -79,6 +81,34 @@ export function modal({ title, body, footer, wide = false }) {
     },
   });
 
+  // If the body contains a <form>, give it a unique id and rewrite any
+  // footer <button type="submit"> to target that form id via the HTML5
+  // form="" attribute. Without this, submit buttons that live in the
+  // modal footer (a sibling of the body) never trigger the form's
+  // submit event — the original "Create lead does nothing" bug.
+  let formId = null;
+  const bodyForm =
+    body instanceof HTMLFormElement
+      ? body
+      : body && body.querySelector
+        ? body.querySelector("form")
+        : null;
+  if (bodyForm) {
+    formId = bodyForm.id || `bm-modal-form-${++modalSeq}`;
+    bodyForm.id = formId;
+  }
+  if (formId && Array.isArray(footer)) {
+    for (const node of footer) {
+      if (node instanceof HTMLButtonElement && node.type === "submit") {
+        node.setAttribute("form", formId);
+      } else if (node && node.querySelectorAll) {
+        node.querySelectorAll('button[type="submit"]').forEach((b) => {
+          b.setAttribute("form", formId);
+        });
+      }
+    }
+  }
+
   const modalEl = h("div", { class: "modal" + (wide ? " modal-wide" : "") }, [
     h("div", { class: "modal-head" }, [
       h("h3", { text: title || "" }),
@@ -96,6 +126,38 @@ export function modal({ title, body, footer, wide = false }) {
   overlay.appendChild(modalEl);
   root.appendChild(overlay);
   return { close, root: modalEl };
+}
+
+/* ---------- Form submit with loading state ----------
+   Wraps a form's submit handler. Disables the submit button, labels it
+   "Saving…", runs the handler, restores on completion. Catches sync
+   and async errors and toasts them so the user is never left guessing
+   whether a click registered. */
+export function bindSubmit(form, handler) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (form.dataset.saving === "1") return;
+    const submitBtn =
+      form.querySelector('button[type="submit"]') ||
+      document.querySelector(`button[type="submit"][form="${form.id}"]`);
+    const labelEl = submitBtn?.querySelector(".btn-label");
+    const originalLabel = labelEl ? labelEl.textContent : submitBtn?.textContent;
+    form.dataset.saving = "1";
+    if (submitBtn) submitBtn.disabled = true;
+    if (labelEl) labelEl.textContent = "Saving…";
+    else if (submitBtn) submitBtn.textContent = "Saving…";
+    try {
+      await handler(e);
+    } catch (err) {
+      console.error("[form] submit failed", err);
+      toast(`Couldn't save — ${err?.message || err}`, 4200);
+    } finally {
+      form.dataset.saving = "";
+      if (submitBtn) submitBtn.disabled = false;
+      if (labelEl) labelEl.textContent = originalLabel;
+      else if (submitBtn) submitBtn.textContent = originalLabel;
+    }
+  });
 }
 
 export function confirm({ title, message, danger = false, onConfirm }) {

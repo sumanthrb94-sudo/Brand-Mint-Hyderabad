@@ -14,6 +14,7 @@ import {
   confirm,
   field,
   formToObject,
+  bindSubmit,
   renderTopbar,
   relTime,
 } from "/admin/components.js";
@@ -316,16 +317,18 @@ export async function render(ctx) {
       wide: true,
     });
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    bindSubmit(form, async () => {
       const v = formToObject(form);
-      if (!v.name?.trim()) return ctx.toast("Name is required.");
+      if (!v.name?.trim()) {
+        ctx.toast("Name is required.");
+        return;
+      }
       v.score = Number(v.score || 0);
       if (isNew) {
-        db.create("leads", v);
+        await db.createAsync("leads", v);
         ctx.toast("Lead created.");
       } else {
-        db.update("leads", lead.id, v);
+        await db.updateAsync("leads", lead.id, v);
         ctx.toast("Saved.");
       }
       instance.close();
@@ -335,6 +338,12 @@ export async function render(ctx) {
   }
 
   redraw();
+
+  // Auto-refresh when the leads table changes (other tab, real-time, etc.)
+  const unsub = db.onTable("leads", () => {
+    if (root.isConnected) redraw();
+    else unsub();
+  });
 
   // URL intents
   const params = new URLSearchParams(location.hash.split("?")[1] || "");
