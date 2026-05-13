@@ -338,9 +338,13 @@ function emailIsValid(value) {
 function closeAuthModal() {
   const overlay = document.getElementById("bm-auth-modal-overlay");
   if (!overlay) return;
-  overlay._cleanup?.();
-  overlay.remove();
-  document.body.style.overflow = "";
+  // _cleanup is idempotent and handles its own DOM removal.
+  if (overlay._cleanup) {
+    overlay._cleanup();
+  } else {
+    overlay.remove();
+    document.body.style.overflow = "";
+  }
 }
 
 function openAuthModal(mode = "login") {
@@ -430,10 +434,14 @@ function openAuthModal(mode = "login") {
   }
   function onBackdrop(e) { if (e.target === overlay) cleanup(); }
 
+  let torn = false;
   function cleanup() {
+    if (torn) return;
+    torn = true;
     document.removeEventListener("keydown", onKey);
     overlay.removeEventListener("click", onBackdrop);
-    closeAuthModal();
+    overlay.remove();
+    document.body.style.overflow = "";
     if (opener && typeof opener.focus === "function") opener.focus();
   }
   overlay._cleanup = cleanup;
