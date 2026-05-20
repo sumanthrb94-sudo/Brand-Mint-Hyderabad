@@ -166,61 +166,96 @@ def beat_title(t, dur):
 # ============================================================
 # Reusable: service-beat shell with eyebrow + name + price + mockup slot
 # ============================================================
-def service_beat(t, dur, letter, name, price, blurb, mockup_svg, dark=False):
+def service_beat(t, dur, letter, name, price_old, price_new, blurb, mockup_svg, dark=False):
     """Common composition for service beats A-F.
 
-    Animation timeline:
-      0.00-0.20s: letter eyebrow fades in
-      0.10-0.45s: service name slides up + fades in
-      0.30-0.55s: price floor scales in with overshoot
-      0.40-0.70s: blurb fades up
-      0.50-...:   mockup card animations (passed in via mockup_svg func)
+    Two prices: MRP (struck through) + launch price (mint, prominent),
+    plus a '50% OFF' badge. Pricing parts pulse in sequence so the
+    discount lands as a beat, not as ornament.
     """
     bg = "#06090A" if dark else CREAM
     fg = CREAM if dark else INK
     sub = "#a8a299" if dark else MUTED
+    strike_col = "#C44747"  # red strike, brand-aligned warm warning hue
 
     letter_op = ease_out_cubic(clamp(t / 0.20))
     name_op = ease_out_cubic(clamp((t - 0.10) / 0.35))
     name_dy = 30 * (1 - name_op)
-    price_prog = clamp((t - 0.30) / 0.25)
-    price_op = ease_out_cubic(price_prog)
-    price_scale = 0.85 + overshoot(price_prog) * 0.15 if price_prog > 0 else 0.85
-    blurb_op = ease_out_cubic(clamp((t - 0.40) / 0.30))
+    blurb_op = ease_out_cubic(clamp((t - 0.65) / 0.30))
     blurb_dy = 16 * (1 - blurb_op)
 
-    # The mockup callback returns SVG, with timing-aware animations
+    # Pricing animation: old fades up first (struck), then new + badge punch in
+    old_op = ease_out_cubic(clamp((t - 0.30) / 0.30))
+    new_prog = clamp((t - 0.45) / 0.25)
+    new_op = ease_out_cubic(new_prog)
+    new_scale = 0.85 + overshoot(new_prog) * 0.15 if new_prog > 0 else 0.85
+    badge_op = ease_out_cubic(clamp((t - 0.55) / 0.30))
+    badge_pulse = 1.0 + 0.05 * math.sin((t - 0.55) * 6) if t > 0.55 else 1.0
+
     mockup = mockup_svg(t, dur)
+
+    # Strike line width — rough char-width estimate for the price-only string
+    old_text_w = 18 * len(price_old) + 12
+
+    pill_y_new = 480
+    pill_w = 540
+    # Adaptive font: shrink for longer prices (e.g. '₹37.5 K / mo')
+    new_font = 44 if len(price_new) <= 8 else 36
 
     inner = f"""
     {chrome(dark=dark)}
-    <!-- Eyebrow: letter + ARTICLE label -->
-    <text x="{CX}" y="190" text-anchor="middle" font-family="{MONO}" font-size="22"
+
+    <!-- Eyebrow: letter -->
+    <text x="{CX}" y="180" text-anchor="middle" font-family="{MONO}" font-size="22"
           letter-spacing="0.28em" fill="{MINT_3}" opacity="{letter_op * 0.92}">{letter} &#183; SERVICE</text>
 
     <!-- Name -->
     <g transform="translate(0 {name_dy})">
-      <text x="{CX}" y="320" text-anchor="middle" font-family="{DISPLAY}" font-size="78"
+      <text x="{CX}" y="282" text-anchor="middle" font-family="{DISPLAY}" font-size="74"
             font-weight="600" letter-spacing="-0.025em" fill="{fg}"
             opacity="{name_op}">{name}</text>
     </g>
 
-    <!-- Price pill -->
-    <g transform="translate({CX} 410) scale({price_scale}) translate({-CX} {-410})"
-       opacity="{price_op}">
-      <rect x="{CX - 200}" y="380" width="400" height="68" rx="34"
-            fill="{MINT_3}" filter="url(#softGlow)"/>
-      <text x="{CX}" y="425" text-anchor="middle" font-family="{MONO}" font-size="28"
-            font-weight="600" letter-spacing="0.04em" fill="{INK}">{price}</text>
+    <!-- 'STARTING FROM' eyebrow above the price stack -->
+    <text x="{CX}" y="350" text-anchor="middle" font-family="{MONO}" font-size="18"
+          letter-spacing="0.28em" fill="{sub}" opacity="{old_op * 0.85}">STARTING FROM</text>
+
+    <!-- Old MRP (struck) — just the number, no 'From' prefix -->
+    <g opacity="{old_op}">
+      <text x="{CX}" y="400" text-anchor="middle" font-family="{MONO}" font-size="32"
+            font-weight="500" letter-spacing="0.04em" fill="{sub}">{price_old}</text>
+      <line x1="{CX - old_text_w / 2}" y1="390" x2="{CX + old_text_w / 2}" y2="390"
+            stroke="{strike_col}" stroke-width="3" stroke-linecap="round"/>
     </g>
+
+    <!-- New price pill (mint, prominent) — just the price, no prefix -->
+    <g transform="translate({CX} {pill_y_new}) scale({new_scale}) translate({-CX} {-pill_y_new})"
+       opacity="{new_op}">
+      <rect x="{CX - pill_w / 2}" y="{pill_y_new - 42}" width="{pill_w}" height="84" rx="42"
+            fill="{MINT_3}" filter="url(#softGlow)"/>
+      <text x="{CX}" y="{pill_y_new + 16}" text-anchor="middle" font-family="{DISPLAY}"
+            font-size="{new_font}" font-weight="700" letter-spacing="-0.01em" fill="{INK}">{price_new}</text>
+    </g>
+
+    <!-- 50% OFF · LAUNCH badge BELOW the pill -->
+    <g transform="translate({CX} 555) scale({badge_pulse}) translate({-CX} -555)"
+       opacity="{badge_op}">
+      <rect x="{CX - 130}" y="540" width="260" height="36" rx="18"
+            fill="{INK if not dark else MINT_3}" stroke="{MINT_3 if not dark else 'none'}" stroke-width="2"/>
+      <text x="{CX}" y="565" text-anchor="middle" font-family="{MONO}" font-size="15"
+            font-weight="700" letter-spacing="0.22em" fill="{CREAM if not dark else INK}">50% OFF &#183; LAUNCH</text>
+    </g>
+
+    <!-- Quote-flex tagline -->
+    <text x="{CX}" y="610" text-anchor="middle" font-family="{MONO}" font-size="14"
+          letter-spacing="0.18em" fill="{sub}" opacity="{badge_op * 0.65}">FINAL QUOTE PER SCOPE &#183; WE MATCH QUOTATIONS</text>
 
     <!-- Blurb -->
     <g transform="translate(0 {blurb_dy})">
-      <text x="{CX}" y="510" text-anchor="middle" font-family="{BODY}" font-size="28"
-            fill="{sub}" opacity="{blurb_op}">{blurb}</text>
+      <text x="{CX}" y="650" text-anchor="middle" font-family="{BODY}" font-size="23"
+            fill="{sub}" opacity="{blurb_op * 0.85}">{blurb}</text>
     </g>
 
-    <!-- Mockup -->
     {mockup}
     """
     return svg_wrap(bg, inner)
@@ -808,31 +843,31 @@ class Beat:
     xfade_type: str = "fade"
 
 
-def make_service(letter, name, price, blurb, mockup, dark=False):
+def make_service(letter, name, price_old, price_new, blurb, mockup, dark=False):
     def _render(t, dur):
-        return service_beat(t, dur, letter, name, price, blurb, mockup, dark)
+        return service_beat(t, dur, letter, name, price_old, price_new, blurb, mockup, dark)
     return _render
 
 
 BEATS = [
     Beat("00-logo",      1.2, beat_logo,                        0.00,  "fade"),
     Beat("01-title",     2.6, beat_title,                       0.40,  "fade"),
-    Beat("02-sites",     3.8, make_service("A", "Custom Websites",      "From ₹2 L",
+    Beat("02-sites",     3.8, make_service("A", "Custom Websites",      "₹2 L",       "₹1 L",
                                             "Designed from zero. Lighthouse 95+.",
                                             mockup_websites, dark=False), 0.25, "slideleft"),
-    Beat("03-tools",     3.8, make_service("B", "Custom Internal Tools","From ₹4 L",
+    Beat("03-tools",     3.8, make_service("B", "Custom Internal Tools","₹4 L",       "₹2 L",
                                             "Dashboards, CRMs, agents. You own the repo.",
                                             mockup_tools, dark=True),     0.25, "slideup"),
-    Beat("04-brand",     3.8, make_service("C", "Brand Systems",         "From ₹1.5 L",
+    Beat("04-brand",     3.8, make_service("C", "Brand Systems",         "₹1.5 L",    "₹75 K",
                                             "Marks, type, motion, voice. Shipped as a working site.",
                                             mockup_brand, dark=False),    0.25, "slideleft"),
-    Beat("05-ai",        3.8, make_service("D", "AI Integrations",       "From ₹2 L",
+    Beat("05-ai",        3.8, make_service("D", "AI Integrations",       "₹2 L",       "₹1 L",
                                             "Claude or Gemini. Auth, observability, eval included.",
                                             mockup_ai, dark=True),        0.30, "fadeblack"),
-    Beat("06-perf",      3.8, make_service("E", "Performance Media",     "From ₹1 L / mo",
+    Beat("06-perf",      3.8, make_service("E", "Performance Media",     "₹1 L / mo",  "₹50 K / mo",
                                             "Meta, Google, LinkedIn. Built and managed by us.",
                                             mockup_perf, dark=False),     0.25, "slideright"),
-    Beat("07-seo",       3.8, make_service("F", "SEO + Content Engines", "From ₹75 K / mo",
+    Beat("07-seo",       3.8, make_service("F", "SEO + Content Engines", "₹75 K / mo", "₹37.5 K / mo",
                                             "Keyword strategy → article → technical fix sprints.",
                                             mockup_seo, dark=True),       0.25, "slideup"),
     Beat("08-bundle",    3.2, beat_bundle,                       0.30, "fadeblack"),
