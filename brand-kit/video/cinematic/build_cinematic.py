@@ -177,21 +177,15 @@ def scene_3_reveal():
 
 
 def scene_4_stat_drop():
+    cy = RH // 2
     inner = f"""
     <rect width="{RW}" height="{RH}" fill="{BLACK}"/>
     <rect width="{RW}" height="{RH}" fill="url(#mintGlow)" opacity="0.5"/>
-    <text x="{RW//2}" y="320" text-anchor="middle" font-family="{MONO}" font-size="28"
-          letter-spacing="0.32em" fill="{CREAM}" opacity="0.7">TRACKED · Q1 FY26</text>
-    <text x="{RW//2}" y="{RH//2 + 70}" text-anchor="middle" font-family="{MONO}"
-          font-size="320" font-weight="500" letter-spacing="-0.03em"
-          fill="{MINT_3}" filter="url(#glow)">+&#8377;42.6 Cr</text>
-    <g font-family="{DISPLAY}" font-weight="500" font-style="italic" fill="{CREAM}">
-      <text x="{RW//2}" y="{RH//2 + 350}" text-anchor="middle" font-size="62">tracked revenue,</text>
-      <text x="{RW//2}" y="{RH//2 + 440}" text-anchor="middle" font-size="62">
-        across <tspan font-family="{MONO}" font-style="normal" fill="{MINT_3}">11</tspan>
-        founder-led brands.
-      </text>
-    </g>
+    <text x="{RW//2}" y="380" text-anchor="middle" font-family="{MONO}" font-size="30" letter-spacing="0.32em" fill="{CREAM}" opacity="0.7">TRACKED &#183; Q1 FY26</text>
+    <text x="{RW//2}" y="{cy - 60}" text-anchor="middle" font-family="{DISPLAY}" font-size="74" font-weight="500" font-style="italic" fill="{CREAM}" opacity="0.85">last quarter,</text>
+    <text x="{RW//2}" y="{cy + 200}" text-anchor="middle" font-family="{MONO}" font-size="220" font-weight="500" letter-spacing="-0.03em" fill="{MINT_3}" filter="url(#glow)">+&#8377;42.6 Cr</text>
+    <text x="{RW//2}" y="{cy + 320}" text-anchor="middle" font-family="{DISPLAY}" font-size="58" font-weight="500" font-style="italic" fill="{CREAM}" opacity="0.85">tracked revenue.</text>
+    <text x="{RW//2}" y="{cy + 520}" text-anchor="middle" font-family="{DISPLAY}" font-size="54" font-weight="500" fill="{CREAM}" opacity="0.78">Across eleven founder-led brands.</text>
     {cinema_bars(dark=True)}
     """
     return wrap(inner)

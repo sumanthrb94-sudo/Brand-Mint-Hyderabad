@@ -41,18 +41,11 @@
       
     <rect width="1440" height="2560" fill="#000000"/>
     <rect width="1440" height="2560" fill="url(#mintGlow)" opacity="0.5"/>
-    <text x="720" y="320" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="28"
-          letter-spacing="0.32em" fill="#F5F1EA" opacity="0.7">TRACKED · Q1 FY26</text>
-    <text x="720" y="1350" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace"
-          font-size="320" font-weight="500" letter-spacing="-0.03em"
-          fill="#10B981" filter="url(#glow)">+&#8377;42.6 Cr</text>
-    <g font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-weight="500" font-style="italic" fill="#F5F1EA">
-      <text x="720" y="1630" text-anchor="middle" font-size="62">tracked revenue,</text>
-      <text x="720" y="1720" text-anchor="middle" font-size="62">
-        across <tspan font-family="JetBrains Mono, ui-monospace, monospace" font-style="normal" fill="#10B981">11</tspan>
-        founder-led brands.
-      </text>
-    </g>
+    <text x="720" y="380" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="30" letter-spacing="0.32em" fill="#F5F1EA" opacity="0.7">TRACKED &#183; Q1 FY26</text>
+    <text x="720" y="1220" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="74" font-weight="500" font-style="italic" fill="#F5F1EA" opacity="0.85">last quarter,</text>
+    <text x="720" y="1480" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="220" font-weight="500" letter-spacing="-0.03em" fill="#10B981" filter="url(#glow)">+&#8377;42.6 Cr</text>
+    <text x="720" y="1600" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="58" font-weight="500" font-style="italic" fill="#F5F1EA" opacity="0.85">tracked revenue.</text>
+    <text x="720" y="1800" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="54" font-weight="500" fill="#F5F1EA" opacity="0.78">Across eleven founder-led brands.</text>
     
     <rect x="0" y="0"          width="1440" height="3" fill="#10B981" opacity="0.85"/>
     <rect x="0" y="2557"     width="1440" height="3" fill="#10B981" opacity="0.85"/>
