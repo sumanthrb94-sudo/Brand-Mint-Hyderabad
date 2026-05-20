@@ -347,16 +347,21 @@ def build_scene_clip(png_path: Path, idx: int, duration: float, direction: str) 
     """
     Render one scene clip with Ken Burns zoom + vignette + film grain.
     direction toggles whether the zoom is in or out so consecutive scenes alternate.
+
+    Implementation note: zoompan's `d` is *output frames per input frame*. With a
+    single still input (`-loop 1 -t 1 -framerate fps`), set `d = total_frames`.
+    Passing a 4-second looped input with `d=total_frames` blows up to
+    total_frames^2 frames (~14k for a 4s clip) and produces multi-GB output.
     """
     out_clip = CLIPS / f"clip-{idx:02d}.mp4"
-    total_frames = int(duration * FPS)
-    # zoompan: smooth zoom 1.00 -> 1.10 (or 1.10 -> 1.00 for alternating)
+    total_frames = int(round(duration * FPS))
+    # Zoom across the duration of the clip.
+    # `on` is the output-frame counter (0..total_frames-1).
     if direction == "in":
-        z_expr = f"min(1.0+0.0007*on,1.12)"
+        z_expr = f"min(1.0+(0.12/{total_frames})*on,1.12)"
     else:
-        z_expr = f"max(1.12-0.0007*on,1.0)"
+        z_expr = f"max(1.12-(0.12/{total_frames})*on,1.0)"
     vf = (
-        f"scale={RW}:{RH}:flags=lanczos,"
         f"zoompan=z='{z_expr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
         f"d={total_frames}:s={W}x{H}:fps={FPS},"
         f"vignette=PI/4.5,"
@@ -365,16 +370,18 @@ def build_scene_clip(png_path: Path, idx: int, duration: float, direction: str) 
     )
     cmd = [
         "ffmpeg", "-y",
-        "-loop", "1", "-framerate", str(FPS), "-t", f"{duration}",
+        # Single input frame — zoompan generates all output frames from it.
+        "-loop", "1", "-framerate", str(FPS), "-t", "1",
         "-i", str(png_path),
         "-vf", vf,
+        "-frames:v", str(total_frames),
         "-c:v", "libx264", "-preset", "medium", "-crf", "18",
         "-pix_fmt", "yuv420p",
         "-r", str(FPS),
         str(out_clip),
     ]
     subprocess.run(cmd, check=True, capture_output=True)
-    print(f"[clip]   {out_clip.name}  ({duration}s, zoom-{direction})")
+    print(f"[clip]   {out_clip.name}  ({duration}s, zoom-{direction}, {out_clip.stat().st_size/1024/1024:.1f} MB)")
     return out_clip
 
 
