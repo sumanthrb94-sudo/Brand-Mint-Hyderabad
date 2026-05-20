@@ -84,7 +84,7 @@ def chrome(dark=False):
     <text x="60" y="80" font-family="{MONO}" font-size="22" letter-spacing="0.18em"
           fill="{fg}" opacity="0.7">BRANDMINT STUDIOS</text>
     <text x="{W-60}" y="{H-50}" text-anchor="end" font-family="{MONO}" font-size="22"
-          letter-spacing="0.06em" fill="{fg}" opacity="0.7">brandmint.studio</text>
+          letter-spacing="0.06em" fill="{fg}" opacity="0.7">brandmint.studios</text>
     """
 
 
@@ -242,8 +242,8 @@ def beat_3(t, dur):
     counter_progress = ease_out_cubic(clamp((t - 1.6) / 0.7))
     counter_val = int(10247 * counter_progress)
 
-    # Chart geometry
-    chart_x, chart_y = 100, 880
+    # Chart geometry — pushed slightly lower to clear the stacked counters
+    chart_x, chart_y = 100, 920
     chart_w, chart_h = 880, 500
     # Sample points (normalized 0-1)
     pts = [(0.0, 0.85), (0.10, 0.78), (0.22, 0.72), (0.35, 0.65),
@@ -285,15 +285,18 @@ def beat_3(t, dur):
     {chrome(dark=True)}
     <text x="60" y="240" font-family="{MONO}" font-size="20" letter-spacing="0.18em"
           fill="{MINT_3}" opacity="{head_op * 0.9}">— PLATFORM HEALTH · LIVE</text>
+
+    <!-- Row 1: users counter (stacked vertically with crashes — fixes overlap) -->
     <text x="60" y="380" font-family="{MONO}" font-size="170" font-weight="600"
           letter-spacing="-0.02em" fill="{CREAM}" opacity="{head_op}">{counter_val:,}</text>
-    <text x="60" y="450" font-family="{DISPLAY}" font-size="44" font-weight="500"
+    <text x="60" y="440" font-family="{DISPLAY}" font-size="44" font-weight="500"
           font-style="italic" fill="{CREAM}" opacity="{head_op * 0.85}">users.</text>
 
-    <text x="640" y="380" font-family="{MONO}" font-size="170" font-weight="600"
-          letter-spacing="-0.02em" fill="{MINT_3}" opacity="{head_op}">0</text>
-    <text x="640" y="450" font-family="{DISPLAY}" font-size="44" font-weight="500"
-          font-style="italic" fill="{CREAM}" opacity="{head_op * 0.85}">crashes.</text>
+    <!-- Row 2: crashes counter, below users -->
+    <text x="60" y="620" font-family="{MONO}" font-size="220" font-weight="600"
+          letter-spacing="-0.02em" fill="{MINT_3}" opacity="{head_op}" filter="url(#softGlow)">0</text>
+    <text x="240" y="615" font-family="{DISPLAY}" font-size="64" font-weight="500"
+          font-style="italic" fill="{CREAM}" opacity="{head_op * 0.92}">crashes.</text>
 
     <!-- chart card -->
     <rect x="{chart_x - 20}" y="{chart_y - 60}" width="{chart_w + 40}" height="{chart_h + 80}"
