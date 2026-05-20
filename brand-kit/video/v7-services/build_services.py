@@ -259,7 +259,7 @@ def service_beat(t, dur, letter, name, price_old, price_new, blurb, mockup_svg, 
     <!-- New price pill (mint, prominent) — just the price, no prefix -->
     <g transform="translate({CX} {pill_y_new}) scale({new_scale}) translate({-CX} {-pill_y_new})"
        opacity="{new_op}">
-      <rect x="{CX - pill_w / 2}" y="{pill_y_new - 42}" width="{pill_w}" height="84" rx="42"
+      <rect x="{CX - pill_w / 2}" y="{pill_y_new - 42}" width="{pill_w}" height="84" rx="42" ry="42"
             fill="{MINT_3}" filter="url(#softGlow)"/>
       <text x="{CX}" y="{pill_y_new + 16}" text-anchor="middle" font-family="{DISPLAY}"
             font-size="{new_font}" font-weight="700" letter-spacing="-0.01em" fill="{INK}">{price_new}</text>
@@ -268,7 +268,7 @@ def service_beat(t, dur, letter, name, price_old, price_new, blurb, mockup_svg, 
     <!-- 50% OFF · LAUNCH badge BELOW the pill -->
     <g transform="translate({CX} 555) scale({badge_pulse}) translate({-CX} -555)"
        opacity="{badge_op}">
-      <rect x="{CX - 130}" y="540" width="260" height="36" rx="18"
+      <rect x="{CX - 130}" y="540" width="260" height="36" rx="18" ry="18"
             fill="{INK if not dark else MINT_3}" stroke="{MINT_3 if not dark else 'none'}" stroke-width="2"/>
       <text x="{CX}" y="565" text-anchor="middle" font-family="{MONO}" font-size="15"
             font-weight="700" letter-spacing="0.22em" fill="{CREAM if not dark else INK}">50% OFF &#183; LAUNCH</text>
@@ -849,8 +849,9 @@ def beat_cta(t, dur):
           opacity="{op_b * 0.65}">HYDERABAD &#8594; WORLDWIDE</text>
 
     <g transform="translate(0 {pill_dy})" opacity="{pill_op}" filter="url(#softGlow)">
-      <rect x="{CX - 380}" y="1280" width="760" height="160" rx="80" fill="{MINT_3}"/>
-      <text x="{CX}" y="1380" text-anchor="middle" font-family="{DISPLAY}" font-size="42"
+      <!-- Ultra-symmetric CTA pill: explicit rx=ry, slightly taller for breathing room -->
+      <rect x="{CX - 410}" y="1270" width="820" height="180" rx="90" ry="90" fill="{MINT_3}"/>
+      <text x="{CX}" y="1383" text-anchor="middle" font-family="{DISPLAY}" font-size="42"
             font-weight="600" fill="{INK}">DM "BUILT" to scope your build</text>
     </g>
 
