@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+      
+    <defs>
+      <linearGradient id="paperBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F5F1EA"/>
+        <stop offset="100%" stop-color="#E9E2D3"/>
+      </linearGradient>
+      <linearGradient id="darkBg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0B1F1A"/>
+        <stop offset="100%" stop-color="#14352D"/>
+      </linearGradient>
+      <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7CF6C8"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+    </defs>
+    
+      
+    <rect width="1080" height="1920" fill="url(#darkBg)"/>
+    <text x="80" y="160" font-family="JetBrains Mono, ui-monospace, monospace" font-size="22" letter-spacing="0.18em"
+          fill="#C9A14A">— 04 / 06 · CASE</text>
+    
+    
+    <text x="80" y="210" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="600"
+          letter-spacing="0.18em" fill="#F5F1EA" opacity="0.85">D2C WELLNESS · HYD &#8594; DXB</text>
+    
+    <g font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-weight="500" letter-spacing="-0.015em" fill="#F5F1EA">
+      <text x="80" y="500"  font-size="84">Bookings up</text>
+      <text x="80" y="610"  font-size="170" font-family="JetBrains Mono, ui-monospace, monospace" font-weight="500"
+            fill="#00C897">3.4&#215;</text>
+      <text x="80" y="780"  font-size="84">Cost per lead</text>
+      <text x="80" y="880"  font-size="84">down</text>
+      <text x="80" y="1030" font-size="170" font-family="JetBrains Mono, ui-monospace, monospace" font-weight="500"
+            fill="#00C897">61%</text>
+    </g>
+    <text x="80" y="1180" font-family="Inter, system-ui, sans-serif" font-size="28" fill="#F5F1EA" opacity="0.72">
+      Two quarters. Same founder. Same product.
+    </text>
+    <g transform="translate(80, 1320)">
+      <rect width="500" height="96" rx="48" fill="#00C897"/>
+      <text x="250" y="62" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="34"
+            font-weight="600" fill="#0B1F1A">See the build &#8594;</text>
+    </g>
+    
+    <line x1="80" y1="1720" x2="1000" y2="1720" stroke="rgba(245,241,234,0.18)"/>
+    <g transform="translate(80, 1760)">
+      <circle cx="32" cy="32" r="32" fill="url(#mark)"/>
+      <path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <text x="86" y="28" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="28" font-weight="600"
+            letter-spacing="-0.02em" fill="#F5F1EA">Brand Mint</text>
+      <text x="86" y="56" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="400"
+            fill="#F5F1EA" opacity="0.62">— Hyderabad</text>
+    </g>
+    <text x="1000" y="1794" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20"
+          letter-spacing="0.06em" fill="#F5F1EA" opacity="0.62">brandmint.studio</text>
+    
+    
+    </svg>

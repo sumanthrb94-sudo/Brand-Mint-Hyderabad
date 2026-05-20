@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+      
+    <defs>
+      <linearGradient id="paperBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F5F1EA"/>
+        <stop offset="100%" stop-color="#E9E2D3"/>
+      </linearGradient>
+      <linearGradient id="darkBg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0B1F1A"/>
+        <stop offset="100%" stop-color="#14352D"/>
+      </linearGradient>
+      <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7CF6C8"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+    </defs>
+    
+      
+    <rect width="1080" height="1920" fill="url(#paperBg)"/>
+    
+    
+    <text x="80" y="200" font-family="Inter, system-ui, sans-serif" font-size="22" font-weight="600"
+          letter-spacing="0.18em" fill="#0A0E0C" opacity="1.0">WHAT WE SHIP</text>
+    
+    <text x="80" y="380" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="92" font-weight="600"
+          letter-spacing="-0.03em" fill="#0A0E0C">Three things.</text>
+    <text x="80" y="470" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="92" font-weight="600"
+          letter-spacing="-0.03em" fill="#0A0E0C" font-style="italic">Done well.</text>
+    
+    <g transform="translate(80, 680)">
+      <text x="0" y="-8" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20" letter-spacing="0.06em"
+            fill="#10B981">01</text>
+      <circle cx="44" cy="56" r="44" fill="none" stroke="#10B981" stroke-width="3"/>
+      <text x="120" y="46" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="44" font-weight="600"
+            letter-spacing="-0.02em" fill="#0A0E0C">Marketing sites that convert</text>
+      <text x="120" y="92" font-family="Inter, system-ui, sans-serif" font-size="26" fill="#0A0E0C" opacity="0.62">SEO, speed, Core Web Vitals — green by default.</text>
+    </g>
+    
+    
+    <g transform="translate(80, 880)">
+      <text x="0" y="-8" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20" letter-spacing="0.06em"
+            fill="#10B981">02</text>
+      <circle cx="44" cy="56" r="44" fill="none" stroke="#10B981" stroke-width="3"/>
+      <text x="120" y="46" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="44" font-weight="600"
+            letter-spacing="-0.02em" fill="#0A0E0C">Internal tools that scale</text>
+      <text x="120" y="92" font-family="Inter, system-ui, sans-serif" font-size="26" fill="#0A0E0C" opacity="0.62">Ops dashboards, admin panels, no-code-killers.</text>
+    </g>
+    
+    
+    <g transform="translate(80, 1080)">
+      <text x="0" y="-8" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20" letter-spacing="0.06em"
+            fill="#10B981">03</text>
+      <circle cx="44" cy="56" r="44" fill="none" stroke="#10B981" stroke-width="3"/>
+      <text x="120" y="46" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="44" font-weight="600"
+            letter-spacing="-0.02em" fill="#0A0E0C">AI woven in, not bolted on</text>
+      <text x="120" y="92" font-family="Inter, system-ui, sans-serif" font-size="26" fill="#0A0E0C" opacity="0.62">Quiet automations behind the brand.</text>
+    </g>
+    
+    
+    <line x1="80" y1="1720" x2="1000" y2="1720" stroke="rgba(10,14,12,0.10)"/>
+    <g transform="translate(80, 1760)">
+      <circle cx="32" cy="32" r="32" fill="url(#mark)"/>
+      <path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <text x="86" y="28" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="28" font-weight="600"
+            letter-spacing="-0.02em" fill="#0A0E0C">Brand Mint</text>
+      <text x="86" y="56" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="400"
+            fill="#0A0E0C" opacity="0.62">— Hyderabad</text>
+    </g>
+    <text x="1000" y="1794" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="20"
+          letter-spacing="0.06em" fill="#0A0E0C" opacity="0.62">brandmint.studio</text>
+    
+    
+    </svg>
