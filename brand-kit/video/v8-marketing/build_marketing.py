@@ -921,6 +921,30 @@ def beat_bundle(t, dur):
     op_d = ease_out_cubic(clamp((t - 1.3) / 0.5))
     op_e = ease_out_cubic(clamp((t - 1.8) / 0.5))
 
+    if not SHOW_PRICES:
+        # No-prices variant: drop the struck MRP + launch retainer.
+        # Show a single 'Starting from ₹49,999' anchor instead.
+        return svg_wrap(BLACK, f"""
+        {chrome(dark=True)}
+        <text x="{CX}" y="430" text-anchor="middle" font-family="{MONO}" font-size="22"
+              letter-spacing="0.28em" fill="{MINT_3}" opacity="{op_a * 0.9}">— THE FULL-STACK RETAINER</text>
+        <text x="{CX}" y="620" text-anchor="middle" font-family="{DISPLAY}" font-size="120"
+              font-weight="600" letter-spacing="-0.03em" fill="{CREAM}"
+              opacity="{op_b}">All six.</text>
+        <text x="{CX}" y="760" text-anchor="middle" font-family="{DISPLAY}" font-size="84"
+              font-weight="600" font-style="italic" letter-spacing="-0.03em" fill="{CREAM}"
+              opacity="{op_b}">One senior team.</text>
+
+        <text x="{CX}" y="920" text-anchor="middle" font-family="{MONO}" font-size="22"
+              letter-spacing="0.28em" fill="#a8a299" opacity="{op_c * 0.9}">STARTING FROM</text>
+        <text x="{CX}" y="1100" text-anchor="middle" font-family="{DISPLAY}" font-size="170"
+              font-weight="700" letter-spacing="-0.03em" fill="{MINT_3}"
+              opacity="{op_d}">₹49,999</text>
+        <text x="{CX}" y="1260" text-anchor="middle" font-family="{BODY}" font-size="24"
+              fill="{CREAM}" opacity="{op_e * 0.65}">Custom-scoped per project. Ad spend billed separately.</text>
+        """)
+
+    # Priced variant: existing struck MRP + launch retainer
     return svg_wrap(BLACK, f"""
     {chrome(dark=True)}
     <text x="{CX}" y="430" text-anchor="middle" font-family="{MONO}" font-size="22"
