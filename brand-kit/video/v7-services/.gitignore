@@ -1,0 +1,5 @@
+frames/
+clips/
+out/_*.wav
+out/score.wav
+__pycache__/
