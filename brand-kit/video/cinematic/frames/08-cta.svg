@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 2560" width="1440" height="2560">
+      
+    <defs>
+      <radialGradient id="mintGlow" cx="50%" cy="50%" r="62%">
+        <stop offset="0%"   stop-color="#10B981" stop-opacity="0.42"/>
+        <stop offset="55%"  stop-color="#047857" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#000000"  stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="cremeGlow" cx="50%" cy="40%" r="70%">
+        <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#F5F1EA" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="darkBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#000000"/>
+        <stop offset="100%" stop-color="#06090A"/>
+      </linearGradient>
+      <linearGradient id="paperBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#F5F1EA"/>
+        <stop offset="100%" stop-color="#E9E2D3"/>
+      </linearGradient>
+      <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"   stop-color="#7CF6C8"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+      <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="14" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="6" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    
+      
+    <rect width="1440" height="2560" fill="#000000"/>
+    <rect width="1440" height="2560" fill="url(#mintGlow)" opacity="0.75"/>
+
+    <g>
+      <circle cx="100" cy="216" r="10" fill="#10B981" filter="url(#glow)"/>
+      <text x="140" y="226" font-family="JetBrains Mono, ui-monospace, monospace" font-size="28" letter-spacing="0.32em"
+            fill="#F5F1EA">BOOKING Q3 2026</text>
+    </g>
+
+    <g font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-weight="600" letter-spacing="-0.025em" fill="#F5F1EA">
+      <text x="720" y="1220" text-anchor="middle" font-size="118">Let's mint</text>
+      <text x="720" y="1360" text-anchor="middle" font-size="118">something that</text>
+      <text x="720" y="1520" text-anchor="middle" font-size="138"
+            font-style="italic" fill="#10B981" filter="url(#glow)">compounds.</text>
+    </g>
+
+    <g transform="translate(360, 1660)" filter="url(#softGlow)">
+      <rect width="720" height="160" rx="80" fill="#10B981"/>
+      <text x="360" y="105" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="52"
+            font-weight="600" fill="#000000">Start a project  &#8594;</text>
+    </g>
+
+    <g transform="translate(660, 2280)">
+      <circle cx="60" cy="60" r="60" fill="url(#mark)"/>
+      <path d="M30 80 V 38 l 30 26 l 30 -26 V 80"
+            stroke="#000000" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+    <text x="720" y="2400" text-anchor="middle" font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-size="40"
+          font-weight="600" letter-spacing="-0.01em" fill="#F5F1EA">Brand Mint — Hyderabad</text>
+    
+    <rect x="0" y="0"          width="1440" height="3" fill="#10B981" opacity="0.85"/>
+    <rect x="0" y="2557"     width="1440" height="3" fill="#10B981" opacity="0.85"/>
+    <text x="48" y="2530" font-family="JetBrains Mono, ui-monospace, monospace" font-size="22" letter-spacing="0.22em"
+          fill="#F5F1EA" opacity="0.55">BRAND MINT</text>
+    <text x="1392" y="2530" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="22"
+          letter-spacing="0.18em" fill="#F5F1EA" opacity="0.55">brandmint.studio</text>
+    
+    
+    </svg>

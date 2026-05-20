@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 2560" width="1440" height="2560">
+      
+    <defs>
+      <radialGradient id="mintGlow" cx="50%" cy="50%" r="62%">
+        <stop offset="0%"   stop-color="#10B981" stop-opacity="0.42"/>
+        <stop offset="55%"  stop-color="#047857" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#000000"  stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="cremeGlow" cx="50%" cy="40%" r="70%">
+        <stop offset="0%"   stop-color="#FFFFFF" stop-opacity="0.55"/>
+        <stop offset="100%" stop-color="#F5F1EA" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="darkBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#000000"/>
+        <stop offset="100%" stop-color="#06090A"/>
+      </linearGradient>
+      <linearGradient id="paperBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#F5F1EA"/>
+        <stop offset="100%" stop-color="#E9E2D3"/>
+      </linearGradient>
+      <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"   stop-color="#7CF6C8"/>
+        <stop offset="100%" stop-color="#10B981"/>
+      </linearGradient>
+      <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="14" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="6" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    
+      
+    <rect width="1440" height="2560" fill="url(#paperBg)"/>
+    <rect width="1440" height="2560" fill="url(#cremeGlow)" opacity="0.4"/>
+    <text x="80" y="240" font-family="JetBrains Mono, ui-monospace, monospace" font-size="28" letter-spacing="0.32em"
+          fill="#0A0E0C" opacity="0.6">— WHAT WE SHIP</text>
+    <g font-family="Plus Jakarta Sans, Inter, system-ui, sans-serif" font-weight="600" letter-spacing="-0.03em" fill="#0A0E0C">
+      <text x="80" y="780"  font-size="140">Sites.</text>
+      <text x="80" y="900"  font-size="80" font-style="italic" fill="#10B981">that convert.</text>
+
+      <text x="80" y="1180" font-size="140">Tools.</text>
+      <text x="80" y="1300" font-size="80" font-style="italic" fill="#10B981">that scale.</text>
+
+      <text x="80" y="1580" font-size="140">AI.</text>
+      <text x="80" y="1700" font-size="80" font-style="italic" fill="#10B981">woven in.</text>
+    </g>
+    
+    <rect x="0" y="0"          width="1440" height="3" fill="#10B981" opacity="0.85"/>
+    <rect x="0" y="2557"     width="1440" height="3" fill="#10B981" opacity="0.85"/>
+    <text x="48" y="2530" font-family="JetBrains Mono, ui-monospace, monospace" font-size="22" letter-spacing="0.22em"
+          fill="#0A0E0C" opacity="0.55">BRAND MINT</text>
+    <text x="1392" y="2530" text-anchor="end" font-family="JetBrains Mono, ui-monospace, monospace" font-size="22"
+          letter-spacing="0.18em" fill="#0A0E0C" opacity="0.55">brandmint.studio</text>
+    
+    
+    </svg>
