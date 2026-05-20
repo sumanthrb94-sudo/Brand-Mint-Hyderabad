@@ -26,9 +26,17 @@ OUT = ROOT / "out"
 for d in (FRAMES, CLIPS, OUT):
     d.mkdir(parents=True, exist_ok=True)
 
+import os
+
 W, H = 1080, 1920
 FPS = 30
 CX = W / 2
+
+# Set BMINT_NO_PRICES=1 to render a clean variant without the price-pill
+# stack on each service beat. Output goes to a different filename so
+# the priced version stays intact.
+SHOW_PRICES = os.environ.get("BMINT_NO_PRICES", "") != "1"
+OUTPUT_NAME = "brandmint-services.mp4" if SHOW_PRICES else "brandmint-services-no-prices.mp4"
 
 # Tokens
 BLACK = "#000000"
@@ -201,6 +209,26 @@ def service_beat(t, dur, letter, name, price_old, price_new, blurb, mockup_svg, 
     pill_w = 540
     # Adaptive font: shrink for longer prices (e.g. '₹37.5 K / mo')
     new_font = 44 if len(price_new) <= 8 else 36
+
+    if not SHOW_PRICES:
+        # Clean variant: no price stack. Name moves down, blurb sits
+        # under it, mockup stays where it is. Lots more negative space.
+        inner = f"""
+    {chrome(dark=dark)}
+    <text x="{CX}" y="200" text-anchor="middle" font-family="{MONO}" font-size="22"
+          letter-spacing="0.28em" fill="{MINT_3}" opacity="{letter_op * 0.92}">{letter} &#183; SERVICE</text>
+    <g transform="translate(0 {name_dy})">
+      <text x="{CX}" y="350" text-anchor="middle" font-family="{DISPLAY}" font-size="84"
+            font-weight="600" letter-spacing="-0.025em" fill="{fg}"
+            opacity="{name_op}">{name}</text>
+    </g>
+    <g transform="translate(0 {blurb_dy})">
+      <text x="{CX}" y="460" text-anchor="middle" font-family="{BODY}" font-size="28"
+            fill="{sub}" opacity="{blurb_op * 0.9}">{blurb}</text>
+    </g>
+    {mockup}
+    """
+        return svg_wrap(bg, inner)
 
     inner = f"""
     {chrome(dark=dark)}
@@ -1033,7 +1061,7 @@ def build_score(total):
 
 
 def mux(clips, score):
-    out_mp4 = OUT / "brandmint-services.mp4"
+    out_mp4 = OUT / OUTPUT_NAME
     inputs = []
     for c in clips:
         inputs += ["-i", str(c)]
