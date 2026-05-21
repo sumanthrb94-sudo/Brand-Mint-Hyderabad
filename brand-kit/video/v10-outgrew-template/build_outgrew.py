@@ -101,46 +101,39 @@ class Beat:
 BEATS: List[Beat] = [
     Beat(
         label="STUDIO NOTE",
-        headline="5 SIGNS YOU'VE OUTGROWN YOUR TEMPLATE",
-        body="If two of these feel familiar, your storefront is leaving money on the table.",
+        headline="TIPS FOR EFFECTIVE BRANDING",
+        body="Four short notes from the BrandMint studio.",
         duration=3.0,
     ),
     Beat(
-        label="SIGN 01",
-        headline="TRAFFIC SPIKES. BOUNCE STAYS.",
-        body="The ads are working. The landing page can't carry the load.",
+        label="TIP 01",
+        headline="CORE VALUES",
+        body="Identify the principles your brand stands on. Make them visible in every touchpoint and felt by the audience you serve.",
         duration=4.0,
     ),
     Beat(
-        label="SIGN 02",
-        headline="YOU'RE EXPLAINING THE PRICE.",
-        body="Your design says template. Your invoice says premium.",
+        label="TIP 02",
+        headline="LOGO DESIGN",
+        body="A professional mark that carries your identity. Versatile across every format — favicon, app icon, billboard.",
         duration=4.0,
     ),
     Beat(
-        label="SIGN 03",
-        headline="THE THEME FIGHTS YOU.",
-        body="Every new feature needs a plugin. Every plugin breaks the layout.",
+        label="TIP 03",
+        headline="STORYTELLING",
+        body="Connect on an emotional level. Share your origin, your mission, and the people behind the work.",
         duration=4.0,
     ),
     Beat(
-        label="SIGN 04",
-        headline="NO ONE REMEMBERS THE NAME.",
-        body="Without a brand system, only the URL sticks. URLs don't compound.",
+        label="TIP 04",
+        headline="BRAND VOICE",
+        body="Define your tone — formal, friendly, authoritative, or playful. It should match the audience you actually serve.",
         duration=4.0,
     ),
     Beat(
-        label="SIGN 05",
-        headline="YOUR CRM IS A SPREADSHEET.",
-        body="When the data outgrows the tool, the team outgrows the speed.",
-        duration=4.2,
-    ),
-    Beat(
-        label="",
-        headline="",
-        body="",
-        duration=3.5,
-        kind="brandmark",
+        label="— MORE",
+        headline="VISIT FOR MORE TIPS",
+        body="brandmint.studios",
+        duration=3.0,
     ),
 ]
 
@@ -346,15 +339,11 @@ def beat_svg(beat: Beat, idx: int, total: int, anim_t: float = 1.0) -> str:
     """Render a single beat at animation progress anim_t in [0,1].
     anim_t controls a subtle fade-in (0 = invisible, 1 = full)."""
     body_opacity = anim_t  # whole content fades up
-
-    if beat.kind == "brandmark":
-        content = render_brand_mark()
-    else:
-        # Layout: label pill at y=560, headline centred ~920, body centred ~1230
-        label_pill = render_pill(beat.label, W // 2, 560)
-        headline_svg, h_top, h_bot = render_headline(beat.headline, 920)
-        body_svg = render_body(beat.body, 1230)
-        content = label_pill + headline_svg + body_svg
+    # Layout: label pill at y=560, headline centred ~920, body centred ~1230
+    label_pill = render_pill(beat.label, W // 2, 560)
+    headline_svg, h_top, h_bot = render_headline(beat.headline, 920)
+    body_svg = render_body(beat.body, 1230)
+    content = label_pill + headline_svg + body_svg
 
     background = f"""
       <defs>
