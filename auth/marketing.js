@@ -57,6 +57,31 @@ function initialFor(s) {
   return ch || "·";
 }
 
+function attachUI() {
+  // Default to signed-out so the right buttons show even if Supabase
+  // fails to load. Real state arrives once bootstrap() finishes.
+  if (!document.body.dataset.authState) {
+    document.body.dataset.authState = "signed-out";
+    dispatchState();
+  }
+
+  document.addEventListener("click", (e) => {
+    const trigger = e.target.closest("[data-auth-action]");
+    if (!trigger) return;
+    const action = trigger.dataset.authAction;
+    if (action === "open" || action === "open-login" || action === "open-signup") {
+      e.preventDefault();
+      openModal(action === "open-signup" ? "signup" : "login");
+    } else if (action === "signout") {
+      e.preventDefault();
+      closeUserMenu();
+      signOut();
+    }
+  });
+
+  wireUserChip();
+}
+
 async function bootstrap() {
   const sb = await getClient();
   const { data } = await sb.auth.getSession();
@@ -68,20 +93,34 @@ async function bootstrap() {
     dispatchState();
   });
 
-  document.addEventListener("click", (e) => {
-    const trigger = e.target.closest("[data-auth-action]");
-    if (!trigger) return;
-    const action = trigger.dataset.authAction;
-    if (action === "open" || action === "open-login" || action === "open-signup") {
-      e.preventDefault();
-      openModal(action === "open-signup" ? "signup" : "login");
-    } else if (action === "signout") {
-      e.preventDefault();
-      signOut();
-    }
+  _readyResolve();
+}
+
+function wireUserChip() {
+  const wrap = document.querySelector(".nav-userchip-wrap");
+  const chip = document.getElementById("nav-userchip");
+  if (!wrap || !chip) return;
+
+  chip.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = wrap.classList.toggle("open");
+    chip.setAttribute("aria-expanded", String(isOpen));
   });
 
-  _readyResolve();
+  document.addEventListener("click", (e) => {
+    if (!wrap.contains(e.target)) closeUserMenu();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeUserMenu();
+  });
+}
+
+function closeUserMenu() {
+  const wrap = document.querySelector(".nav-userchip-wrap");
+  const chip = document.getElementById("nav-userchip");
+  if (!wrap) return;
+  wrap.classList.remove("open");
+  chip?.setAttribute("aria-expanded", "false");
 }
 
 async function signOut() {
@@ -144,21 +183,21 @@ function openModal(mode = "login") {
       <form id="bm-auth-form" autocomplete="on">
         ${showName ? `
         <label class="bm-auth-field">
-          <input id="bm-auth-name" type="text" autocomplete="name" placeholder="Your name" />
+          <input id="bm-auth-name" type="text" autocomplete="name" placeholder=" " />
           <span>Name <em style="opacity:.55">(optional)</em></span>
         </label>` : ""}
 
         <label class="bm-auth-field">
-          <input id="bm-auth-email" type="email" required autocomplete="email" placeholder="you@studio.com" />
+          <input id="bm-auth-email" type="email" required autocomplete="email" placeholder=" " />
           <span>Email</span>
         </label>
 
         ${showPassword ? `
-        <label class="bm-auth-field">
+        <label class="bm-auth-field has-eye">
           <input id="bm-auth-password" type="password" required
                  minlength="${mode === "signup" ? 8 : 1}"
                  autocomplete="${mode === "signup" ? "new-password" : "current-password"}"
-                 placeholder="${mode === "signup" ? "At least 8 characters" : "Your password"}" />
+                 placeholder=" " />
           <span>Password</span>
           <button type="button" class="bm-auth-eye" aria-label="Toggle password visibility" tabindex="-1">Show</button>
         </label>` : ""}
@@ -336,7 +375,16 @@ window.bmAuth = {
   ready: _readyP,
 };
 
-bootstrap().catch((e) => {
-  console.error("[auth] bootstrap failed", e);
-  _readyResolve();
-});
+function init() {
+  attachUI();
+  bootstrap().catch((e) => {
+    console.error("[auth] bootstrap failed", e);
+    _readyResolve();
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}

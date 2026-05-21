@@ -87,9 +87,12 @@
           Sign up
         </a>
 
-        <button type="button" class="nav-userchip" id="nav-userchip" data-auth-show="signed-in" hidden>
-          <span class="nav-userchip-avatar" data-auth-user-initial>?</span>
-          <span data-auth-user-name>Account</span>
+        <div class="nav-userchip-wrap" data-auth-show="signed-in" hidden>
+          <button type="button" class="nav-userchip" id="nav-userchip" aria-haspopup="menu" aria-expanded="false">
+            <span class="nav-userchip-avatar" data-auth-user-initial>?</span>
+            <span data-auth-user-name>Account</span>
+            <svg class="nav-userchip-caret" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
           <div class="nav-userchip-menu" role="menu">
             <div class="um-head">
               <div class="label">Signed in as</div>
@@ -97,7 +100,7 @@
             </div>
             <button type="button" data-auth-action="signout">Sign out</button>
           </div>
-        </button>
+        </div>
 
         <a href="#contact" class="btn btn--ghost">Start a project</a>
       </nav>
