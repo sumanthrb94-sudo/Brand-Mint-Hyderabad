@@ -524,20 +524,25 @@ button {
 }
 .bm-auth-eye {
   position: absolute;
-  top: 12px;
-  right: 10px;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
   background: transparent;
   border: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--mint-4);
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 6px;
+  z-index: 2;
 }
-.bm-auth-eye:hover { background: rgba(16, 185, 129, 0.08); }
+.bm-auth-eye:hover { background: rgba(16, 185, 129, 0.10); }
+.bm-auth-field:has(.bm-auth-eye) input {
+  padding-right: 64px;
+}
 .bm-auth-row {
   display: flex;
   justify-content: flex-end;
