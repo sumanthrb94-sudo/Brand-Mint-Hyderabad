@@ -3,6 +3,7 @@
  *
  * Loads supabase-js v2 from esm.sh (no build step needed). Falls back to a
  * no-op stub if config is missing so the admin still works offline-only.
+ * Persists the auth session so a refresh keeps the admin signed in.
  */
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "/admin/config.js";
@@ -21,7 +22,12 @@ export async function getClient() {
     _loadPromise = import("https://esm.sh/@supabase/supabase-js@2").then(
       ({ createClient }) => {
         _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { persistSession: false },
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: false,
+            storageKey: "bm.admin.supabase.session",
+          },
         });
         return _client;
       }

@@ -40,8 +40,8 @@ const ctx = {
       invoices: overdueInvoices || null,
     });
   },
-  logout() {
-    auth.endSession();
+  async logout() {
+    await auth.signOut();
     location.reload();
   },
 };
@@ -81,15 +81,68 @@ async function renderRoute() {
 
 /* ---------- Init ---------- */
 
-async function boot() {
+function renderGate(state, errorMessage) {
   const gate = document.getElementById("auth-gate");
-  if (gate) gate.hidden = true;
+  const app = document.getElementById("app");
+  if (!gate) return;
+  app.hidden = true;
+  gate.hidden = false;
+  const err = gate.querySelector(".gate-error");
+  if (err) {
+    err.textContent = errorMessage || "";
+    err.hidden = !errorMessage;
+  }
+  const subm = gate.querySelector("button[type=submit]");
+  if (subm) {
+    subm.disabled = state === "busy";
+    subm.querySelector(".btn-label").textContent =
+      state === "busy" ? "Signing in…" : "Sign in";
+  }
+}
+
+async function showApp() {
+  document.getElementById("auth-gate").hidden = true;
   document.getElementById("app").hidden = false;
   document.getElementById("view").innerHTML =
     '<div class="view-loading">Loading your data…</div>';
   await db.hydrate();
   await seedIfEmpty();
   await renderRoute();
+}
+
+async function boot() {
+  const state = await auth.bootstrap();
+  if (!state.configured) {
+    // No Supabase config — fall through to offline-only mode (cache lives in
+    // localStorage). Gate isn't useful here.
+    document.getElementById("auth-gate").hidden = true;
+    document.getElementById("app").hidden = false;
+    document.getElementById("view").innerHTML =
+      '<div class="view-loading">Loading your data…</div>';
+    await db.hydrate();
+    await seedIfEmpty();
+    await renderRoute();
+    return;
+  }
+  if (state.user && state.isAdmin) {
+    await showApp();
+    return;
+  }
+
+  renderGate("idle");
+  const form = document.getElementById("gate-form");
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = form.email.value;
+    const password = form.password.value;
+    renderGate("busy");
+    try {
+      await auth.signIn(email, password);
+      await showApp();
+    } catch (err) {
+      renderGate("idle", err.message || "Sign-in failed.");
+    }
+  });
 }
 
 window.addEventListener("hashchange", renderRoute);

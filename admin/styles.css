@@ -84,9 +84,10 @@ code {
   place-items: center;
   background: linear-gradient(160deg, #0b1f1a 0%, #14352d 100%);
   z-index: 50;
+  padding: 20px;
 }
-.auth-card {
-  width: min(420px, calc(100vw - 32px));
+.gate-card {
+  width: min(420px, 100%);
   background: var(--surface);
   border-radius: var(--radius-lg);
   padding: 36px 32px;
@@ -95,37 +96,104 @@ code {
   flex-direction: column;
   gap: 14px;
 }
-.auth-mark {
-  width: 40px;
-  height: 40px;
+.gate-mark {
   margin-bottom: 4px;
 }
-.auth-card h1 {
+.gate-card h1 {
   font-family: var(--display);
   font-size: 26px;
   font-weight: 600;
   letter-spacing: -0.02em;
   margin: 0;
 }
-.auth-sub {
+.gate-sub {
   color: var(--muted);
   margin: 0 0 8px;
   font-size: 14px;
 }
-.auth-err {
-  color: var(--danger);
+.gate-field {
+  position: relative;
+  display: block;
+}
+.gate-field input {
+  width: 100%;
+  padding: 22px 14px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 15px;
+  color: var(--ink);
+  font-family: var(--sans);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.gate-field.has-eye input {
+  padding-right: 70px;
+}
+.gate-field input:focus {
+  outline: none;
+  border-color: var(--mint-3);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+.gate-field > span {
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  color: var(--faint);
+  font-size: 14px;
+  pointer-events: none;
+  transition: transform 0.15s, color 0.15s, font-size 0.15s;
+  background: var(--surface);
+  padding: 0 4px;
+}
+.gate-field input:focus + span,
+.gate-field input:not(:placeholder-shown) + span {
+  transform: translateY(-14px);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mint-4);
+  font-weight: 600;
+}
+.gate-eye {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mint-4);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  z-index: 2;
+}
+.gate-eye:hover { background: rgba(16, 185, 129, 0.10); }
+.gate-error {
+  color: var(--danger, #b91c1c);
+  background: rgba(226, 59, 59, 0.08);
+  border: 1px solid rgba(226, 59, 59, 0.22);
   font-size: 13px;
+  border-radius: 8px;
+  padding: 10px 14px;
   margin: 4px 0 0;
 }
-.auth-hint {
+.gate-foot {
   color: var(--faint);
   font-size: 12px;
   margin: 8px 0 0;
   line-height: 1.5;
 }
-.auth-hint code {
+.gate-foot code {
   font-size: 11px;
+  background: rgba(10, 14, 12, 0.05);
+  padding: 1px 6px;
+  border-radius: 4px;
 }
+.gate-submit { width: 100%; justify-content: center; }
 
 /* ---------- SHELL ---------- */
 .shell {

@@ -1,56 +1,99 @@
 /**
- * Auth — single-passcode gate.
+ * Brand Mint Admin — Auth.
  *
- * On first run, the default passcode is "brandmint2026" and is treated as
- * the active one until the CEO sets a new one via Settings. We store only
- * the SHA-256 hash in localStorage, never the cleartext.
+ * Supabase email + password with an `admins` allowlist gate. A user can only
+ * enter the admin panel if (a) they sign in successfully AND (b) their
+ * auth.uid() exists in public.admins (verified server-side by RLS — the
+ * .single() call below will return PGRST116 if they're not in the table).
+ *
+ * Exposes:
+ *   auth.bootstrap()    -> resolves the current state on page load
+ *   auth.signIn(email, password)
+ *   auth.signOut()
+ *   auth.getUser()      -> { id, email } or null
+ *   auth.isAdmin()      -> boolean (cached after sign-in)
  */
 
-const HASH_KEY = "bm.admin.v1.passhash";
-const SESSION_KEY = "bm.admin.v1.session";
-const DEFAULT_PASS = "brandmint2026";
-const SESSION_HOURS = 12;
+import { getClient, isConfigured } from "/admin/supabase.js";
 
-async function sha256(str) {
-  const buf = new TextEncoder().encode(str);
-  const hashBuf = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(hashBuf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+let _user = null;
+let _isAdmin = false;
+
+async function refreshAdminFlag() {
+  if (!_user) {
+    _isAdmin = false;
+    return false;
+  }
+  const sb = await getClient();
+  if (!sb) {
+    _isAdmin = false;
+    return false;
+  }
+  const { data, error } = await sb
+    .from("admins")
+    .select("user_id")
+    .eq("user_id", _user.id)
+    .maybeSingle();
+  _isAdmin = !error && !!data;
+  return _isAdmin;
 }
 
 export const auth = {
-  async isPasscodeSet() {
-    return !!localStorage.getItem(HASH_KEY);
-  },
-  async setPasscode(plain) {
-    const hash = await sha256(plain);
-    localStorage.setItem(HASH_KEY, hash);
-  },
-  async verify(plain) {
-    const stored = localStorage.getItem(HASH_KEY);
-    const compareTo = stored || (await sha256(DEFAULT_PASS));
-    // Mobile keyboards often add a trailing space or autocapitalize the first
-    // letter. Try the literal input first, then forgiving variants.
-    const candidates = [plain, plain.trim(), plain.trim().toLowerCase()];
-    for (const c of candidates) {
-      if ((await sha256(c)) === compareTo) return true;
+  async bootstrap() {
+    if (!isConfigured()) {
+      return { user: null, isAdmin: false, configured: false };
     }
-    return false;
+    const sb = await getClient();
+    const { data } = await sb.auth.getSession();
+    _user = data.session?.user
+      ? { id: data.session.user.id, email: data.session.user.email }
+      : null;
+    await refreshAdminFlag();
+
+    // Keep cached state in sync with token refresh / sign-out from other tabs.
+    sb.auth.onAuthStateChange(async (_event, session) => {
+      _user = session?.user
+        ? { id: session.user.id, email: session.user.email }
+        : null;
+      await refreshAdminFlag();
+    });
+
+    return { user: _user, isAdmin: _isAdmin, configured: true };
   },
-  resetToDefault() {
-    localStorage.removeItem(HASH_KEY);
+
+  async signIn(email, password) {
+    const sb = await getClient();
+    if (!sb) throw new Error("Supabase not configured.");
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    if (error) throw error;
+    _user = { id: data.user.id, email: data.user.email };
+    const isAdmin = await refreshAdminFlag();
+    if (!isAdmin) {
+      // Sign out immediately so a non-admin can't sit on a half-session.
+      await sb.auth.signOut();
+      _user = null;
+      throw new Error(
+        "This account isn't authorised for admin. Contact the owner."
+      );
+    }
+    return _user;
   },
-  startSession() {
-    const expires = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
-    localStorage.setItem(SESSION_KEY, String(expires));
+
+  async signOut() {
+    const sb = await getClient();
+    if (sb) await sb.auth.signOut();
+    _user = null;
+    _isAdmin = false;
   },
-  isSessionValid() {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return false;
-    return Number(raw) > Date.now();
+
+  getUser() {
+    return _user;
   },
-  endSession() {
-    localStorage.removeItem(SESSION_KEY);
+
+  isAdmin() {
+    return _isAdmin;
   },
 };

@@ -274,19 +274,16 @@ function renderBank(settings) {
 /* ---------- Security ---------- */
 
 async function renderSecurity() {
-  const isSet = await auth.isPasscodeSet();
+  const user = auth.getUser();
   const status = h("div", {
     class: "muted",
     style: { fontSize: "12.5px", marginTop: "10px" },
-    text: isSet
-      ? "Custom passcode set."
-      : "Using default passcode — change it now.",
+    text: user ? `Signed in as ${user.email}.` : "Not signed in.",
   });
 
   const form = h("form", { class: "vstack", style: { gap: "12px" } }, [
-    field({ label: "Current passcode", name: "current", type: "password" }),
-    field({ label: "New passcode (min 8 chars)", name: "next", type: "password" }),
-    field({ label: "Confirm new passcode", name: "confirm", type: "password" }),
+    field({ label: "New password (min 8 chars)", name: "next", type: "password" }),
+    field({ label: "Confirm new password", name: "confirm", type: "password" }),
     h(
       "div",
       { class: "hstack", style: { justifyContent: "flex-end", marginTop: "8px" } },
@@ -294,7 +291,7 @@ async function renderSecurity() {
         h("button", {
           type: "submit",
           class: "btn btn-primary",
-          text: "Update passcode",
+          text: "Update password",
         }),
       ]
     ),
@@ -302,34 +299,35 @@ async function renderSecurity() {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const { current, next, confirm: confirmPass } = formToObject(form);
+    const { next, confirm: confirmPass } = formToObject(form);
 
-    const ok = await auth.verify(current || "");
-    if (!ok) {
-      toast("Current passcode is wrong.");
-      return;
-    }
     if (next !== confirmPass) {
-      toast("New passcodes don't match.");
+      toast("Passwords don't match.");
       return;
     }
     if (!next || next.length < 8) {
-      toast("Passcode must be at least 8 characters.");
+      toast("Password must be at least 8 characters.");
       return;
     }
 
-    await auth.setPasscode(next);
-    form.reset();
-    status.textContent = "Custom passcode set.";
-    toast("Passcode updated.");
+    try {
+      const { getClient } = await import("/admin/supabase.js");
+      const sb = await getClient();
+      const { error } = await sb.auth.updateUser({ password: next });
+      if (error) throw error;
+      form.reset();
+      toast("Password updated.");
+    } catch (err) {
+      toast(err?.message || "Couldn't update password.");
+    }
   });
 
   return h("section", { id: "security", class: "settings-card" }, [
-    h("h4", { text: "Passcode" }),
+    h("h4", { text: "Account password" }),
     h("div", {
       class: "desc",
       text:
-        "Used on the admin login screen. Default is `brandmint2026`. Change it on first login.",
+        "Change the password for the admin account you're signed in with. Stored as a bcrypt hash in Supabase Auth.",
     }),
     form,
     status,
