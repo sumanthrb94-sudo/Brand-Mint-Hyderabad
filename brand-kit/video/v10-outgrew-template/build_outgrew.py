@@ -95,6 +95,7 @@ class Beat:
     headline: str       # big bold line
     body: str           # support copy
     duration: float = 3.0  # seconds
+    kind: str = "text"  # "text" | "brandmark"
 
 
 BEATS: List[Beat] = [
@@ -135,10 +136,11 @@ BEATS: List[Beat] = [
         duration=4.2,
     ),
     Beat(
-        label="— YOUR MOVE",
-        headline="BUILT IN HITEC CITY. SHIPPED WORLDWIDE.",
-        body='DM "OUTGROWN" — we scope your build in 48 hours.',
+        label="",
+        headline="",
+        body="",
         duration=3.5,
+        kind="brandmark",
     ),
 ]
 
@@ -251,6 +253,76 @@ def render_body(text: str, cy: int) -> str:
         )
     return "".join(svgs)
 
+def render_brand_mark(cy_logo: int = 850, cy_palette: int = 1240) -> str:
+    """Closing beat: BrandMint logo + UI colour swatches. Zero text."""
+    # ---- Logo: mint-gradient rounded square with the 'M' stroke ----
+    logo_size = 360
+    lx = W // 2 - logo_size // 2
+    ly = cy_logo - logo_size // 2
+    r = 64  # corner radius
+    # M-path scaled into the logo box. Original favicon viewBox = 32, path
+    # spans x:9..23, y:10..22. Scale to logo_size with proper margin.
+    scale = logo_size / 32
+    stroke_w = 2.6 * scale * 0.9
+    # Path: M 9 22 V 10 L 16 16 L 23 10 V 22
+    p_x = lambda v: lx + v * scale
+    p_y = lambda v: ly + v * scale
+    d = (
+        f"M {p_x(9):.1f} {p_y(22):.1f} "
+        f"V {p_y(10):.1f} "
+        f"L {p_x(16):.1f} {p_y(16):.1f} "
+        f"L {p_x(23):.1f} {p_y(10):.1f} "
+        f"V {p_y(22):.1f}"
+    )
+
+    # ---- Colour palette: 5 swatches across the brand spectrum ----
+    swatches = [
+        ("INK",    "#0a0e0c", PAPER),
+        ("PAPER",  "#f5f1ea", "#0a0e0c"),
+        ("MINT 1", "#d6f5e6", "#0a0e0c"),
+        ("MINT 2", "#7cf6c8", "#0a0e0c"),
+        ("MINT",   "#10b981", "#0a0e0c"),
+    ]
+    n = len(swatches)
+    sw = 150
+    sh = 150
+    gap = 24
+    total_w = n * sw + (n - 1) * gap
+    sx0 = W // 2 - total_w // 2
+    sy = cy_palette - sh // 2
+
+    swatch_svg: List[str] = []
+    for i, (name, hexv, fg) in enumerate(swatches):
+        x = sx0 + i * (sw + gap)
+        swatch_svg.append(
+            f'<rect x="{x}" y="{sy}" width="{sw}" height="{sh}" rx="18" ry="18" '
+            f'fill="{hexv}" stroke="{PAPER}" stroke-opacity="0.08" stroke-width="1"/>'
+        )
+        # tiny mono label inside the swatch, bottom-left
+        swatch_svg.append(
+            f'<text x="{x + 14}" y="{sy + sh - 16}" font-family="{FONT_MONO}" '
+            f'font-size="14" font-weight="700" letter-spacing="0.16em" '
+            f'fill="{fg}" opacity="0.78">{name}</text>'
+        )
+
+    return f"""
+      <!-- LOGO -->
+      <defs>
+        <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="{MINT_2}"/>
+          <stop offset="100%" stop-color="{MINT}"/>
+        </linearGradient>
+      </defs>
+      <rect x="{lx}" y="{ly}" width="{logo_size}" height="{logo_size}"
+            rx="{r}" ry="{r}" fill="url(#logoGrad)"/>
+      <path d="{d}" stroke="{INK}" stroke-width="{stroke_w:.1f}"
+            stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+      <!-- PALETTE -->
+      {''.join(swatch_svg)}
+    """
+
+
 def render_cta_pill(text: str, cy: int) -> str:
     """Big mint CTA pill for the closing beat."""
     pt = 36
@@ -273,17 +345,16 @@ def render_cta_pill(text: str, cy: int) -> str:
 def beat_svg(beat: Beat, idx: int, total: int, anim_t: float = 1.0) -> str:
     """Render a single beat at animation progress anim_t in [0,1].
     anim_t controls a subtle fade-in (0 = invisible, 1 = full)."""
-    is_cta = idx == total - 1
     body_opacity = anim_t  # whole content fades up
 
-    # Layout: label pill at y=560, headline centred ~860, body centred ~1180
-    label_pill = render_pill(beat.label, W // 2, 560)
-    headline_svg, h_top, h_bot = render_headline(beat.headline, 920)
-
-    if is_cta:
-        body_svg = render_cta_pill('DM "OUTGROWN"', 1240)
+    if beat.kind == "brandmark":
+        content = render_brand_mark()
     else:
+        # Layout: label pill at y=560, headline centred ~920, body centred ~1230
+        label_pill = render_pill(beat.label, W // 2, 560)
+        headline_svg, h_top, h_bot = render_headline(beat.headline, 920)
         body_svg = render_body(beat.body, 1230)
+        content = label_pill + headline_svg + body_svg
 
     background = f"""
       <defs>
@@ -308,9 +379,7 @@ def beat_svg(beat: Beat, idx: int, total: int, anim_t: float = 1.0) -> str:
       {chrome_top()}
       {chrome_bottom(idx, total)}
       <g opacity="{body_opacity:.3f}">
-        {label_pill}
-        {headline_svg}
-        {body_svg}
+        {content}
       </g>
     </svg>"""
 
