@@ -517,6 +517,39 @@ button {
   color: #b91c1c;
   border-color: rgba(226, 59, 59, 0.22);
 }
+.bm-auth-status.ok {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--mint-4);
+  border-color: rgba(16, 185, 129, 0.22);
+}
+.bm-auth-eye {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mint-4);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.bm-auth-eye:hover { background: rgba(16, 185, 129, 0.08); }
+.bm-auth-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px 0 12px;
+}
+.bm-auth-forgot {
+  font-size: 12.5px;
+  color: var(--mint-4);
+  font-weight: 500;
+  text-decoration: none;
+}
+.bm-auth-forgot:hover { text-decoration: underline; }
 .bm-auth-switch {
   text-align: center;
   margin-top: 18px;

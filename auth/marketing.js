@@ -1,11 +1,14 @@
 /**
  * Brand Mint — Public-site auth.
  *
- * Magic-link sign-in via Supabase. No passwords. First-time email creates a
- * user; subsequent emails log in. State is mirrored to the nav and any other
- * elements with [data-auth-state="signed-in" | "signed-out"].
+ * Email + password sign-in via Supabase. Three flows in one modal:
+ *   login   →  signInWithPassword
+ *   signup  →  signUp  (creates user; signs in directly if email-confirm is off)
+ *   forgot  →  resetPasswordForEmail
  *
- * Exposes:  window.bmAuth = { openModal, signOut, getUser, getSession, ready }
+ * State is mirrored to the nav and any [data-auth-show="signed-in|signed-out"]
+ * elements.  Exposes:  window.bmAuth = { openModal, signOut, getUser,
+ * getSession, getClient, ready }
  */
 
 const SUPABASE_URL = "https://ycdfgtljxqrhyobnwwbz.supabase.co";
@@ -65,7 +68,6 @@ async function bootstrap() {
     dispatchState();
   });
 
-  // Wire any element with [data-auth-action]
   document.addEventListener("click", (e) => {
     const trigger = e.target.closest("[data-auth-action]");
     if (!trigger) return;
@@ -87,8 +89,36 @@ async function signOut() {
   await sb.auth.signOut();
 }
 
+const COPY = {
+  login: {
+    title: "Welcome back",
+    sub: "Enter your email and password to sign in.",
+    cta: "Sign in",
+    switchText: `New to Brand Mint?`,
+    switchLink: { mode: "signup", label: "Create an account" },
+  },
+  signup: {
+    title: "Create your Brand Mint account",
+    sub: "Pick a password you'll remember &mdash; minimum 8 characters.",
+    cta: "Create account",
+    switchText: `Already have an account?`,
+    switchLink: { mode: "login", label: "Sign in" },
+  },
+  forgot: {
+    title: "Reset your password",
+    sub: "Enter your email. We'll send a one-time link to set a new password.",
+    cta: "Send reset link",
+    switchText: `Remembered it?`,
+    switchLink: { mode: "login", label: "Back to sign in" },
+  },
+};
+
 function openModal(mode = "login") {
   if (document.getElementById("bm-auth-modal-overlay")) return;
+
+  const copy = COPY[mode] || COPY.login;
+  const showPassword = mode !== "forgot";
+  const showName = mode === "signup";
 
   const overlay = document.createElement("div");
   overlay.id = "bm-auth-modal-overlay";
@@ -108,31 +138,48 @@ function openModal(mode = "login") {
         </svg>
       </div>
 
-      <h2 id="bm-auth-title">${mode === "signup" ? "Create your Brand Mint account" : "Welcome back"}</h2>
-      <p class="bm-auth-sub">
-        ${mode === "signup"
-          ? "One email is all it takes. We'll send a magic link &mdash; no password to remember."
-          : "Enter your email. We'll send a magic link to log you in."}
-      </p>
+      <h2 id="bm-auth-title">${copy.title}</h2>
+      <p class="bm-auth-sub">${copy.sub}</p>
 
-      <form id="bm-auth-form" autocomplete="off">
+      <form id="bm-auth-form" autocomplete="on">
+        ${showName ? `
+        <label class="bm-auth-field">
+          <input id="bm-auth-name" type="text" autocomplete="name" placeholder="Your name" />
+          <span>Name <em style="opacity:.55">(optional)</em></span>
+        </label>` : ""}
+
         <label class="bm-auth-field">
           <input id="bm-auth-email" type="email" required autocomplete="email" placeholder="you@studio.com" />
           <span>Email</span>
         </label>
+
+        ${showPassword ? `
+        <label class="bm-auth-field">
+          <input id="bm-auth-password" type="password" required
+                 minlength="${mode === "signup" ? 8 : 1}"
+                 autocomplete="${mode === "signup" ? "new-password" : "current-password"}"
+                 placeholder="${mode === "signup" ? "At least 8 characters" : "Your password"}" />
+          <span>Password</span>
+          <button type="button" class="bm-auth-eye" aria-label="Toggle password visibility" tabindex="-1">Show</button>
+        </label>` : ""}
+
+        ${mode === "login" ? `
+        <div class="bm-auth-row">
+          <a href="#" class="bm-auth-forgot" data-auth-switch="forgot">Forgot password?</a>
+        </div>` : ""}
+
         <button type="submit" class="btn btn--primary bm-auth-submit">
-          <span class="btn-label">Send magic link</span>
+          <span class="btn-label">${copy.cta}</span>
         </button>
         <p class="bm-auth-status" id="bm-auth-status" hidden></p>
       </form>
 
       <div class="bm-auth-switch">
-        ${mode === "signup"
-          ? `Already have an account? <a href="#" data-auth-switch="login">Sign in</a>`
-          : `New to Brand Mint? <a href="#" data-auth-switch="signup">Create an account</a>`}
+        ${copy.switchText}
+        <a href="#" data-auth-switch="${copy.switchLink.mode}">${copy.switchLink.label}</a>
       </div>
 
-      <p class="bm-auth-foot">By continuing you agree to receive a one-time login email from Brand Mint.</p>
+      <p class="bm-auth-foot">By continuing you agree to Brand Mint's terms.</p>
     </div>
   `;
 
@@ -162,44 +209,118 @@ function openModal(mode = "login") {
     });
   }
 
+  const eye = overlay.querySelector(".bm-auth-eye");
+  if (eye) {
+    const pwInput = overlay.querySelector("#bm-auth-password");
+    eye.addEventListener("click", () => {
+      const masked = pwInput.type === "password";
+      pwInput.type = masked ? "text" : "password";
+      eye.textContent = masked ? "Hide" : "Show";
+    });
+  }
+
   const form = overlay.querySelector("#bm-auth-form");
-  const input = overlay.querySelector("#bm-auth-email");
+  const emailInput = overlay.querySelector("#bm-auth-email");
+  const pwInput = overlay.querySelector("#bm-auth-password");
+  const nameInput = overlay.querySelector("#bm-auth-name");
   const submit = overlay.querySelector(".bm-auth-submit .btn-label");
+  const submitBtn = overlay.querySelector(".bm-auth-submit");
   const status = overlay.querySelector("#bm-auth-status");
-  setTimeout(() => input.focus(), 50);
+
+  setTimeout(() => (showName ? nameInput : emailInput).focus(), 50);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     status.hidden = true;
-    status.classList.remove("err");
-    const email = input.value.trim();
+    status.classList.remove("err", "ok");
+
+    const email = emailInput.value.trim();
+    const password = pwInput?.value || "";
+    const name = nameInput?.value.trim() || "";
     if (!email) return;
 
-    submit.textContent = "Sending…";
-    form.querySelector("button").disabled = true;
+    submit.textContent = "Working…";
+    submitBtn.disabled = true;
 
     try {
       const sb = await getClient();
-      const { error } = await sb.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: window.location.origin },
-      });
-      if (error) throw error;
-      submit.textContent = "Send magic link";
-      form.querySelector("button").disabled = false;
-      status.hidden = false;
-      status.textContent = `Check ${email} for a one-tap login link.`;
-      input.value = "";
+
+      if (mode === "login") {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        close();
+        return;
+      }
+
+      if (mode === "signup") {
+        const { data, error } = await sb.auth.signUp({
+          email,
+          password,
+          options: {
+            data: name ? { name } : undefined,
+            emailRedirectTo: window.location.origin,
+          },
+        });
+        if (error) throw error;
+        if (data.session) {
+          close();
+          return;
+        }
+        status.hidden = false;
+        status.classList.add("ok");
+        status.textContent = `Almost there. Check ${email} to confirm your account, then sign in.`;
+        submit.textContent = copy.cta;
+        submitBtn.disabled = false;
+        return;
+      }
+
+      if (mode === "forgot") {
+        const { error } = await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + "/?reset=1",
+        });
+        if (error) throw error;
+        status.hidden = false;
+        status.classList.add("ok");
+        status.textContent = `Reset link sent to ${email}. Check your inbox.`;
+        submit.textContent = copy.cta;
+        submitBtn.disabled = false;
+        return;
+      }
     } catch (err) {
       submit.textContent = "Try again";
-      form.querySelector("button").disabled = false;
+      submitBtn.disabled = false;
       status.hidden = false;
       status.classList.add("err");
-      status.textContent =
-        err?.message ||
-        "Couldn't send the link. Double-check the email and try again.";
+      status.textContent = friendlyError(err, mode);
     }
   });
+}
+
+function friendlyError(err, mode) {
+  const m = (err?.message || "").toLowerCase();
+  if (m.includes("invalid login") || m.includes("invalid credentials")) {
+    return "That email and password don't match. Try again or reset your password.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "Confirm your email first — check the link we sent when you signed up.";
+  }
+  if (m.includes("user already registered") || m.includes("already been registered")) {
+    return "An account with that email already exists. Try signing in.";
+  }
+  if (m.includes("password") && m.includes("short")) {
+    return "Password is too short — use at least 8 characters.";
+  }
+  if (m.includes("rate limit")) {
+    return "Too many attempts. Wait a minute and try again.";
+  }
+  return (
+    err?.message ||
+    (mode === "login"
+      ? "Couldn't sign you in. Check your email and password."
+      : mode === "signup"
+        ? "Couldn't create your account. Try again."
+        : "Couldn't send the reset link. Try again.")
+  );
 }
 
 window.bmAuth = {
