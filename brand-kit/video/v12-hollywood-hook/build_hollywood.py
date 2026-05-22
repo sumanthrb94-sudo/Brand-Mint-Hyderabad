@@ -17,6 +17,7 @@ Run:    python3 build_hollywood.py
 from __future__ import annotations
 
 import math
+import os
 import shutil
 import subprocess
 import wave
@@ -31,6 +32,20 @@ from PIL import ImageFont
 # ---------------------------------------------------------------- tokens ---
 
 W, H, FPS = 1080, 1920, 30
+
+# ---------------------------------------------------------------- tempo ---
+# All cuts snap to a BPM grid so the video syncs to any audio at this tempo.
+# Set BPM to match the trending audio you're pairing with in Canva / IG.
+#   90  → cinematic / lo-fi
+#   100 → mid-tempo pop
+#   120 → mainstream pop, Bollywood remix, "trending"  ← default
+#   128 → EDM standard
+#   140 → trap / drill
+BPM = int(os.environ.get("BPM", "120"))
+BEAT_SEC = 60.0 / BPM            # seconds per musical beat
+def beats(n: float) -> float:    # convenience: 2 beats → seconds
+    return n * BEAT_SEC
+
 INK = "#070a09"
 INK_2 = "#10171a"
 PAPER = "#f5f1ea"
@@ -77,20 +92,24 @@ class Beat:
     accent: str = ""             # word inside text to render in mint
     sub: str = ""                # small supporting line (cta / brandmark)
 
+# Each beat's duration is expressed in MUSICAL beats (whole numbers), so the
+# whole reel snaps to the BPM grid. At 120 BPM this gives 15.5s total; at
+# 100 BPM = 18.6s; at 140 BPM = 13.3s. The visual cuts always land on beat
+# boundaries no matter which audio you pair with.
 BEATS: List[Beat] = [
-    Beat(text="MOST FOUNDERS", duration=1.3, kind="title"),
-    Beat(text="BLAME THE MARKET.", duration=1.5, kind="title"),
-    Beat(text="", duration=0.30, kind="flash"),
-    Beat(text="IT WAS NEVER THE MARKET.", duration=2.0, kind="title", accent="NEVER"),
-    Beat(text="IT WAS THE TEMPLATE.", duration=1.8, kind="title", accent="TEMPLATE"),
-    Beat(text="", duration=0.30, kind="flash"),
-    Beat(text="FROM ZERO.", duration=1.0, kind="metric"),
-    Beat(text="IN SEVEN WEEKS.", duration=1.0, kind="metric"),
-    Beat(text="ONE SENIOR TEAM.", duration=1.4, kind="metric"),
+    Beat(text="MOST FOUNDERS",          duration=beats(3), kind="title"),
+    Beat(text="BLAME THE MARKET.",      duration=beats(3), kind="title"),
+    Beat(text="",                       duration=beats(1), kind="flash"),
+    Beat(text="IT WAS NEVER THE MARKET.", duration=beats(4), kind="title", accent="NEVER"),
+    Beat(text="IT WAS THE TEMPLATE.",   duration=beats(4), kind="title", accent="TEMPLATE"),
+    Beat(text="",                       duration=beats(1), kind="flash"),
+    Beat(text="FROM ZERO.",             duration=beats(2), kind="metric"),
+    Beat(text="IN SEVEN WEEKS.",        duration=beats(2), kind="metric"),
+    Beat(text="ONE SENIOR TEAM.",       duration=beats(3), kind="metric"),
     Beat(text="BRANDMINT STUDIOS",
-         duration=2.0, kind="brandmark",
+         duration=beats(4), kind="brandmark",
          sub="Custom websites · Internal tools · Brand systems"),
-    Beat(text='DM "BUILD"', duration=2.0, kind="cta",
+    Beat(text='DM "BUILD"',             duration=beats(4), kind="cta",
          sub="brandmint.studios · HITEC City, Hyderabad"),
 ]
 
@@ -514,7 +533,7 @@ def main() -> None:
     print("Synthesising audio…")
     audio = synth_audio()
     print("Encoding mp4…")
-    out_mp4 = OUT / "brandmint-hollywood-hook.mp4"
+    out_mp4 = OUT / f"brandmint-hollywood-hook-{BPM}bpm.mp4"
     encode_video(audio, out_mp4)
     print(f"\n✓ {out_mp4}")
 
