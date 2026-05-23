@@ -138,7 +138,7 @@ def cover_question() -> str:
               stroke="{MINT}" stroke-width="2"/>
         <text x="{cx}" y="1300" font-family="{FONT_MONO}" font-size="22"
               font-weight="700" fill="{PAPER_DIM}" text-anchor="middle"
-              letter-spacing="0.36em">RANKED BY MILLION SQ FT</text>
+              letter-spacing="0.36em">RANKED  ·  BY SALES  ·  BY STORY</text>
 
         {chrome()}
       </svg>
@@ -167,21 +167,21 @@ def cover_eight() -> str:
 
         <text x="{cx}" y="1260" font-family="{FONT_MONO}" font-size="22"
               font-weight="700" fill="{PAPER_DIM}" text-anchor="middle"
-              letter-spacing="0.36em">RANKED BY MILLION SQ FT</text>
+              letter-spacing="0.36em">RANKED  ·  BY SALES  ·  BY STORY</text>
 
         <line x1="{cx - 50}" y1="1310" x2="{cx + 50}" y2="1310"
               stroke="{MINT}" stroke-width="2"/>
 
         <text x="{cx}" y="1380" font-family="{FONT_SERIF}" font-size="42"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
-              font-style="italic">~ 217 million sq ft, one city.</text>
+              font-style="italic">~ 500 years of skyline, one city.</text>
 
         {chrome()}
       </svg>
     """
 
 def cover_rank1() -> str:
-    """Name-recognition cover — #1 My Home Group · 87 MSF."""
+    """Name-recognition cover — #1 Prestige Group · National Champion."""
     cx = W // 2
     return f"""<?xml version="1.0" encoding="UTF-8"?>
       <svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}"
@@ -190,7 +190,7 @@ def cover_rank1() -> str:
 
         <text x="{cx}" y="430" font-family="{FONT_MONO}" font-size="24"
               font-weight="700" fill="{MINT}" text-anchor="middle"
-              letter-spacing="0.36em">HYDERABAD'S EMPIRES · BY MSF</text>
+              letter-spacing="0.36em">HYDERABAD'S EMPIRES  ·  2026</text>
         <line x1="{cx - 70}" y1="460" x2="{cx + 70}" y2="460"
               stroke="{MINT}" stroke-width="2"/>
 
@@ -203,21 +203,22 @@ def cover_rank1() -> str:
 
         <text x="{cx}" y="940" font-family="{FONT_DISPLAY}" font-size="116"
               font-weight="900" fill="{PAPER}" text-anchor="middle"
-              letter-spacing="-0.01em">MY HOME</text>
+              letter-spacing="-0.01em">PRESTIGE</text>
         <text x="{cx}" y="1070" font-family="{FONT_DISPLAY}" font-size="116"
               font-weight="900" fill="{PAPER}" text-anchor="middle"
               letter-spacing="-0.01em">GROUP</text>
 
-        <text x="{cx}" y="1180" font-family="{FONT_MONO}" font-size="20"
-              font-weight="700" fill="{PAPER_DIM}" text-anchor="middle"
-              letter-spacing="0.36em">TOTAL DEVELOPABLE AREA</text>
-        <text x="{cx}" y="1320" font-family="{FONT_SERIF}" font-size="140"
-              font-weight="700" fill="{MINT}" text-anchor="middle"
-              letter-spacing="-0.02em">87 MSF</text>
+        <text x="{cx}" y="1180" font-family="{FONT_SERIF}" font-size="44"
+              font-weight="700" fill="{MINT_2}" text-anchor="middle"
+              font-style="italic">The National Champion</text>
 
-        <line x1="{cx - 50}" y1="1390" x2="{cx + 50}" y2="1390"
+        <text x="{cx}" y="1290" font-family="{FONT_MONO}" font-size="20"
+              font-weight="700" fill="{PAPER_DIM}" text-anchor="middle"
+              letter-spacing="0.26em">FOUNDED 1986  ·  200+ PROJECTS  ·  INDIA'S #1</text>
+
+        <line x1="{cx - 50}" y1="1360" x2="{cx + 50}" y2="1360"
               stroke="{MINT}" stroke-width="2"/>
-        <text x="{cx}" y="1440" font-family="{FONT_SERIF}" font-size="32"
+        <text x="{cx}" y="1420" font-family="{FONT_SERIF}" font-size="32"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">See the full ranking →</text>
 

@@ -98,52 +98,85 @@ def measure(text: str, pt: int, kind: str = "bold") -> float:
     return float(r - l)
 
 # ------------------------------------------------------- empire data ---
-# Public-record data only. Founder names + company names + year est. +
-# signature project list. NO net-worth figures, NO unverified claims.
-# Editorially ordered by publicly known portfolio scale; verify before
-# publishing.
+# Data source: editorial research doc "Hyderabad's Empires: Episode One
+# — The 13 Titans of Hyderabad Real Estate, Ranking & History Report"
+# (2026 edition). EP01 reveals the top 8 by current sales-value /
+# prestige ranking; the bottom 5 (SMR, Modi, Aditya, Sri Aditya, Ramky)
+# get teased at the end as "EP02: The Heritage Five".
+#
+# All fields are public-record (company sites + RERA + industry press).
+# No net-worth figures or unverified claims.
 
 @dataclass
 class Empire:
     rank: int
-    msf: str                    # "87 MSF" — total developable area
-    company: List[str]          # 1-3 lines (so "MY HOME" / "GROUP")
-    founder: str
-    est: str                    # "Est. 1981"
-    hq: str = "Hyderabad"
-    signature: List[str] = None # 1-2 signature projects (bullet list)
+    name: List[str]              # ["PRESTIGE", "GROUP"] — 1 or 2 lines
+    founder: str                 # "Razack Sattar"
+    founded: int                 # 1986
+    hq: str                      # "BANGALORE → HYD" or "HYDERABAD"
+    price: str                   # "₹8-12K"
+    projects: str                # "200+ PROJECTS" or "37M SFT DELIVERED"
+    angle: str                   # "The National Champion"  (story chip)
+    key_project: str             # "The Prestige City · Rajendra Nagar"
 
-# Ranked by total developable area in million sq ft (msf), defined as
-# delivered + ongoing + upcoming portfolio. Sources: company about pages,
-# investor presentations, ANAROCK / Houssed listings. National giants
-# (Prestige / Brigade / Lodha / Salarpuria / Sumadhura) excluded — they
-# ship pan-India numbers, not Hyderabad-only. Episode 03 covers them.
-
+# Ordered #8 → #1 (reveal countdown). Ranks from the research doc's
+# Executive Ranking Table — by current sales value + prestige + portfolio.
 EMPIRES: List[Empire] = [
-    Empire(rank=8, msf="8 MSF", company=["MANJEERA", "GROUP"],
-           founder="G. Yoganand", est="Est. 1987",
-           signature=["Manjeera Trinity", "Diamond Towers"]),
-    Empire(rank=7, msf="8 MSF", company=["VASAVI", "GROUP"],
-           founder="Yerram Vijay Kumar", est="Est. 1994",
-           signature=["Vasavi Signature", "Vasavi Skyla"]),
-    Empire(rank=6, msf="18 MSF", company=["NCC", "URBAN"],
-           founder="NCC Ltd · AVS Raju legacy", est="Est. 2005",
-           signature=["NCC Urban One", "Nagarjuna Resort"]),
-    Empire(rank=5, msf="28 MSF", company=["HONER", "HOMES"],
-           founder="Venkateswarlu · Rajamouli · Balu", est="Est. 2016",
-           signature=["Honer Aquantis", "Honer Vivantis"]),
-    Empire(rank=4, msf="33 MSF", company=["APARNA", "CONSTRUCTIONS"],
-           founder="S. Sridhar Reddy", est="Est. 1996",
-           signature=["Aparna Sarovar Zenith", "Aparna Cyberscape"]),
-    Empire(rank=3, msf="40 MSF", company=["PHOENIX", "GROUP"],
-           founder="Suresh Chukkapalli", est="Est. 2001",
-           signature=["Phoenix Avance Hub", "One Place"]),
-    Empire(rank=2, msf="55 MSF", company=["RAJAPUSHPA", "PROPERTIES"],
-           founder="Parupati Brothers", est="Est. 2006",
-           signature=["Rajapushpa Atria", "Provincia"]),
-    Empire(rank=1, msf="87 MSF", company=["MY HOME", "GROUP"],
-           founder="Jupally Rameswara Rao", est="Est. 1981",
-           signature=["My Home Bhooja", "Krishe Sapphire"]),
+    Empire(rank=8, name=["SUMADHURA", "INFRACON"],
+           founder="Madhusudhan G.", founded=1995,
+           hq="NALGONDA → HYD",
+           price="₹6-9.5K", projects="56+ · 12,000 HOMES",
+           angle="The First-Generation Hustle",
+           key_project="The Olympus · Financial District"),
+
+    Empire(rank=7, name=["RAJAPUSHPA", "PROPERTIES"],
+           founder="Parupati Brothers", founded=2006,
+           hq="KOKAPET · HYD",
+           price="₹8.5-12.5K", projects="3.5M SFT · 4M UC",
+           angle="The Four-Brothers Empire",
+           key_project="Rajapushpa West Avenue · Kokapet"),
+
+    Empire(rank=6, name=["PHOENIX", "GROUP"],
+           founder="Phoenix Family", founded=2004,
+           hq="JUBILEE HILLS · HYD",
+           price="₹9-15K", projects="20+ · AWARD-WINNING",
+           angle="The Ultra-Luxury Specialist",
+           key_project="Phoenix Golf Edge · Gachibowli"),
+
+    Empire(rank=5, name=["LODHA", "GROUP"],
+           founder="Mangal Prabhat Lodha", founded=1980,
+           hq="MUMBAI → HYD",
+           price="₹7-10.5K", projects="300+ PROJECTS",
+           angle="The Mumbai Giant",
+           key_project="Lodha Bellezza · Kukatpally"),
+
+    Empire(rank=4, name=["VASAVI", "GROUP"],
+           founder="Vasavi Family", founded=1996,
+           hq="HYDERABAD",
+           price="₹6-9K", projects="40+ PROJECTS",
+           angle="The Detail Masters",
+           key_project="Vasavi Crown East · Uppal"),
+
+    Empire(rank=3, name=["APARNA", "CONSTRUCTIONS"],
+           founder="S. Sridhar Reddy Family", founded=1996,
+           hq="HYDERABAD",
+           price="₹6.5-9.5K", projects="60+ · ISO CERTIFIED",
+           angle="The Green Pioneer",
+           key_project="Aparna Sarovar Zenith · Nallagandla"),
+
+    Empire(rank=2, name=["MY HOME", "GROUP"],
+           founder="Dr. J. Rameswar Rao", founded=1981,
+           hq="HYDERABAD",
+           price="₹7.5-11K", projects="37M SFT DELIVERED",
+           angle="The Hyderabad Original",
+           key_project="My Home Bhooja · Hi-Tech City"),
+
+    Empire(rank=1, name=["PRESTIGE", "GROUP"],
+           founder="Razack Sattar", founded=1986,
+           hq="BANGALORE → HYD",
+           price="₹8-12K", projects="200+ · INDIA'S #1",
+           angle="The National Champion",
+           key_project="The Prestige City · Rajendra Nagar"),
 ]
 
 # ------------------------------------------------------- beat schedule ---
@@ -166,19 +199,19 @@ BEATS: List[Beat] = [
     Beat(kind="splash",        duration=beats(1.6),
          text="Can you rank",  text2="builders?"),
     Beat(kind="intro_title",   duration=beats(5),
-         text="HYDERABAD",     text2="EIGHT EMPIRES · BY MSF"),
+         text="HYDERABAD",     text2="THE TOP EIGHT · 2026"),
     Beat(kind="intro_setup",   duration=beats(4),
-         text="Ranked by million",
-         text2="square feet built."),
+         text="Ranked by sales,",
+         text2="scale, and story."),
 ] + [
-    Beat(kind="empire", duration=beats(5), empire=e) for e in EMPIRES
+    Beat(kind="empire", duration=beats(6), empire=e) for e in EMPIRES
 ] + [
     Beat(kind="boutique_teaser", duration=beats(5),
-         text="MYSCAPE",
-         text2="Yoo Hyderabad · Jubilee Hills"),
+         text="THE HERITAGE",
+         text2="SMR · MODI · ADITYA · SRI ADITYA · RAMKY"),
     Beat(kind="outro_caption", duration=beats(3),
-         text="Brick by brick.",
-         text2="Tower by tower."),
+         text="Eight empires.",
+         text2="One skyline."),
     Beat(kind="cta", duration=beats(7),
          text="FOLLOW",
          text2="@brandmint.studios"),
@@ -266,7 +299,7 @@ def chrome_overlay(intro_t: float) -> str:
         <text x="{W - 64}" y="{H - 40}" font-family="{FONT_MONO}" font-size="16"
               font-weight="700" letter-spacing="0.22em" fill="{PAPER_DIM}"
               text-anchor="end">
-          v13 · HYDERABAD
+          EP01 · HYDERABAD
         </text>
       </g>
     """
@@ -316,7 +349,7 @@ def render_splash(beat: Beat, local: float, scale: float) -> str:
               stroke="{MINT}" stroke-width="2"/>
         <text x="{cx}" y="1300" font-family="{FONT_MONO}" font-size="22"
               font-weight="700" fill="{PAPER_DIM}" text-anchor="middle"
-              letter-spacing="0.36em">RANKED BY MILLION SQ FT</text>
+              letter-spacing="0.36em">RANKED  ·  BY SALES  ·  BY STORY</text>
       </g>
     """
 
@@ -387,189 +420,201 @@ def render_intro_setup(beat: Beat, local: float, scale: float) -> str:
     """
 
 def render_empire(beat: Beat, local: float, scale: float) -> str:
-    """Per-builder slate — CENTRE-ALIGNED for Instagram Reel safe-zone.
-    Meta's UI eats top 420px (username, follow button) and bottom ~420px
-    (like/comment/share + caption preview), so all content lives in the
-    centre 1080px (Y≈460 → Y≈1500), centred horizontally.
+    """Per-builder slate — CENTRE-ALIGNED inside Instagram Reel's safe
+    zone (top 220px, bottom 384px are reserved by Meta's UI). All content
+    sits in Y=320–1540, fully usable horizontal width with 80px gutters.
 
-    Layout (top → bottom):
-        eyebrow            HYDERABAD'S EMPIRES · BY MSF
-        small mint rule    ───
-        rank numeral       #01    (huge mint serif)
-        RANK label
-        company display    MY HOME GROUP
-        msf data anchor    87 MSF
-        TOTAL DEVELOPABLE AREA
-        mint rule          ───
-        founder            Jupally Rameswara Rao
-        est line           EST. 1981 · HYDERABAD
-        signature line     My Home Bhooja  ·  Krishe Sapphire
+    Layout (top → bottom, Y coordinates):
+        Y=400   eyebrow "HYDERABAD'S EMPIRES · 2026"
+        Y=430   short mint rule
+        Y=580   rank numeral "#01"  (serif 160pt mint, the anchor)
+        Y=615   "RANK" micro-label
+        Y=730   name line 1  (display 100-110pt)
+        Y=840   name line 2  (if 2-line)
+        Y=970   italic story angle  ("The National Champion")
+        Y=1080  stats dot-strip  "FOUNDED 1986 · 200+ PROJECTS · ₹8-12K"
+        Y=1170  founder + HQ  "RAZACK SATTAR · BANGALORE → HYD"
+        Y=1290  mint mid-rule
+        Y=1370  italic key project  "The Prestige City · Rajendra Nagar"
+
+    The richer info-grid (vs v13's MSF-only) trades pure cinematic
+    silence for editorial density — every slate now carries founder,
+    age, scale, price tier, story angle, and a signature project in
+    a single glance.
     """
     e = beat.empire
     if e is None:
         return ""
 
-    op_in = min(1.0, local / 0.25)
-    op_out = 1.0 - max(0.0, (local - 0.85) / 0.15)
+    op_in = min(1.0, local / 0.20)
+    op_out = 1.0 - max(0.0, (local - 0.88) / 0.12)
     op = min(op_in, op_out)
-    drift = lerp(14, -14, ease_in_out(local))
+    drift = lerp(10, -10, ease_in_out(local))
     cx = W // 2
 
-    # ----- centred block geometry -----
-    eyebrow_y = 470
-    eyebrow_rule_y = eyebrow_y + 22
+    # Mint accent for the rank numeral fades in slightly later for
+    # cinematic reveal feel.
+    rank_op = min(1.0, max(0.0, (local - 0.10) / 0.20))
 
-    rank_pt = 168
-    rank_y = eyebrow_rule_y + rank_pt + 30
-    rank_label_y = rank_y + 30
-
-    # Company display — center-aligned, auto-shrink to fit safe width
+    # Name — auto-shrink if a line is too wide
     safe_w = W - 200
-    company_pt = 108
-    while company_pt > 60 and any(
-        measure(line, company_pt) > safe_w for line in e.company
+    name_pt = 108
+    while name_pt > 64 and any(
+        measure(line, name_pt) > safe_w for line in e.name
     ):
-        company_pt -= 6
-    company_line_h = int(company_pt * 1.02)
-    company_block_h = company_line_h * len(e.company)
-    company_top = rank_label_y + 60
-    company_baseline_first = company_top + int(company_pt * 0.92)
+        name_pt -= 6
+    name_line_h = int(name_pt * 1.05)
 
-    # MSF — the data anchor
-    msf_pt = 124
-    msf_label_y = company_top + company_block_h + 50
-    msf_y = msf_label_y + msf_pt - 8
+    eyebrow_y      = 400
+    eyebrow_rule_y = 432
 
-    # Mint rule + founder + est + signature line
-    rule_y = msf_y + 60
-    founder_y = rule_y + 60
-    est_y = founder_y + 46
-    sig_y = est_y + 70
+    rank_pt        = 160
+    rank_y         = 580
+    rank_label_y   = 620
 
-    rank_str = f"#{e.rank:02d}"
+    # Name block (1 or 2 lines, centered vertically in its slot)
+    name_slot_top    = 700
+    name_slot_height = 200          # fits 2 × 100pt comfortably
+    n_lines = len(e.name)
+    name_block_h = name_line_h * n_lines
+    name_block_top = name_slot_top + (name_slot_height - name_block_h) // 2
+    name_baseline_first = name_block_top + int(name_pt * 0.85)
 
-    # Company lines (centred)
-    company_lines = []
-    for i, line in enumerate(e.company):
-        company_lines.append(
-            f'<text x="{cx}" y="{company_baseline_first + i * company_line_h + drift:.0f}" '
-            f'font-family="{FONT_DISPLAY}" font-size="{company_pt}" font-weight="900" '
-            f'fill="{PAPER}" text-anchor="middle" letter-spacing="-0.01em">{line}</text>'
+    angle_y     = 970
+    stats_y     = 1080
+    founder_y   = 1170
+    rule_y      = 1290
+    project_y   = 1370
+
+    name_lines_svg = []
+    for i, line in enumerate(e.name):
+        y_line = name_baseline_first + i * name_line_h + drift
+        name_lines_svg.append(
+            f'<text x="{cx}" y="{y_line:.0f}" '
+            f'font-family="{FONT_DISPLAY}" font-size="{name_pt}" '
+            f'font-weight="900" fill="{PAPER}" text-anchor="middle" '
+            f'letter-spacing="-0.01em">{line}</text>'
         )
 
-    # Signature projects on one line, mid-dot separator
-    sig_line = "  ·  ".join(e.signature or [])
+    # Stats strip: "FOUNDED 1986 · 200+ PROJECTS · ₹8-12K"
+    stats_text = f"FOUNDED {e.founded}  ·  {e.projects}  ·  {e.price}"
+
+    # Founder + HQ: "RAZACK SATTAR · BANGALORE → HYD"
+    founder_text = f"{e.founder.upper()}  ·  {e.hq}"
+
+    rank_str = f"#{e.rank:02d}"
 
     return f"""
       <g opacity="{op:.3f}">
         <!-- eyebrow -->
         <text x="{cx}" y="{eyebrow_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{MINT}" text-anchor="middle" letter-spacing="0.32em">
-          HYDERABAD'S EMPIRES · BY MSF
+              fill="{MINT}" text-anchor="middle" letter-spacing="0.34em">
+          HYDERABAD'S EMPIRES  ·  2026
         </text>
-        <line x1="{cx - 50}" y1="{eyebrow_rule_y + drift:.0f}"
-              x2="{cx + 50}" y2="{eyebrow_rule_y + drift:.0f}"
+        <line x1="{cx - 60}" y1="{eyebrow_rule_y + drift:.0f}"
+              x2="{cx + 60}" y2="{eyebrow_rule_y + drift:.0f}"
               stroke="{MINT}" stroke-width="1.5"/>
 
-        <!-- rank numeral, centred -->
-        <text x="{cx}" y="{rank_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="{rank_pt}" font-weight="700"
-              fill="{MINT}" text-anchor="middle" letter-spacing="-0.02em">
-          {rank_str}
-        </text>
-        <text x="{cx}" y="{rank_label_y + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="18" font-weight="700"
-              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.36em">
-          RANK
-        </text>
+        <!-- rank numeral (mint, the anchor) -->
+        <g opacity="{rank_op:.3f}">
+          <text x="{cx}" y="{rank_y + drift:.0f}"
+                font-family="{FONT_SERIF}" font-size="{rank_pt}" font-weight="700"
+                fill="{MINT}" text-anchor="middle" letter-spacing="-0.02em">
+            {rank_str}
+          </text>
+          <text x="{cx}" y="{rank_label_y + drift:.0f}"
+                font-family="{FONT_MONO}" font-size="18" font-weight="700"
+                fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.40em">
+            RANK
+          </text>
+        </g>
 
-        <!-- company display -->
-        {''.join(company_lines)}
+        <!-- name block (1 or 2 lines, vertically centered) -->
+        {''.join(name_lines_svg)}
 
-        <!-- msf anchor -->
-        <text x="{cx}" y="{msf_label_y + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="18" font-weight="700"
-              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.36em">
-          TOTAL DEVELOPABLE AREA
-        </text>
-        <text x="{cx}" y="{msf_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="{msf_pt}" font-weight="700"
-              fill="{MINT}" text-anchor="middle" letter-spacing="-0.02em">
-          {e.msf}
+        <!-- italic story angle -->
+        <text x="{cx}" y="{angle_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="52" font-weight="700"
+              fill="{MINT_2}" text-anchor="middle"
+              font-style="italic" letter-spacing="0.01em">
+          {e.angle}
         </text>
 
-        <!-- mint rule -->
-        <line x1="{cx - 60}" y1="{rule_y + drift:.0f}"
-              x2="{cx + 60}" y2="{rule_y + drift:.0f}"
-              stroke="{MINT}" stroke-width="2"/>
+        <!-- stats dot-strip: founded · projects · price -->
+        <text x="{cx}" y="{stats_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="22" font-weight="700"
+              fill="{PAPER}" text-anchor="middle" letter-spacing="0.20em">
+          {stats_text}
+        </text>
 
-        <!-- founder + est -->
+        <!-- founder + HQ -->
         <text x="{cx}" y="{founder_y + drift:.0f}"
-              font-family="{FONT_DISPLAY}" font-size="36" font-weight="700"
-              fill="{PAPER}" text-anchor="middle" letter-spacing="0.02em">
-          {e.founder}
-        </text>
-        <text x="{cx}" y="{est_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="20" font-weight="700"
-              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.24em">
-          {e.est.upper()}  ·  {e.hq.upper()}
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.26em">
+          {founder_text}
         </text>
 
-        <!-- signature projects on one line -->
-        <text x="{cx}" y="{sig_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="32" font-weight="700"
+        <!-- mid-rule before the project -->
+        <line x1="{cx - 50}" y1="{rule_y + drift:.0f}"
+              x2="{cx + 50}" y2="{rule_y + drift:.0f}"
+              stroke="{MINT}" stroke-width="2" opacity="0.6"/>
+
+        <!-- signature project (italic serif) -->
+        <text x="{cx}" y="{project_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="36" font-weight="700"
               fill="{PAPER}" text-anchor="middle" font-style="italic">
-          {sig_line}
+          {e.key_project}
         </text>
       </g>
     """
 
 def render_boutique_teaser(beat: Beat, local: float, scale: float) -> str:
-    """MySCAPE teaser — same centred grammar as empire slates but with a
-    "→ EP 04" arrow instead of a rank, and the metric switches from msf
-    to "PREMIUM (₹/sft)" to signal a different ranking lens."""
-    op_in = min(1.0, local / 0.25)
-    op_out = 1.0 - max(0.0, (local - 0.85) / 0.15)
+    """EP02 teaser — "The Heritage Five". Five more Hyderabad builders
+    that didn't make the Top 8 but have decades of legacy: SMR, Modi,
+    Aditya, Sri Aditya, Ramky. Same centered grammar as the empire
+    slates so it reads as a continuation, not a CTA.
+    """
+    op_in = min(1.0, local / 0.20)
+    op_out = 1.0 - max(0.0, (local - 0.88) / 0.12)
     op = min(op_in, op_out)
-    drift = lerp(14, -14, ease_in_out(local))
+    drift = lerp(10, -10, ease_in_out(local))
     cx = W // 2
 
-    company = ["MYSCAPE", "PROPERTIES"]
-    company_pt = 108
+    title = ["THE HERITAGE", "FIVE"]
+    title_pt = 108
     safe_w = W - 200
-    while company_pt > 60 and any(
-        measure(line, company_pt) > safe_w for line in company
-    ):
-        company_pt -= 6
-    company_line_h = int(company_pt * 1.02)
-    company_block_h = company_line_h * len(company)
+    while title_pt > 64 and any(measure(line, title_pt) > safe_w for line in title):
+        title_pt -= 6
+    title_line_h = int(title_pt * 1.05)
+    title_block_h = title_line_h * len(title)
 
-    eyebrow_y = 470
-    eyebrow_rule_y = eyebrow_y + 22
+    eyebrow_y      = 400
+    eyebrow_rule_y = 432
 
-    arrow_pt = 168
-    arrow_y = eyebrow_rule_y + arrow_pt + 30
-    arrow_label_y = arrow_y + 30
+    arrow_pt       = 160
+    arrow_y        = 580
+    arrow_label_y  = 620
 
-    company_top = arrow_label_y + 60
-    company_baseline_first = company_top + int(company_pt * 0.92)
+    name_slot_top    = 700
+    name_slot_height = 200
+    name_block_top   = name_slot_top + (name_slot_height - title_block_h) // 2
+    name_baseline    = name_block_top + int(title_pt * 0.85)
 
-    metric_pt = 124
-    metric_label_y = company_top + company_block_h + 50
-    metric_y = metric_label_y + metric_pt - 8
+    angle_y    = 970
+    list_y     = 1080
+    note_y     = 1170
+    rule_y     = 1290
+    drop_y     = 1370
 
-    rule_y = metric_y + 60
-    project_y = rule_y + 60
-    loc_y = project_y + 46
-    next_y = loc_y + 70
-
-    company_lines = []
-    for i, line in enumerate(company):
-        company_lines.append(
-            f'<text x="{cx}" y="{company_baseline_first + i * company_line_h + drift:.0f}" '
-            f'font-family="{FONT_DISPLAY}" font-size="{company_pt}" font-weight="900" '
-            f'fill="{PAPER}" text-anchor="middle" letter-spacing="-0.01em">{line}</text>'
+    title_lines_svg = []
+    for i, line in enumerate(title):
+        y_line = name_baseline + i * title_line_h + drift
+        title_lines_svg.append(
+            f'<text x="{cx}" y="{y_line:.0f}" '
+            f'font-family="{FONT_DISPLAY}" font-size="{title_pt}" '
+            f'font-weight="900" fill="{PAPER}" text-anchor="middle" '
+            f'letter-spacing="-0.01em">{line}</text>'
         )
 
     return f"""
@@ -577,56 +622,56 @@ def render_boutique_teaser(beat: Beat, local: float, scale: float) -> str:
         <!-- eyebrow -->
         <text x="{cx}" y="{eyebrow_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{MINT}" text-anchor="middle" letter-spacing="0.32em">
-          THE  BOUTIQUE  KINGS
+              fill="{MINT}" text-anchor="middle" letter-spacing="0.34em">
+          NEXT  EPISODE  ·  EP 02
         </text>
-        <line x1="{cx - 50}" y1="{eyebrow_rule_y + drift:.0f}"
-              x2="{cx + 50}" y2="{eyebrow_rule_y + drift:.0f}"
+        <line x1="{cx - 60}" y1="{eyebrow_rule_y + drift:.0f}"
+              x2="{cx + 60}" y2="{eyebrow_rule_y + drift:.0f}"
               stroke="{MINT}" stroke-width="1.5"/>
 
-        <!-- arrow instead of rank -->
+        <!-- arrow in place of rank -->
         <text x="{cx}" y="{arrow_y + drift:.0f}"
               font-family="{FONT_SERIF}" font-size="{arrow_pt}" font-weight="700"
               fill="{MINT}" text-anchor="middle">→</text>
         <text x="{cx}" y="{arrow_label_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="18" font-weight="700"
-              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.36em">
-          EPISODE  04
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.40em">
+          NEXT
         </text>
 
-        <!-- company -->
-        {''.join(company_lines)}
+        <!-- title -->
+        {''.join(title_lines_svg)}
 
-        <!-- alternate metric -->
-        <text x="{cx}" y="{metric_label_y + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="18" font-weight="700"
-              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.36em">
-          RANKED BY ₹/SFT · NOT MSF
-        </text>
-        <text x="{cx}" y="{metric_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="{metric_pt}" font-weight="700"
-              fill="{MINT}" text-anchor="middle" letter-spacing="-0.02em">
-          PREMIUM
+        <!-- italic angle line -->
+        <text x="{cx}" y="{angle_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="52" font-weight="700"
+              fill="{MINT_2}" text-anchor="middle"
+              font-style="italic" letter-spacing="0.01em">
+          The five who built the foundations
         </text>
 
-        <line x1="{cx - 60}" y1="{rule_y + drift:.0f}"
-              x2="{cx + 60}" y2="{rule_y + drift:.0f}"
-              stroke="{MINT}" stroke-width="2"/>
-
-        <text x="{cx}" y="{project_y + drift:.0f}"
-              font-family="{FONT_DISPLAY}" font-size="36" font-weight="700"
-              fill="{PAPER}" text-anchor="middle" letter-spacing="0.02em">
-          Yoo Hyderabad
+        <!-- five names dot-strip -->
+        <text x="{cx}" y="{list_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="22" font-weight="700"
+              fill="{PAPER}" text-anchor="middle" letter-spacing="0.20em">
+          {beat.text2}
         </text>
-        <text x="{cx}" y="{loc_y + drift:.0f}"
+
+        <!-- combined heritage stat -->
+        <text x="{cx}" y="{note_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="20" font-weight="700"
-              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.24em">
-          JUBILEE HILLS  ·  EST. 2012
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.26em">
+          5 BUILDERS  ·  150+ YEARS COMBINED  ·  HYDERABAD
         </text>
-        <text x="{cx}" y="{next_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="32" font-weight="700"
-              fill="{MINT_2}" text-anchor="middle" font-style="italic">
-          ▸  Full episode next month
+
+        <line x1="{cx - 50}" y1="{rule_y + drift:.0f}"
+              x2="{cx + 50}" y2="{rule_y + drift:.0f}"
+              stroke="{MINT}" stroke-width="2" opacity="0.6"/>
+
+        <text x="{cx}" y="{drop_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="36" font-weight="700"
+              fill="{PAPER}" text-anchor="middle" font-style="italic">
+          ▸ Out next Sunday
         </text>
       </g>
     """
