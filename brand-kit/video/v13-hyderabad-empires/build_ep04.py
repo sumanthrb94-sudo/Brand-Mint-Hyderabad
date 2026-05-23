@@ -40,16 +40,18 @@ BEAT_SEC = 60.0 / BPM
 def beats(n: float) -> float:
     return n * BEAT_SEC
 
-# Modcon brand palette (warm sand + dusty rose) on warm-black ground.
-INK = "#0a0908"
-INK_2 = "#14110d"
-INK_3 = "#1f1a14"
+# BrandMint signature palette — matches EP01-03. The Modcon-brand
+# sand+rose accents from the v1 cut were dropped in favor of series
+# consistency (per user direction).
+INK = "#070a09"
+INK_2 = "#10171a"
+INK_3 = "#1a2024"
 PAPER = "#f5f1ea"
-PAPER_DIM = "#aaa195"
-SAND = "#c3baaf"           # Modcon primary  → replaces MINT
-ROSE = "#bf7f7f"           # Modcon secondary → replaces MINT_2
-SAND_DEEP = "#8a8175"      # vignette
-MUTE = "#6e645a"
+PAPER_DIM = "#a3b2ac"
+SAND = "#10b981"           # MINT — BrandMint signature
+ROSE = "#7cf6c8"           # MINT_2 — bright highlight (italic accents)
+SAND_DEEP = "#047857"      # MINT_4 — vignette + deep accent
+MUTE = "#5d7368"
 
 FONT_DISPLAY = "DejaVu Sans, Inter, system-ui, sans-serif"
 FONT_SERIF = "DejaVu Serif, Georgia, serif"
