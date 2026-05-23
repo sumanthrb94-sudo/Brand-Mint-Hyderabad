@@ -163,23 +163,18 @@ class Beat:
     text2: str = ""
     empire: Optional[Empire] = None
 
-# Target ~55s at 80 BPM.
-#   splash 2b + intro_title 5b + intro_setup 4b + 5×10b empire + closer 12b
-#   = 73 beats × 0.75s ≈ 54.75s ✓
+# Target ~27s at 80 BPM — short-form pace.
+#   splash 2b + 5×5.5b empire + closer 6b = 35.5 beats × 0.75s ≈ 26.6s ✓
+# Intro_title + intro_setup beats from the 55s cut were dropped; the
+# splash already establishes the episode framing.
 BEATS: List[Beat] = [
     Beat(kind="splash",        duration=beats(2.0),
          text="Before the towers,",
          text2="builders."),
-    Beat(kind="intro_title",   duration=beats(5),
-         text="HERITAGE",
-         text2="EP02 · THE FOUNDATIONS"),
-    Beat(kind="intro_setup",   duration=beats(4),
-         text="The five who built",
-         text2="Hyderabad's bones."),
 ] + [
-    Beat(kind="empire", duration=beats(10), empire=e) for e in EMPIRES
+    Beat(kind="empire", duration=beats(5.5), empire=e) for e in EMPIRES
 ] + [
-    Beat(kind="closer", duration=beats(12),
+    Beat(kind="closer", duration=beats(6),
          text="Now you know.",
          text2="THE 13 TITANS · 2026"),
 ]
