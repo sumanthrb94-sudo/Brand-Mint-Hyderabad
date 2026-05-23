@@ -106,35 +106,42 @@ def measure(text: str, pt: int, kind: str = "bold") -> float:
 @dataclass
 class Empire:
     rank: int
+    msf: str                    # "87 MSF" — total developable area
     company: List[str]          # 1-3 lines (so "MY HOME" / "GROUP")
     founder: str
     est: str                    # "Est. 1981"
     hq: str = "Hyderabad"
     signature: List[str] = None # 1-2 signature projects (bullet list)
 
+# Ranked by total developable area in million sq ft (msf), defined as
+# delivered + ongoing + upcoming portfolio. Sources: company about pages,
+# investor presentations, ANAROCK / Houssed listings. National giants
+# (Prestige / Brigade / Lodha / Salarpuria / Sumadhura) excluded — they
+# ship pan-India numbers, not Hyderabad-only. Episode 03 covers them.
+
 EMPIRES: List[Empire] = [
-    Empire(rank=8, company=["MODI", "BUILDERS"],
-           founder="Soham Modi", est="Est. 1982",
-           signature=["Silver Oak Estate", "Splendor"]),
-    Empire(rank=7, company=["MANJEERA", "GROUP"],
+    Empire(rank=8, msf="8 MSF", company=["MANJEERA", "GROUP"],
            founder="G. Yoganand", est="Est. 1987",
            signature=["Manjeera Trinity", "Diamond Towers"]),
-    Empire(rank=6, company=["VASAVI", "GROUP"],
-           founder="K. Subba Reddy", est="Est. 1985",
-           signature=["Vasavi GP Trends", "Vasavi Skyla"]),
-    Empire(rank=5, company=["RAJAPUSHPA", "PROPERTIES"],
-           founder="Rajashekar Reddy", est="Est. 2006",
-           signature=["Rajapushpa Atria", "Provincia"]),
-    Empire(rank=4, company=["NCC", "URBAN"],
-           founder="A.A.V. Ranga Raju", est="Est. 1978",
+    Empire(rank=7, msf="8 MSF", company=["VASAVI", "GROUP"],
+           founder="Yerram Vijay Kumar", est="Est. 1994",
+           signature=["Vasavi Signature", "Vasavi Skyla"]),
+    Empire(rank=6, msf="18 MSF", company=["NCC", "URBAN"],
+           founder="NCC Ltd · AVS Raju legacy", est="Est. 2005",
            signature=["NCC Urban One", "Nagarjuna Resort"]),
-    Empire(rank=3, company=["PHOENIX", "GROUP"],
-           founder="Pinninti Krishna Reddy", est="Est. 1997",
-           signature=["Pioneer Park", "One Place"]),
-    Empire(rank=2, company=["APARNA", "CONSTRUCTIONS"],
-           founder="C. Sridhar Reddy", est="Est. 1996",
-           signature=["Aparna Sarovar", "Aparna Cyberscape"]),
-    Empire(rank=1, company=["MY HOME", "GROUP"],
+    Empire(rank=5, msf="28 MSF", company=["HONER", "HOMES"],
+           founder="Venkateswarlu · Rajamouli · Balu", est="Est. 2016",
+           signature=["Honer Aquantis", "Honer Vivantis"]),
+    Empire(rank=4, msf="33 MSF", company=["APARNA", "CONSTRUCTIONS"],
+           founder="S. Sridhar Reddy", est="Est. 1996",
+           signature=["Aparna Sarovar Zenith", "Aparna Cyberscape"]),
+    Empire(rank=3, msf="40 MSF", company=["PHOENIX", "GROUP"],
+           founder="Suresh Chukkapalli", est="Est. 2001",
+           signature=["Phoenix Avance Hub", "One Place"]),
+    Empire(rank=2, msf="55 MSF", company=["RAJAPUSHPA", "PROPERTIES"],
+           founder="Parupati Brothers", est="Est. 2006",
+           signature=["Rajapushpa Atria", "Provincia"]),
+    Empire(rank=1, msf="87 MSF", company=["MY HOME", "GROUP"],
            founder="Jupally Rameswara Rao", est="Est. 1981",
            signature=["My Home Bhooja", "Krishe Sapphire"]),
 ]
@@ -157,16 +164,20 @@ class Beat:
 
 BEATS: List[Beat] = [
     Beat(kind="intro_title",   duration=beats(5),
-         text="HYDERABAD",     text2="EIGHT EMPIRES"),
+         text="HYDERABAD",     text2="EIGHT EMPIRES · BY MSF"),
     Beat(kind="intro_setup",   duration=beats(4),
-         text="The builders",  text2="who shaped a skyline."),
+         text="Ranked by million",
+         text2="square feet built."),
 ] + [
     Beat(kind="empire", duration=beats(5), empire=e) for e in EMPIRES
 ] + [
-    Beat(kind="outro_caption", duration=beats(4),
+    Beat(kind="boutique_teaser", duration=beats(5),
+         text="MYSCAPE",
+         text2="Yoo Hyderabad · Jubilee Hills"),
+    Beat(kind="outro_caption", duration=beats(3),
          text="Brick by brick.",
          text2="Tower by tower."),
-    Beat(kind="cta", duration=beats(8),
+    Beat(kind="cta", duration=beats(7),
          text="FOLLOW",
          text2="@brandmint.studios"),
 ]
@@ -329,12 +340,14 @@ def render_intro_setup(beat: Beat, local: float, scale: float) -> str:
 def render_empire(beat: Beat, local: float, scale: float) -> str:
     """Per-builder slate. Layout:
 
-        HYDERABAD'S EMPIRES                          [#08]
-        ────                                         (huge serif rank)
+        HYDERABAD'S EMPIRES · BY MSF                 [#08]
+        ────                                         (huge mint rank)
 
         COMPANY
         NAME
         (big bold display, 2 lines)
+
+        87 MSF        ← big mint serif (the data anchor)
 
         ────
         Founder Name
@@ -365,7 +378,7 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
     rank_y = BAR_H + 240
 
     # Company name — left aligned, big bold sans, up to 2 lines
-    company_pt = 124
+    company_pt = 112
     # auto-shrink if any line is too wide
     max_company_w = W - 220
     while company_pt > 60 and any(
@@ -373,10 +386,14 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
     ):
         company_pt -= 6
     company_line_h = int(company_pt * 1.02)
-    company_start_y = BAR_H + 480
+    company_start_y = BAR_H + 440
 
-    # Gold rule
-    rule_y = company_start_y + company_line_h * len(e.company) + 60
+    # MSF stat — big serif callout below company name (the data anchor)
+    msf_pt = 124
+    msf_y = company_start_y + company_line_h * len(e.company) + 110
+
+    # Rule sits below the MSF callout
+    rule_y = msf_y + 80
 
     # Founder + est line
     meta_pt = 38
@@ -409,7 +426,7 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
         <!-- eyebrow -->
         <text x="100" y="{eyebrow_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{MINT}" letter-spacing="0.32em">HYDERABAD'S EMPIRES</text>
+              fill="{MINT}" letter-spacing="0.32em">HYDERABAD'S EMPIRES · BY MSF</text>
 
         <!-- huge rank numeral -->
         <text x="{rank_x}" y="{rank_y + drift:.0f}"
@@ -420,7 +437,7 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
               font-family="{FONT_MONO}" font-size="18" font-weight="700"
               fill="{PAPER_DIM}" text-anchor="end" letter-spacing="0.32em">RANK</text>
 
-        <!-- thin gold divider top-right -->
+        <!-- thin mint divider top-right -->
         <line x1="{rank_x - 240}" y1="{rank_y + 30 + drift:.0f}"
               x2="{rank_x}" y2="{rank_y + 30 + drift:.0f}"
               stroke="{MINT}" stroke-width="1" opacity="0.6"/>
@@ -428,7 +445,15 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
         <!-- company name (left) -->
         {''.join(company_lines)}
 
-        <!-- gold rule -->
+        <!-- MSF stat — the data anchor -->
+        <text x="100" y="{msf_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="{msf_pt}" font-weight="700"
+              fill="{MINT}" letter-spacing="-0.02em">{e.msf}</text>
+        <text x="100" y="{msf_y - msf_pt + 24 + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="16" font-weight="700"
+              fill="{PAPER_DIM}" letter-spacing="0.32em">TOTAL DEVELOPABLE AREA</text>
+
+        <!-- mint rule -->
         <line x1="100" y1="{rule_y + drift:.0f}"
               x2="380" y2="{rule_y + drift:.0f}"
               stroke="{MINT}" stroke-width="2"/>
@@ -445,6 +470,89 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
 
         <!-- signatures -->
         {''.join(sig_lines)}
+      </g>
+    """
+
+def render_boutique_teaser(beat: Beat, local: float, scale: float) -> str:
+    """Teaser slate for MySCAPE — boutique builders compete on ₹/sft, not
+    total msf. Same visual grammar as empire slates but no rank numeral
+    (replaced with a "→" arrow) and the metric label switches to ₹/SFT."""
+    op_in = min(1.0, local / 0.25)
+    op_out = 1.0 - max(0.0, (local - 0.85) / 0.15)
+    op = min(op_in, op_out)
+    drift = lerp(20, -20, ease_in_out(local))
+
+    company = ["MYSCAPE", "PROPERTIES"]
+    company_pt = 112
+    company_start_y = BAR_H + 440
+    company_line_h = int(company_pt * 1.02)
+
+    arrow_pt = 200
+    arrow_x = W - 110
+    arrow_y = BAR_H + 240
+
+    metric_y = company_start_y + company_line_h * len(company) + 110
+    metric_pt = 124
+
+    rule_y = metric_y + 80
+    meta_pt = 38
+    project_y = rule_y + 70
+    loc_y = project_y + 50
+
+    next_y = loc_y + 130
+
+    company_lines = []
+    for i, line in enumerate(company):
+        company_lines.append(
+            f'<text x="100" y="{company_start_y + i * company_line_h + drift:.0f}" '
+            f'font-family="{FONT_DISPLAY}" font-size="{company_pt}" font-weight="900" '
+            f'fill="{PAPER}" letter-spacing="-0.01em">{line}</text>'
+        )
+
+    return f"""
+      <g opacity="{op:.3f}">
+        <text x="100" y="{BAR_H + 80 + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="22" font-weight="700"
+              fill="{MINT}" letter-spacing="0.32em">THE  BOUTIQUE  KINGS</text>
+
+        <!-- arrow instead of rank -->
+        <text x="{arrow_x}" y="{arrow_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="{arrow_pt}" font-weight="700"
+              fill="{MINT}" text-anchor="end"
+              opacity="0.95">→</text>
+        <text x="{arrow_x}" y="{arrow_y - arrow_pt + 30 + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="18" font-weight="700"
+              fill="{PAPER_DIM}" text-anchor="end" letter-spacing="0.32em">EP 04</text>
+        <line x1="{arrow_x - 240}" y1="{arrow_y + 30 + drift:.0f}"
+              x2="{arrow_x}" y2="{arrow_y + 30 + drift:.0f}"
+              stroke="{MINT}" stroke-width="1" opacity="0.6"/>
+
+        {''.join(company_lines)}
+
+        <!-- alternate metric: ₹/sft (not msf) -->
+        <text x="100" y="{metric_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="{metric_pt}" font-weight="700"
+              fill="{MINT}" letter-spacing="-0.02em">PREMIUM</text>
+        <text x="100" y="{metric_y - metric_pt + 24 + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="16" font-weight="700"
+              fill="{PAPER_DIM}" letter-spacing="0.32em">RANKED BY ₹/SFT · NOT MSF</text>
+
+        <line x1="100" y1="{rule_y + drift:.0f}"
+              x2="380" y2="{rule_y + drift:.0f}"
+              stroke="{MINT}" stroke-width="2"/>
+
+        <text x="100" y="{project_y + drift:.0f}"
+              font-family="{FONT_DISPLAY}" font-size="{meta_pt}" font-weight="700"
+              fill="{PAPER}" letter-spacing="0.02em">Yoo Hyderabad</text>
+        <text x="100" y="{loc_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="22" font-weight="700"
+              fill="{PAPER_DIM}" letter-spacing="0.18em">
+          JUBILEE HILLS  ·  EST. 2012
+        </text>
+
+        <text x="100" y="{next_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="34" font-weight="700"
+              fill="{MINT_2}" font-style="italic">▸  Full episode next month</text>
       </g>
     """
 
@@ -581,6 +689,8 @@ def compose_svg(t_sec: float, frame_idx: int) -> str:
         content = render_intro_setup(beat, local, scale)
     elif beat.kind == "empire":
         content = render_empire(beat, local, scale)
+    elif beat.kind == "boutique_teaser":
+        content = render_boutique_teaser(beat, local, scale)
     elif beat.kind == "outro_caption":
         content = render_outro_caption(beat, local, scale)
     elif beat.kind == "cta":
@@ -642,7 +752,7 @@ def synth_audio(out_wav: Path) -> None:
     impacts = np.zeros(n)
     cursor = 0.0
     for b in BEATS:
-        if b.kind in ("intro_title", "empire", "cta"):
+        if b.kind in ("intro_title", "empire", "boutique_teaser", "cta"):
             i = int(cursor * sr)
             dur = int(0.45 * sr)
             if i + dur <= n:
