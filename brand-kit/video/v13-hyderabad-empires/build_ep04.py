@@ -488,7 +488,7 @@ def render_pillars(beat: Beat, local: float, scale: float) -> str:
     pillars = [
         ("01", "UNCOMPROMISING", "Quality Standards"),
         ("02", "SUSTAINABLE", "Building Practices"),
-        ("03", "EXPERIENCED", "& Skilled Team"),
+        ("03", "EXPERIENCED", "and Skilled Team"),
         ("04", "TIMELY", "Project Delivery"),
     ]
 
