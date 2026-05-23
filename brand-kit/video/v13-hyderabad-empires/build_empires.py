@@ -163,6 +163,8 @@ class Beat:
 #   59 × 0.75s = ~44s ✓ good Reel length
 
 BEATS: List[Beat] = [
+    Beat(kind="splash",        duration=beats(1.6),
+         text="Can you rank",  text2="builders?"),
     Beat(kind="intro_title",   duration=beats(5),
          text="HYDERABAD",     text2="EIGHT EMPIRES · BY MSF"),
     Beat(kind="intro_setup",   duration=beats(4),
@@ -270,6 +272,53 @@ def chrome_overlay(intro_t: float) -> str:
     """
 
 # ------------------------------------------------------ scene renderers ---
+
+def render_splash(beat: Beat, local: float, scale: float) -> str:
+    """Held cover splash for ~1.2s at the start of the reel.
+
+    This is the frame IG's feed shows BEFORE the user taps play — so
+    it acts as a baked-in thumbnail (insurance against IG not picking up
+    the custom cover JPG). Composition matches cover-question.jpg.
+
+    Subtle 1.0 → 1.02 breathing scale + soft fade-out in the last 15%
+    so the cut to the intro feels intentional, not abrupt.
+    """
+    cx = W // 2
+    # subtle breathing on the mint accent
+    pulse = 1.0 + 0.015 * math.sin(local * math.pi * 1.6)
+    # gentle fade-out at the very end so the transition to intro is smooth
+    op = 1.0 if local < 0.85 else max(0.0, 1.0 - (local - 0.85) / 0.15)
+
+    big_pt = int(142 * pulse)
+
+    return f"""
+      <g opacity="{op:.3f}">
+        <text x="{cx}" y="500" font-family="{FONT_MONO}" font-size="24"
+              font-weight="700" fill="{MINT}" text-anchor="middle"
+              letter-spacing="0.36em">HYDERABAD'S EMPIRES</text>
+        <line x1="{cx - 70}" y1="530" x2="{cx + 70}" y2="530"
+              stroke="{MINT}" stroke-width="2"/>
+
+        <text x="{cx}" y="730" font-family="{FONT_SERIF}" font-size="108"
+              font-weight="700" fill="{PAPER}" text-anchor="middle"
+              font-style="italic">{beat.text}</text>
+        <text x="{cx}" y="850" font-family="{FONT_SERIF}" font-size="108"
+              font-weight="700" fill="{PAPER}" text-anchor="middle"
+              font-style="italic">Hyderabad's</text>
+        <text x="{cx}" y="1000" font-family="{FONT_DISPLAY}" font-size="{big_pt}"
+              font-weight="900" fill="{MINT}" text-anchor="middle"
+              letter-spacing="-0.01em">8 BIGGEST</text>
+        <text x="{cx}" y="1120" font-family="{FONT_SERIF}" font-size="108"
+              font-weight="700" fill="{PAPER}" text-anchor="middle"
+              font-style="italic">{beat.text2}</text>
+
+        <line x1="{cx - 60}" y1="1230" x2="{cx + 60}" y2="1230"
+              stroke="{MINT}" stroke-width="2"/>
+        <text x="{cx}" y="1300" font-family="{FONT_MONO}" font-size="22"
+              font-weight="700" fill="{PAPER_DIM}" text-anchor="middle"
+              letter-spacing="0.36em">RANKED BY MILLION SQ FT</text>
+      </g>
+    """
 
 def render_intro_title(beat: Beat, local: float, scale: float) -> str:
     """Big serif HYDERABAD with letter-by-letter reveal, then EIGHT EMPIRES
@@ -704,12 +753,16 @@ def compose_svg(t_sec: float, frame_idx: int) -> str:
 
     # Slow push-in per beat — scale grows 1.0 → 1.06 across each scene.
     scale = lerp(1.0, 1.06, local)
-    intro_t = min(1.0, t_sec / 0.6)
+    # Chrome fades in only AFTER the splash so the cover frame stays clean.
+    splash_dur = BEATS[0].duration if BEATS and BEATS[0].kind == "splash" else 0.0
+    intro_t = max(0.0, min(1.0, (t_sec - splash_dur) / 0.6))
 
     bg = background(scale)
-    chrome = chrome_overlay(intro_t)
+    chrome = "" if beat.kind == "splash" else chrome_overlay(intro_t)
 
-    if beat.kind == "intro_title":
+    if beat.kind == "splash":
+        content = render_splash(beat, local, scale)
+    elif beat.kind == "intro_title":
         content = render_intro_title(beat, local, scale)
     elif beat.kind == "intro_setup":
         content = render_intro_setup(beat, local, scale)
