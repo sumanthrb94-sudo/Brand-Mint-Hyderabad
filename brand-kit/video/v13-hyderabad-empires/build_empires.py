@@ -867,24 +867,51 @@ def synth_audio(out_wav: Path) -> None:
 # --------------------------------------------------------------- mux ---
 
 def mux_video(out_mp4: Path, with_audio: bool) -> None:
-    cmd_video = [
+    """Mux the rendered PNG frames + audio into an MP4 with an embedded
+    cover image (attached_pic) so Android Gallery / WhatsApp / Telegram /
+    IG upload-preview show the splash cover as the thumbnail rather than
+    auto-sampling a random middle frame."""
+    cover = OUT / "covers" / "cover-question.jpg"
+
+    cmd = [
         "ffmpeg", "-y",
         "-framerate", str(FPS),
         "-i", str(FRAMES / "f%05d.png"),
     ]
-    audio_args: List[str] = []
     if with_audio:
-        audio_args = ["-i", str(OUT / "_audio.wav"),
-                      "-c:a", "aac", "-b:a", "192k", "-ac", "2"]
-    cmd = cmd_video + audio_args + [
-        "-c:v", "libx264", "-pix_fmt", "yuv420p",
-        "-profile:v", "high", "-level", "4.0",
+        cmd += ["-i", str(OUT / "_audio.wav")]
+    if cover.exists():
+        cmd += ["-i", str(cover)]
+
+    cmd += ["-map", "0:v:0"]
+    if with_audio:
+        cmd += ["-map", "1:a:0"]
+    if cover.exists():
+        cover_input_idx = 2 if with_audio else 1
+        cmd += ["-map", f"{cover_input_idx}:v:0"]
+
+    cmd += [
+        "-c:v:0", "libx264", "-pix_fmt:v:0", "yuv420p",
+        "-profile:v:0", "high", "-level:v:0", "4.0",
         "-crf", "18", "-preset", "medium",
-        "-movflags", "+faststart",
-        "-shortest" if with_audio else "-y",
-        str(out_mp4),
     ]
-    print(f"  muxing → {out_mp4.name}")
+    if with_audio:
+        cmd += ["-c:a", "aac", "-b:a", "192k", "-ac", "2"]
+    if cover.exists():
+        # mjpeg encoder needs the JPEG-range pixel format
+        cmd += ["-c:v:1", "mjpeg",
+                "-pix_fmt:v:1", "yuvj420p",
+                "-disposition:v:1", "attached_pic"]
+
+    cmd += ["-movflags", "+faststart"]
+    # -shortest would clip to the 1-frame cover; skip it when a cover is
+    # attached. Video and audio already match by design.
+    if with_audio and not cover.exists():
+        cmd += ["-shortest"]
+    cmd += [str(out_mp4)]
+
+    print(f"  muxing → {out_mp4.name}"
+          + ("  (+cover embedded)" if cover.exists() else ""))
     subprocess.run(cmd, check=True, capture_output=True)
 
 # ---------------------------------------------------------------- main ---
