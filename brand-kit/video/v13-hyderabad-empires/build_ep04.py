@@ -299,7 +299,7 @@ def render_founders_award(beat: Beat, local: float, scale: float) -> str:
               font-family="{FONT_SERIF}" font-size="48" font-weight="700"
               fill="{ROSE}" text-anchor="middle"
               font-style="italic" letter-spacing="0.01em">
-          The visionary boutique
+          The new vanguard
         </text>
 
         <!-- Founders -->
