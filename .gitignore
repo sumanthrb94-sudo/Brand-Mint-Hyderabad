@@ -9,3 +9,4 @@ dist/
 __pycache__/
 *.pyc
 brand-kit/video/*/frames/
+brand-kit/video/*/frames_*/
