@@ -51,15 +51,17 @@ BEAT_SEC = 60.0 / BPM
 def beats(n: float) -> float:
     return n * BEAT_SEC
 
-# Habitat.uae palette — warm black, cream, gold.
-INK = "#0a0908"
-INK_2 = "#13110f"
-INK_3 = "#1a1714"
-CREAM = "#f0e6d2"
-CREAM_DIM = "#a89a82"
-GOLD = "#c9a961"
-GOLD_DEEP = "#8a7a45"
-MUTE = "#5a5145"
+# Habitat.uae editorial frame · BrandMint palette.
+# Warm-black ground + cream display + signature mint accent (no gold).
+INK = "#070a09"
+INK_2 = "#10171a"
+INK_3 = "#1a2024"
+PAPER = "#f5f1ea"          # cream display text
+PAPER_DIM = "#a3b2ac"      # muted cool-cream for meta lines
+MINT = "#10b981"           # BrandMint signature
+MINT_2 = "#7cf6c8"          # bright highlight
+MINT_4 = "#047857"          # deep mint (vignette, deep accent)
+MUTE = "#5d7368"
 
 FONT_DISPLAY = "DejaVu Sans, Inter, system-ui, sans-serif"
 FONT_SERIF = "DejaVu Serif, Georgia, serif"
@@ -207,14 +209,14 @@ def background(scale: float, warm: float = 1.0) -> str:
           <stop offset="100%" stop-color="{INK}"/>
         </linearGradient>
         <radialGradient id="glow" cx="0.5" cy="0.4" r="{radius:.3f}">
-          <stop offset="0%" stop-color="{GOLD}" stop-opacity="{glow_op:.3f}"/>
-          <stop offset="55%" stop-color="{GOLD_DEEP}" stop-opacity="{glow_op * 0.3:.3f}"/>
+          <stop offset="0%" stop-color="{MINT}" stop-opacity="{glow_op:.3f}"/>
+          <stop offset="55%" stop-color="{MINT_4}" stop-opacity="{glow_op * 0.3:.3f}"/>
           <stop offset="100%" stop-color="{INK}" stop-opacity="0"/>
         </radialGradient>
         <pattern id="grain" x="0" y="0" width="3" height="3"
                  patternUnits="userSpaceOnUse">
           <rect width="3" height="3" fill="{INK}"/>
-          <circle cx="1.5" cy="1.5" r="0.4" fill="{CREAM}" opacity="0.04"/>
+          <circle cx="1.5" cy="1.5" r="0.4" fill="{PAPER}" opacity="0.04"/>
         </pattern>
       </defs>
       <rect width="{W}" height="{H}" fill="url(#bg)"/>
@@ -227,9 +229,9 @@ def background(scale: float, warm: float = 1.0) -> str:
 
       <!-- thin gold hairlines beneath bars -->
       <line x1="0" y1="{BAR_H}" x2="{W}" y2="{BAR_H}"
-            stroke="{GOLD}" stroke-opacity="0.25" stroke-width="1"/>
+            stroke="{MINT}" stroke-opacity="0.25" stroke-width="1"/>
       <line x1="0" y1="{H - BAR_H}" x2="{W}" y2="{H - BAR_H}"
-            stroke="{GOLD}" stroke-opacity="0.25" stroke-width="1"/>
+            stroke="{MINT}" stroke-opacity="0.25" stroke-width="1"/>
     """
 
 def chrome_overlay(intro_t: float) -> str:
@@ -237,19 +239,19 @@ def chrome_overlay(intro_t: float) -> str:
     return f"""
       <g opacity="{op:.3f}">
         <text x="64" y="68" font-family="{FONT_MONO}" font-size="20"
-              font-weight="700" letter-spacing="0.22em" fill="{CREAM}"
+              font-weight="700" letter-spacing="0.22em" fill="{PAPER}"
               opacity="0.72">@brandmint.studios</text>
         <text x="{W - 64}" y="68" font-family="{FONT_MONO}" font-size="20"
-              font-weight="700" letter-spacing="0.22em" fill="{GOLD}"
+              font-weight="700" letter-spacing="0.22em" fill="{MINT}"
               text-anchor="end" opacity="0.72">EDITORIAL · 2026</text>
       </g>
       <g opacity="{op * 0.72:.3f}">
         <text x="64" y="{H - 40}" font-family="{FONT_MONO}" font-size="16"
-              font-weight="700" letter-spacing="0.22em" fill="{CREAM_DIM}">
+              font-weight="700" letter-spacing="0.22em" fill="{PAPER_DIM}">
           SOURCES · PUBLIC RECORDS
         </text>
         <text x="{W - 64}" y="{H - 40}" font-family="{FONT_MONO}" font-size="16"
-              font-weight="700" letter-spacing="0.22em" fill="{CREAM_DIM}"
+              font-weight="700" letter-spacing="0.22em" fill="{PAPER_DIM}"
               text-anchor="end">
           v13 · HYDERABAD
         </text>
@@ -287,16 +289,16 @@ def render_intro_title(beat: Beat, local: float, scale: float) -> str:
     return f"""
       <text x="{W//2}" y="{title_y + drift:.0f}"
             font-family="{FONT_SERIF}" font-size="{pt}" font-weight="700"
-            fill="{CREAM}" text-anchor="middle"
+            fill="{PAPER}" text-anchor="middle"
             letter-spacing="0.04em">{shown}</text>
 
       <g opacity="{sub_op:.3f}">
         <line x1="{W//2 - 80}" y1="{sub_y - 60}"
               x2="{W//2 + 80}" y2="{sub_y - 60}"
-              stroke="{GOLD}" stroke-width="1.5"/>
+              stroke="{MINT}" stroke-width="1.5"/>
         <text x="{W//2}" y="{sub_y}"
               font-family="{FONT_DISPLAY}" font-size="{sub_pt}"
-              font-weight="700" fill="{GOLD}" text-anchor="middle"
+              font-weight="700" fill="{MINT}" text-anchor="middle"
               letter-spacing="{sub_letter_spacing}">{sub}</text>
       </g>
     """
@@ -315,11 +317,11 @@ def render_intro_setup(beat: Beat, local: float, scale: float) -> str:
       <g opacity="{op:.3f}">
         <text x="{W//2}" y="{cy - line_h // 2 + pt // 2}"
               font-family="{FONT_SERIF}" font-size="{pt}" font-weight="700"
-              fill="{CREAM}" text-anchor="middle" letter-spacing="0.02em"
+              fill="{PAPER}" text-anchor="middle" letter-spacing="0.02em"
               font-style="italic">{beat.text}</text>
         <text x="{W//2}" y="{cy + line_h // 2 + pt // 2}"
               font-family="{FONT_SERIF}" font-size="{pt}" font-weight="700"
-              fill="{CREAM}" text-anchor="middle" letter-spacing="0.02em"
+              fill="{PAPER}" text-anchor="middle" letter-spacing="0.02em"
               font-style="italic">{beat.text2}</text>
       </g>
     """
@@ -389,7 +391,7 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
         sig_lines.append(
             f'<text x="110" y="{sig_start_y + i * 56 + drift:.0f}" '
             f'font-family="{FONT_SERIF}" font-size="{sig_pt}" font-weight="700" '
-            f'fill="{CREAM}" letter-spacing="0.01em" '
+            f'fill="{PAPER}" letter-spacing="0.01em" '
             f'font-style="italic">▸  {proj}</text>'
         )
 
@@ -399,7 +401,7 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
         company_lines.append(
             f'<text x="100" y="{company_start_y + i * company_line_h + drift:.0f}" '
             f'font-family="{FONT_DISPLAY}" font-size="{company_pt}" font-weight="900" '
-            f'fill="{CREAM}" letter-spacing="-0.01em">{line}</text>'
+            f'fill="{PAPER}" letter-spacing="-0.01em">{line}</text>'
         )
 
     return f"""
@@ -407,21 +409,21 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
         <!-- eyebrow -->
         <text x="100" y="{eyebrow_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{GOLD}" letter-spacing="0.32em">HYDERABAD'S EMPIRES</text>
+              fill="{MINT}" letter-spacing="0.32em">HYDERABAD'S EMPIRES</text>
 
         <!-- huge rank numeral -->
         <text x="{rank_x}" y="{rank_y + drift:.0f}"
               font-family="{FONT_SERIF}" font-size="{rank_pt}" font-weight="700"
-              fill="{GOLD}" text-anchor="end" letter-spacing="-0.02em"
+              fill="{MINT}" text-anchor="end" letter-spacing="-0.02em"
               opacity="0.95">{rank_str}</text>
         <text x="{rank_x}" y="{rank_y - rank_pt + 30 + drift:.0f}"
               font-family="{FONT_MONO}" font-size="18" font-weight="700"
-              fill="{CREAM_DIM}" text-anchor="end" letter-spacing="0.32em">RANK</text>
+              fill="{PAPER_DIM}" text-anchor="end" letter-spacing="0.32em">RANK</text>
 
         <!-- thin gold divider top-right -->
         <line x1="{rank_x - 240}" y1="{rank_y + 30 + drift:.0f}"
               x2="{rank_x}" y2="{rank_y + 30 + drift:.0f}"
-              stroke="{GOLD}" stroke-width="1" opacity="0.6"/>
+              stroke="{MINT}" stroke-width="1" opacity="0.6"/>
 
         <!-- company name (left) -->
         {''.join(company_lines)}
@@ -429,15 +431,15 @@ def render_empire(beat: Beat, local: float, scale: float) -> str:
         <!-- gold rule -->
         <line x1="100" y1="{rule_y + drift:.0f}"
               x2="380" y2="{rule_y + drift:.0f}"
-              stroke="{GOLD}" stroke-width="2"/>
+              stroke="{MINT}" stroke-width="2"/>
 
         <!-- founder + est -->
         <text x="100" y="{founder_y + drift:.0f}"
               font-family="{FONT_DISPLAY}" font-size="{meta_pt}" font-weight="700"
-              fill="{CREAM}" letter-spacing="0.02em">{e.founder}</text>
+              fill="{PAPER}" letter-spacing="0.02em">{e.founder}</text>
         <text x="100" y="{est_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{CREAM_DIM}" letter-spacing="0.18em">
+              fill="{PAPER_DIM}" letter-spacing="0.18em">
           {e.est.upper()}  ·  {e.hq.upper()}
         </text>
 
@@ -459,11 +461,11 @@ def render_outro_caption(beat: Beat, local: float, scale: float) -> str:
       <g opacity="{op:.3f}">
         <text x="{W//2}" y="{cy - 30}"
               font-family="{FONT_SERIF}" font-size="{pt}" font-weight="700"
-              fill="{CREAM}" text-anchor="middle"
+              fill="{PAPER}" text-anchor="middle"
               font-style="italic">{beat.text}</text>
         <text x="{W//2}" y="{cy + 80}"
               font-family="{FONT_SERIF}" font-size="{pt}" font-weight="700"
-              fill="{GOLD}" text-anchor="middle"
+              fill="{MINT}" text-anchor="middle"
               font-style="italic">{beat.text2}</text>
       </g>
     """
@@ -511,50 +513,50 @@ def render_cta(beat: Beat, local: float, scale: float) -> str:
         <!-- top: episode marker -->
         <text x="{W//2}" y="{BAR_H + 100}"
               font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{GOLD}" text-anchor="middle" letter-spacing="0.32em">
+              fill="{MINT}" text-anchor="middle" letter-spacing="0.32em">
           EPISODE  01  OF
         </text>
 
         <!-- series wordmark -->
         <text x="{W//2}" y="{series_y_top}"
               font-family="{FONT_SERIF}" font-size="{series_pt}"
-              font-weight="700" fill="{CREAM}" text-anchor="middle"
+              font-weight="700" fill="{PAPER}" text-anchor="middle"
               letter-spacing="0.02em">HYDERABAD'S</text>
         <text x="{W//2}" y="{series_y_top + 100}"
               font-family="{FONT_SERIF}" font-size="{series_pt}"
-              font-weight="700" fill="{CREAM}" text-anchor="middle"
+              font-weight="700" fill="{PAPER}" text-anchor="middle"
               letter-spacing="0.02em">EMPIRES</text>
 
         <!-- gold divider -->
         <line x1="{W//2 - 80}" y1="{series_y_top + 180}"
               x2="{W//2 + 80}" y2="{series_y_top + 180}"
-              stroke="{GOLD}" stroke-width="2"/>
+              stroke="{MINT}" stroke-width="2"/>
 
         <!-- FOLLOW (huge, pulsing) -->
         <text x="{W//2}" y="{follow_y}"
               font-family="{FONT_DISPLAY}" font-size="{follow_pt}"
-              font-weight="900" fill="{GOLD}" text-anchor="middle"
+              font-weight="900" fill="{MINT}" text-anchor="middle"
               letter-spacing="0.04em">{beat.text}</text>
 
         <!-- handle -->
         <text x="{W//2}" y="{handle_y}"
               font-family="{FONT_MONO}" font-size="{handle_pt}"
-              font-weight="700" fill="{CREAM}" text-anchor="middle"
+              font-weight="700" fill="{PAPER}" text-anchor="middle"
               letter-spacing="0.04em">{beat.text2}</text>
 
         <!-- incentive: for Episode 02 → -->
         <text x="{W//2}" y="{incentive_y}"
               font-family="{FONT_SERIF}" font-size="{incentive_pt}"
-              font-weight="700" fill="{CREAM_DIM}" text-anchor="middle"
+              font-weight="700" fill="{PAPER_DIM}" text-anchor="middle"
               font-style="italic">for Episode 02  ▸</text>
 
         <!-- teaser footer -->
         <line x1="{W//2 - 220}" y1="{teaser_y - 30}"
               x2="{W//2 + 220}" y2="{teaser_y - 30}"
-              stroke="{GOLD}" stroke-opacity="0.4" stroke-width="1"/>
+              stroke="{MINT}" stroke-opacity="0.4" stroke-width="1"/>
         <text x="{W//2}" y="{teaser_y}"
               font-family="{FONT_MONO}" font-size="18"
-              font-weight="700" fill="{CREAM_DIM}" text-anchor="middle"
+              font-weight="700" fill="{PAPER_DIM}" text-anchor="middle"
               letter-spacing="0.22em">
           NEXT  ·  TELUGU  TITANS  ·  NATIONAL  GIANTS
         </text>
