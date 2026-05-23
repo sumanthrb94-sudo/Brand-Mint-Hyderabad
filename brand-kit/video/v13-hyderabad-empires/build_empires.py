@@ -132,7 +132,7 @@ EMPIRES: List[Empire] = [
     Empire(rank=7, name=["RAJAPUSHPA", "PROPERTIES"],
            founder="Parupati Brothers", founded=2006,
            hq="KOKAPET · HYD",
-           price="₹8.5-12.5K", projects="3.5M SFT · 4M UC",
+           price="₹8.5-12.5K", projects="7+ DELIVERED · 4 BROTHERS",
            angle="The Four-Brothers Empire",
            key_project="Rajapushpa West Avenue · Kokapet"),
 
@@ -167,7 +167,7 @@ EMPIRES: List[Empire] = [
     Empire(rank=2, name=["MY HOME", "GROUP"],
            founder="Dr. J. Rameswar Rao", founded=1981,
            hq="HYDERABAD",
-           price="₹7.5-11K", projects="37M SFT DELIVERED",
+           price="₹7.5-11K", projects="44 YEARS · ₹4,000Cr TURNOVER",
            angle="The Hyderabad Original",
            key_project="My Home Bhooja · Hi-Tech City"),
 
