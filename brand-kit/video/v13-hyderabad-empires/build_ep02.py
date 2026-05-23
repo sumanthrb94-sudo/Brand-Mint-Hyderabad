@@ -163,18 +163,17 @@ class Beat:
     text2: str = ""
     empire: Optional[Empire] = None
 
-# Target ~27s at 80 BPM — short-form pace.
-#   splash 2b + 5×5.5b empire + closer 6b = 35.5 beats × 0.75s ≈ 26.6s ✓
-# Intro_title + intro_setup beats from the 55s cut were dropped; the
-# splash already establishes the episode framing.
+# Short cut for IG short-form — average view time is ~6s. Empire
+# slates trimmed to 3.3b each, closer 4b. Splash holds episode framing.
+#   splash 1.5b + 5×3.3b empire + closer 4b = 22.0 beats × 0.75s ≈ 16.5s ✓
 BEATS: List[Beat] = [
-    Beat(kind="splash",        duration=beats(2.0),
+    Beat(kind="splash",        duration=beats(1.5),
          text="Before the towers,",
          text2="builders."),
 ] + [
-    Beat(kind="empire", duration=beats(5.5), empire=e) for e in EMPIRES
+    Beat(kind="empire", duration=beats(3.3), empire=e) for e in EMPIRES
 ] + [
-    Beat(kind="closer", duration=beats(6),
+    Beat(kind="closer", duration=beats(4),
          text="Now you know.",
          text2="THE 13 TITANS · 2026"),
 ]

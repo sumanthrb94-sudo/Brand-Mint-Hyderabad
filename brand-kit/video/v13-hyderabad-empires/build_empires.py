@@ -189,30 +189,17 @@ class Beat:
     text2: str = ""
     empire: Optional[Empire] = None
 
-# Total runtime at 80 BPM:
-#   intro 4b + setup 3b + 8×4b empire + outro 4b + cta 4b = 47 beats
-#   47 × 0.75s = ~35s  (a touch tight — bump empire to 5b each)
-#   intro 5b + setup 4b + 8×5b empire + outro 5b + cta 5b = 59 beats
-#   59 × 0.75s = ~44s ✓ good Reel length
-
+# Short cut for IG short-form — average view time is ~6s, so all
+# intro/teaser/outro beats are dropped. Splash carries the framing,
+# 8 empire slates flash in countdown, cta closes with the follow ask.
+#   splash 2b + 8×2.2b empire + cta 3b = 22.6 beats × 0.75s ≈ 17.0s ✓
 BEATS: List[Beat] = [
-    Beat(kind="splash",        duration=beats(1.6),
+    Beat(kind="splash",        duration=beats(2.0),
          text="Can you rank",  text2="builders?"),
-    Beat(kind="intro_title",   duration=beats(5),
-         text="HYDERABAD",     text2="THE TOP EIGHT · 2026"),
-    Beat(kind="intro_setup",   duration=beats(4),
-         text="Ranked by sales,",
-         text2="scale, and story."),
 ] + [
-    Beat(kind="empire", duration=beats(6), empire=e) for e in EMPIRES
+    Beat(kind="empire", duration=beats(2.2), empire=e) for e in EMPIRES
 ] + [
-    Beat(kind="boutique_teaser", duration=beats(5),
-         text="THE HERITAGE",
-         text2="SMR · MODI · ADITYA · SRI ADITYA · RAMKY"),
-    Beat(kind="outro_caption", duration=beats(3),
-         text="Eight empires.",
-         text2="One skyline."),
-    Beat(kind="cta", duration=beats(7),
+    Beat(kind="cta", duration=beats(3),
          text="FOLLOW",
          text2="@brandmint.studios"),
 ]
