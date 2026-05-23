@@ -338,221 +338,247 @@ def render_intro_setup(beat: Beat, local: float, scale: float) -> str:
     """
 
 def render_empire(beat: Beat, local: float, scale: float) -> str:
-    """Per-builder slate. Layout:
+    """Per-builder slate — CENTRE-ALIGNED for Instagram Reel safe-zone.
+    Meta's UI eats top 420px (username, follow button) and bottom ~420px
+    (like/comment/share + caption preview), so all content lives in the
+    centre 1080px (Y≈460 → Y≈1500), centred horizontally.
 
-        HYDERABAD'S EMPIRES · BY MSF                 [#08]
-        ────                                         (huge mint rank)
-
-        COMPANY
-        NAME
-        (big bold display, 2 lines)
-
-        87 MSF        ← big mint serif (the data anchor)
-
-        ────
-        Founder Name
-        Est. YYYY · Hyderabad
-
-        ▸ Signature Project A
-        ▸ Signature Project B
+    Layout (top → bottom):
+        eyebrow            HYDERABAD'S EMPIRES · BY MSF
+        small mint rule    ───
+        rank numeral       #01    (huge mint serif)
+        RANK label
+        company display    MY HOME GROUP
+        msf data anchor    87 MSF
+        TOTAL DEVELOPABLE AREA
+        mint rule          ───
+        founder            Jupally Rameswara Rao
+        est line           EST. 1981 · HYDERABAD
+        signature line     My Home Bhooja  ·  Krishe Sapphire
     """
     e = beat.empire
     if e is None:
         return ""
 
-    # Fade in over 25%, hold, fade out over last 15%
     op_in = min(1.0, local / 0.25)
     op_out = 1.0 - max(0.0, (local - 0.85) / 0.15)
     op = min(op_in, op_out)
+    drift = lerp(14, -14, ease_in_out(local))
+    cx = W // 2
 
-    # Slow upward drift for the whole slate
-    drift = lerp(20, -20, ease_in_out(local))
+    # ----- centred block geometry -----
+    eyebrow_y = 470
+    eyebrow_rule_y = eyebrow_y + 22
 
-    # Top eyebrow
-    eyebrow_y = BAR_H + 80
+    rank_pt = 168
+    rank_y = eyebrow_rule_y + rank_pt + 30
+    rank_label_y = rank_y + 30
 
-    # Rank — huge serif, top-right
-    rank_str = f"#{e.rank:02d}"
-    rank_pt = 200
-    rank_x = W - 110
-    rank_y = BAR_H + 240
-
-    # Company name — left aligned, big bold sans, up to 2 lines
-    company_pt = 112
-    # auto-shrink if any line is too wide
-    max_company_w = W - 220
+    # Company display — center-aligned, auto-shrink to fit safe width
+    safe_w = W - 200
+    company_pt = 108
     while company_pt > 60 and any(
-        measure(line, company_pt) > max_company_w for line in e.company
+        measure(line, company_pt) > safe_w for line in e.company
     ):
         company_pt -= 6
     company_line_h = int(company_pt * 1.02)
-    company_start_y = BAR_H + 440
+    company_block_h = company_line_h * len(e.company)
+    company_top = rank_label_y + 60
+    company_baseline_first = company_top + int(company_pt * 0.92)
 
-    # MSF stat — big serif callout below company name (the data anchor)
+    # MSF — the data anchor
     msf_pt = 124
-    msf_y = company_start_y + company_line_h * len(e.company) + 110
+    msf_label_y = company_top + company_block_h + 50
+    msf_y = msf_label_y + msf_pt - 8
 
-    # Rule sits below the MSF callout
-    rule_y = msf_y + 80
+    # Mint rule + founder + est + signature line
+    rule_y = msf_y + 60
+    founder_y = rule_y + 60
+    est_y = founder_y + 46
+    sig_y = est_y + 70
 
-    # Founder + est line
-    meta_pt = 38
-    founder_y = rule_y + 70
-    est_y = founder_y + 50
+    rank_str = f"#{e.rank:02d}"
 
-    # Signature bullets
-    sig_pt = 36
-    sig_start_y = est_y + 90
-    sig_lines = []
-    for i, proj in enumerate(e.signature or []):
-        sig_lines.append(
-            f'<text x="110" y="{sig_start_y + i * 56 + drift:.0f}" '
-            f'font-family="{FONT_SERIF}" font-size="{sig_pt}" font-weight="700" '
-            f'fill="{PAPER}" letter-spacing="0.01em" '
-            f'font-style="italic">▸  {proj}</text>'
-        )
-
-    # Company lines
+    # Company lines (centred)
     company_lines = []
     for i, line in enumerate(e.company):
         company_lines.append(
-            f'<text x="100" y="{company_start_y + i * company_line_h + drift:.0f}" '
+            f'<text x="{cx}" y="{company_baseline_first + i * company_line_h + drift:.0f}" '
             f'font-family="{FONT_DISPLAY}" font-size="{company_pt}" font-weight="900" '
-            f'fill="{PAPER}" letter-spacing="-0.01em">{line}</text>'
+            f'fill="{PAPER}" text-anchor="middle" letter-spacing="-0.01em">{line}</text>'
+        )
+
+    # Signature projects on one line, mid-dot separator
+    sig_line = "  ·  ".join(e.signature or [])
+
+    return f"""
+      <g opacity="{op:.3f}">
+        <!-- eyebrow -->
+        <text x="{cx}" y="{eyebrow_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="22" font-weight="700"
+              fill="{MINT}" text-anchor="middle" letter-spacing="0.32em">
+          HYDERABAD'S EMPIRES · BY MSF
+        </text>
+        <line x1="{cx - 50}" y1="{eyebrow_rule_y + drift:.0f}"
+              x2="{cx + 50}" y2="{eyebrow_rule_y + drift:.0f}"
+              stroke="{MINT}" stroke-width="1.5"/>
+
+        <!-- rank numeral, centred -->
+        <text x="{cx}" y="{rank_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="{rank_pt}" font-weight="700"
+              fill="{MINT}" text-anchor="middle" letter-spacing="-0.02em">
+          {rank_str}
+        </text>
+        <text x="{cx}" y="{rank_label_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="18" font-weight="700"
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.36em">
+          RANK
+        </text>
+
+        <!-- company display -->
+        {''.join(company_lines)}
+
+        <!-- msf anchor -->
+        <text x="{cx}" y="{msf_label_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="18" font-weight="700"
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.36em">
+          TOTAL DEVELOPABLE AREA
+        </text>
+        <text x="{cx}" y="{msf_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="{msf_pt}" font-weight="700"
+              fill="{MINT}" text-anchor="middle" letter-spacing="-0.02em">
+          {e.msf}
+        </text>
+
+        <!-- mint rule -->
+        <line x1="{cx - 60}" y1="{rule_y + drift:.0f}"
+              x2="{cx + 60}" y2="{rule_y + drift:.0f}"
+              stroke="{MINT}" stroke-width="2"/>
+
+        <!-- founder + est -->
+        <text x="{cx}" y="{founder_y + drift:.0f}"
+              font-family="{FONT_DISPLAY}" font-size="36" font-weight="700"
+              fill="{PAPER}" text-anchor="middle" letter-spacing="0.02em">
+          {e.founder}
+        </text>
+        <text x="{cx}" y="{est_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="20" font-weight="700"
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.24em">
+          {e.est.upper()}  ·  {e.hq.upper()}
+        </text>
+
+        <!-- signature projects on one line -->
+        <text x="{cx}" y="{sig_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="32" font-weight="700"
+              fill="{PAPER}" text-anchor="middle" font-style="italic">
+          {sig_line}
+        </text>
+      </g>
+    """
+
+def render_boutique_teaser(beat: Beat, local: float, scale: float) -> str:
+    """MySCAPE teaser — same centred grammar as empire slates but with a
+    "→ EP 04" arrow instead of a rank, and the metric switches from msf
+    to "PREMIUM (₹/sft)" to signal a different ranking lens."""
+    op_in = min(1.0, local / 0.25)
+    op_out = 1.0 - max(0.0, (local - 0.85) / 0.15)
+    op = min(op_in, op_out)
+    drift = lerp(14, -14, ease_in_out(local))
+    cx = W // 2
+
+    company = ["MYSCAPE", "PROPERTIES"]
+    company_pt = 108
+    safe_w = W - 200
+    while company_pt > 60 and any(
+        measure(line, company_pt) > safe_w for line in company
+    ):
+        company_pt -= 6
+    company_line_h = int(company_pt * 1.02)
+    company_block_h = company_line_h * len(company)
+
+    eyebrow_y = 470
+    eyebrow_rule_y = eyebrow_y + 22
+
+    arrow_pt = 168
+    arrow_y = eyebrow_rule_y + arrow_pt + 30
+    arrow_label_y = arrow_y + 30
+
+    company_top = arrow_label_y + 60
+    company_baseline_first = company_top + int(company_pt * 0.92)
+
+    metric_pt = 124
+    metric_label_y = company_top + company_block_h + 50
+    metric_y = metric_label_y + metric_pt - 8
+
+    rule_y = metric_y + 60
+    project_y = rule_y + 60
+    loc_y = project_y + 46
+    next_y = loc_y + 70
+
+    company_lines = []
+    for i, line in enumerate(company):
+        company_lines.append(
+            f'<text x="{cx}" y="{company_baseline_first + i * company_line_h + drift:.0f}" '
+            f'font-family="{FONT_DISPLAY}" font-size="{company_pt}" font-weight="900" '
+            f'fill="{PAPER}" text-anchor="middle" letter-spacing="-0.01em">{line}</text>'
         )
 
     return f"""
       <g opacity="{op:.3f}">
         <!-- eyebrow -->
-        <text x="100" y="{eyebrow_y + drift:.0f}"
+        <text x="{cx}" y="{eyebrow_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{MINT}" letter-spacing="0.32em">HYDERABAD'S EMPIRES · BY MSF</text>
-
-        <!-- huge rank numeral -->
-        <text x="{rank_x}" y="{rank_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="{rank_pt}" font-weight="700"
-              fill="{MINT}" text-anchor="end" letter-spacing="-0.02em"
-              opacity="0.95">{rank_str}</text>
-        <text x="{rank_x}" y="{rank_y - rank_pt + 30 + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="18" font-weight="700"
-              fill="{PAPER_DIM}" text-anchor="end" letter-spacing="0.32em">RANK</text>
-
-        <!-- thin mint divider top-right -->
-        <line x1="{rank_x - 240}" y1="{rank_y + 30 + drift:.0f}"
-              x2="{rank_x}" y2="{rank_y + 30 + drift:.0f}"
-              stroke="{MINT}" stroke-width="1" opacity="0.6"/>
-
-        <!-- company name (left) -->
-        {''.join(company_lines)}
-
-        <!-- MSF stat — the data anchor -->
-        <text x="100" y="{msf_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="{msf_pt}" font-weight="700"
-              fill="{MINT}" letter-spacing="-0.02em">{e.msf}</text>
-        <text x="100" y="{msf_y - msf_pt + 24 + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="16" font-weight="700"
-              fill="{PAPER_DIM}" letter-spacing="0.32em">TOTAL DEVELOPABLE AREA</text>
-
-        <!-- mint rule -->
-        <line x1="100" y1="{rule_y + drift:.0f}"
-              x2="380" y2="{rule_y + drift:.0f}"
-              stroke="{MINT}" stroke-width="2"/>
-
-        <!-- founder + est -->
-        <text x="100" y="{founder_y + drift:.0f}"
-              font-family="{FONT_DISPLAY}" font-size="{meta_pt}" font-weight="700"
-              fill="{PAPER}" letter-spacing="0.02em">{e.founder}</text>
-        <text x="100" y="{est_y + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{PAPER_DIM}" letter-spacing="0.18em">
-          {e.est.upper()}  ·  {e.hq.upper()}
+              fill="{MINT}" text-anchor="middle" letter-spacing="0.32em">
+          THE  BOUTIQUE  KINGS
         </text>
-
-        <!-- signatures -->
-        {''.join(sig_lines)}
-      </g>
-    """
-
-def render_boutique_teaser(beat: Beat, local: float, scale: float) -> str:
-    """Teaser slate for MySCAPE — boutique builders compete on ₹/sft, not
-    total msf. Same visual grammar as empire slates but no rank numeral
-    (replaced with a "→" arrow) and the metric label switches to ₹/SFT."""
-    op_in = min(1.0, local / 0.25)
-    op_out = 1.0 - max(0.0, (local - 0.85) / 0.15)
-    op = min(op_in, op_out)
-    drift = lerp(20, -20, ease_in_out(local))
-
-    company = ["MYSCAPE", "PROPERTIES"]
-    company_pt = 112
-    company_start_y = BAR_H + 440
-    company_line_h = int(company_pt * 1.02)
-
-    arrow_pt = 200
-    arrow_x = W - 110
-    arrow_y = BAR_H + 240
-
-    metric_y = company_start_y + company_line_h * len(company) + 110
-    metric_pt = 124
-
-    rule_y = metric_y + 80
-    meta_pt = 38
-    project_y = rule_y + 70
-    loc_y = project_y + 50
-
-    next_y = loc_y + 130
-
-    company_lines = []
-    for i, line in enumerate(company):
-        company_lines.append(
-            f'<text x="100" y="{company_start_y + i * company_line_h + drift:.0f}" '
-            f'font-family="{FONT_DISPLAY}" font-size="{company_pt}" font-weight="900" '
-            f'fill="{PAPER}" letter-spacing="-0.01em">{line}</text>'
-        )
-
-    return f"""
-      <g opacity="{op:.3f}">
-        <text x="100" y="{BAR_H + 80 + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{MINT}" letter-spacing="0.32em">THE  BOUTIQUE  KINGS</text>
+        <line x1="{cx - 50}" y1="{eyebrow_rule_y + drift:.0f}"
+              x2="{cx + 50}" y2="{eyebrow_rule_y + drift:.0f}"
+              stroke="{MINT}" stroke-width="1.5"/>
 
         <!-- arrow instead of rank -->
-        <text x="{arrow_x}" y="{arrow_y + drift:.0f}"
+        <text x="{cx}" y="{arrow_y + drift:.0f}"
               font-family="{FONT_SERIF}" font-size="{arrow_pt}" font-weight="700"
-              fill="{MINT}" text-anchor="end"
-              opacity="0.95">→</text>
-        <text x="{arrow_x}" y="{arrow_y - arrow_pt + 30 + drift:.0f}"
+              fill="{MINT}" text-anchor="middle">→</text>
+        <text x="{cx}" y="{arrow_label_y + drift:.0f}"
               font-family="{FONT_MONO}" font-size="18" font-weight="700"
-              fill="{PAPER_DIM}" text-anchor="end" letter-spacing="0.32em">EP 04</text>
-        <line x1="{arrow_x - 240}" y1="{arrow_y + 30 + drift:.0f}"
-              x2="{arrow_x}" y2="{arrow_y + 30 + drift:.0f}"
-              stroke="{MINT}" stroke-width="1" opacity="0.6"/>
-
-        {''.join(company_lines)}
-
-        <!-- alternate metric: ₹/sft (not msf) -->
-        <text x="100" y="{metric_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="{metric_pt}" font-weight="700"
-              fill="{MINT}" letter-spacing="-0.02em">PREMIUM</text>
-        <text x="100" y="{metric_y - metric_pt + 24 + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="16" font-weight="700"
-              fill="{PAPER_DIM}" letter-spacing="0.32em">RANKED BY ₹/SFT · NOT MSF</text>
-
-        <line x1="100" y1="{rule_y + drift:.0f}"
-              x2="380" y2="{rule_y + drift:.0f}"
-              stroke="{MINT}" stroke-width="2"/>
-
-        <text x="100" y="{project_y + drift:.0f}"
-              font-family="{FONT_DISPLAY}" font-size="{meta_pt}" font-weight="700"
-              fill="{PAPER}" letter-spacing="0.02em">Yoo Hyderabad</text>
-        <text x="100" y="{loc_y + drift:.0f}"
-              font-family="{FONT_MONO}" font-size="22" font-weight="700"
-              fill="{PAPER_DIM}" letter-spacing="0.18em">
-          JUBILEE HILLS  ·  EST. 2012
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.36em">
+          EPISODE  04
         </text>
 
-        <text x="100" y="{next_y + drift:.0f}"
-              font-family="{FONT_SERIF}" font-size="34" font-weight="700"
-              fill="{MINT_2}" font-style="italic">▸  Full episode next month</text>
+        <!-- company -->
+        {''.join(company_lines)}
+
+        <!-- alternate metric -->
+        <text x="{cx}" y="{metric_label_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="18" font-weight="700"
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.36em">
+          RANKED BY ₹/SFT · NOT MSF
+        </text>
+        <text x="{cx}" y="{metric_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="{metric_pt}" font-weight="700"
+              fill="{MINT}" text-anchor="middle" letter-spacing="-0.02em">
+          PREMIUM
+        </text>
+
+        <line x1="{cx - 60}" y1="{rule_y + drift:.0f}"
+              x2="{cx + 60}" y2="{rule_y + drift:.0f}"
+              stroke="{MINT}" stroke-width="2"/>
+
+        <text x="{cx}" y="{project_y + drift:.0f}"
+              font-family="{FONT_DISPLAY}" font-size="36" font-weight="700"
+              fill="{PAPER}" text-anchor="middle" letter-spacing="0.02em">
+          Yoo Hyderabad
+        </text>
+        <text x="{cx}" y="{loc_y + drift:.0f}"
+              font-family="{FONT_MONO}" font-size="20" font-weight="700"
+              fill="{PAPER_DIM}" text-anchor="middle" letter-spacing="0.24em">
+          JUBILEE HILLS  ·  EST. 2012
+        </text>
+        <text x="{cx}" y="{next_y + drift:.0f}"
+              font-family="{FONT_SERIF}" font-size="32" font-weight="700"
+              fill="{MINT_2}" text-anchor="middle" font-style="italic">
+          ▸  Full episode next month
+        </text>
       </g>
     """
 
