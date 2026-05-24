@@ -1,0 +1,16 @@
+Post: ep03 (New Money — teaser for 5 emerging builders)
+Pillar: Builder spotlight / Hyderabad's Empires series
+Format: Reel (12.75s @ 30fps) — shortest of the series, by design
+File: brand-kit/video/v13-hyderabad-empires/out/hyderabad-empires-ep03-80bpm.mp4
+Best time: Tuesday 7:30pm IST or Thursday 7:30pm IST
+DM keyword: 'NEW'
+
+Notes:
+This is a TEASER, not a full episode. The 5 emerging builders get
+their own dedicated deep-dive episodes (Modcon is EP04, the other
+4 are 2026 production). Caption explicitly flags this so the audience
+doesn't expect builder details we haven't verified yet.
+
+If/when we get verified data on ASBL, Vamsiram, Auro Realty, and
+Greenmark, re-render EP03 with the data baked in (currently just names
++ EMERGING tag).

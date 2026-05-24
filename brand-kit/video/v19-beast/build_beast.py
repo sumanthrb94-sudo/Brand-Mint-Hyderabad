@@ -406,9 +406,10 @@ def build_stakes(b: Beat, local: float, t_sec: float) -> str:
                    value="₹ 2,40,000 CR", bg=BEAST_GREEN,
                    opacity=chip_t)}
 
-        <!-- arrow pointing to chip -->
+        <!-- arrow points DOWN at the chip number (not at the pill label).
+             Fix: was looping under and overlapping 'COMBINED MARKET CAP'. -->
         <g opacity="{label_a:.3f}">
-          {red_arrow(cx + 380, chip_y + 200, cx + 80, chip_y + 60,
+          {red_arrow(cx + 430, chip_y - 80, cx + 280, chip_y + 50,
                      stroke_w=12)}
         </g>
       </g>
