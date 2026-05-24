@@ -638,24 +638,24 @@ def render_cta_phase(t: float) -> str:
     cx = W // 2
     local = (t - PHASE_PILLAR_END) / (PHASE_CTA_END - PHASE_PILLAR_END)
 
-    # Pillar slides UP off-canvas. At local=0 it's at y=600 (resting).
-    # At local=0.55 it's at y=-900 (entirely above the canvas).
-    pillar_exit_t = ease_in_cubic(clamp01(local / 0.55))
+    # Pillar exits FAST: slides up + fades, fully gone by local=0.22
+    # (was 0.55 — caused overlap with the incoming CTA text).
+    pillar_exit_t = ease_in_cubic(clamp01(local / 0.22))
     pillar_top = lerp(600, -900, pillar_exit_t)
-    pillar_a = 1.0 - clamp01((local - 0.10) / 0.30)
-    if pillar_top <= -900:
-        pillar_a = 0.0    # killswitch — don't render pillar elements at all
+    pillar_a = 1.0 - clamp01(local / 0.20)
+    if pillar_a < 0.02 or pillar_top <= -800:
+        pillar_a = 0.0    # killswitch
 
     big_pt = fit_to_width("BRAND MINT", SAFE_TEXT_W, 152, floor_pt=110)
     tagline = "Positioning is the only marketing that compounds."
     sub_pt = fit_to_width(tagline, SAFE_TEXT_W, 36, floor_pt=28, kind="serif")
 
-    # CTA text appears AFTER pillar has cleared.
-    cta_text_a = smoothstep(0.30, 0.60, local)
+    # CTA text starts AFTER pillar is gone (0.22 → 0.50). Clean handoff.
+    cta_text_a = smoothstep(0.25, 0.50, local)
     cta_top_pt = fit_to_width("COMMENT \"COMPOUND\"", SAFE_TEXT_W, 76, floor_pt=56)
 
     # CTA bar slides up from the bottom (independent of pillar).
-    bar_t = clamp01((local - 0.20) / 0.40)
+    bar_t = clamp01((local - 0.15) / 0.40)
     bar_top = lerp(H, 1450, ease_out_cubic(bar_t))
 
     # Only render pillar group while it's still on-screen
