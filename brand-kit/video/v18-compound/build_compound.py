@@ -571,7 +571,7 @@ def render_reveal_phase(t: float) -> str:
       </g>
 
       <rect x="0" y="{pillar_top:.2f}" width="{W}" height="900" fill="{MINT}"/>
-      {draw_mark(cx, max(960, pillar_top + 180), scale=mark_scale * 0.9,
+      {draw_mark(cx, min(960, pillar_top + 180), scale=mark_scale * 0.9,
                  draw_t=mark_a, opacity=mark_a, glow=mark_glow * 0.6)}
     """
 
