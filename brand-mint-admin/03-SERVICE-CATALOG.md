@@ -103,7 +103,7 @@ Logo systems, type pairings, motion principles, messaging spine. Brand book ship
 - Colour system (primary + neutrals + accents + dark interlude if needed)
 - Voice & tone guide
 - Application examples: site nav, deck cover, social card, business card, email signature
-- Working brand book site (like ours at brandmint.studio/brand-kit)
+- Working brand book site (like ours at brandmintstudios.in/brand-kit)
 
 ### Tiers
 

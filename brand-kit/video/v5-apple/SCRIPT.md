@@ -38,7 +38,7 @@ series, *"Crush!"* (iPad Pro 2024).
 | 5 | 26.0 | 34.0 | 8.0    | **The monogram emerges.** Gradient circle + single-stroke M, scaling 0.85 → 1.00 with overshoot. Mint glow swells. | Music swell at 27.0–30.0s |
 | 6 | 34.0 | 40.0 | 6.0    | `Brand Mint.`  *(cream wordmark · 130pt)*              | Below the monogram                 |
 | 7 | 40.0 | 46.0 | 6.0    | `Designed in HITEC City, Hyderabad.`  *(JetBrains Mono · 42pt · 0.16em letterspacing)* | Verbatim homage to *Designed by Apple in California* |
-| 8 | 46.0 | 50.0 | 4.0    | `brandmint.studio`  *(JetBrains Mono · 32pt mint · types in)* | Final 1.0s is fade to black        |
+| 8 | 46.0 | 50.0 | 4.0    | `brandmintstudios.in`  *(JetBrains Mono · 32pt mint · types in)* | Final 1.0s is fade to black        |
 
 Total: **50.00s** at 30 fps · 1500 frames · 1080×1920.
 

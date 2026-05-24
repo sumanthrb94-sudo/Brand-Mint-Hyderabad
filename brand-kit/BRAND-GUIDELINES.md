@@ -210,7 +210,7 @@ If photography is unavoidable: high-contrast, warm-light, India-grounded scenes 
 ```
 Sumanth | Brand Mint
 Studio in HITEC City, Hyderabad
-brandmint.studio · +91 …
+brandmintstudios.in · +91 …
 ```
 
 Plus Jakarta Sans 600 for the name + studio, Inter 400 for the rest, mint-3 underline on the URL only.
@@ -235,7 +235,7 @@ Plus Jakarta Sans 600 for the name + studio, Inter 400 for the rest, mint-3 unde
 
 - Use **Brand Mint** as two words, both capitalised. Never "BrandMint", "Brandmint", or "BM" externally.
 - Internal shorthand "BM" is fine in code (`--bm-ink`, `bm-clients`)
-- Domain: `brandmint.studio`
+- Domain: `brandmintstudios.in`
 - Handle: `@brandmintstudio`
 
 ---

@@ -58,7 +58,7 @@ the energy; only the studio reveal and the CTA breathe.
 |10 | 6.70 | 7.90 | 1.20   | Black     | Cream          | Built in HITEC City.       | fade-black (0.20)|
 |11 | 7.90 | 9.10 | 1.20   | Mint      | Ink            | Booking Q3 2026.           | slideup          |
 |12 | 9.10 | 11.10| 2.00   | Black     | Cream + mint   | Brand Mint. Start a project → | crossfade (0.30) |
-|13 |11.10 | 12.10| 1.00   | Black     | Mint           | brandmint.studio           | (continuation)   |
+|13 |11.10 | 12.10| 1.00   | Black     | Mint           | brandmintstudios.in           | (continuation)   |
 
 12.1 s total composition, ~30 fps.
 
@@ -125,7 +125,7 @@ the energy; only the studio reveal and the CTA breathe.
 - "Brand Mint." in Plus Jakarta 600, 86pt Cream below
 - CTA pill: Mint #10B981 bg, Cream label "Start a project →", 720×140
 
-### 13 · "brandmint.studio" (1.0s, same bg)
+### 13 · "brandmintstudios.in" (1.0s, same bg)
 - URL types in character-by-character in JetBrains Mono 38pt Mint
 - Blinking cursor at the end for 200ms
 - Composition fades out together over the final 400ms

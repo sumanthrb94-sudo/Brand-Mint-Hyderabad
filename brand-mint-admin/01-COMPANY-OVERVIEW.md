@@ -49,7 +49,7 @@ Three structural shifts make this the right moment:
 ```
 SUMANTH BOLLA — Founder & Studio Director
 8+ years across [prior roles]. Previously [achievements / ex-employers].
-Lives in HITEC City, Hyderabad. Writes at brandmint.studio/notes.
+Lives in HITEC City, Hyderabad. Writes at brandmintstudios.in/notes.
 ```
 
 ## Studio principles (the way we work)

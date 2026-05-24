@@ -18,7 +18,7 @@ shift, but tokens never do.
 | Context           | Ratio | Length     | Sound       | Primary use            |
 |-------------------|-------|------------|-------------|------------------------|
 | **Reel / Story / TikTok** | 9:16  | 6–15 s     | Original synth pad (Meta-policy safe). No licensed music. | Paid + organic social on IG, FB, LinkedIn vertical, TikTok |
-| **Site hero loop**| 16:9 or 1:1 | 6–12 s loop, silent | Silent (autoplay-muted by browser) | brandmint.studio above-the-fold |
+| **Site hero loop**| 16:9 or 1:1 | 6–12 s loop, silent | Silent (autoplay-muted by browser) | brandmintstudios.in above-the-fold |
 | **Case-study film** | 16:9  | 60–120 s   | Licensed track OK (YouTube/Vimeo/site) + restrained VO  | Long-form proof; sales follow-up |
 | **OG / link preview** | 1.91:1 still | n/a — single still card | n/a | Slack, WhatsApp, iMessage previews |
 

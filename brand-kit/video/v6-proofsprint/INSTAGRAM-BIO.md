@@ -25,7 +25,7 @@ DM "BUILT" — we scope in 48h ↓
 *138 characters.*
 
 ### Link
-- Primary: `brandmint.studios` *(swap from the current `brand-mint-sdmk.vercel.app` — vercel.app subdomain undermines senior positioning)*
+- Primary: `brandmint.studios` *(swap from the current `www.brandmintstudios.in` — vercel.app subdomain undermines senior positioning)*
 - If multi-link: pin `brandmint.studios` + Calendly + lead case study.
 
 ### Action button
@@ -44,7 +44,7 @@ DM "BUILT" — we scope in 48h ↓
 | `We build brands that win online. 🩶`           | Generic; "win online" reads as jargon; 🩶 too casual              | Cut entirely                       |
 | `Websites · Apps · Instagram Growth`            | "Instagram Growth" drops the serious-engineering buyer            | `Custom software · Custom websites` |
 | `👇 Free strategy call — link below`            | Two pointers for the same action; softer than v6 CTA              | `DM "BUILT" — we scope in 48h ↓`  |
-| `brand-mint-sdmk.vercel.app`                    | Vercel preview URL signals in-progress / not real                 | `brandmint.studios`                |
+| `www.brandmintstudios.in`                    | Vercel preview URL signals in-progress / not real                 | `brandmint.studios`                |
 | `Secunderabad`                                  | Brand strategy says HITEC City                                    | `HITEC City`                       |
 
 ---

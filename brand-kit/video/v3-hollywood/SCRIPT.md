@@ -40,7 +40,7 @@ deliberately uneven for "human" pacing — not metronomic.
 | 4    | 4.60 | 6.00 | 1.40   | `61%` lower CPL.                                       | Whoosh + staccato pluck        |
 | 5    | 6.00 | 8.20 | 2.20   | Most agencies leave a logo. / We leave *compounding revenue.* | Drone modulates, riser     |
 | 6    | 8.20 | 10.60| 2.40   | Brand Mint. / `Mint your next quarter →`               | Cymbal swell, drone resolves   |
-| 7    |10.60 |12.00 | 1.40   | Monogram glow + `brandmint.studio`                     | Final low note, fade out       |
+| 7    |10.60 |12.00 | 1.40   | Monogram glow + `brandmintstudios.in`                     | Final low note, fade out       |
 
 ## Copy (all on-screen text, frame-accurate)
 
@@ -132,7 +132,7 @@ Mint your next quarter →
 CTA pill stays. Below it, the URL types in monospace:
 
 ```
-brandmint.studio
+brandmintstudios.in
 ```
 
 *JetBrains Mono 32pt, mint, 0.06em tracking, blinking cursor for the

@@ -166,7 +166,7 @@
             payload.message || "",
           ].join("\n")
         );
-        window.location.href = `mailto:hello@brandmint.studio?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:hello@brandmintstudios.in?subject=${subject}&body=${body}`;
       }
     });
   }

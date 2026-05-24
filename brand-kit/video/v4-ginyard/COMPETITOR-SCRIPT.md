@@ -38,7 +38,7 @@ ACT 4 — SPECIFICITY + SCARCITY (7.08–9.78s)
 ACT 5 — CTA + STAMP (9.78–13.34s)
   Beat 12  {{ brand_name }}. / {{ cta_pill }}  e.g. "Brand Mint." /
                                                     "Start a project →"
-  Beat 13  {{ url }}                           e.g. "brandmint.studio"
+  Beat 13  {{ url }}                           e.g. "brandmintstudios.in"
 ```
 
 ## Token table (factor out)

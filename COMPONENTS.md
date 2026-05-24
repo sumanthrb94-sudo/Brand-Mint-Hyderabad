@@ -541,7 +541,7 @@ Two-column hero: text + visual. Adjust the visual to your project.
   </details>
   <details>
     <summary>Are you hiring? Can I refer someone?</summary>
-    <p>Always — see <a href="/careers">brandmint.studio/careers</a>.</p>
+    <p>Always — see <a href="/careers">brandmintstudios.in/careers</a>.</p>
   </details>
 </section>
 ```
@@ -590,7 +590,7 @@ Two-column hero: text + visual. Adjust the visual to your project.
   </div>
   <div class="cta-actions">
     <a href="#contact" class="btn btn-primary">Start a project →</a>
-    <a href="mailto:hello@brandmint.studio" class="btn btn-ghost">hello@brandmint.studio</a>
+    <a href="mailto:hello@brandmintstudios.in" class="btn btn-ghost">hello@brandmintstudios.in</a>
   </div>
 </section>
 ```
@@ -784,7 +784,7 @@ A scoped dark section with its own palette. Use sparingly — once per page maxi
     </div>
     <div>
       <h4>Contact</h4>
-      <a href="mailto:hello@brandmint.studio">hello@brandmint.studio</a>
+      <a href="mailto:hello@brandmintstudios.in">hello@brandmintstudios.in</a>
       <a href="tel:+919999999999">+91 ••••• •••••</a>
     </div>
   </div>

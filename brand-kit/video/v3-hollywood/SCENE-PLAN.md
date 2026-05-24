@@ -106,7 +106,7 @@ Total = 12.50 s including the 0.5 s tail fade.
 ### Shot 7 — LOGO STAMP + URL (10.60–12.00s)
 
 - **Frame:** Identical to shot 6 (CTA pill still visible) PLUS URL
-  `brandmint.studio` at 38pt JetBrains Mono mint, 0.06em tracking,
+  `brandmintstudios.in` at 38pt JetBrains Mono mint, 0.06em tracking,
   centered at y=1500.
 - **Animation:** URL types in (~16 chars × 30ms = 480ms) starting at
   t=10.7. A 2px-wide cream cursor blinks at the end of the URL for the

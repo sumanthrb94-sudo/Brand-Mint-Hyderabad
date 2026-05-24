@@ -15,8 +15,8 @@
 | Latest commit | `141def9` |
 | Total commits | 14 |
 | Vercel project | `brand-mint-sdmk` (auto-named from the repo) |
-| Live URL | `https://brand-mint-sdmk.vercel.app` |
-| Brand domain (target) | `brandmint.studio` (not yet pointed) |
+| Live URL | `https://www.brandmintstudios.in` |
+| Brand domain (target) | `brandmintstudios.in` (not yet pointed) |
 | Repo size | ~2.2 MB |
 
 ---
@@ -45,7 +45,7 @@ Vercel auto-generated the slug because the repo name had a non-standard characte
 
 1. **Rename the repo on GitHub** to `BrandMint-Hyderabad` — eliminates the trailing-dot bug everywhere
 2. **Rename the Vercel project** to `brandmint-hyderabad` — gives a clean URL slug
-3. **(Optional later) Point a custom domain** like `brandmint.studio` — kills the Vercel slug entirely
+3. **(Optional later) Point a custom domain** like `brandmintstudios.in` — kills the Vercel slug entirely
 
 ---
 
@@ -89,17 +89,17 @@ cd BrandMint-Hyderabad
 2. Click the **brand-mint-sdmk** project → **Settings → General**
 3. **Project Name** → change to `brandmint-hyderabad`
 4. Save. Your new URL becomes `https://brandmint-hyderabad.vercel.app`
-5. Vercel keeps the old `brand-mint-sdmk.vercel.app` as a permanent alias, so old shares still resolve
+5. Vercel keeps the old `www.brandmintstudios.in` as a permanent alias, so old shares still resolve
 
 ### 4c · OG / social tags in `index.html`
 
 Once Vercel gives you the new URL, find/replace these four lines in `index.html`:
 
 ```html
-<link rel="canonical" href="https://brand-mint-sdmk.vercel.app/" />
-<meta property="og:url" content="https://brand-mint-sdmk.vercel.app/" />
-<meta property="og:image" content="https://brand-mint-sdmk.vercel.app/og-image.png" />
-<meta name="twitter:image" content="https://brand-mint-sdmk.vercel.app/og-image.png" />
+<link rel="canonical" href="https://www.brandmintstudios.in/" />
+<meta property="og:url" content="https://www.brandmintstudios.in/" />
+<meta property="og:image" content="https://www.brandmintstudios.in/og-image.png" />
+<meta name="twitter:image" content="https://www.brandmintstudios.in/og-image.png" />
 ```
 
 Change `brand-mint-sdmk` → `brandmint-hyderabad` in all four. Commit, push, redeploy.
@@ -120,7 +120,7 @@ WhatsApp specifically caches for **7 days per phone**. To force-refresh on your 
 
 I've already updated `README.md`. The remaining references are either:
 
-- The **brand domain** (`brandmint.studio`) — keep these, they're the long-term home
+- The **brand domain** (`brandmintstudios.in`) — keep these, they're the long-term home
 - The **default admin passcode** (`brandmint2026`) — unrelated, keep
 - The **Vercel hashed slug** (`brand-mint-sdmk`) — update only after you rename the Vercel project (step 4b)
 
@@ -129,7 +129,7 @@ Full grep:
 ```
 index.html          : 4 OG/canonical tags pointing to brand-mint-sdmk
 README.md           : updated to reference BrandMint-Hyderabad
-brandmint.studio    : 12+ references — these are the future custom domain, not the slug. Keep.
+brandmintstudios.in    : 12+ references — these are the future custom domain, not the slug. Keep.
 brandmint2026       : admin default passcode. Unrelated to repo name.
 ```
 
