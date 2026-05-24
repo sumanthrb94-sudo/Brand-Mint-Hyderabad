@@ -548,17 +548,25 @@ def render_organize_phase(t: float) -> str:
     """
 
 def render_reveal_phase(t: float) -> str:
-    """0:11-0:13.5 REVEAL — pull back, network blooms into the mark."""
+    """0:11-0:13.5 REVEAL — particles bloom-flash, fade out CLEAN, then
+    mark fades in. Serial, not parallel — no overlap window."""
     cz = camera_z_at(t)
     local = (t - PHASE_ORGANIZE_END) / (PHASE_REVEAL_END - PHASE_ORGANIZE_END)
-    # Crossfade from particles to the actual mark
-    particles_a = lerp(1.0, 0.0, ease_out_cubic(local))
-    mark_a = smoothstep(0.20, 0.70, local)
+
+    # FIX C2: particles fade out in the FIRST 35% of reveal (was the full phase).
+    # Mark starts fading in at 40%. No overlap.
+    particles_a = 1.0 - ease_in_cubic(clamp01(local / 0.35))
+
+    # Q2: bloom-flash at local≈0.05 — the moment the M resolves
+    bloom = max(0, 1 - abs(local - 0.05) * 12)
+    particles_intensity = particles_a * (1.0 + 1.5 * bloom)
+
+    mark_a = smoothstep(0.40, 0.78, local)
     mark_scale = lerp(0.6, 0.90, ease_out_cubic(local))
-    mark_glow = max(0, 1 - abs(local - 0.45) * 3)
+    mark_glow = max(0, 1 - abs(local - 0.55) * 3)
 
     # Mint pillar starts arriving at the END of reveal
-    pillar_t = smoothstep(0.65, 1.0, local)
+    pillar_t = smoothstep(0.72, 1.0, local)
     pillar_top = lerp(H + 200, 600, ease_out_cubic(pillar_t))
 
     cx, cy = W // 2, H // 2
@@ -567,7 +575,7 @@ def render_reveal_phase(t: float) -> str:
       {render_atmosphere(t)}
       <g opacity="{particles_a:.3f}">
         {render_connections(t, camera_z=cz, intensity=0.5 * particles_a)}
-        {render_particles(t, camera_z=cz, intensity=particles_a)}
+        {render_particles(t, camera_z=cz, intensity=particles_intensity)}
       </g>
 
       <rect x="0" y="{pillar_top:.2f}" width="{W}" height="900" fill="{MINT}"/>
@@ -621,56 +629,71 @@ def render_pillar_phase(t: float) -> str:
     """
 
 def render_cta_phase(t: float) -> str:
-    """0:15.5-0:17 CTA — pillar dissolves, CTA bar slides up."""
+    """0:15.5-0:17 CTA — pillar SLIDES UP off the canvas (clearing the
+    middle), CTA text fades in on clean black, mint CTA bar slides up.
+
+    FIX C1: pillar no longer fades-in-place (which stacked 7 layers in
+    the same vertical band). Now pillar exits via slide-up + fade,
+    completely off-canvas by local≈0.55, then CTA text takes the stage."""
     cx = W // 2
     local = (t - PHASE_PILLAR_END) / (PHASE_CTA_END - PHASE_PILLAR_END)
 
-    # Pillar fades out
-    pillar_a = 1 - ease_in_cubic(local)
-    pillar_top = lerp(600, 540, local)  # subtle drift up as it fades
+    # Pillar slides UP off-canvas. At local=0 it's at y=600 (resting).
+    # At local=0.55 it's at y=-900 (entirely above the canvas).
+    pillar_exit_t = ease_in_cubic(clamp01(local / 0.55))
+    pillar_top = lerp(600, -900, pillar_exit_t)
+    pillar_a = 1.0 - clamp01((local - 0.10) / 0.30)
+    if pillar_top <= -900:
+        pillar_a = 0.0    # killswitch — don't render pillar elements at all
+
     big_pt = fit_to_width("BRAND MINT", SAFE_TEXT_W, 152, floor_pt=110)
     tagline = "Positioning is the only marketing that compounds."
     sub_pt = fit_to_width(tagline, SAFE_TEXT_W, 36, floor_pt=28, kind="serif")
-    pillar_text_a = pillar_a
 
-    # CTA bar slides up from bottom over local 0..0.5
-    bar_t = clamp01(local / 0.5)
-    bar_top = lerp(H, 1450, ease_out_cubic(bar_t))
-
-    cta_text_a = smoothstep(0.18, 0.50, local)
+    # CTA text appears AFTER pillar has cleared.
+    cta_text_a = smoothstep(0.30, 0.60, local)
     cta_top_pt = fit_to_width("COMMENT \"COMPOUND\"", SAFE_TEXT_W, 76, floor_pt=56)
 
+    # CTA bar slides up from the bottom (independent of pillar).
+    bar_t = clamp01((local - 0.20) / 0.40)
+    bar_top = lerp(H, 1450, ease_out_cubic(bar_t))
+
+    # Only render pillar group while it's still on-screen
+    pillar_group = ""
+    if pillar_a > 0.01:
+        pillar_group = f"""
+        <g opacity="{pillar_a:.3f}">
+          <rect x="0" y="{pillar_top:.2f}" width="{W}" height="900" fill="{MINT}"/>
+          {draw_mark(cx, pillar_top + 180, scale=0.81, draw_t=1.0, opacity=1.0)}
+          <text x="{cx}" y="{pillar_top + 510:.0f}"
+                font-family="{FONT_DISPLAY}" font-size="{big_pt}" font-weight="900"
+                fill="{INK_2}" text-anchor="middle" letter-spacing="-0.025em">
+            BRAND MINT
+          </text>
+          <text x="{cx}" y="{pillar_top + 630:.0f}"
+                font-family="{FONT_SERIF}" font-size="{sub_pt}" font-weight="700"
+                fill="{INK_2}" text-anchor="middle" font-style="italic"
+                opacity="0.85">
+            {esc(tagline)}
+          </text>
+        </g>"""
+
     return f"""
-      <g opacity="{pillar_a:.3f}">
-        <rect x="0" y="{pillar_top:.2f}" width="{W}" height="900" fill="{MINT}"/>
-        {draw_mark(cx, max(780, pillar_top + 180), scale=0.81, draw_t=1.0,
-                   opacity=1.0)}
-        <text x="{cx}" y="{pillar_top + 510:.0f}"
-              font-family="{FONT_DISPLAY}" font-size="{big_pt}" font-weight="900"
-              fill="{INK_2}" text-anchor="middle" letter-spacing="-0.025em">
-          BRAND MINT
-        </text>
-        <text x="{cx}" y="{pillar_top + 630:.0f}"
-              font-family="{FONT_SERIF}" font-size="{sub_pt}" font-weight="700"
-              fill="{INK_2}" text-anchor="middle" font-style="italic"
-              opacity="0.85">
-          {esc(tagline)}
-        </text>
-      </g>
+      {pillar_group}
 
       <g opacity="{cta_text_a:.3f}">
-        <text x="{cx}" y="{int(H * 0.30)}"
+        <text x="{cx}" y="{int(H * 0.34)}"
               font-family="{FONT_MONO}" font-size="28" font-weight="700"
               fill="{WHITE}" text-anchor="middle" letter-spacing="0.30em">
           YOUR POSITION?
         </text>
-        <text x="{cx}" y="{int(H * 0.46)}"
+        <text x="{cx}" y="{int(H * 0.50)}"
               font-family="{FONT_DISPLAY}" font-size="{cta_top_pt}"
               font-weight="900" fill="{MINT_2}" text-anchor="middle"
               letter-spacing="-0.02em">
           COMMENT "COMPOUND"
         </text>
-        <text x="{cx}" y="{int(H * 0.56)}"
+        <text x="{cx}" y="{int(H * 0.60)}"
               font-family="{FONT_SERIF}" font-size="36" font-weight="700"
               fill="{WHITE}" text-anchor="middle" font-style="italic">
           We'll DM your category gap.
