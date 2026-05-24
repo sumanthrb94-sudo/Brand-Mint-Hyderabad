@@ -48,12 +48,17 @@ MINT_2 = "#7CF6C8"          # highlight (lime accent on emphasis words)
 YELLOW = "#FFD60A"          # keyword highlight (per §2 fill_highlight option)
 PAPER = "#F5F1EA"           # used only on the brand-reveal beat
 
-FONT_DISPLAY = "DejaVu Sans, Inter, sans-serif"
-FONT_SERIF = "DejaVu Serif, Georgia, serif"
-FONT_MONO = "DejaVu Sans Mono, Menlo, monospace"
-_DEJAVU_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-_DEJAVU_SERIF_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
-_DEJAVU_MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+# Brand Mint typography per brand-kit/BRAND-GUIDELINES.md §4:
+#   Display  = Plus Jakarta Sans (ExtraBold 800 for hero, Bold 700 for body)
+#   Italic   = Plus Jakarta Sans SemiBold Italic (for the angle/emphasis)
+#   Numerals = JetBrains Mono Bold (for labels, IDs, monospaced UI marks)
+# (Inter is the body face but this reel has no body copy — only display.)
+FONT_DISPLAY = "Plus Jakarta Sans, system-ui, sans-serif"
+FONT_SERIF = "Plus Jakarta Sans, system-ui, sans-serif"  # italic via font-style
+FONT_MONO = "JetBrains Mono, ui-monospace, monospace"
+_DEJAVU_BOLD = "/usr/local/share/fonts/brandmint/PlusJakartaSans-ExtraBold.ttf"
+_DEJAVU_SERIF_BOLD = "/usr/local/share/fonts/brandmint/PlusJakartaSans-SemiBoldItalic.ttf"
+_DEJAVU_MONO = "/usr/local/share/fonts/brandmint/JetBrainsMono-Bold.ttf"
 
 HERE = Path(__file__).parent
 FRAMES = HERE / "frames"
@@ -193,13 +198,25 @@ def stroked_text(text: str, x: int, y: int, pt: int, fill: str,
                  anchor: str = "middle", weight: int = 900,
                  letter_spacing: str = "-0.02em",
                  kind_font: str = FONT_DISPLAY,
-                 stroke_w: int = 5) -> str:
-    """White-fill + thick-black-stroke caption per playbook §2."""
+                 stroke_w: int = 0) -> str:
+    """Display text in brand-mint typography.
+
+    NOTE on stroke: the playbook §2 calls for a 5px black stroke for
+    legibility on busy/bright backgrounds. On our solid-black beats it
+    would be invisible AND `paint-order="stroke fill"` would eat the
+    visible silhouette of every glyph, making the font look thin.
+    Default stroke_w=0 here; only pass stroke_w>0 when rendering over a
+    bright fill (mint pillar, image bg, etc.).
+    """
+    stroke_attr = (
+        f'stroke="{STROKE}" stroke-width="{stroke_w}" '
+        f'paint-order="stroke fill" stroke-linejoin="round" '
+        if stroke_w > 0 else ""
+    )
     return (
         f'<text x="{x}" y="{y}" font-family="{kind_font}" '
         f'font-size="{pt}" font-weight="{weight}" fill="{fill}" '
-        f'stroke="{STROKE}" stroke-width="{stroke_w}" '
-        f'paint-order="stroke fill" stroke-linejoin="round" '
+        f'{stroke_attr}'
         f'text-anchor="{anchor}" letter-spacing="{letter_spacing}">'
         f"{esc(text)}</text>"
     )
@@ -217,11 +234,11 @@ def render_hook(b: Beat, local: float) -> str:
     return f"""
       <!-- TOP-18% small caption -->
       {stroked_text(b.top, cx, int(H * 0.20), top_pt, WHITE,
-                    letter_spacing="0.02em", weight=800, stroke_w=4)}
+                    letter_spacing="0.02em", weight=800)}
 
       <!-- BIG hook -->
       {stroked_text(b.big, cx, int(H * 0.55), big_pt, MINT_2,
-                    letter_spacing="-0.025em", stroke_w=6)}
+                    letter_spacing="-0.025em")}
 
       <!-- mark of intent (small) -->
       <text x="{cx}" y="{int(H * 0.85)}" font-family="{FONT_MONO}"
@@ -240,10 +257,10 @@ def render_pain(b: Beat, local: float) -> str:
 
     return f"""
       {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
-                    letter_spacing="0.04em", weight=700, stroke_w=4)}
+                    letter_spacing="0.04em", weight=700)}
 
       {stroked_text(b.big, cx, int(H * 0.55), big_pt, YELLOW,
-                    letter_spacing="-0.03em", stroke_w=6)}
+                    letter_spacing="-0.03em")}
 
       <text x="{cx}" y="{int(H * 0.68)}" font-family="{FONT_SERIF}"
             font-size="{sub_pt}" font-weight="700" fill="{WHITE}"
@@ -302,10 +319,10 @@ def render_proof(b: Beat, local: float) -> str:
 
     return f"""
       {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
-                    letter_spacing="0.10em", weight=700, stroke_w=4)}
+                    letter_spacing="0.10em", weight=700)}
 
       {stroked_text(b.big, cx, int(H * 0.55), big_pt, MINT_2,
-                    letter_spacing="-0.02em", stroke_w=6)}
+                    letter_spacing="-0.02em")}
 
       <text x="{cx}" y="{int(H * 0.72)}" font-family="{FONT_SERIF}"
             font-size="44" font-weight="700" fill="{WHITE}"
@@ -327,10 +344,10 @@ def render_cta(b: Beat, local: float) -> str:
 
     return f"""
       {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
-                    letter_spacing="0.06em", weight=800, stroke_w=4)}
+                    letter_spacing="0.06em", weight=800)}
 
       {stroked_text(b.big, cx, int(H * 0.50), big_pt, MINT_2,
-                    letter_spacing="-0.02em", stroke_w=6)}
+                    letter_spacing="-0.02em")}
 
       <text x="{cx}" y="{int(H * 0.63)}" font-family="{FONT_SERIF}"
             font-size="{sub_pt}" font-weight="700" fill="{WHITE}"
