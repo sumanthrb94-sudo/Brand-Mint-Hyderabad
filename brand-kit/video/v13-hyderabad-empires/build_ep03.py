@@ -85,6 +85,19 @@ def measure(text: str, pt: int, kind: str = "bold") -> float:
     l, _, r, _ = _font(pt, kind).getbbox(text)
     return float(r - l)
 
+# IG Reels safe text width — 1080 canvas with 80px margin each side
+# leaves 920px for content. Any display line that risks being long
+# (splash phrases, brand names, hooks) must call fit_to_width() first.
+SAFE_TEXT_W = 920
+
+def fit_to_width(text: str, max_w_px: float, start_pt: int,
+                 floor_pt: int = 32, kind: str = "bold",
+                 step: int = 2) -> int:
+    for pt in range(start_pt, floor_pt - 1, -step):
+        if measure(text or "", pt, kind) <= max_w_px:
+            return pt
+    return floor_pt
+
 # ------------------------------------------------------- builder roster ---
 # Countdown 5 → 1. Modcon is #1 — it's the cliffhanger that hands off
 # to EP04. Other 4 are placeholders until verified data lands.
@@ -217,7 +230,11 @@ def render_splash(beat: Beat, local: float, scale: float) -> str:
     cx = W // 2
     pulse = 1.0 + 0.015 * math.sin(local * math.pi * 1.6)
     op = 1.0 if local < 0.85 else max(0.0, 1.0 - (local - 0.85) / 0.15)
-    big_pt = int(132 * pulse)
+
+    line1_pt = fit_to_width(beat.text,  SAFE_TEXT_W, start_pt=108, kind="serif")
+    line2_pt = fit_to_width(beat.text2, SAFE_TEXT_W, start_pt=108, kind="serif")
+    big_pt_base = fit_to_width("5 EMERGING", SAFE_TEXT_W, start_pt=132, kind="bold")
+    big_pt = int(big_pt_base * pulse)
 
     return f"""
       <g opacity="{op:.3f}">
@@ -227,10 +244,10 @@ def render_splash(beat: Beat, local: float, scale: float) -> str:
         <line x1="{cx - 70}" y1="530" x2="{cx + 70}" y2="530"
               stroke="{MINT}" stroke-width="2"/>
 
-        <text x="{cx}" y="730" font-family="{FONT_SERIF}" font-size="108"
+        <text x="{cx}" y="730" font-family="{FONT_SERIF}" font-size="{line1_pt}"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">{beat.text}</text>
-        <text x="{cx}" y="870" font-family="{FONT_SERIF}" font-size="108"
+        <text x="{cx}" y="870" font-family="{FONT_SERIF}" font-size="{line2_pt}"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">{beat.text2}</text>
 

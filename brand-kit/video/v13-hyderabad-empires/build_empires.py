@@ -91,6 +91,20 @@ def _font(pt: int, kind: str = "bold"):
         _font_cache[key] = ImageFont.truetype(path, pt)
     return _font_cache[key]
 
+# IG Reels safe text width — 1080 canvas with 80px margin each side
+# leaves 920px for content. Any display line that risks being long
+# (splash phrases, builder names, hooks) must call fit_to_width() first.
+SAFE_TEXT_W = 920
+
+def fit_to_width(text: str, max_w_px: float, start_pt: int,
+                 floor_pt: int = 32, kind: str = "bold",
+                 step: int = 2) -> int:
+    for pt in range(start_pt, floor_pt - 1, -step):
+        l, _, r, _ = _font(pt, kind).getbbox(text or "")
+        if (r - l) <= max_w_px:
+            return pt
+    return floor_pt
+
 def measure(text: str, pt: int, kind: str = "bold") -> float:
     if not text:
         return 0.0
@@ -309,7 +323,11 @@ def render_splash(beat: Beat, local: float, scale: float) -> str:
     # gentle fade-out at the very end so the transition to intro is smooth
     op = 1.0 if local < 0.85 else max(0.0, 1.0 - (local - 0.85) / 0.15)
 
-    big_pt = int(142 * pulse)
+    line1_pt = fit_to_width(beat.text,    SAFE_TEXT_W, start_pt=108, kind="serif")
+    line2_pt = fit_to_width("Hyderabad's", SAFE_TEXT_W, start_pt=108, kind="serif")
+    big_pt_base = fit_to_width("8 BIGGEST", SAFE_TEXT_W, start_pt=142, kind="bold")
+    big_pt = int(big_pt_base * pulse)
+    line4_pt = fit_to_width(beat.text2,   SAFE_TEXT_W, start_pt=108, kind="serif")
 
     return f"""
       <g opacity="{op:.3f}">
@@ -319,16 +337,16 @@ def render_splash(beat: Beat, local: float, scale: float) -> str:
         <line x1="{cx - 70}" y1="530" x2="{cx + 70}" y2="530"
               stroke="{MINT}" stroke-width="2"/>
 
-        <text x="{cx}" y="730" font-family="{FONT_SERIF}" font-size="108"
+        <text x="{cx}" y="730" font-family="{FONT_SERIF}" font-size="{line1_pt}"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">{beat.text}</text>
-        <text x="{cx}" y="850" font-family="{FONT_SERIF}" font-size="108"
+        <text x="{cx}" y="850" font-family="{FONT_SERIF}" font-size="{line2_pt}"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">Hyderabad's</text>
         <text x="{cx}" y="1000" font-family="{FONT_DISPLAY}" font-size="{big_pt}"
               font-weight="900" fill="{MINT}" text-anchor="middle"
               letter-spacing="-0.01em">8 BIGGEST</text>
-        <text x="{cx}" y="1120" font-family="{FONT_SERIF}" font-size="108"
+        <text x="{cx}" y="1120" font-family="{FONT_SERIF}" font-size="{line4_pt}"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">{beat.text2}</text>
 

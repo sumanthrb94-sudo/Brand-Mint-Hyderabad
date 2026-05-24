@@ -88,6 +88,21 @@ def measure(text: str, pt: int, kind: str = "bold") -> float:
     l, _, r, _ = _font(pt, kind).getbbox(text)
     return float(r - l)
 
+# IG Reels safe text width — 1080 canvas with 80px margin each side
+# leaves 920px for content. Conservative enough for the right-side
+# action column when posted as a Reel.
+SAFE_TEXT_W = 920
+
+def fit_to_width(text: str, max_w_px: float, start_pt: int,
+                 floor_pt: int = 32, kind: str = "bold",
+                 step: int = 2) -> int:
+    """Largest pt at which `text` fits in `max_w_px`. Used for every big
+    display line so nothing overflows the canvas at any phone aspect."""
+    for pt in range(start_pt, floor_pt - 1, -step):
+        if measure(text, pt, kind) <= max_w_px:
+            return pt
+    return floor_pt
+
 # ------------------------------------------------------- empire data ---
 # Ranks 13 → 09 from "Hyderabad's Empires: Episode One — The 13 Titans
 # of Hyderabad Real Estate" (2026 edition). Reveal order: countdown
@@ -265,11 +280,17 @@ def chrome_overlay(intro_t: float) -> str:
 
 def render_splash(beat: Beat, local: float, scale: float) -> str:
     """EP02 cover splash: 'Before the towers, / there were / THESE 5 /
-    builders.' Held ~1.5s as the IG feed thumbnail."""
+    builders.' Held ~1.5s as the IG feed thumbnail. Every big line is
+    fit-to-width against SAFE_TEXT_W so nothing bleeds off-canvas."""
     cx = W // 2
     pulse = 1.0 + 0.015 * math.sin(local * math.pi * 1.6)
     op = 1.0 if local < 0.85 else max(0.0, 1.0 - (local - 0.85) / 0.15)
-    big_pt = int(142 * pulse)
+
+    line1_pt = fit_to_width(beat.text,   SAFE_TEXT_W, start_pt=108, kind="serif")
+    line2_pt = fit_to_width("there were", SAFE_TEXT_W, start_pt=108, kind="serif")
+    big_pt_base = fit_to_width("THESE 5", SAFE_TEXT_W, start_pt=142, kind="bold")
+    big_pt = int(big_pt_base * pulse)
+    line4_pt = fit_to_width(beat.text2,  SAFE_TEXT_W, start_pt=108, kind="serif")
 
     return f"""
       <g opacity="{op:.3f}">
@@ -279,16 +300,16 @@ def render_splash(beat: Beat, local: float, scale: float) -> str:
         <line x1="{cx - 70}" y1="530" x2="{cx + 70}" y2="530"
               stroke="{MINT}" stroke-width="2"/>
 
-        <text x="{cx}" y="730" font-family="{FONT_SERIF}" font-size="108"
+        <text x="{cx}" y="730" font-family="{FONT_SERIF}" font-size="{line1_pt}"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">{beat.text}</text>
-        <text x="{cx}" y="850" font-family="{FONT_SERIF}" font-size="108"
+        <text x="{cx}" y="850" font-family="{FONT_SERIF}" font-size="{line2_pt}"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">there were</text>
         <text x="{cx}" y="1000" font-family="{FONT_DISPLAY}" font-size="{big_pt}"
               font-weight="900" fill="{MINT}" text-anchor="middle"
               letter-spacing="-0.01em">THESE 5</text>
-        <text x="{cx}" y="1120" font-family="{FONT_SERIF}" font-size="108"
+        <text x="{cx}" y="1120" font-family="{FONT_SERIF}" font-size="{line4_pt}"
               font-weight="700" fill="{PAPER}" text-anchor="middle"
               font-style="italic">{beat.text2}</text>
 

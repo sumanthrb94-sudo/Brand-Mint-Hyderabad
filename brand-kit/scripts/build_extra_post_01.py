@@ -125,7 +125,7 @@ def chrome_bottom():
 def render_cover():
     cx = W // 2
     hook_lines = ["The 5 words on", "every Hyderabad", "builder hoarding."]
-    hook_pt = fit_size(hook_lines, max_w_px=960, start_pt=98)
+    hook_pt = fit_size(hook_lines, max_w_px=920, start_pt=98)
     line_h = int(hook_pt * 1.15)
     block_top = (H // 2) - (line_h * len(hook_lines)) // 2 - 40
 

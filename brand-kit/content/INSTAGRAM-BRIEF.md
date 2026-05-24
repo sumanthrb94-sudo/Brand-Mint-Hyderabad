@@ -125,6 +125,11 @@ Pricing never appears in feed posts. Route to DM.
 
 ## Visual systems
 
+> **Every render must follow `brand-kit/SPACING-GUIDELINES.md`.**
+> Display text routes through `fit_to_width(SAFE_TEXT_W=920, …)`. No
+> hard-coded `font-size` on lines longer than ~10 characters. Run the
+> pre-flight checklist in the spacing doc before shipping a render.
+
 ### Track A — v13 editorial
 
 - Background `#070A09` (warm-black)
