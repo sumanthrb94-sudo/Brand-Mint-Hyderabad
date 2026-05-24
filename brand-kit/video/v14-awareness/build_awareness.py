@@ -172,24 +172,67 @@ def beat_at(t_sec: float):
         cursor += b.duration
     return len(BEATS) - 1, 1.0, BEATS[-1]
 
+# ----- easing + animation helpers -----------------------------------------
+
 def lerp(a, b, t): return a + (b - a) * t
-def ease_in_out(t): return 0.5 - 0.5 * math.cos(math.pi * t)
+
+def clamp01(t: float) -> float:
+    return 0.0 if t < 0 else 1.0 if t > 1 else t
+
+def ease_out_cubic(t: float) -> float:
+    """Snappy entrances — fast start, gentle settle."""
+    t = clamp01(t)
+    return 1 - (1 - t) ** 3
+
+def ease_in_cubic(t: float) -> float:
+    """Mirror — gentle start, fast finish (use for exits)."""
+    t = clamp01(t)
+    return t ** 3
+
+def ease_in_out(t: float) -> float:
+    t = clamp01(t)
+    return 0.5 - 0.5 * math.cos(math.pi * t)
+
+def smoothstep(edge0: float, edge1: float, x: float) -> float:
+    t = clamp01((x - edge0) / (edge1 - edge0)) if edge1 > edge0 else 0.0
+    return t * t * (3 - 2 * t)
+
+def beat_envelope(local: float, in_t: float = 0.18,
+                  out_t: float = 0.12) -> dict:
+    """Standard beat envelope:
+       0..in_t          → entrance (slide-up + fade-in, ease-out-cubic)
+       in_t..(1-out_t)  → hold with subtle breathing
+       (1-out_t)..1     → exit (fade-out, ease-in-cubic)
+    Returns dict of {alpha, slide_y, breathe, punch}.
+    """
+    if local < in_t:
+        alpha = ease_out_cubic(local / in_t)
+        slide_y = lerp(40, 0, ease_out_cubic(local / in_t))
+    elif local > 1 - out_t:
+        alpha = 1 - ease_in_cubic((local - (1 - out_t)) / out_t)
+        slide_y = lerp(0, -20, ease_in_cubic((local - (1 - out_t)) / out_t))
+    else:
+        alpha = 1.0
+        # Continuous gentle breathing during hold — never linear, never flat.
+        hold_local = (local - in_t) / (1 - in_t - out_t)
+        slide_y = 2 * math.sin(hold_local * math.pi * 2)  # ±2px sway
+
+    # Zoom-punch on the emphasis word — peaks at local=0.42, decays by 0.55
+    punch_t = (local - 0.42) / 0.13
+    punch = 1.0 + 0.06 * max(0.0, 1.0 - abs(punch_t)) if -1 <= punch_t <= 1 else 1.0
+
+    # Slow background breathe (independent of beat envelope, used for bg scale)
+    breathe = 1.0 + 0.008 * math.sin(local * math.pi * 1.8)
+
+    return {"alpha": alpha, "slide_y": slide_y,
+            "punch": punch, "breathe": breathe}
 
 # ----- shared background --------------------------------------------------
 
 def bg_for(kind: str) -> str:
-    """Cuts go full-bleed (no letterbox) per viral playbook — letterboxes
-    are for v13 editorial. Brand reveal uses mint ground for impact."""
-    if kind == "brand":
-        return f"""
-      <rect width="{W}" height="{H}" fill="{BLACK}"/>
-      <rect x="0" y="600" width="{W}" height="720" fill="{MINT}"/>
-    """
-    if kind == "cta":
-        return f"""
-      <rect width="{W}" height="{H}" fill="{BLACK}"/>
-      <rect x="0" y="1450" width="{W}" height="280" fill="{MINT}"/>
-    """
+    """Black canvas only. The mint pillar (brand beat) and mint CTA bar
+    (cta beat) are painted INSIDE their render_* functions so they can
+    animate (slide up from below) instead of popping into place."""
     return f'<rect width="{W}" height="{H}" fill="{BLACK}"/>'
 
 # ----- text helpers -------------------------------------------------------
@@ -224,150 +267,195 @@ def stroked_text(text: str, x: int, y: int, pt: int, fill: str,
 # ----- scene renderers ----------------------------------------------------
 
 def render_hook(b: Beat, local: float) -> str:
-    """0:00 hook — top-18% placement per §2."""
+    """Frame 1 hook. Slide-up + fade-in on entry, zoom-punch on the
+    payoff word at local≈0.42, fade-out at the end."""
+    env = beat_envelope(local, in_t=0.22, out_t=0.10)
     cx = W // 2
-    # zoom-punch on the highlight word at local ~0.55
-    pulse = 1.0 + (0.06 if 0.5 < local < 0.66 else 0.0)
     top_pt = fit_to_width(b.top, SAFE_TEXT_W, 88, floor_pt=56)
-    big_pt = int(fit_to_width(b.big, SAFE_TEXT_W, 168, floor_pt=72) * pulse)
+    big_pt = int(fit_to_width(b.big, SAFE_TEXT_W, 168, floor_pt=72) * env["punch"])
 
     return f"""
-      <!-- TOP-18% small caption -->
-      {stroked_text(b.top, cx, int(H * 0.20), top_pt, WHITE,
-                    letter_spacing="0.02em", weight=800)}
+      <g opacity="{env['alpha']:.3f}" transform="translate(0 {env['slide_y']:.2f})">
+        {stroked_text(b.top, cx, int(H * 0.20), top_pt, WHITE,
+                      letter_spacing="0.02em", weight=800)}
 
-      <!-- BIG hook -->
-      {stroked_text(b.big, cx, int(H * 0.55), big_pt, MINT_2,
-                    letter_spacing="-0.025em")}
+        {stroked_text(b.big, cx, int(H * 0.55), big_pt, MINT_2,
+                      letter_spacing="-0.025em")}
 
-      <!-- mark of intent (small) -->
-      <text x="{cx}" y="{int(H * 0.85)}" font-family="{FONT_MONO}"
-            font-size="22" font-weight="700" fill="{WHITE}"
-            text-anchor="middle" letter-spacing="0.30em" opacity="0.7">
-        KEEP WATCHING.
-      </text>
+        <text x="{cx}" y="{int(H * 0.85)}" font-family="{FONT_MONO}"
+              font-size="22" font-weight="700" fill="{WHITE}"
+              text-anchor="middle" letter-spacing="0.30em"
+              opacity="{0.70 * env['alpha']:.3f}">
+          KEEP WATCHING.
+        </text>
+      </g>
     """
 
 def render_pain(b: Beat, local: float) -> str:
+    env = beat_envelope(local, in_t=0.24, out_t=0.16)
     cx = W // 2
-    pulse = 1.0 + (0.08 if 0.30 < local < 0.55 else 0.0)
     top_pt = fit_to_width(b.top, SAFE_TEXT_W, 72, floor_pt=44)
-    big_pt = int(fit_to_width(b.big, SAFE_TEXT_W, 200, floor_pt=110) * pulse)
+    big_pt = int(fit_to_width(b.big, SAFE_TEXT_W, 200, floor_pt=110) * env["punch"])
     sub_pt = fit_to_width(b.sub, SAFE_TEXT_W, 60, floor_pt=40, kind="serif")
+    # Sub line enters slightly later for a staggered feel.
+    sub_alpha = smoothstep(0.30, 0.50, local) * env["alpha"]
 
     return f"""
-      {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
-                    letter_spacing="0.04em", weight=700)}
+      <g opacity="{env['alpha']:.3f}" transform="translate(0 {env['slide_y']:.2f})">
+        {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
+                      letter_spacing="0.04em", weight=700)}
 
-      {stroked_text(b.big, cx, int(H * 0.55), big_pt, YELLOW,
-                    letter_spacing="-0.03em")}
-
+        {stroked_text(b.big, cx, int(H * 0.55), big_pt, YELLOW,
+                      letter_spacing="-0.03em")}
+      </g>
       <text x="{cx}" y="{int(H * 0.68)}" font-family="{FONT_SERIF}"
             font-size="{sub_pt}" font-weight="700" fill="{WHITE}"
             text-anchor="middle" font-style="italic"
-            stroke="{STROKE}" stroke-width="3"
-            paint-order="stroke fill" stroke-linejoin="round">
+            opacity="{sub_alpha:.3f}">
         {esc(b.sub)}
       </text>
     """
 
 def render_brand(b: Beat, local: float) -> str:
-    """Mint pillar lives y=600..1320 (centered 960). All text stays
-    INSIDE the pillar so black ink is on mint, not on the black bg."""
+    """Mint pillar slides UP from below the canvas to its resting band
+    over the first 30% of the beat, ease-out-cubic. Text fades in inside
+    the pillar after the pillar arrives."""
     cx = W // 2
-    drift = lerp(40, 0, ease_in_out(min(1.0, local * 2)))
 
-    # fit-to-width for the BRAND MINT line so it never bleeds
+    pillar_t = clamp01(local / 0.30)
+    pillar_top = lerp(H, 600, ease_out_cubic(pillar_t))
+    pillar_h = 720
+
+    text_t = smoothstep(0.18, 0.42, local)
+    text_drift = lerp(20, 0, ease_out_cubic(text_t))
+
+    # Exit fade in the last 12%
+    text_alpha = text_t
+    if local > 0.88:
+        out = ease_in_cubic((local - 0.88) / 0.12)
+        text_alpha *= (1 - out)
+        pillar_top -= 40 * out
+
     big_pt = fit_to_width(b.big, SAFE_TEXT_W, start_pt=168, floor_pt=110)
 
+    # Each line enters with its own small delay for a staggered cascade.
+    we_are_a = smoothstep(0.18, 0.32, local) * (1 if local <= 0.88 else max(0, 1 - (local - 0.88) / 0.12))
+    big_a = smoothstep(0.24, 0.40, local) * (1 if local <= 0.88 else max(0, 1 - (local - 0.88) / 0.12))
+    sub_a = smoothstep(0.32, 0.50, local) * (1 if local <= 0.88 else max(0, 1 - (local - 0.88) / 0.12))
+    url_a = smoothstep(0.40, 0.58, local) * (1 if local <= 0.88 else max(0, 1 - (local - 0.88) / 0.12))
+
     return f"""
-      <!-- mint pillar painted in bg_for() -->
+      <!-- mint pillar slides up -->
+      <rect x="0" y="{pillar_top:.2f}" width="{W}" height="{pillar_h}"
+            fill="{MINT}"/>
 
-      <text x="{cx}" y="{720 + drift:.0f}"
-            font-family="{FONT_MONO}" font-size="28" font-weight="700"
-            letter-spacing="0.40em" fill="{BLACK}" text-anchor="middle"
-            opacity="0.65">
-        WE ARE
-      </text>
+      <g transform="translate(0 {pillar_top - 600 + text_drift:.2f})">
+        <text x="{cx}" y="720"
+              font-family="{FONT_MONO}" font-size="28" font-weight="700"
+              letter-spacing="0.40em" fill="{BLACK}" text-anchor="middle"
+              opacity="{0.65 * we_are_a:.3f}">
+          WE ARE
+        </text>
 
-      <text x="{cx}" y="{900 + drift:.0f}"
-            font-family="{FONT_DISPLAY}" font-size="{big_pt}"
-            font-weight="900" fill="{BLACK}" text-anchor="middle"
-            letter-spacing="-0.025em">
-        {esc(b.big)}
-      </text>
+        <text x="{cx}" y="900"
+              font-family="{FONT_DISPLAY}" font-size="{big_pt}"
+              font-weight="900" fill="{BLACK}" text-anchor="middle"
+              letter-spacing="-0.025em"
+              opacity="{big_a:.3f}">
+          {esc(b.big)}
+        </text>
 
-      <text x="{cx}" y="{1070 + drift:.0f}"
-            font-family="{FONT_SERIF}" font-size="40" font-weight="700"
-            fill="{BLACK}" text-anchor="middle" font-style="italic">
-        {esc(b.sub)}
-      </text>
+        <text x="{cx}" y="1070"
+              font-family="{FONT_SERIF}" font-size="40" font-weight="700"
+              fill="{BLACK}" text-anchor="middle" font-style="italic"
+              opacity="{sub_a:.3f}">
+          {esc(b.sub)}
+        </text>
 
-      <text x="{cx}" y="{1230 + drift:.0f}"
-            font-family="{FONT_MONO}" font-size="22" font-weight="700"
-            letter-spacing="0.30em" fill="{BLACK}" text-anchor="middle"
-            opacity="0.75">
-        BRANDMINTSTUDIOS.IN
-      </text>
+        <text x="{cx}" y="1230"
+              font-family="{FONT_MONO}" font-size="22" font-weight="700"
+              letter-spacing="0.30em" fill="{BLACK}" text-anchor="middle"
+              opacity="{0.75 * url_a:.3f}">
+          BRANDMINTSTUDIOS.IN
+        </text>
+      </g>
     """
 
 def render_proof(b: Beat, local: float) -> str:
+    env = beat_envelope(local, in_t=0.22, out_t=0.14)
     cx = W // 2
-    pulse = 1.0 + (0.10 if 0.30 < local < 0.55 else 0.0)
     top_pt = fit_to_width(b.top, SAFE_TEXT_W, 60, floor_pt=44)
-    big_pt = int(fit_to_width(b.big, SAFE_TEXT_W, 200, floor_pt=120) * pulse)
+    # Strong zoom-punch on the ₹500 Cr+ figure
+    big_pt = int(fit_to_width(b.big, SAFE_TEXT_W, 200, floor_pt=120) * env["punch"])
+    sub_alpha = smoothstep(0.30, 0.50, local) * env["alpha"]
 
     return f"""
-      {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
-                    letter_spacing="0.10em", weight=700)}
+      <g opacity="{env['alpha']:.3f}" transform="translate(0 {env['slide_y']:.2f})">
+        {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
+                      letter_spacing="0.10em", weight=700)}
 
-      {stroked_text(b.big, cx, int(H * 0.55), big_pt, MINT_2,
-                    letter_spacing="-0.02em")}
-
+        {stroked_text(b.big, cx, int(H * 0.55), big_pt, MINT_2,
+                      letter_spacing="-0.02em")}
+      </g>
       <text x="{cx}" y="{int(H * 0.72)}" font-family="{FONT_SERIF}"
             font-size="44" font-weight="700" fill="{WHITE}"
             text-anchor="middle" font-style="italic"
-            stroke="{STROKE}" stroke-width="3"
-            paint-order="stroke fill" stroke-linejoin="round">
+            opacity="{sub_alpha:.3f}">
         {esc(b.sub)}
       </text>
     """
 
 def render_cta(b: Beat, local: float) -> str:
+    """CTA bar slides UP from below over the first 25% of the beat.
+    Text fades in after the bar. Continuous mint pulse on the CTA word."""
     cx = W // 2
-    # double-pulse on the CTA word
-    pulse = 1.0 + (0.08 if (local % 0.4) < 0.15 else 0.0)
+
+    bar_t = clamp01(local / 0.25)
+    bar_top = lerp(H, 1450, ease_out_cubic(bar_t))
+    bar_h = 280
+
+    body_t = smoothstep(0.05, 0.30, local)
+    body_drift = lerp(20, 0, ease_out_cubic(body_t))
+
+    # Continuous pulse on the CTA word
+    pulse = 1.0 + 0.035 * (0.5 + 0.5 * math.sin(local * 2 * math.pi * 1.5))
 
     top_pt = fit_to_width(b.top, SAFE_TEXT_W, 60, floor_pt=44)
     big_pt = int(fit_to_width(b.big, SAFE_TEXT_W, 152, floor_pt=84) * pulse)
     sub_pt = fit_to_width(b.sub, SAFE_TEXT_W, 56, floor_pt=40, kind="serif")
+    sub_alpha = smoothstep(0.35, 0.55, local)
 
     return f"""
-      {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
-                    letter_spacing="0.06em", weight=800)}
+      <g opacity="{body_t:.3f}" transform="translate(0 {body_drift:.2f})">
+        {stroked_text(b.top, cx, int(H * 0.28), top_pt, WHITE,
+                      letter_spacing="0.06em", weight=800)}
 
-      {stroked_text(b.big, cx, int(H * 0.50), big_pt, MINT_2,
-                    letter_spacing="-0.02em")}
-
+        {stroked_text(b.big, cx, int(H * 0.50), big_pt, MINT_2,
+                      letter_spacing="-0.02em")}
+      </g>
       <text x="{cx}" y="{int(H * 0.63)}" font-family="{FONT_SERIF}"
             font-size="{sub_pt}" font-weight="700" fill="{WHITE}"
             text-anchor="middle" font-style="italic"
-            stroke="{STROKE}" stroke-width="3"
-            paint-order="stroke fill" stroke-linejoin="round">
+            opacity="{sub_alpha:.3f}">
         {esc(b.sub)}
       </text>
 
-      <!-- mint bottom CTA bar -->
-      <text x="{cx}" y="{int(H * 0.84):.0f}"
-            font-family="{FONT_DISPLAY}" font-size="52" font-weight="900"
-            fill="{BLACK}" text-anchor="middle" letter-spacing="0.04em">
-        @brandmint.studios
-      </text>
-      <text x="{cx}" y="{int(H * 0.90):.0f}"
-            font-family="{FONT_MONO}" font-size="26" font-weight="700"
-            fill="{BLACK}" text-anchor="middle" letter-spacing="0.30em">
-        HYDERABAD  ·  HITEC CITY
-      </text>
+      <!-- mint CTA bar (slides up) -->
+      <rect x="0" y="{bar_top:.2f}" width="{W}" height="{bar_h}"
+            fill="{MINT}"/>
+
+      <g transform="translate(0 {bar_top - 1450:.2f})">
+        <text x="{cx}" y="1620"
+              font-family="{FONT_DISPLAY}" font-size="52" font-weight="900"
+              fill="{BLACK}" text-anchor="middle" letter-spacing="0.04em">
+          @brandmint.studios
+        </text>
+        <text x="{cx}" y="1690"
+              font-family="{FONT_MONO}" font-size="26" font-weight="700"
+              fill="{BLACK}" text-anchor="middle" letter-spacing="0.30em">
+          HYDERABAD  ·  HITEC CITY
+        </text>
+      </g>
     """
 
 # ----- compose ------------------------------------------------------------
@@ -389,18 +477,13 @@ def compose_svg(t_sec: float) -> str:
     else:
         body = ""
 
-    # 2-frame black flash at the very start of every beat (mechanic #7
-    # 'scene break' from playbook §3)
-    flash = ""
-    if local < 2.0 / FPS / b.duration:
-        flash = f'<rect width="{W}" height="{H}" fill="{STROKE}"/>'
-
+    # No black flash — entrances are now smooth slide+fade so the
+    # scene-break is intrinsic to the animation, not a hard cut.
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}"
      viewBox="0 0 {W} {H}">
   {bg}
   {body}
-  {flash}
 </svg>
 """
 
