@@ -225,37 +225,44 @@ def text_at(text: str, x: int, y: int, pt: int, fill: str = WHITE,
 
 # ===== MOTION GRAPHICS HELPERS ============================================
 
+# Canonical Brand Mint M-monogram — loaded directly from the source SVG
+# at module init so every render is pixel-identical to the brand asset.
+_LOGO_SVG_PATH = Path(__file__).resolve().parent.parent.parent / "logo" / "brand-mint-monogram.svg"
+_LOGO_SVG_SRC = _LOGO_SVG_PATH.read_text() if _LOGO_SVG_PATH.exists() else None
+
 def draw_mark(cx: int, cy: int, scale: float, draw_t: float,
               opacity: float) -> str:
-    """Brand Mint M-monogram. Scales up + the M-path draws itself via
-    stroke-dashoffset, mimicking a Canva-style logo build.
+    """Embeds brand-kit/logo/brand-mint-monogram.svg directly into the
+    frame, with the path's stroke-dasharray animated by draw_t so the
+    M draws itself in (0=hidden, 1=fully drawn).
 
-    Source mark: 32x32 viewBox with a mint gradient circle and an M
-    stroked in dark ink — from /index.html lockup."""
-    # Bigger render — base 32px, we render at 320px
+    scale=1 → 320px size. Every render is pixel-identical to the source
+    SVG; any future logo updates propagate automatically."""
     size = int(320 * scale)
-    # Approximate path length for the M (in 32-unit viewBox space): ~36
-    path_len = 36
+    if size <= 4 or _LOGO_SVG_SRC is None:
+        return ""
+    path_len = 85
     dash_offset = path_len * (1 - clamp01(draw_t))
     op = clamp01(opacity)
+
+    uniq = f"{int(scale * 10000)}-{int(draw_t * 10000)}"
+    svg = _LOGO_SVG_SRC
+    svg = svg.replace('id="bmGrad"', f'id="bmGrad-{uniq}"')
+    svg = svg.replace('url(#bmGrad)', f'url(#bmGrad-{uniq})')
+    svg = svg.replace(
+        'stroke-linejoin="round" fill="none"',
+        f'stroke-linejoin="round" fill="none" '
+        f'stroke-dasharray="{path_len}" stroke-dashoffset="{dash_offset:.2f}"'
+    )
+    svg = svg.replace('width="64" height="64"',
+                      f'width="{size}" height="{size}"')
+    if svg.startswith("<?xml"):
+        svg = svg.split("?>", 1)[1].lstrip()
 
     return f"""
       <g transform="translate({cx - size//2} {cy - size//2})"
          opacity="{op:.3f}">
-        <svg width="{size}" height="{size}" viewBox="0 0 32 32">
-          <defs>
-            <linearGradient id="bm-mark-grad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="{MINT_2}"/>
-              <stop offset="100%" stop-color="{MINT}"/>
-            </linearGradient>
-          </defs>
-          <circle cx="16" cy="16" r="15" fill="url(#bm-mark-grad)"/>
-          <path d="M9 22V10l7 6 7-6v12"
-                stroke="{INK_2}" stroke-width="2.4"
-                stroke-linecap="round" stroke-linejoin="round" fill="none"
-                stroke-dasharray="{path_len}"
-                stroke-dashoffset="{dash_offset:.2f}"/>
-        </svg>
+        {svg}
       </g>
     """
 

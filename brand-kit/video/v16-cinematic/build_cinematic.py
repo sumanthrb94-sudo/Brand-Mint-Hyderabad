@@ -266,16 +266,48 @@ def mask_wipe_text(text: str, x: float, y: float, pt: int,
       </g>
     """
 
+# Load the canonical Brand Mint monogram SVG at module init so we
+# pixel-match the source file rather than re-coding the path.
+_LOGO_SVG_PATH = Path(__file__).resolve().parent.parent.parent / "logo" / "brand-mint-monogram.svg"
+_LOGO_SVG_SRC = _LOGO_SVG_PATH.read_text() if _LOGO_SVG_PATH.exists() else None
+
 def draw_mark(cx: float, cy: float, scale: float, draw_t: float,
               opacity: float, glow: float = 0.0) -> str:
-    """Brand Mint M-monogram. scale=1 → 320px size. draw_t controls
-    stroke-dashoffset on the M-path. glow adds a soft mint aura."""
+    """Brand Mint M-monogram — embeds the canonical SVG file directly
+    from brand-kit/logo/brand-mint-monogram.svg.
+
+    The source SVG (viewBox 64x64, circle r=32, path
+    'M18 44V20l14 12 14-12v24', stroke-width 4.4, stroke #0B1F1A) is
+    loaded once at module init. We inject a stroke-dasharray to
+    animate the M-path drawing in, and a unique gradient id per call
+    so multiple mark instances don't collide.
+
+    scale=1 → 320px size. draw_t controls the path-draw progress
+    (0=hidden, 1=full). glow adds a soft mint aura behind the mark."""
     size = int(320 * scale)
-    if size <= 4:
+    if size <= 4 or _LOGO_SVG_SRC is None:
         return ""
-    path_len = 36
+    path_len = 85    # V24 + diag(√(14²+12²)) + diag + V24 ≈ 84.8
     dash_offset = path_len * (1 - clamp01(draw_t))
     op = clamp01(opacity)
+
+    # Inject animation attrs into the canonical SVG (replace the
+    # <path d="..."/> with the same path + stroke-dasharray/offset).
+    # We also re-id the gradient so multiple marks in the same frame
+    # don't share IDs.
+    uniq = f"{int(scale * 10000)}-{int(draw_t * 10000)}"
+    svg = _LOGO_SVG_SRC
+    svg = svg.replace('id="bmGrad"', f'id="bmGrad-{uniq}"')
+    svg = svg.replace('url(#bmGrad)', f'url(#bmGrad-{uniq})')
+    # Add stroke-dasharray + offset to the M-path
+    svg = svg.replace(
+        'stroke-linejoin="round" fill="none"',
+        f'stroke-linejoin="round" fill="none" '
+        f'stroke-dasharray="{path_len}" stroke-dashoffset="{dash_offset:.2f}"'
+    )
+    # Re-size the outer <svg>
+    svg = svg.replace('width="64" height="64"',
+                      f'width="{size}" height="{size}"')
 
     glow_layer = ""
     if glow > 0:
@@ -286,24 +318,15 @@ def draw_mark(cx: float, cy: float, scale: float, draw_t: float,
             f'filter="blur(40)"/>'
         )
 
+    # Strip the XML declaration if present (we're embedding inline)
+    if svg.startswith("<?xml"):
+        svg = svg.split("?>", 1)[1].lstrip()
+
     return f"""
       {glow_layer}
       <g transform="translate({cx - size/2:.1f} {cy - size/2:.1f})"
          opacity="{op:.3f}">
-        <svg width="{size}" height="{size}" viewBox="0 0 32 32">
-          <defs>
-            <linearGradient id="bm-mark-g-{int(scale * 1000)}" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="{MINT_2}"/>
-              <stop offset="100%" stop-color="{MINT}"/>
-            </linearGradient>
-          </defs>
-          <circle cx="16" cy="16" r="15" fill="url(#bm-mark-g-{int(scale * 1000)})"/>
-          <path d="M9 22V10l7 6 7-6v12"
-                stroke="{INK_2}" stroke-width="2.4"
-                stroke-linecap="round" stroke-linejoin="round" fill="none"
-                stroke-dasharray="{path_len}"
-                stroke-dashoffset="{dash_offset:.2f}"/>
-        </svg>
+        {svg}
       </g>
     """
 
