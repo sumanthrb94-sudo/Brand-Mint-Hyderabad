@@ -49,6 +49,9 @@
         <p class="gate-foot">
           Restricted area. Only emails in the <code>admins</code> allowlist can enter.
         </p>
+        <p class="gate-foot">
+          <a href="#" id="gate-force-signout">Stuck? Clear session from this device →</a>
+        </p>
       </div>
     </div>
 
@@ -111,6 +114,27 @@
         const masked = input.type === "password";
         input.type = masked ? "text" : "password";
         eye.textContent = masked ? "Hide" : "Show";
+      });
+
+      // Force-clear session from this device. Works even if the auth module
+      // failed to load — wipes every Supabase auth key from storage and reloads.
+      document.addEventListener("click", function (e) {
+        var link = e.target.closest("#gate-force-signout");
+        if (!link) return;
+        e.preventDefault();
+        try {
+          Object.keys(localStorage).forEach(function (k) {
+            if (k.indexOf("sb-") === 0 || k.indexOf("supabase") !== -1) {
+              localStorage.removeItem(k);
+            }
+          });
+          Object.keys(sessionStorage).forEach(function (k) {
+            if (k.indexOf("sb-") === 0 || k.indexOf("supabase") !== -1) {
+              sessionStorage.removeItem(k);
+            }
+          });
+        } catch (_) {}
+        location.reload();
       });
     </script>
     <script type="module" src="/admin/app.js?v=11"></script>

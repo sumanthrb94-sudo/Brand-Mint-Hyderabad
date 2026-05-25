@@ -589,7 +589,40 @@ export function renderTopbar({ breadcrumb, title, actions }) {
   );
 
   const syncPill = buildSyncPill();
-  const actionBox = h("div", { class: "topbar-actions" }, [syncPill, trigger]);
+  const logoutBtn = h(
+    "button",
+    {
+      class: "topbar-logout",
+      type: "button",
+      "aria-label": "Sign out",
+      title: "Sign out",
+      onclick: () => {
+        if (!window.bm?.ctx) {
+          // Hard fallback so the button always works
+          try {
+            localStorage.clear();
+            sessionStorage.clear();
+          } catch (_) {}
+          location.replace("/admin.html");
+          return;
+        }
+        if (confirm("Sign out of the admin panel?")) {
+          window.bm.ctx.logout?.();
+        }
+      },
+    },
+    [
+      h("svg", {
+        viewBox: "0 0 16 16",
+        html:
+          '<path d="M10 11l3-3-3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '<path d="M13 8H6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>' +
+          '<path d="M8 3H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+      }),
+      h("span", { text: "Sign out" }),
+    ]
+  );
+  const actionBox = h("div", { class: "topbar-actions" }, [syncPill, trigger, logoutBtn]);
   if (actions && actions.length) actions.forEach((a) => actionBox.appendChild(a));
   root.appendChild(actionBox);
 }
