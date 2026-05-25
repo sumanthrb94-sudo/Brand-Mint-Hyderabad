@@ -30,7 +30,7 @@
         <h1>Brand Mint Admin</h1>
         <p class="gate-sub">Sign in with your admin email + password.</p>
 
-        <form id="gate-form" autocomplete="on">
+        <form id="gate-form" method="post" action="javascript:void(0)" autocomplete="on">
           <label class="gate-field">
             <input id="gate-email" name="email" type="email" required autocomplete="email" placeholder=" " />
             <span>Email</span>
@@ -66,8 +66,44 @@
     <div id="modal-root"></div>
 
     <script>
-      // Wire the password eye toggle before the module loads so the click
-      // works even if the auth bootstrap takes a moment.
+      // SECURITY: scrub any email/password that ended up in the URL (e.g.
+      // because the form was submitted before the auth module finished
+      // loading and fell back to a default GET). Strip ?email/?password
+      // from history immediately so they don't survive in browser history,
+      // bookmarks, or the Referer header on the next navigation.
+      (function () {
+        try {
+          var u = new URL(window.location.href);
+          var leaked = false;
+          ["email", "password"].forEach(function (k) {
+            if (u.searchParams.has(k)) {
+              u.searchParams.delete(k);
+              leaked = true;
+            }
+          });
+          if (leaked) {
+            window.history.replaceState(
+              {},
+              document.title,
+              u.pathname + (u.searchParams.toString() ? "?" + u.searchParams.toString() : "") + u.hash
+            );
+          }
+        } catch (_) {}
+      })();
+
+      // SECURITY: hard-stop form submission BEFORE the auth module attaches
+      // its handler. Without this, a fast submit (or a JS-load failure) lets
+      // the browser fall back to the default action and append the password
+      // to the URL as a query string.
+      document.addEventListener(
+        "submit",
+        function (e) {
+          if (e.target && e.target.id === "gate-form") e.preventDefault();
+        },
+        true
+      );
+
+      // Password eye toggle (must work before the module loads).
       document.addEventListener("click", function (e) {
         const eye = e.target.closest(".gate-eye");
         if (!eye) return;

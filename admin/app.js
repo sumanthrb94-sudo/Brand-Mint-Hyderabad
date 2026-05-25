@@ -133,13 +133,26 @@ async function boot() {
   const form = document.getElementById("gate-form");
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const email = form.email.value;
     const password = form.password.value;
     renderGate("busy");
     try {
-      await auth.signIn(email, password);
+      // Hard 15s timeout so the gate can never sit on "Signing in…"
+      // forever (network blip, Supabase paused, rate limit, etc.).
+      await Promise.race([
+        auth.signIn(email, password),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Sign-in timed out. Check your connection and try again.")),
+            15000
+          )
+        ),
+      ]);
+      if (form.password) form.password.value = "";
       await showApp();
     } catch (err) {
+      if (form.password) form.password.value = "";
       renderGate("idle", err.message || "Sign-in failed.");
     }
   });
