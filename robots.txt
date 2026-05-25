@@ -3,5 +3,9 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 Disallow: /admin.html
+Disallow: /brand-mint-admin
+Disallow: /brand-mint-admin/
+Disallow: /brand-kit
+Disallow: /brand-kit/
 
 Sitemap: https://brandmintstudios.in/sitemap.xml

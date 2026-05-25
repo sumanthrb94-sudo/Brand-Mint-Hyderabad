@@ -75,9 +75,9 @@ export async function render(ctx) {
             h("div", {
               class: "muted",
               text:
-                "Coming soon — this doc hasn't been written yet. When it's ready, it'll live at /brand-mint-admin/" +
+                "Not deployed. Internal docs are excluded from the public CDN for security — read them in the private git repo at brand-mint-admin/" +
                 current.file +
-                ".",
+                ". Migration to gated Supabase Storage is on the roadmap.",
             }),
           ])
         );

@@ -212,7 +212,8 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-// Auth disabled — always boot straight into the dashboard.
+// Boot the auth state machine; renders the gate if not signed in,
+// or hydrates the app + first route if the session is admin-verified.
 await boot();
 
 // Expose helpers for the topbar palette trigger + console debugging.

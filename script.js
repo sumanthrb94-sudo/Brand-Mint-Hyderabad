@@ -162,16 +162,24 @@
         }
       ).catch((err) => console.error("[contact] Gmail notify failed", err));
 
-      try {
-        await sendLeadToSupabase(payload);
-        await gmailNotify;
+      // Gmail (Formsubmit) is the SOURCE OF TRUTH for inbound leads — we
+      // succeed as long as it succeeds. Supabase is best-effort backup for
+      // the admin panel and may legitimately fail (e.g. anon role blocked
+      // by RLS). Mailto navigation only kicks in if BOTH fail.
+      const supabaseTry = sendLeadToSupabase(payload).catch((err) => {
+        console.error("[contact] Supabase insert failed (Gmail still primary)", err);
+        return null;
+      });
+      const [gmailResult] = await Promise.all([gmailNotify, supabaseTry]);
+
+      if (gmailResult && gmailResult.ok !== false) {
         button.disabled = false;
         labelEl.textContent = original;
         status.textContent =
           "Thanks — we'll be in touch within one business day.";
         form.reset();
-      } catch (err) {
-        console.error("[contact] Supabase insert failed, falling back to mailto", err);
+      } else {
+        console.error("[contact] Both Gmail + Supabase failed — falling back to mailto");
         button.disabled = false;
         labelEl.textContent = original;
         status.textContent =

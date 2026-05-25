@@ -1,0 +1,24 @@
+# SECURITY: never ship internal docs / assets to the public CDN.
+# These dirs contain financial models, sales playbooks, hiring docs,
+# brand briefs, raw video source files, etc. They live in the private
+# git repo as the source of truth but must NOT be world-readable at
+# brandmintstudios.in/<dir>/<file>.
+#
+# Admin panel reads these via /admin/modules/documents.js — that
+# integration must migrate to Supabase Storage with RLS auth gating.
+# Until then, the docs viewer will show a "not deployed" message,
+# which is the correct degraded behavior.
+
+brand-mint-admin/
+brand-kit/
+
+# Local-only dev artifacts (defense in depth — most are already
+# gitignored, but excluding here ensures they never reach Vercel
+# even if accidentally committed).
+.env
+.env.*
+*.log
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store

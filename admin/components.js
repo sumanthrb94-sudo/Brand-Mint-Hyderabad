@@ -597,18 +597,25 @@ export function renderTopbar({ breadcrumb, title, actions }) {
       "aria-label": "Sign out",
       title: "Sign out",
       onclick: () => {
-        if (!window.bm?.ctx) {
+        const doLogout = () => {
+          if (window.bm?.ctx?.logout) {
+            window.bm.ctx.logout();
+            return;
+          }
           // Hard fallback so the button always works
           try {
-            localStorage.clear();
-            sessionStorage.clear();
+            Object.keys(localStorage).forEach((k) => {
+              if (k.indexOf("sb-") === 0 || k.indexOf("supabase") !== -1) {
+                localStorage.removeItem(k);
+              }
+            });
           } catch (_) {}
           location.replace("/admin.html");
-          return;
-        }
-        if (confirm("Sign out of the admin panel?")) {
-          window.bm.ctx.logout?.();
-        }
+        };
+        // Native browser confirm — keep this dead-simple and reliable.
+        // The module-level `confirm()` export takes an options object;
+        // calling it with a string silently fails. Use window.confirm.
+        if (window.confirm("Sign out of the admin panel?")) doLogout();
       },
     },
     [
