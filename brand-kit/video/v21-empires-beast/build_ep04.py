@@ -226,7 +226,7 @@ def build_philosophy(b, local, t):
                      fill=BEAST_BLACK, stroke=BEAST_BLACK, stroke_w=2)}
       </g>
       <g opacity="{body_a:.3f}">
-        {stroke_text("\"ARCHITECTURE", cx, int(H * 0.34), 88,
+        {stroke_text('"ARCHITECTURE', cx, int(H * 0.34), 88,
                      fill=BEAST_BLACK, stroke=BEAST_BLACK, stroke_w=1)}
       </g>
       <g opacity="{body2_a:.3f}">
@@ -236,7 +236,7 @@ def build_philosophy(b, local, t):
                      fill=BEAST_BLACK, stroke=BEAST_BLACK, stroke_w=1)}
       </g>
       <g opacity="{body3_a:.3f}">
-        {stroke_text("LIVES.\"", cx, int(H * 0.72), 124,
+        {stroke_text('LIVES."', cx, int(H * 0.72), 124,
                      fill=BEAST_BLACK, stroke=BEAST_BLACK, stroke_w=2)}
       </g>
       <text x="{cx}" y="{int(H * 0.86)}" font-family="{FONT_MONO}"
