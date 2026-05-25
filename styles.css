@@ -2492,3 +2492,14 @@ html.lenis body {
     opacity: 1 !important;
   }
 }
+
+/* If a motion-word ever ends up inside a gradient-text element, make
+   sure it inherits the gradient instead of going transparent (bug:
+   .grad uses background-clip:text and inline-block children break it). */
+.grad .motion-word {
+  background: inherit;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}

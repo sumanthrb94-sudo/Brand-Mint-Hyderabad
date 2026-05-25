@@ -94,19 +94,15 @@
   }
 
   /* ---------- 1. Hero ---------- */
+  // NOTE: don't word-split the hero title — it contains a .grad span with
+  // background-clip:text that breaks when a child gets display:inline-block.
+  // Animate the whole title as one block for reliability.
   once(".hero-title", (el) => {
-    const words = splitHeadline(el);
-    if (!words.length) return;
-    gsap.set(words, { y: 40, opacity: 0, rotate: 1.5 });
-    gsap.to(words, {
-      y: 0,
-      opacity: 1,
-      rotate: 0,
-      stagger: 0.045,
-      duration: 0.85,
-      delay: 0.1,
-      ease: "power4.out",
-    });
+    gsap.fromTo(
+      el,
+      { y: 36, opacity: 0 },
+      { y: 0, opacity: 1, duration: 1.0, delay: 0.1, ease: "power4.out" }
+    );
   });
 
   once(".hero-sub", (el) => {
