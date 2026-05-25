@@ -2112,62 +2112,6 @@ main {
   letter-spacing: 0.02em;
 }
 
-/* ---------- PRESS STRIP ---------- */
-.press {
-  max-width: var(--maxw);
-  margin: 0 auto;
-  padding: clamp(28px, 4vw, 48px) var(--pad);
-  text-align: center;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.press-eyebrow {
-  display: block;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.24em;
-  color: var(--gold);
-  margin-bottom: 22px;
-  text-transform: uppercase;
-}
-.press-row {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 14px 26px;
-  font-family: var(--serif);
-  font-size: clamp(20px, 2.4vw, 30px);
-  letter-spacing: -0.01em;
-  color: var(--ink-2);
-  filter: grayscale(0.4) opacity(0.85);
-  transition: filter 0.3s;
-}
-.press-row:hover {
-  filter: none;
-}
-.press-logo {
-  position: relative;
-  padding: 0 4px;
-}
-.press-logo em {
-  font-style: italic;
-}
-.press-logo sup {
-  font-family: var(--sans);
-  font-size: 0.5em;
-  font-weight: 600;
-  vertical-align: super;
-}
-.press-dot {
-  font-family: var(--sans);
-  color: var(--gold);
-  opacity: 0.6;
-}
-
 /* ---------- SERVICE PRICE ---------- */
 .service-price {
   margin-top: 14px;
