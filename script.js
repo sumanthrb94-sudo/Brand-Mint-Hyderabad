@@ -138,8 +138,33 @@
         user_id: authUser?.id || null,
       };
 
+      // Fire-and-forget Gmail notification via Formsubmit. Runs in parallel
+      // with the Supabase write so every inquiry lands in the inbox even if
+      // the DB write fails. Requires one-time verification on first submission
+      // (Formsubmit emails brandmint.studios.in@gmail.com a confirm link).
+      const gmailNotify = fetch(
+        "https://formsubmit.co/ajax/brandmint.studios.in@gmail.com",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            _subject: `New project inquiry — ${type}`,
+            _template: "table",
+            _captcha: "false",
+            Name: name,
+            Email: email,
+            Company: payload.company || "—",
+            Phone: payload.phone || "—",
+            Type: payload.project_type,
+            Budget: payload.budget || "—",
+            Message: payload.message || "—",
+          }),
+        }
+      ).catch((err) => console.error("[contact] Gmail notify failed", err));
+
       try {
         await sendLeadToSupabase(payload);
+        await gmailNotify;
         button.disabled = false;
         labelEl.textContent = original;
         status.textContent =
@@ -166,7 +191,7 @@
             payload.message || "",
           ].join("\n")
         );
-        window.location.href = `mailto:hello@brandmintstudios.in?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:brandmint.studios.in@gmail.com?subject=${subject}&body=${body}`;
       }
     });
   }
