@@ -2426,3 +2426,69 @@ main {
     transform: none;
   }
 }
+
+/* ============================================================
+   MOTION LAYER (motion.js)
+   - Word-split spans for headline reveals
+   - 3D perspective hints for tilt cards
+   - Lenis smooth-scroll body lock
+   ============================================================ */
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.motion-word {
+  display: inline-block;
+  will-change: transform, opacity;
+  transform-origin: 50% 100%;
+}
+
+.hero-card,
+.service,
+.case,
+.bm-card {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* GSAP sets inline styles, so a sane "before-anim" state stops the
+   page from flashing fully-styled content for one frame before the
+   timeline kicks in. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-title,
+  .hero-sub,
+  .hero-cta,
+  .hero-card,
+  #services h2,
+  #work h2,
+  #process h2,
+  #about h2,
+  #contact h2,
+  .contact h2,
+  .service,
+  .case,
+  .process li,
+  .contact-form .field {
+    will-change: transform, opacity;
+  }
+}
+
+/* Reduced motion: kill all of the motion-layer transforms hard. */
+@media (prefers-reduced-motion: reduce) {
+  .motion-word {
+    display: inline !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
