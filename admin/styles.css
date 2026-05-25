@@ -433,6 +433,38 @@ code {
   .topbar-back { padding: 6px; margin-right: 8px; }
 }
 
+.topbar-dashboard {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--mint-3);
+  background: var(--mint-3);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-right: 14px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+.topbar-dashboard:hover {
+  background: var(--mint-4);
+  border-color: var(--mint-4);
+  color: #fff;
+}
+.topbar-dashboard:active {
+  transform: translateY(1px);
+}
+.topbar-dashboard svg {
+  width: 13px;
+  height: 13px;
+}
+@media (max-width: 720px) {
+  .topbar-dashboard span { display: none; }
+  .topbar-dashboard { padding: 6px 8px; margin-right: 8px; }
+}
+
 /* ---------- VIEW ---------- */
 .view {
   padding: 28px 28px 60px;
