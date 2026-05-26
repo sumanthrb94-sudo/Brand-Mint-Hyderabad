@@ -92,24 +92,29 @@ def scene_local(t: float, scene_i: int):
 def render_scene_1(t: float) -> str:
     local, n = scene_local(t, 0)
     if local is None: return ""
-    # Letter-spacing settle 0.34em -> 0.05em
-    ls = lerp(0.34, 0.05, ease_out_cubic(smoothstep(0.0, 0.45, n)))
-    # Slide-up + opacity floor at 0.4 so first frame is never empty
-    yoff = lerp(20, 0, ease_out_cubic(smoothstep(0.0, 0.35, n)))
+    # Two-line layout for the ad opener — more dramatic + fits cleanly.
+    # Letter-spacing settle 0.16em -> 0.04em (tighter now that each line
+    # is shorter and we have width budget for big type)
+    ls = lerp(0.16, 0.04, ease_out_cubic(smoothstep(0.0, 0.45, n)))
+    yoff_top = lerp(22, 0, ease_out_cubic(smoothstep(0.0, 0.35, n)))
+    yoff_bot = lerp(22, 0, ease_out_cubic(smoothstep(0.10, 0.45, n)))
     appear_raw = smoothstep(0.0, 0.25, n)
-    appear = max(0.4, appear_raw)   # FLOOR: always visible from frame 0
+    appear = max(0.55, appear_raw)   # floor at 55% so first frame is legible
     leave  = 1 - smoothstep(0.90, 1.0, n)
     a = appear * leave
     if a <= 0.01: return ""
-    # Mint accent dot, pulsing
+    # Mint accent dot pulses between the two lines
     dot_a = appear_raw * leave * 0.9
     dot_pulse = 1.0 + 0.20 * math.sin(local * math.tau * 1.2)
     return f"""
-      <text x="{CENTER_X}" y="{CENTER_Y + yoff:.1f}" font-family="{FONT_DISPLAY}"
-            font-weight="800" font-size="84" letter-spacing="{ls:.3f}em"
-            fill="{PAPER}" text-anchor="middle" opacity="{a:.3f}">DESIGN THAT THINKS.</text>
-      <circle cx="{CENTER_X}" cy="{CENTER_Y + yoff + 70:.1f}" r="{8 * dot_pulse:.1f}"
+      <text x="{CENTER_X}" y="{CENTER_Y - 80 + yoff_top:.1f}" font-family="{FONT_DISPLAY}"
+            font-weight="800" font-size="140" letter-spacing="{ls:.3f}em"
+            fill="{PAPER}" text-anchor="middle" opacity="{a:.3f}">DESIGN</text>
+      <circle cx="{CENTER_X}" cy="{CENTER_Y + 8:.1f}" r="{6 * dot_pulse:.1f}"
               fill="{MINT_3}" opacity="{dot_a:.3f}"/>
+      <text x="{CENTER_X}" y="{CENTER_Y + 130 + yoff_bot:.1f}" font-family="{FONT_DISPLAY}"
+            font-weight="800" font-size="110" letter-spacing="{ls:.3f}em"
+            fill="{PAPER}" text-anchor="middle" opacity="{a:.3f}">THAT THINKS.</text>
     """
 
 # ---------- Scene 2: BRAND — "BRAND MINT" + STUDIOS · HYDERABAD ----------
