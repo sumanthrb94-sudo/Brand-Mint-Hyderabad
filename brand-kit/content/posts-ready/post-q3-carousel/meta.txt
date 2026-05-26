@@ -1,0 +1,17 @@
+Post: Q3 readiness carousel ad
+Format: Instagram carousel (3 slides) · 1080x1350 (4:5 portrait)
+Best time: Tuesday 7:30-8:30pm IST (engagement primetime in India)
+DM keyword: 'Q3' — auto-replies with the strategy workshop calendar
+
+Slide order:
+  1. slide-1-cost-of-waiting.png            — Hook: "THE COST OF WAITING" (Q3 calendar visual)
+  2. slide-2-strategy-design-engineering.png — Mid: "The cost of WAITING" + Strategy/Design/Engineering together
+  3. slide-3-partner-led-no-handoffs.png    — Close: "Partner-led. No handoffs." + Book a strategy workshop CTA
+
+Use as either:
+- Organic carousel post on @brandmint.studios (drives DM keyword "Q3")
+- Meta Ads creative (Engagement / Lead Gen objective)
+
+CTA destination (if running as paid ad):
+- Form URL: brandmintstudios.in/q3-workshop  (set up the landing page first)
+- OR DM auto-reply via Meta's automated responses
