@@ -412,7 +412,7 @@ def render_shot_text(t: float) -> str:
                 f'<text x="{CENTER_X}" y="{THIRD_Y_BOT + 220:.1f}" '
                 f'font-family="{FONT_MONO}" font-weight="600" font-size="30" '
                 f'letter-spacing="0.32em" fill="{PAPER}" text-anchor="middle" '
-                f'opacity="{a:.3f}">01 &#8212; PRINCIPLE &rarr; SYSTEM</text>'
+                f'opacity="{a:.3f}">01 &#8212; PRINCIPLE &#8594; SYSTEM</text>'
             )
     # ── Shot 4 kicker: 5.8 — 8.2
     if 5.6 < t < 8.4:
