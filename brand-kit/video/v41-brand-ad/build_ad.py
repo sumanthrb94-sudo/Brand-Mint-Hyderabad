@@ -92,22 +92,23 @@ def scene_local(t: float, scene_i: int):
 def render_scene_1(t: float) -> str:
     local, n = scene_local(t, 0)
     if local is None: return ""
-    # Letter-spacing settle 0.40em -> 0.06em
-    ls = lerp(0.40, 0.06, ease_out_cubic(smoothstep(0.0, 0.45, n)))
-    # Slide-up + opacity fade-in
-    yoff = lerp(28, 0, ease_out_cubic(smoothstep(0.0, 0.35, n)))
-    appear = smoothstep(0.0, 0.25, n)
+    # Letter-spacing settle 0.34em -> 0.05em
+    ls = lerp(0.34, 0.05, ease_out_cubic(smoothstep(0.0, 0.45, n)))
+    # Slide-up + opacity floor at 0.4 so first frame is never empty
+    yoff = lerp(20, 0, ease_out_cubic(smoothstep(0.0, 0.35, n)))
+    appear_raw = smoothstep(0.0, 0.25, n)
+    appear = max(0.4, appear_raw)   # FLOOR: always visible from frame 0
     leave  = 1 - smoothstep(0.90, 1.0, n)
     a = appear * leave
     if a <= 0.01: return ""
     # Mint accent dot, pulsing
-    dot_a = appear * leave * 0.9
+    dot_a = appear_raw * leave * 0.9
     dot_pulse = 1.0 + 0.20 * math.sin(local * math.tau * 1.2)
     return f"""
       <text x="{CENTER_X}" y="{CENTER_Y + yoff:.1f}" font-family="{FONT_DISPLAY}"
-            font-weight="800" font-size="118" letter-spacing="{ls:.3f}em"
+            font-weight="800" font-size="84" letter-spacing="{ls:.3f}em"
             fill="{PAPER}" text-anchor="middle" opacity="{a:.3f}">DESIGN THAT THINKS.</text>
-      <circle cx="{CENTER_X}" cy="{CENTER_Y + yoff + 90:.1f}" r="{8 * dot_pulse:.1f}"
+      <circle cx="{CENTER_X}" cy="{CENTER_Y + yoff + 70:.1f}" r="{8 * dot_pulse:.1f}"
               fill="{MINT_3}" opacity="{dot_a:.3f}"/>
     """
 
@@ -127,14 +128,14 @@ def render_scene_2(t: float) -> str:
     # Tiny mint accent line above
     line_w = lerp(0, 220, ease_out_cubic(smoothstep(0.10, 0.45, n)))
     return f"""
-      <line x1="{CENTER_X - line_w/2:.1f}" y1="{CENTER_Y - 200}"
-            x2="{CENTER_X + line_w/2:.1f}" y2="{CENTER_Y - 200}"
+      <line x1="{CENTER_X - line_w/2:.1f}" y1="{CENTER_Y - 160}"
+            x2="{CENTER_X + line_w/2:.1f}" y2="{CENTER_Y - 160}"
             stroke="{INK}" stroke-width="3" opacity="{a:.3f}"/>
       <text x="{CENTER_X}" y="{CENTER_Y + yoff_main:.1f}" font-family="{FONT_DISPLAY}"
-            font-weight="800" font-size="146" letter-spacing="{ls_main:.3f}em"
+            font-weight="800" font-size="108" letter-spacing="{ls_main:.3f}em"
             fill="{INK}" text-anchor="middle" opacity="{a:.3f}">BRAND MINT</text>
-      <text x="{CENTER_X}" y="{CENTER_Y + 130 + yoff_kicker:.1f}" font-family="{FONT_MONO}"
-            font-weight="600" font-size="26" letter-spacing="0.35em"
+      <text x="{CENTER_X}" y="{CENTER_Y + 100 + yoff_kicker:.1f}" font-family="{FONT_MONO}"
+            font-weight="600" font-size="24" letter-spacing="0.35em"
             fill="{INK}" text-anchor="middle" opacity="{a_kicker:.3f}">STUDIOS &#183; HYDERABAD</text>
     """
 
@@ -215,13 +216,13 @@ def render_scene_5(t: float) -> str:
     else:
         sp = 1.0
     return f"""
-      <text x="{CENTER_X}" y="{CENTER_Y - 100 + yoff_top:.1f}" font-family="{FONT_MONO}"
-            font-weight="600" font-size="34" letter-spacing="0.28em"
+      <text x="{CENTER_X}" y="{CENTER_Y - 60 + yoff_top:.1f}" font-family="{FONT_MONO}"
+            font-weight="600" font-size="30" letter-spacing="0.28em"
             fill="{PAPER}" text-anchor="middle"
             opacity="{a_top:.3f}">WE MINT BRANDS THAT</text>
-      <g transform="translate({CENTER_X} {CENTER_Y + 80}) scale({sp:.3f})" opacity="{a_bot:.3f}">
+      <g transform="translate({CENTER_X} {CENTER_Y + 70}) scale({sp:.3f})" opacity="{a_bot:.3f}">
         <text x="0" y="0" font-family="{FONT_DISPLAY}" font-weight="800"
-              font-size="180" letter-spacing="0.02em" fill="url(#mintTextGrad)"
+              font-size="128" letter-spacing="0.02em" fill="url(#mintAdGrad)"
               text-anchor="middle" font-style="italic">compound.</text>
       </g>
     """
@@ -338,6 +339,11 @@ def svg_for_frame(f: int) -> str:
       <stop offset="0%"  stop-color="{MINT_2}"/>
       <stop offset="60%" stop-color="{MINT_3}"/>
       <stop offset="100%" stop-color="{MINT_4}"/>
+    </linearGradient>
+    <linearGradient id="mintAdGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="{MINT_1}"/>
+      <stop offset="50%"  stop-color="{MINT_2}"/>
+      <stop offset="100%" stop-color="{MINT_3}"/>
     </linearGradient>
     <radialGradient id="vig" cx="0.5" cy="0.5" r="0.9">
       <stop offset="0%"  stop-color="#000" stop-opacity="0"/>
