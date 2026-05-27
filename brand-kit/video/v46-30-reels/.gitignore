@@ -1,0 +1,3 @@
+# Temporary per-reel frame buffers — auto-deleted after mux, but
+# the stop hook may catch them mid-render. Always ignore.
+_frames_*/
