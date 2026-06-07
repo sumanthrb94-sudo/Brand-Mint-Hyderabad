@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brand Mint — "How We Work" Carousel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --mint-1: #d6f5e6;
+        --mint-2: #7cf6c8;
+        --mint-3: #10b981;
+        --mint-4: #047857;
+        --ink: #0a0e0c;
+        --paper: #f5f1ea;
+        --white: #fff;
+        --gold: #c9a14a;
+        --bm-ink: #0b1f1a;
+        --bm-ink-2: #14352d;
+        --bm-ink-deep: #06140f;
+        --bm-cream: #f5f1ea;
+        --bm-emerald: #00c897;
+        --muted: rgba(10, 14, 12, 0.62);
+        --line: rgba(10, 14, 12, 0.1);
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: #d9d2c6;
+        font-family: "Inter", system-ui, sans-serif;
+        padding: 40px 0 80px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .deck {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+      }
+
+      /* ---- 4:5 portrait export frame ---- */
+      .slide {
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        background: var(--paper);
+        color: var(--ink);
+        overflow: hidden;
+        padding: 96px 96px 88px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+      }
+
+      /* grain + orbs */
+      .slide::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/></svg>");
+        pointer-events: none;
+        z-index: 0;
+      }
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.5;
+        z-index: 0;
+      }
+      .orb-a { width: 560px; height: 560px; right: -200px; top: -180px;
+        background: radial-gradient(circle, var(--mint-2), transparent 70%); }
+      .orb-b { width: 460px; height: 460px; left: -180px; bottom: -160px;
+        background: radial-gradient(circle, var(--mint-1), transparent 70%); opacity: 0.6; }
+
+      .slide > * { position: relative; z-index: 1; }
+
+      /* ---- shared bits ---- */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: auto;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-family: "Plus Jakarta Sans";
+        font-weight: 600;
+        font-size: 24px;
+        letter-spacing: -0.01em;
+      }
+      .brand .city { color: var(--muted); font-weight: 500; }
+      .mark { width: 46px; height: 46px; flex: none; }
+
+      .eyebrow {
+        font-family: "Inter";
+        font-weight: 600;
+        font-size: 20px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--mint-4);
+      }
+
+      .pagenum {
+        font-family: "JetBrains Mono";
+        font-weight: 500;
+        font-size: 20px;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+
+      h1 {
+        font-family: "Plus Jakarta Sans";
+        font-weight: 700;
+        font-size: 92px;
+        line-height: 1.02;
+        letter-spacing: -0.03em;
+      }
+      h1 em { font-style: italic; color: var(--mint-3); font-weight: 600; }
+
+      .sub {
+        font-size: 30px;
+        line-height: 1.45;
+        color: var(--muted);
+        max-width: 24ch;
+      }
+
+      .footer {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 22px;
+        color: var(--muted);
+      }
+      .footer .url { color: var(--ink); font-weight: 600; }
+      .swipe {
+        display: inline-flex; align-items: center; gap: 10px;
+        font-weight: 600; color: var(--mint-4);
+      }
+
+      /* ---- step slides ---- */
+      .step-num {
+        font-family: "JetBrains Mono";
+        font-weight: 600;
+        font-size: 200px;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        color: var(--mint-3);
+        opacity: 0.16;
+        position: absolute;
+        top: 150px;
+        right: 80px;
+        z-index: 0;
+      }
+      .step-kicker {
+        font-family: "JetBrains Mono";
+        font-weight: 600;
+        font-size: 26px;
+        letter-spacing: 0.1em;
+        color: var(--mint-4);
+        margin-bottom: 18px;
+      }
+      h2 {
+        font-family: "Plus Jakarta Sans";
+        font-weight: 700;
+        font-size: 110px;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        margin-bottom: 22px;
+      }
+      .step-line {
+        font-family: "Plus Jakarta Sans";
+        font-weight: 500;
+        font-size: 38px;
+        letter-spacing: -0.01em;
+        color: var(--mint-4);
+        margin-bottom: 36px;
+      }
+      .step-body {
+        font-size: 32px;
+        line-height: 1.5;
+        max-width: 26ch;
+        color: var(--ink);
+      }
+      .rule {
+        width: 92px; height: 5px; background: var(--mint-3);
+        border-radius: 3px; margin: 0 0 40px;
+      }
+      .step-track {
+        margin-top: auto;
+        display: flex; gap: 12px; align-items: center;
+      }
+      .pip {
+        height: 8px; border-radius: 4px; background: var(--line); flex: 1;
+      }
+      .pip.on { background: var(--mint-3); }
+
+      /* ---- dark proof slide ---- */
+      .slide.dark {
+        background:
+          radial-gradient(120% 90% at 80% 0%, var(--bm-ink-2), transparent 60%),
+          linear-gradient(160deg, var(--bm-ink), var(--bm-ink-deep));
+        color: var(--bm-cream);
+      }
+      .slide.dark .brand,
+      .slide.dark .footer .url { color: var(--bm-cream); }
+      .slide.dark .city,
+      .slide.dark .footer,
+      .slide.dark .pagenum { color: rgba(245, 241, 234, 0.6); }
+      .slide.dark .eyebrow { color: var(--bm-emerald); }
+      .slide.dark .orb-a { background: radial-gradient(circle, rgba(0,200,151,0.5), transparent 70%); opacity: .4; }
+      .slide.dark .orb-b { background: radial-gradient(circle, rgba(0,200,151,0.25), transparent 70%); opacity: .3; }
+      .bignum {
+        font-family: "JetBrains Mono";
+        font-weight: 600;
+        font-size: 168px;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        color: var(--gold);
+        margin: 28px 0 8px;
+      }
+      .proof-body {
+        font-size: 38px;
+        line-height: 1.4;
+        max-width: 22ch;
+        color: var(--bm-cream);
+      }
+      .proof-body em { color: var(--bm-emerald); font-style: italic; }
+
+      /* ---- CTA slide ---- */
+      .btn {
+        display: inline-flex; align-items: center; gap: 14px;
+        background: var(--mint-3); color: #04241a;
+        font-family: "Plus Jakarta Sans"; font-weight: 700; font-size: 32px;
+        padding: 26px 40px; border-radius: 18px; margin-top: 44px;
+        align-self: flex-start;
+      }
+      .meta-line {
+        font-family: "JetBrains Mono"; font-weight: 500; font-size: 24px;
+        letter-spacing: 0.04em; color: var(--muted); margin-top: 30px;
+      }
+
+      .lead { display: flex; flex-direction: column; gap: 28px; margin-bottom: 8px; }
+
+      @media print {
+        body { background: #fff; padding: 0; }
+        .deck { gap: 0; }
+        .slide { box-shadow: none; page-break-after: always; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck">
+      <!-- ============ 01 — COVER ============ -->
+      <section class="slide" data-slide="01">
+        <div class="orb orb-a"></div><div class="orb orb-b"></div>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+              <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/>
+              </linearGradient></defs>
+              <circle cx="16" cy="16" r="15" fill="url(#g1)"/>
+              <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>Brand Mint <span class="city">— Hyderabad</span></span>
+          </div>
+          <span class="pagenum">01 / 08</span>
+        </div>
+
+        <div class="lead">
+          <span class="eyebrow">How we work</span>
+          <h1>How we <em>mint</em> brands that compound</h1>
+          <p class="sub">A look inside the studio — from first call to compounding returns.</p>
+        </div>
+
+        <div class="footer">
+          <span class="url">brandmint.studio</span>
+          <span class="swipe">Swipe&nbsp;→</span>
+        </div>
+      </section>
+
+      <!-- ============ 02 — PREMISE ============ -->
+      <section class="slide" data-slide="02">
+        <div class="orb orb-a"></div><div class="orb orb-b"></div>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32"><use href="#g1"/>
+              <circle cx="16" cy="16" r="15" fill="url(#g1)"/>
+              <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>Brand Mint <span class="city">— Hyderabad</span></span>
+          </div>
+          <span class="pagenum">02 / 08</span>
+        </div>
+
+        <div class="lead">
+          <span class="eyebrow">The premise</span>
+          <h1>Most studios hand you <em>files.</em><br/>We hand you outcomes.</h1>
+          <p class="sub">No interns at the table. Every engagement is led by an 8+ year operator — and we only take work we can tie to revenue or product velocity.</p>
+        </div>
+
+        <div class="footer">
+          <span class="url">brandmint.studio</span>
+          <span class="swipe">Swipe&nbsp;→</span>
+        </div>
+      </section>
+
+      <!-- ============ 03 — STEP 01 MINT ============ -->
+      <section class="slide" data-slide="03">
+        <div class="orb orb-a"></div><div class="orb orb-b"></div>
+        <span class="step-num">01</span>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="15" fill="url(#g1)"/>
+              <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>Brand Mint <span class="city">— Hyderabad</span></span>
+          </div>
+          <span class="pagenum">03 / 08</span>
+        </div>
+
+        <div class="lead">
+          <div class="step-kicker">STEP 01</div>
+          <div class="rule"></div>
+          <h2>Mint</h2>
+          <div class="step-line">Strategy + brand system</div>
+          <p class="step-body">We map your business to its money. Positioning, brand system, and the one story that compounds — built founder-to-founder.</p>
+        </div>
+
+        <div class="step-track">
+          <span class="pip on"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span>
+        </div>
+      </section>
+
+      <!-- ============ 04 — STEP 02 ARCHITECT ============ -->
+      <section class="slide" data-slide="04">
+        <div class="orb orb-a"></div><div class="orb orb-b"></div>
+        <span class="step-num">02</span>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="15" fill="url(#g1)"/>
+              <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>Brand Mint <span class="city">— Hyderabad</span></span>
+          </div>
+          <span class="pagenum">04 / 08</span>
+        </div>
+
+        <div class="lead">
+          <div class="step-kicker">STEP 02</div>
+          <div class="rule"></div>
+          <h2>Architect</h2>
+          <div class="step-line">Plan before a pixel ships</div>
+          <p class="step-body">We map the flows, the data, and the AI where it earns its place. Scope locked, surprises out — so the build runs fast and clean.</p>
+        </div>
+
+        <div class="step-track">
+          <span class="pip on"></span><span class="pip on"></span><span class="pip"></span><span class="pip"></span>
+        </div>
+      </section>
+
+      <!-- ============ 05 — STEP 03 BUILD ============ -->
+      <section class="slide" data-slide="05">
+        <div class="orb orb-a"></div><div class="orb orb-b"></div>
+        <span class="step-num">03</span>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="15" fill="url(#g1)"/>
+              <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>Brand Mint <span class="city">— Hyderabad</span></span>
+          </div>
+          <span class="pagenum">05 / 08</span>
+        </div>
+
+        <div class="lead">
+          <div class="step-kicker">STEP 03</div>
+          <div class="rule"></div>
+          <h2>Build</h2>
+          <div class="step-line">Engineer &amp; ship</div>
+          <p class="step-body">Senior hands, augmented with AI, ship in days what takes others weeks. Custom code, not templates. Fast — but never fragile.</p>
+        </div>
+
+        <div class="step-track">
+          <span class="pip on"></span><span class="pip on"></span><span class="pip on"></span><span class="pip"></span>
+        </div>
+      </section>
+
+      <!-- ============ 06 — STEP 04 CARE ============ -->
+      <section class="slide" data-slide="06">
+        <div class="orb orb-a"></div><div class="orb orb-b"></div>
+        <span class="step-num">04</span>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="15" fill="url(#g1)"/>
+              <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>Brand Mint <span class="city">— Hyderabad</span></span>
+          </div>
+          <span class="pagenum">06 / 08</span>
+        </div>
+
+        <div class="lead">
+          <div class="step-kicker">STEP 04</div>
+          <div class="rule"></div>
+          <h2>Care</h2>
+          <div class="step-line">Measure &amp; compound</div>
+          <p class="step-body">We don't disappear at launch. Retainers that measure, iterate, and keep the asset compounding — quarter after quarter.</p>
+        </div>
+
+        <div class="step-track">
+          <span class="pip on"></span><span class="pip on"></span><span class="pip on"></span><span class="pip on"></span>
+        </div>
+      </section>
+
+      <!-- ============ 07 — PROOF (dark) ============ -->
+      <section class="slide dark" data-slide="07">
+        <div class="orb orb-a"></div><div class="orb orb-b"></div>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="15" fill="url(#g1)"/>
+              <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>Brand Mint <span class="city">— Hyderabad</span></span>
+          </div>
+          <span class="pagenum">07 / 08</span>
+        </div>
+
+        <div class="lead">
+          <span class="eyebrow">The return</span>
+          <div class="bignum">+₹42.6 Cr</div>
+          <p class="proof-body">tracked revenue across 11 founder-led brands last quarter. Brands that <em>compound</em> — by design.</p>
+        </div>
+
+        <div class="footer">
+          <span class="url">brandmint.studio</span>
+          <span class="pagenum">Q3 2026</span>
+        </div>
+      </section>
+
+      <!-- ============ 08 — CTA ============ -->
+      <section class="slide" data-slide="08">
+        <div class="orb orb-a"></div><div class="orb orb-b"></div>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="mark" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="15" fill="url(#g1)"/>
+              <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+            <span>Brand Mint <span class="city">— Hyderabad</span></span>
+          </div>
+          <span class="pagenum">08 / 08</span>
+        </div>
+
+        <div class="lead">
+          <span class="eyebrow">Booking Q3 2026</span>
+          <h1>Let's mint something that <em>compounds.</em></h1>
+          <div class="btn">Start a project&nbsp;→</div>
+          <div class="meta-line">Studio in HITEC City, Hyderabad · INR-priced · GST extra</div>
+        </div>
+
+        <div class="footer">
+          <span class="url">brandmint.studio</span>
+          <span class="swipe">— Brand Mint, Hyderabad</span>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
