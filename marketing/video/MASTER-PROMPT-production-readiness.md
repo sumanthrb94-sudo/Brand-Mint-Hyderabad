@@ -3,9 +3,11 @@
 
 > **How to use in Gemini Omni / Veo:**
 > 1. Attach your **saved avatar** as the *character / identity reference* (face-lock ON, likeness 100%).
-> 2. Paste the **MASTER PROMPT** below into the prompt field.
-> 3. Set duration **10s**, resolution **4K / 2160p**, frame rate **24fps** (cinematic), aspect ratio **16:9** (master) — re-render **9:16** and **1:1** with the vertical/square variants in §7.
-> 4. Add the **brand overlays** in §5 in post (or via Omni text layers) — keep AI-burned text minimal so logos stay crisp.
+> 2. Attach **`brand-mint-identity-kit.pdf`** as a *brand / style reference* (in Omni: "add reference" → upload the PDF; or screenshot pages 2–4 — logo suite, colour, type — and attach those as image refs). This locks the model to the correct logo, palette, and type.
+> 3. Attach your uploaded clip as the *style / motion reference* (pacing + look).
+> 4. Paste the **MASTER PROMPT** below into the prompt field.
+> 5. Set duration **10s**, resolution **4K / 2160p**, frame rate **24fps** (cinematic), aspect ratio **16:9** (master) — re-render **9:16** and **1:1** with the vertical/square variants in §7.
+> 6. **Composite logos & text in post** using the exact assets/specs from the PDF (§5 below) — do NOT let the model burn in logos or text; keep AI-rendered type out so the lock-up stays crisp and on-brand.
 
 ---
 
@@ -16,6 +18,12 @@ Netflix-style documentary cinematography, photoreal, ultra-HD. A confident
 founder-presenter [USE ATTACHED AVATAR — exact likeness, face-locked] stands in
 a minimal premium design studio in HITEC City, Hyderabad. Cinematic 10-second
 single-subject hero shot for a creative studio brand film.
+
+BRAND REFERENCE: match the attached Brand Mint identity-kit PDF — its colour
+palette, mint logo mark, and type system define the entire look. Pull the
+emerald-ink + cream + mint-green world directly from that kit. Do NOT render any
+logos or text inside the shot; leave clean negative space upper-left so the
+lock-up can be composited in post from the PDF assets.
 
 SUBJECT & SKIN: hyper-realistic skin with natural texture, visible pores, subtle
 subsurface scattering, no plastic smoothing, no beauty filter. Natural micro-
