@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,500;0,600;0,700;0,800;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --mint1:#D6F5E6;--mint2:#7CF6C8;--mint3:#10B981;--mint4:#047857;
+    --ink:#0A0E0C;--paper:#F5F1EA;--white:#fff;--gold:#C9A14A;
+    --bmink:#0B1F1A;--bmink2:#14352D;--bminkdeep:#06140F;--cream:#F5F1EA;--emerald:#00C897;
+    --muted:rgba(10,14,12,.62);--line:rgba(10,14,12,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Inter",system-ui,sans-serif;color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .page{
+    width:210mm;height:297mm;padding:18mm 18mm 16mm;position:relative;
+    background:var(--paper);overflow:hidden;page-break-after:always;display:flex;flex-direction:column;
+  }
+  .page:last-child{page-break-after:auto;}
+  .eyebrow{font-weight:600;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mint4);}
+  h1{font-family:"Plus Jakarta Sans";font-weight:700;letter-spacing:-.03em;line-height:1.02;}
+  h2{font-family:"Plus Jakarta Sans";font-weight:700;font-size:26px;letter-spacing:-.02em;margin-bottom:4px;}
+  h3{font-family:"Plus Jakarta Sans";font-weight:600;font-size:14px;letter-spacing:-.01em;margin-bottom:8px;}
+  p,li{font-size:12px;line-height:1.55;color:var(--ink);}
+  .muted{color:var(--muted);}
+  em{font-style:italic;color:var(--mint3);}
+  .mono{font-family:"JetBrains Mono";font-weight:500;letter-spacing:.04em;}
+  .pagefoot{position:absolute;bottom:10mm;left:18mm;right:18mm;display:flex;justify-content:space-between;font-size:9px;color:var(--muted);border-top:1px solid var(--line);padding-top:6px;}
+  .pagefoot .mono{font-size:9px;}
+  .head{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:18px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .card{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--white);}
+  .logoframe{border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;padding:18px;min-height:90px;background:var(--white);}
+  .logoframe.dark{background:var(--bmink);}
+  .cap{font-family:"JetBrains Mono";font-size:9px;letter-spacing:.04em;color:var(--muted);margin-top:6px;}
+  /* swatches */
+  .sw{border-radius:10px;overflow:hidden;border:1px solid var(--line);}
+  .sw .chip{height:64px;}
+  .sw .meta{padding:8px 10px;background:var(--white);}
+  .sw .name{font-family:"Plus Jakarta Sans";font-weight:600;font-size:12px;}
+  .sw .hex{font-family:"JetBrains Mono";font-size:10px;color:var(--muted);}
+  .pill{display:inline-block;font-family:"JetBrains Mono";font-size:9px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);}
+  .do{color:var(--mint4);font-weight:600;}
+  .dont{color:#b4453a;font-weight:600;}
+  ul{padding-left:16px;}
+  li{margin-bottom:5px;}
+  /* cover */
+  .cover{background:radial-gradient(120% 80% at 80% 0%,var(--bmink2),transparent 60%),linear-gradient(160deg,var(--bmink),var(--bminkdeep));color:var(--cream);justify-content:space-between;}
+  .cover .eyebrow{color:var(--emerald);}
+  .cover h1{font-size:62px;}
+  .cover .lead{display:flex;flex-direction:column;gap:18px;}
+  .cover .sub{font-size:16px;color:rgba(245,241,234,.7);max-width:46ch;}
+  .cover .metaRow{display:flex;gap:22px;font-family:"JetBrains Mono";font-size:11px;color:rgba(245,241,234,.6);}
+  .rule{width:60px;height:4px;background:var(--mint3);border-radius:3px;}
+  .goldrule{width:48px;height:2px;background:var(--gold);}
+  .typeSpec{font-family:"Plus Jakarta Sans";line-height:1;margin:2px 0 6px;}
+  .specRow{display:flex;justify-content:space-between;font-size:11px;padding:6px 0;border-bottom:1px solid var(--line);}
+  .specRow .mono{color:var(--muted);}
+  .twocol{column-count:2;column-gap:20px;}
+  .tag{font-family:"JetBrains Mono";font-size:9px;color:var(--gold);}
+  table{width:100%;border-collapse:collapse;font-size:10.5px;}
+  td,th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
+  th{font-family:"Inter";font-weight:600;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .clearspace{position:relative;border:1px dashed var(--mint3);border-radius:10px;padding:22px;display:flex;align-items:center;justify-content:center;background:var(--white);}
+</style>
+</head>
+<body>
+
+<!-- ===== PAGE 1 — COVER ===== -->
+<section class="page cover">
+  <div style="display:flex;align-items:center;gap:14px;">
+    <svg width="56" height="56" viewBox="0 0 64 64"><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#cg)"/><path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <div style="font-family:'Plus Jakarta Sans';font-weight:600;font-size:18px;">Brand Mint <span style="opacity:.55;font-weight:500;">— Hyderabad</span></div>
+  </div>
+
+  <div class="lead">
+    <span class="eyebrow">Brand identity kit · v1.0</span>
+    <h1>The studio<br/>identity <em>system</em></h1>
+    <div class="rule"></div>
+    <p class="sub">Logos, colour, type, placement, and the video/UGC ad spec — everything needed to keep Brand Mint production-ready across film, social, and print.</p>
+  </div>
+
+  <div>
+    <div class="metaRow"><span>brandmint.studio</span><span>HITEC City, Hyderabad</span><span>INR-priced · GST extra</span></div>
+  </div>
+</section>
+
+<!-- ===== PAGE 2 — LOGO SUITE ===== -->
+<section class="page">
+  <div class="head"><div><span class="eyebrow">01 · Logo suite</span><h2>The mark &amp; its variants</h2></div><span class="mono" style="font-size:10px;color:var(--muted)">/admin · brand-kit/logo</span></div>
+
+  <p class="muted" style="margin-bottom:14px;max-width:70ch;">A mint-gradient circle holding a single-stroke <strong>M</strong> that reads as both the letter and a rising graph line. Full lock-up = mark + wordmark “Brand Mint” + city tag “— Hyderabad”.</p>
+
+  <div class="grid2" style="margin-bottom:14px;">
+    <div><div class="logoframe">
+      <svg width="320" height="64" viewBox="0 0 480 96"><defs><linearGradient id="p1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs><g transform="translate(0,16)"><circle cx="32" cy="32" r="32" fill="url(#p1)"/><path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g><text x="80" y="58" font-family="Plus Jakarta Sans" font-weight="600" font-size="34" letter-spacing="-0.02em" fill="#0A0E0C">Brand Mint</text><text x="290" y="58" font-family="Plus Jakarta Sans" font-style="italic" font-size="18" fill="#0A0E0C" opacity="0.55">— Hyderabad</text></svg>
+    </div><div class="cap">brand-mint-primary.svg · default, light/cream backgrounds</div></div>
+
+    <div><div class="logoframe dark">
+      <svg width="320" height="64" viewBox="0 0 480 96"><defs><linearGradient id="p2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs><g transform="translate(16,16)"><circle cx="32" cy="32" r="32" fill="url(#p2)"/><path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g><text x="96" y="58" font-family="Plus Jakarta Sans" font-weight="600" font-size="34" letter-spacing="-0.02em" fill="#F5F1EA">Brand Mint</text><text x="306" y="58" font-family="Plus Jakarta Sans" font-style="italic" font-size="18" fill="#F5F1EA" opacity="0.55">— Hyderabad</text></svg>
+    </div><div class="cap">brand-mint-primary-dark.svg · on #0B1F1A or darker</div></div>
+  </div>
+
+  <div class="grid3">
+    <div><div class="logoframe"><svg width="180" height="34" viewBox="0 0 320 60"><text x="0" y="44" font-family="Plus Jakarta Sans" font-weight="600" font-size="38" letter-spacing="-0.02em" fill="#0A0E0C">Brand Mint</text></svg></div><div class="cap">wordmark.svg</div></div>
+    <div><div class="logoframe"><svg width="72" height="72" viewBox="0 0 64 64"><defs><linearGradient id="m1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#m1)"/><path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><div class="cap">monogram.svg · avatars, bug</div></div>
+    <div><div class="logoframe dark"><svg width="72" height="72" viewBox="0 0 64 64"><rect width="64" height="64" fill="#0B1F1A"/><circle cx="32" cy="32" r="31" fill="none" stroke="#F5F1EA" stroke-width="2"/><path d="M18 44V20l14 12 14-12v24" stroke="#F5F1EA" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><div class="cap">monogram-cream.svg</div></div>
+    <div><div class="logoframe"><svg width="72" height="72" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="none" stroke="#0A0E0C" stroke-width="2"/><path d="M18 44V20l14 12 14-12v24" stroke="#0A0E0C" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><div class="cap">monogram-mono.svg · 1-colour print</div></div>
+    <div><div class="logoframe"><svg width="60" height="60" viewBox="0 0 32 32"><defs><linearGradient id="fv" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="url(#fv)"/><path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><div class="cap">favicon.svg · app icon</div></div>
+    <div><div class="logoframe dark"><svg width="180" height="34" viewBox="0 0 320 60"><text x="0" y="44" font-family="Plus Jakarta Sans" font-weight="600" font-size="38" letter-spacing="-0.02em" fill="#F5F1EA">Brand Mint</text></svg></div><div class="cap">wordmark-dark.svg</div></div>
+  </div>
+
+  <div class="pagefoot"><span>Brand Mint — Identity Kit v1.0</span><span class="mono">02 / 07</span></div>
+</section>
+
+<!-- ===== PAGE 3 — PLACEMENT ===== -->
+<section class="page">
+  <div class="head"><div><span class="eyebrow">02 · Placement &amp; rules</span><h2>Clear space, sizing, don’ts</h2></div></div>
+
+  <div class="grid2" style="margin-bottom:16px;">
+    <div class="card">
+      <h3>Clear space</h3>
+      <div class="clearspace">
+        <svg width="240" height="48" viewBox="0 0 480 96"><defs><linearGradient id="cs" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs><g transform="translate(0,16)"><circle cx="32" cy="32" r="32" fill="url(#cs)"/><path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g><text x="80" y="58" font-family="Plus Jakarta Sans" font-weight="600" font-size="34" letter-spacing="-0.02em" fill="#0A0E0C">Brand Mint</text><text x="290" y="58" font-family="Plus Jakarta Sans" font-style="italic" font-size="18" fill="#0A0E0C" opacity="0.55">— Hyderabad</text></svg>
+      </div>
+      <p class="muted" style="margin-top:10px;">Reserve clear space equal to the height of the <strong>M-stroke</strong> on every side. Nothing — text, image edges, illustration — encroaches.</p>
+    </div>
+    <div class="card">
+      <h3>Minimum sizes</h3>
+      <div class="specRow"><span>Primary lock-up</span><span class="mono">120px / 32mm</span></div>
+      <div class="specRow"><span>Wordmark only</span><span class="mono">96px / 24mm</span></div>
+      <div class="specRow"><span>Monogram</span><span class="mono">16px / 5mm</span></div>
+      <div class="specRow"><span>On-screen 4K bug</span><span class="mono">≥ 64px</span></div>
+      <h3 style="margin-top:14px;">When to use which</h3>
+      <p class="muted">Light bg → <span class="mono">primary</span>. Dark bg → <span class="mono">primary-dark</span>. Logo strips → <span class="mono">wordmark</span>. Square/avatar → <span class="mono">monogram</span>. 1-colour → <span class="mono">monogram-mono</span>.</p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 class="do">✓ Do</h3>
+      <ul>
+        <li>Keep the gradient direction top-left → bottom-right.</li>
+        <li>Use a translucent backdrop over photography/footage.</li>
+        <li>Pair mint CTAs with ink text on paper.</li>
+        <li>Let gold stay quieter than mint, always.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 class="dont">✕ Don’t</h3>
+      <ul>
+        <li>Recolour the gradient — use a mono variant instead.</li>
+        <li>Stretch, skew, rotate, or outline the mark.</li>
+        <li>Add drop shadows or bevels.</li>
+        <li>Place the mark on busy footage with no backdrop.</li>
+        <li>Change the wordmark font (Plus Jakarta Sans 600).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pagefoot"><span>Brand Mint — Identity Kit v1.0</span><span class="mono">03 / 07</span></div>
+</section>
+
+<!-- ===== PAGE 4 — COLOUR ===== -->
+<section class="page">
+  <div class="head"><div><span class="eyebrow">03 · Colour system</span><h2>Palette &amp; tokens</h2></div></div>
+
+  <h3>Primary — Mint</h3>
+  <div class="grid2" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+    <div class="sw"><div class="chip" style="background:#D6F5E6"></div><div class="meta"><div class="name">Mint 1</div><div class="hex">#D6F5E6</div></div></div>
+    <div class="sw"><div class="chip" style="background:#7CF6C8"></div><div class="meta"><div class="name">Mint 2</div><div class="hex">#7CF6C8</div></div></div>
+    <div class="sw"><div class="chip" style="background:#10B981"></div><div class="meta"><div class="name">Mint 3 ★</div><div class="hex">#10B981</div></div></div>
+    <div class="sw"><div class="chip" style="background:#047857"></div><div class="meta"><div class="name">Mint 4</div><div class="hex">#047857</div></div></div>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <h3>Neutrals</h3>
+      <div class="grid2" style="grid-template-columns:1fr 1fr;">
+        <div class="sw"><div class="chip" style="background:#0A0E0C"></div><div class="meta"><div class="name" >Ink</div><div class="hex">#0A0E0C</div></div></div>
+        <div class="sw"><div class="chip" style="background:#F5F1EA"></div><div class="meta"><div class="name">Paper</div><div class="hex">#F5F1EA</div></div></div>
+      </div>
+      <h3 style="margin-top:14px;">Accent</h3>
+      <div class="sw"><div class="chip" style="background:#C9A14A"></div><div class="meta"><div class="name">Gold — editorial only</div><div class="hex">#C9A14A</div></div></div>
+    </div>
+    <div>
+      <h3>Dark interlude</h3>
+      <div class="grid2" style="grid-template-columns:1fr 1fr;">
+        <div class="sw"><div class="chip" style="background:#0B1F1A"></div><div class="meta"><div class="name">BM Ink</div><div class="hex">#0B1F1A</div></div></div>
+        <div class="sw"><div class="chip" style="background:#14352D"></div><div class="meta"><div class="name">BM Ink 2</div><div class="hex">#14352D</div></div></div>
+        <div class="sw"><div class="chip" style="background:#06140F"></div><div class="meta"><div class="name">BM Ink Deep</div><div class="hex">#06140F</div></div></div>
+        <div class="sw"><div class="chip" style="background:#00C897"></div><div class="meta"><div class="name">BM Emerald</div><div class="hex">#00C897</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Pairing &amp; accessibility</h3>
+    <p class="muted">Light pages: Paper bg → Ink text → Mint 3 CTAs → one gold flourish. Dark: Ink gradient → Cream text → Emerald CTAs → gold for serial numbers. Never set Mint 3 and Gold side-by-side at equal scale. &nbsp;·&nbsp; <span class="mono">Ink on Paper 14.6:1 AAA · Mint 3 on Paper 3.4:1 (AA @18px+) · White on Mint 3 3.0:1 (buttons ≥16px bold)</span></p>
+  </div>
+
+  <div class="pagefoot"><span>Brand Mint — Identity Kit v1.0</span><span class="mono">04 / 07</span></div>
+</section>
+
+<!-- ===== PAGE 5 — TYPE ===== -->
+<section class="page">
+  <div class="head"><div><span class="eyebrow">04 · Typography</span><h2>Type system</h2></div></div>
+
+  <div class="grid3" style="margin-bottom:16px;">
+    <div class="card"><div class="tag">DISPLAY</div><div class="typeSpec" style="font-weight:700;font-size:30px;">Plus Jakarta</div><p class="muted">Headlines, wordmark, titles. 600/700, tracking −0.02em.</p></div>
+    <div class="card"><div class="tag">BODY</div><div class="typeSpec" style="font-family:Inter;font-weight:600;font-size:30px;">Inter</div><p class="muted">Body, lower-thirds, UI. 400/600.</p></div>
+    <div class="card"><div class="tag">NUMERALS</div><div class="typeSpec mono" style="font-size:28px;">JetBrains</div><p class="muted">₹ amounts, %, KPIs, timecodes, IDs. 500, tracking 0.06em.</p></div>
+  </div>
+
+  <table>
+    <tr><th>Role</th><th>Family</th><th>Weight</th><th>Size</th><th>Tracking</th></tr>
+    <tr><td>Hero H1</td><td>Plus Jakarta Sans</td><td class="mono">600</td><td class="mono">clamp(38–72px)</td><td class="mono">−0.03em</td></tr>
+    <tr><td>Section H2</td><td>Plus Jakarta Sans</td><td class="mono">600</td><td class="mono">clamp(28–48px)</td><td class="mono">−0.02em</td></tr>
+    <tr><td>Card title H3</td><td>Plus Jakarta Sans</td><td class="mono">600</td><td class="mono">22px</td><td class="mono">−0.015em</td></tr>
+    <tr><td>Body</td><td>Inter</td><td class="mono">400</td><td class="mono">15–18px</td><td class="mono">0</td></tr>
+    <tr><td>Eyebrow / label</td><td>Inter</td><td class="mono">600</td><td class="mono">11–12px</td><td class="mono">0.18em ↑</td></tr>
+    <tr><td>Numerals / IDs</td><td>JetBrains Mono</td><td class="mono">500</td><td class="mono">12–14px</td><td class="mono">0.06em</td></tr>
+  </table>
+
+  <div class="grid2" style="margin-top:16px;">
+    <div class="card"><h3>Signature: italic emphasis</h3><p style="font-family:'Plus Jakarta Sans';font-weight:600;font-size:22px;line-height:1.2;">We mint <em>brands</em> that compound.</p><p class="muted" style="margin-top:8px;">Italicise <strong>one</strong> word per headline — never more. Left-align body. Max 56ch line length.</p></div>
+    <div class="card"><h3>Numerals signal “engineered”</h3><p class="mono" style="font-size:16px;">+₹42.6 Cr · 28.4k sessions · Q3 2026</p><p class="muted" style="margin-top:8px;">All quantitative claims set in JetBrains Mono. Don’t use Plus Jakarta below 14px — switch to Inter.</p></div>
+  </div>
+
+  <div class="pagefoot"><span>Brand Mint — Identity Kit v1.0</span><span class="mono">05 / 07</span></div>
+</section>
+
+<!-- ===== PAGE 6 — VIDEO / UGC SPEC ===== -->
+<section class="page">
+  <div class="head"><div><span class="eyebrow">05 · Film &amp; UGC spec</span><h2>Documentary ad spec sheet</h2></div></div>
+
+  <div class="grid2" style="margin-bottom:14px;">
+    <div class="card">
+      <h3>Look &amp; grade</h3>
+      <ul>
+        <li>Netflix-doc LUT: teal-emerald shadows, warm cream highlights, rich blacks.</li>
+        <li>35mm prime, T1.8, slow push-in, 4K / 24fps.</li>
+        <li>3-point light: 5600K soft key, 3200K warm fill, <strong>mint #10B981 rim</strong>.</li>
+        <li>Ultra-HD skin — real texture, no plastic smoothing.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Deliverable formats</h3>
+      <div class="specRow"><span>Master</span><span class="mono">16:9 · 3840×2160</span></div>
+      <div class="specRow"><span>Reels / Shorts</span><span class="mono">9:16 · 2160×3840</span></div>
+      <div class="specRow"><span>Feed</span><span class="mono">1:1 · 2160×2160</span></div>
+      <div class="specRow"><span>Duration / FPS</span><span class="mono">10s · 24fps</span></div>
+      <div class="specRow"><span>Audio</span><span class="mono">48kHz · −14 LUFS</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <h3>On-screen logo &amp; text placement</h3>
+    <div class="grid3">
+      <div><span class="pill">0:02 LOWER-THIRD</span><p class="muted" style="margin-top:6px;">Bottom-left. <strong>Brand Mint</strong> (Plus Jakarta 600, cream) + “Digital studio · HITEC City” (Inter 400). 4px mint underline wipes in.</p></div>
+      <div><span class="pill">0:06 HEADLINE</span><p class="muted" style="margin-top:6px;">Upper-left negative space. “We mint brands that <em>compound</em>.” One word mint italic.</p></div>
+      <div><span class="pill">8.5s END CARD</span><p class="muted" style="margin-top:6px;">Paper card, <strong>primary.svg</strong> centred, brandmint.studio (mono), gold rule above city tag. Monogram bug bottom-right from 0:02.</p></div>
+    </div>
+    <p class="muted" style="margin-top:10px;"><strong>Safe areas:</strong> all text within 90% title-safe; lower-third above bottom 12%. Bug ≥ 64px @4K, 40–60% opacity. Keep AI-burned text out — composite logos in post so they stay crisp.</p>
+  </div>
+
+  <div class="card">
+    <h3>Voice on camera</h3>
+    <p style="font-family:'Plus Jakarta Sans';font-weight:500;font-size:15px;">“We don’t hand you files. We hand you brands that <em>compound</em>.”</p>
+    <p class="muted" style="margin-top:6px;">Founder-to-founder, calm, specific. Indian-English warmth. Lead with a number, italicise one word, sign off “— Brand Mint, Hyderabad”.</p>
+  </div>
+
+  <div class="pagefoot"><span>Brand Mint — Identity Kit v1.0</span><span class="mono">06 / 07</span></div>
+</section>
+
+<!-- ===== PAGE 7 — MASTER PROMPT ===== -->
+<section class="page cover">
+  <div>
+    <span class="eyebrow">06 · Appendix</span>
+    <h1 style="font-size:34px;margin-top:10px;">Master video prompt</h1>
+    <div class="goldrule" style="margin:14px 0;"></div>
+  </div>
+  <div style="background:rgba(245,241,234,.06);border:1px solid rgba(245,241,234,.16);border-radius:12px;padding:16px;font-family:'JetBrains Mono';font-size:9.5px;line-height:1.6;color:#dfe9e3;white-space:pre-wrap;flex:1;overflow:hidden;">Netflix-style documentary cinematography, photoreal, ultra-HD. A confident founder-presenter [USE ATTACHED AVATAR — exact likeness, face-locked] in a minimal premium studio in HITEC City, Hyderabad.
+
+SKIN: hyper-real texture, visible pores, subsurface scattering, no plastic smoothing, tack-sharp eyes, 4K crispness.
+ENVIRONMENT: deep emerald-ink walls (#0B1F1A), cream accents (#F5F1EA), bokeh mint dashboards behind, volumetric haze, mint gradient glow.
+CAMERA: 35mm prime, T1.8, slow push-in dolly over 10s, gimbal-smooth, rack focus to eyes by 2s. ARRI Alexa look, 4K, 24fps.
+LIGHTING: 3-point — 5600K soft silk key L, 3200K warm fill R, crisp emerald-mint (#10B981) rim, one mint practical glow. Low-key premium Netflix-doc mood, catchlights in both eyes.
+GRADE: teal-emerald shadows, warm cream highlights, rich blacks, fine 35mm grain. Palette mint #10B981/#7CF6C8, ink #0A0E0C, paper #F5F1EA, one gold #C9A14A accent.
+BEATS (10s): 0–2 profile→turn + focus; 2–6 push-in + line to camera; 6–8.5 confident micro-nod; 8.5–10 held hero frame, negative space upper-left for logo.
+
+NEGATIVE: plastic/waxy skin, over-smoothed, beauty filter, warped hands, text artifacts, watermark, logo distortion, oversaturated, low-res, cartoon, 3D-render look.</div>
+  <div class="metaRow" style="margin-top:14px;"><span>Full prompt → MASTER-PROMPT-production-readiness.md</span><span>brandmint.studio</span></div>
+</section>
+
+</body>
+</html>
