@@ -170,4 +170,95 @@
       }
     });
   }
+
+  /* ---------- Premium motion layer ---------- */
+
+  // 1 · Staggered scroll-reveal — cascade siblings within a group
+  if (!reduceMotion) {
+    document
+      .querySelectorAll(".services, .quotes, .faq, .hero-meta")
+      .forEach((group) => {
+        [...group.querySelectorAll(".reveal")].forEach((el, i) => {
+          el.style.transitionDelay = Math.min(i, 8) * 70 + "ms";
+        });
+      });
+  }
+
+  // 2 · Hero entrance — children rise in, staggered, on first paint
+  if (!reduceMotion) {
+    const heroItems = [...document.querySelectorAll(".hero-inner > *")];
+    heroItems.forEach((el, i) => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(18px)";
+      el.style.transition =
+        "opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1)";
+      el.style.transitionDelay = i * 90 + "ms";
+    });
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        heroItems.forEach((el) => {
+          el.style.opacity = "";
+          el.style.transform = "";
+        });
+      })
+    );
+  }
+
+  // 3 · Count-up stat numbers when the hero meta scrolls into view
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    document.querySelectorAll(".hero-meta strong").forEach((strong) => {
+      const node = [...strong.childNodes].find(
+        (n) => n.nodeType === 3 && /\d/.test(n.nodeValue)
+      );
+      if (!node) return;
+      const m = node.nodeValue.match(/^(\D*)(\d+(?:\.\d+)?)(\D*)$/);
+      if (!m) return;
+      const [, pre, numStr, post] = m;
+      const target = parseFloat(numStr);
+      const decimals = (numStr.split(".")[1] || "").length;
+      const fmt = (v) =>
+        pre +
+        (decimals
+          ? v.toFixed(decimals)
+          : Math.round(v).toLocaleString("en-IN")) +
+        post;
+
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            obs.disconnect();
+            const dur = 1100;
+            const start = performance.now();
+            const tick = (now) => {
+              const p = Math.min(1, (now - start) / dur);
+              const eased = 1 - Math.pow(1 - p, 3);
+              node.nodeValue = fmt(target * eased);
+              if (p < 1) requestAnimationFrame(tick);
+              else node.nodeValue = fmt(target);
+            };
+            requestAnimationFrame(tick);
+          });
+        },
+        { threshold: 0.4 }
+      );
+      io.observe(strong);
+    });
+  }
+
+  // 4 · Magnetic primary buttons (fine pointer, motion allowed)
+  if (!reduceMotion && isFinePointer) {
+    document.querySelectorAll(".btn--primary").forEach((btn) => {
+      const pull = 14;
+      btn.addEventListener("mousemove", (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width / 2) / r.width;
+        const y = (e.clientY - r.top - r.height / 2) / r.height;
+        btn.style.transform = `translate(${x * pull}px, ${y * pull}px)`;
+      });
+      btn.addEventListener("mouseleave", () => {
+        btn.style.transform = "";
+      });
+    });
+  }
 })();
