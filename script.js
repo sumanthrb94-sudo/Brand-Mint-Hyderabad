@@ -261,4 +261,65 @@
       });
     });
   }
+
+  // 5 · Scroll progress bar
+  {
+    const bar = document.createElement("div");
+    bar.className = "scroll-progress";
+    document.body.appendChild(bar);
+    let ticking = false;
+    const update = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? window.scrollY / max : 0;
+      bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p))})`;
+      ticking = false;
+    };
+    update();
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true }
+    );
+    window.addEventListener("resize", update, { passive: true });
+  }
+
+  // 6 · Custom cursor ring (accents the native cursor; fine pointer + motion on)
+  if (!reduceMotion && isFinePointer) {
+    const ring = document.createElement("div");
+    ring.className = "bm-cursor";
+    document.body.appendChild(ring);
+    let mx = window.innerWidth / 2,
+      my = window.innerHeight / 2,
+      cx = mx,
+      cy = my;
+    window.addEventListener(
+      "mousemove",
+      (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+      },
+      { passive: true }
+    );
+    const loop = () => {
+      cx += (mx - cx) * 0.18;
+      cy += (my - cy) * 0.18;
+      ring.style.left = cx + "px";
+      ring.style.top = cy + "px";
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+    const grow = () => ring.classList.add("is-active");
+    const shrink = () => ring.classList.remove("is-active");
+    document
+      .querySelectorAll("a, button, .bm-card, .service, [data-auth-action]")
+      .forEach((el) => {
+        el.addEventListener("mouseenter", grow);
+        el.addEventListener("mouseleave", shrink);
+      });
+  }
 })();

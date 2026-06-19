@@ -2396,6 +2396,66 @@ main {
   font-variant-numeric: tabular-nums;
 }
 
+/* Scroll progress bar — thin mint gradient across the very top */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, #7cf6c8, #10b981);
+  z-index: 1000;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Work cards — a slow diagonal sheen sweeps across on hover + soft lift shadow */
+.bm-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(0, 200, 151, 0.1) 50%,
+    transparent 60%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+.bm-card:hover::before {
+  transform: translateX(120%);
+}
+.bm-card:hover {
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 200, 151, 0.18);
+}
+
+/* Custom cursor ring — accents the native cursor on fine pointers */
+.bm-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 1.5px solid rgba(16, 185, 129, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1001;
+  transition: width 0.22s ease, height 0.22s ease, margin 0.22s ease,
+    background 0.22s ease, border-color 0.22s ease;
+}
+.bm-cursor.is-active {
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.9);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
