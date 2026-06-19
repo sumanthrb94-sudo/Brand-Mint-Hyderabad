@@ -124,50 +124,45 @@
       labelEl.textContent = "Sending…";
 
       const authUser = window.bmAuth?.getUser?.();
+      const phone = (data.get("phone") || "").toString().trim();
+      const message = (data.get("message") || "").toString().trim();
+
       const payload = {
         name,
-        company: (data.get("company") || "").toString().trim() || null,
         email,
-        phone: (data.get("phone") || "").toString().trim() || null,
+        phone: phone || null,
         project_type: type,
-        budget: (data.get("budget") || "").toString().trim() || null,
-        message: (data.get("message") || "").toString().trim() || null,
+        message: message || null,
         status: "new",
         score: authUser ? 65 : 50,
         source: authUser ? "Signed-in inquiry" : "Site contact form",
         user_id: authUser?.id || null,
       };
 
-      try {
-        await sendLeadToSupabase(payload);
-        button.disabled = false;
-        labelEl.textContent = original;
-        status.textContent =
-          "Thanks — we'll be in touch within one business day.";
-        form.reset();
-      } catch (err) {
-        console.error("[contact] Supabase insert failed, falling back to mailto", err);
-        button.disabled = false;
-        labelEl.textContent = original;
-        status.textContent =
-          "Opening your mail app — send us the message and we'll reply within one business day.";
-        form.reset();
-        const subject = encodeURIComponent(
-          `New project inquiry — ${type || "Brand Mint"}`
-        );
-        const body = encodeURIComponent(
-          [
-            `Name: ${name}`,
-            `Email: ${email}`,
-            `Company: ${payload.company || "—"}`,
-            `Type: ${payload.project_type || "—"}`,
-            `Budget: ${payload.budget || "—"}`,
-            "",
-            payload.message || "",
-          ].join("\n")
-        );
-        window.location.href = `mailto:hello@brandmint.studio?subject=${subject}&body=${body}`;
-      }
+      // Best-effort: still capture the lead in the CRM (non-blocking).
+      sendLeadToSupabase(payload).catch((err) =>
+        console.error("[contact] Supabase insert failed", err)
+      );
+
+      // Primary action: open WhatsApp to the studio with the inquiry prefilled.
+      const waText = encodeURIComponent(
+        [
+          "New project inquiry — Brand Mint",
+          `Name: ${name}`,
+          `Email: ${email}`,
+          `Phone: ${phone || "—"}`,
+          `Type: ${type || "—"}`,
+          "",
+          message || "(no notes)",
+        ].join("\n")
+      );
+      window.open(`https://wa.me/917799934943?text=${waText}`, "_blank");
+
+      button.disabled = false;
+      labelEl.textContent = original;
+      status.textContent =
+        "Opening WhatsApp — hit send and we'll reply within one business day.";
+      form.reset();
     });
   }
 
