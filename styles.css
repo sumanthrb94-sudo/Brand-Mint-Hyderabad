@@ -2756,11 +2756,21 @@ main {
   color: var(--ink, #0a0e0c);
   padding: 0 28px;
 }
+/* Lower row: clean white text on a dark mint-ink strip */
+.marquee--ghost {
+  background: linear-gradient(180deg, #0b1f1a, #06140f);
+  border-radius: 14px;
+  padding: 14px 0;
+}
 .marquee--ghost .m-item {
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(10, 14, 12, 0.32);
+  color: #ffffff;
+  -webkit-text-stroke: 0;
   font-style: italic;
+  font-weight: 500;
   font-size: clamp(16px, 2.4vw, 26px);
+}
+.marquee--ghost .m-dot {
+  background: #00c897;
 }
 .m-dot {
   width: 9px;

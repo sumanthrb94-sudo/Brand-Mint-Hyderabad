@@ -338,6 +338,7 @@
         () => {
           const y = window.scrollY;
           vel += y - lastY;
+          vel = Math.max(-120, Math.min(120, vel)); // cap momentum build-up
           lastY = y;
         },
         { passive: true }
@@ -348,17 +349,17 @@
         { passive: true }
       );
 
-      const BASE = 55; // px/sec idle drift
+      const BASE = 38; // px/sec idle drift
       const loop = (now) => {
         const dt = Math.min(0.05, (now - last) / 1000);
         last = now;
 
-        const boost = Math.max(-160, Math.min(160, vel)); // clamp flings
-        vel *= 0.86; // decay toward idle
+        const boost = Math.max(-90, Math.min(90, vel)); // clamp flings
+        vel *= 0.88; // decay toward idle
         if (Math.abs(vel) < 0.01) vel = 0;
 
-        const skew = Math.max(-9, Math.min(9, boost * 0.5));
-        const step = BASE * dt + Math.abs(boost) * 1.1;
+        const skew = Math.max(-5, Math.min(5, boost * 0.28));
+        const step = BASE * dt + Math.abs(boost) * 0.45;
 
         for (const t of tracks) {
           if (!t.w) t.w = t.el.scrollWidth / 2 || 0;
@@ -371,7 +372,7 @@
         }
 
         if (stage) {
-          logoRot += boost * 0.06;
+          logoRot += boost * 0.04;
           stage.style.transform = `rotateY(${logoRot.toFixed(2)}deg)`;
         }
 
