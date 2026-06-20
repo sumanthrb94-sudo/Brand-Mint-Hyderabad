@@ -124,50 +124,197 @@
       labelEl.textContent = "Sending…";
 
       const authUser = window.bmAuth?.getUser?.();
+      const phone = (data.get("phone") || "").toString().trim();
+      const message = (data.get("message") || "").toString().trim();
+
       const payload = {
         name,
-        company: (data.get("company") || "").toString().trim() || null,
         email,
-        phone: (data.get("phone") || "").toString().trim() || null,
+        phone: phone || null,
         project_type: type,
-        budget: (data.get("budget") || "").toString().trim() || null,
-        message: (data.get("message") || "").toString().trim() || null,
+        message: message || null,
         status: "new",
         score: authUser ? 65 : 50,
         source: authUser ? "Signed-in inquiry" : "Site contact form",
         user_id: authUser?.id || null,
       };
 
-      try {
-        await sendLeadToSupabase(payload);
-        button.disabled = false;
-        labelEl.textContent = original;
-        status.textContent =
-          "Thanks — we'll be in touch within one business day.";
-        form.reset();
-      } catch (err) {
-        console.error("[contact] Supabase insert failed, falling back to mailto", err);
-        button.disabled = false;
-        labelEl.textContent = original;
-        status.textContent =
-          "Opening your mail app — send us the message and we'll reply within one business day.";
-        form.reset();
-        const subject = encodeURIComponent(
-          `New project inquiry — ${type || "Brand Mint"}`
-        );
-        const body = encodeURIComponent(
-          [
-            `Name: ${name}`,
-            `Email: ${email}`,
-            `Company: ${payload.company || "—"}`,
-            `Type: ${payload.project_type || "—"}`,
-            `Budget: ${payload.budget || "—"}`,
-            "",
-            payload.message || "",
-          ].join("\n")
-        );
-        window.location.href = `mailto:hello@brandmint.studio?subject=${subject}&body=${body}`;
-      }
+      // Best-effort: still capture the lead in the CRM (non-blocking).
+      sendLeadToSupabase(payload).catch((err) =>
+        console.error("[contact] Supabase insert failed", err)
+      );
+
+      // Primary action: open WhatsApp to the studio with the inquiry prefilled.
+      const waText = encodeURIComponent(
+        [
+          "New project inquiry — Brand Mint",
+          `Name: ${name}`,
+          `Email: ${email}`,
+          `Phone: ${phone || "—"}`,
+          `Type: ${type || "—"}`,
+          "",
+          message || "(no notes)",
+        ].join("\n")
+      );
+      window.open(`https://wa.me/917799934943?text=${waText}`, "_blank");
+
+      button.disabled = false;
+      labelEl.textContent = original;
+      status.textContent =
+        "Opening WhatsApp — hit send and we'll reply within one business day.";
+      form.reset();
     });
+  }
+
+  /* ---------- Premium motion layer ---------- */
+
+  // 1 · Staggered scroll-reveal — cascade siblings within a group
+  if (!reduceMotion) {
+    document
+      .querySelectorAll(".services, .quotes, .faq, .hero-meta")
+      .forEach((group) => {
+        [...group.querySelectorAll(".reveal")].forEach((el, i) => {
+          el.style.transitionDelay = Math.min(i, 8) * 70 + "ms";
+        });
+      });
+  }
+
+  // 2 · Hero entrance — children rise in, staggered, on first paint
+  if (!reduceMotion) {
+    const heroItems = [...document.querySelectorAll(".hero-inner > *")];
+    heroItems.forEach((el, i) => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(18px)";
+      el.style.transition =
+        "opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1)";
+      el.style.transitionDelay = i * 90 + "ms";
+    });
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        heroItems.forEach((el) => {
+          el.style.opacity = "";
+          el.style.transform = "";
+        });
+      })
+    );
+  }
+
+  // 3 · Count-up stat numbers when the hero meta scrolls into view
+  if (!reduceMotion && "IntersectionObserver" in window) {
+    document.querySelectorAll(".hero-meta strong").forEach((strong) => {
+      const node = [...strong.childNodes].find(
+        (n) => n.nodeType === 3 && /\d/.test(n.nodeValue)
+      );
+      if (!node) return;
+      const m = node.nodeValue.match(/^(\D*)(\d+(?:\.\d+)?)(\D*)$/);
+      if (!m) return;
+      const [, pre, numStr, post] = m;
+      const target = parseFloat(numStr);
+      const decimals = (numStr.split(".")[1] || "").length;
+      const fmt = (v) =>
+        pre +
+        (decimals
+          ? v.toFixed(decimals)
+          : Math.round(v).toLocaleString("en-IN")) +
+        post;
+
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            obs.disconnect();
+            const dur = 1100;
+            const start = performance.now();
+            const tick = (now) => {
+              const p = Math.min(1, (now - start) / dur);
+              const eased = 1 - Math.pow(1 - p, 3);
+              node.nodeValue = fmt(target * eased);
+              if (p < 1) requestAnimationFrame(tick);
+              else node.nodeValue = fmt(target);
+            };
+            requestAnimationFrame(tick);
+          });
+        },
+        { threshold: 0.4 }
+      );
+      io.observe(strong);
+    });
+  }
+
+  // 4 · Magnetic primary buttons (fine pointer, motion allowed)
+  if (!reduceMotion && isFinePointer) {
+    document.querySelectorAll(".btn--primary").forEach((btn) => {
+      const pull = 14;
+      btn.addEventListener("mousemove", (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width / 2) / r.width;
+        const y = (e.clientY - r.top - r.height / 2) / r.height;
+        btn.style.transform = `translate(${x * pull}px, ${y * pull}px)`;
+      });
+      btn.addEventListener("mouseleave", () => {
+        btn.style.transform = "";
+      });
+    });
+  }
+
+  // 5 · Scroll progress bar
+  {
+    const bar = document.createElement("div");
+    bar.className = "scroll-progress";
+    document.body.appendChild(bar);
+    let ticking = false;
+    const update = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? window.scrollY / max : 0;
+      bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p))})`;
+      ticking = false;
+    };
+    update();
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true }
+    );
+    window.addEventListener("resize", update, { passive: true });
+  }
+
+  // 6 · Custom cursor ring (accents the native cursor; fine pointer + motion on)
+  if (!reduceMotion && isFinePointer) {
+    const ring = document.createElement("div");
+    ring.className = "bm-cursor";
+    document.body.appendChild(ring);
+    let mx = window.innerWidth / 2,
+      my = window.innerHeight / 2,
+      cx = mx,
+      cy = my;
+    window.addEventListener(
+      "mousemove",
+      (e) => {
+        mx = e.clientX;
+        my = e.clientY;
+      },
+      { passive: true }
+    );
+    const loop = () => {
+      cx += (mx - cx) * 0.18;
+      cy += (my - cy) * 0.18;
+      ring.style.left = cx + "px";
+      ring.style.top = cy + "px";
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+    const grow = () => ring.classList.add("is-active");
+    const shrink = () => ring.classList.remove("is-active");
+    document
+      .querySelectorAll("a, button, .bm-card, .service, [data-auth-action]")
+      .forEach((el) => {
+        el.addEventListener("mouseenter", grow);
+        el.addEventListener("mouseleave", shrink);
+      });
   }
 })();

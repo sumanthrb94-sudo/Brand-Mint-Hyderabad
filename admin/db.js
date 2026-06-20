@@ -500,7 +500,7 @@ export async function seedIfEmpty() {
     pan: "ABCDE1234F",
     address: "HITEC City, Hyderabad 500081",
     email: "hello@brandmint.studio",
-    phone: "+91 00000 00000",
+    phone: "+91 77999 34943",
     website: "brandmint.studio",
     bank: { name: "HDFC Bank", account: "00000000000000", ifsc: "HDFC0000000" },
     pricing: {
