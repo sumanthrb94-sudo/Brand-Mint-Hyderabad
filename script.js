@@ -317,4 +317,67 @@
         el.addEventListener("mouseleave", shrink);
       });
   }
+
+  // 7 · Scroll-velocity motion — marquee speed/skew + 3D logo rotation sync to scroll
+  if (!reduceMotion) {
+    const tracks = [...document.querySelectorAll(".marquee-track")].map((el) => {
+      el.style.animation = "none"; // take over from the CSS base loop
+      const reverse = el.parentElement.classList.contains("marquee--reverse");
+      return { el, dir: reverse ? 1 : -1, x: 0, w: 0 };
+    });
+    const stage = document.querySelector(".logo3d-stage");
+
+    if (tracks.length || stage) {
+      let lastY = window.scrollY;
+      let vel = 0; // recent scroll delta (px)
+      let logoRot = 0;
+      let last = performance.now();
+
+      window.addEventListener(
+        "scroll",
+        () => {
+          const y = window.scrollY;
+          vel += y - lastY;
+          lastY = y;
+        },
+        { passive: true }
+      );
+      window.addEventListener(
+        "resize",
+        () => tracks.forEach((t) => (t.w = 0)),
+        { passive: true }
+      );
+
+      const BASE = 55; // px/sec idle drift
+      const loop = (now) => {
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+
+        const boost = Math.max(-160, Math.min(160, vel)); // clamp flings
+        vel *= 0.86; // decay toward idle
+        if (Math.abs(vel) < 0.01) vel = 0;
+
+        const skew = Math.max(-9, Math.min(9, boost * 0.5));
+        const step = BASE * dt + Math.abs(boost) * 1.1;
+
+        for (const t of tracks) {
+          if (!t.w) t.w = t.el.scrollWidth / 2 || 0;
+          t.x += t.dir * step;
+          if (t.w) {
+            while (t.x <= -t.w) t.x += t.w;
+            while (t.x > 0) t.x -= t.w;
+          }
+          t.el.style.transform = `translate3d(${t.x}px,0,0) skewX(${(-skew * t.dir).toFixed(2)}deg)`;
+        }
+
+        if (stage) {
+          logoRot += boost * 0.06;
+          stage.style.transform = `rotateY(${logoRot.toFixed(2)}deg)`;
+        }
+
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }
+  }
 })();
