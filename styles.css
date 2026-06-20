@@ -2758,9 +2758,32 @@ main {
 }
 /* Lower row: clean white text on a dark mint-ink strip */
 .marquee--ghost {
+  position: relative;
   background: linear-gradient(180deg, #0b1f1a, #06140f);
   border-radius: 14px;
   padding: 14px 0;
+  /* drop the transparent edge-mask so no light/white shows through */
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+/* fade edges to the strip's own dark colour (no white bleed) */
+.marquee--ghost::before,
+.marquee--ghost::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  z-index: 2;
+  pointer-events: none;
+}
+.marquee--ghost::before {
+  left: 0;
+  background: linear-gradient(90deg, #0b1f1a, transparent);
+}
+.marquee--ghost::after {
+  right: 0;
+  background: linear-gradient(270deg, #06140f, transparent);
 }
 .marquee--ghost .m-item {
   color: #ffffff;
