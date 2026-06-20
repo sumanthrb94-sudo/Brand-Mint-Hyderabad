@@ -318,20 +318,14 @@
       });
   }
 
-  // 7 · Scroll-velocity motion — marquee speed/skew + 3D logo rotation sync to scroll
+  // 7 · 3D logo rotation synced to scroll velocity.
+  //     Marquees are NOT scroll-linked — they run at a steady CSS pace.
   if (!reduceMotion) {
-    const tracks = [...document.querySelectorAll(".marquee-track")].map((el) => {
-      el.style.animation = "none"; // take over from the CSS base loop
-      const reverse = el.parentElement.classList.contains("marquee--reverse");
-      return { el, dir: reverse ? 1 : -1, x: 0, w: 0 };
-    });
     const stage = document.querySelector(".logo3d-stage");
-
-    if (tracks.length || stage) {
+    if (stage) {
       let lastY = window.scrollY;
       let vel = 0; // recent scroll delta (px)
       let logoRot = 0;
-      let last = performance.now();
 
       window.addEventListener(
         "scroll",
@@ -343,39 +337,13 @@
         },
         { passive: true }
       );
-      window.addEventListener(
-        "resize",
-        () => tracks.forEach((t) => (t.w = 0)),
-        { passive: true }
-      );
 
-      const BASE = 38; // px/sec idle drift
-      const loop = (now) => {
-        const dt = Math.min(0.05, (now - last) / 1000);
-        last = now;
-
-        const boost = Math.max(-90, Math.min(90, vel)); // clamp flings
+      const loop = () => {
+        const boost = Math.max(-90, Math.min(90, vel));
         vel *= 0.88; // decay toward idle
         if (Math.abs(vel) < 0.01) vel = 0;
-
-        const skew = Math.max(-5, Math.min(5, boost * 0.28));
-        const step = BASE * dt + Math.abs(boost) * 0.45;
-
-        for (const t of tracks) {
-          if (!t.w) t.w = t.el.scrollWidth / 2 || 0;
-          t.x += t.dir * step;
-          if (t.w) {
-            while (t.x <= -t.w) t.x += t.w;
-            while (t.x > 0) t.x -= t.w;
-          }
-          t.el.style.transform = `translate3d(${t.x}px,0,0) skewX(${(-skew * t.dir).toFixed(2)}deg)`;
-        }
-
-        if (stage) {
-          logoRot += boost * 0.04;
-          stage.style.transform = `rotateY(${logoRot.toFixed(2)}deg)`;
-        }
-
+        logoRot += boost * 0.05;
+        stage.style.transform = `rotateY(${logoRot.toFixed(2)}deg)`;
         requestAnimationFrame(loop);
       };
       requestAnimationFrame(loop);
