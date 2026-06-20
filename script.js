@@ -339,10 +339,10 @@
       );
 
       const loop = () => {
-        const boost = Math.max(-90, Math.min(90, vel));
-        vel *= 0.88; // decay toward idle
+        const boost = Math.max(-60, Math.min(60, vel));
+        vel *= 0.9; // decay toward idle
         if (Math.abs(vel) < 0.01) vel = 0;
-        logoRot += boost * 0.05;
+        logoRot += boost * 0.02; // low scroll-sync — subtle rotation
         stage.style.transform = `rotateY(${logoRot.toFixed(2)}deg)`;
         requestAnimationFrame(loop);
       };
