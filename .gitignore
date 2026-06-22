@@ -6,3 +6,6 @@ node_modules/
 .idea/
 dist/
 .cache/
+
+# Installed agent skills (reproducible via: npx skills add) — not vendored
+.agents/
