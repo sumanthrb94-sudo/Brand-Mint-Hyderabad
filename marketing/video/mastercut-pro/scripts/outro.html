@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+#c{position:relative;width:720px;height:1280px;overflow:hidden;font-family:'Inter',sans-serif;
+  background:radial-gradient(130% 100% at 50% 32%, #123a2c 0%, #0c2a20 52%, #07150f 100%)}
+/* subtle vignette + grain feel */
+#glow{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);width:760px;height:760px;
+  background:radial-gradient(circle, rgba(30,209,151,.18), transparent 62%);filter:blur(8px)}
+/* M monogram badge */
+#badge{position:absolute;left:50%;top:330px;transform:translateX(-50%);width:212px;height:212px;border-radius:30%;
+  background:radial-gradient(120% 120% at 50% 30%, #2BE6A6 0%, #15C68C 48%, #0BA876 100%);
+  box-shadow:0 26px 60px rgba(0,80,55,.55),inset 0 3px 0 rgba(255,255,255,.25)}
+#badge svg{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:150px;height:150px;
+  filter:drop-shadow(0 8px 14px rgba(0,50,34,.4))}
+/* wordmark */
+#wm{position:absolute;left:0;right:0;top:600px;text-align:center;color:#F4F1EA;
+  font-weight:900;font-size:84px;letter-spacing:-.02em;line-height:1}
+#wm .mint{color:#1ED197}
+#studios{position:absolute;left:0;right:0;top:700px;text-align:center;color:#F4F1EA;
+  font-weight:800;font-size:58px;letter-spacing:.42em;text-indent:.42em}
+/* tagline */
+#tag{position:absolute;left:60px;right:60px;top:794px;text-align:center;color:#9fb3aa;
+  font-weight:600;font-size:25px;letter-spacing:.01em;line-height:1.3}
+/* handles */
+#handles{position:absolute;left:0;right:0;bottom:150px;text-align:center;color:#cfe0d8;
+  font-weight:700;font-size:31px;line-height:1.9}
+#handles .row{display:block}
+#handles .ic{color:#1ED197}
+/* hairline divider */
+#rule{position:absolute;left:50%;top:870px;transform:translateX(-50%);width:120px;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,#1ED197,transparent)}
+</style></head>
+<body>
+<div id="c">
+  <div id="glow"></div>
+  <div id="badge">
+    <svg viewBox="0 0 64 64"><path d="M15 47V17l17 15 17-15v30" stroke="#06281c" stroke-width="5.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div id="wm">Brand <span class="mint">Mint</span></div>
+  <div id="studios">STUDIOS</div>
+  <div id="rule"></div>
+  <div id="tag">Websites &amp; identities, built to be remembered.</div>
+  <div id="handles">
+    <span class="row"><span class="ic">&#127760;</span>&nbsp; brandmintstudios.in</span>
+    <span class="row"><span class="ic">&#128247;</span>&nbsp; @brandmint.studios</span>
+  </div>
+</div>
+</body></html>
