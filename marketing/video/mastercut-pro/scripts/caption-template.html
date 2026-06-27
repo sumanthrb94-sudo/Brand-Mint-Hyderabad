@@ -4,14 +4,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}html,body{background:transparent}
 #c{position:relative;width:720px;height:1280px;overflow:hidden;font-family:'Inter',sans-serif}
-/* BEHIND — full crown phrase per beat, fit-to-width, ~50% visible above head (50% embed) */
 .beh{position:absolute;left:50%;transform:translateX(-50%);font-weight:900;letter-spacing:-.045em;
   white-space:nowrap;color:#1ED197;line-height:.9;opacity:0;will-change:opacity,transform;
   text-shadow:0 4px 0 #0f9d70,0 8px 0 #0b8460,0 12px 4px rgba(0,0,0,.20),0 30px 52px rgba(0,0,0,.45)}
-#beh1{top:149px;font-size:88px}   /* Great branding */
-#beh2{top:146px;font-size:96px}   /* We put you */
-#beh3{top:143px;font-size:108px}  /* Marketing */
-/* FRONT — white rail at chest, mint hero word */
+#beh1{top:149px;font-size:88px}
+#beh2{top:146px;font-size:96px}
+#beh3{top:143px;font-size:108px}
 .fro{position:absolute;left:50%;transform:translateX(-50%);font-weight:800;letter-spacing:-.02em;
   white-space:nowrap;color:#F6F2EA;text-align:center;line-height:1.04;opacity:0;will-change:opacity,transform;
   text-shadow:0 3px 0 #1c1c1a,0 7px 2px rgba(0,0,0,.32),0 18px 36px rgba(0,0,0,.55)}
@@ -19,7 +17,6 @@
 #fro2{top:884px;font-size:50px}
 #fro3{top:884px;font-size:56px}
 .hero{color:#1ED197}
-/* LOGO BUG — bottom-RIGHT, M badge covers the Gemini watermark (x552-628,y1108-1184) */
 #bug{position:absolute;right:80px;bottom:92px;display:flex;align-items:center;gap:14px;opacity:0;
   will-change:opacity}
 #bug .t{font-weight:800;font-size:34px;color:#F4F1EA;letter-spacing:-.01em;line-height:1;
@@ -29,20 +26,17 @@
   background:radial-gradient(120% 120% at 50% 30%, #2BE6A6 0%, #15C68C 50%, #0BA876 100%);
   box-shadow:0 8px 20px rgba(0,60,40,.5),inset 0 2px 0 rgba(255,255,255,.22);position:relative}
 #bug .m svg{position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);width:62px;height:62px}
-/* layer isolation for compositing */
 body[data-layer="back"] .fro,body[data-layer="back"] #bug{display:none!important}
 body[data-layer="front"] .beh{display:none!important}
 </style></head>
 <body>
 <div id="c">
-  <div class="beh" id="beh1">Great branding</div>
-  <div class="beh" id="beh2">We put you</div>
-  <div class="beh" id="beh3">Marketing</div>
-
-  <div class="fro" id="fro1">nobody sees is a <span class="hero">waste.</span></div>
-  <div class="fro" id="fro2">in front of the <span class="hero">right people.</span></div>
-  <div class="fro" id="fro3">that sounds like <span class="hero">you.</span></div>
-
+  <div class="beh" id="beh1">you promised</div>
+  <div class="beh" id="beh2">fulfillment</div>
+  <div class="beh" id="beh3">every single day</div>
+  <div class="fro" id="fro1">seen as <span class="hero">fulfillment</span></div>
+  <div class="fro" id="fro2">exactly what <span class="hero">they're</span> delivering</div>
+  <div class="fro" id="fro3">that's your <span class="hero">promise</span></div>
   <div id="bug">
     <span class="t">Brand <b>Mint</b></span>
     <span class="m"><svg viewBox="0 0 64 64"><path d="M15 47V17l17 15 17-15v30" stroke="#06281c" stroke-width="5.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -57,19 +51,15 @@ function fade(el,t,t0,t1,rise){
   if(rise!==undefined) el.style.transform='translateX(-50%) translateY('+((1-p)*rise)+'px)';
 }
 function render(t){
-  // Beat 1 — speech ~1.35-3.0s, fade out by 3.6
-  const o1=clamp(t<3.5?1:1-(t-3.5)/0.5,0,1);
-  fade(beh1,t,1.25,1.85,-18); beh1.style.opacity*=o1;
-  fade(fro1,t,1.55,2.15,14);  fro1.style.opacity*=o1;
-  // Beat 2 — speech ~3.8-5.4s, fade out by 5.8
-  const o2=clamp(t<5.7?1:1-(t-5.7)/0.4,0,1);
-  fade(beh2,t,3.7,4.3,-18); beh2.style.opacity*=o2;
-  fade(fro2,t,4.0,4.6,14);   fro2.style.opacity*=o2;
-  // Beat 3 — speech ~6.05-9.0s, hold to end
-  fade(beh3,t,6.0,6.6,-18);
-  fade(fro3,t,6.3,6.9,14);
-  // logo bug fades in fast to FULL opacity (badge must fully cover the watermark)
-  bug.style.opacity=ease(clamp((t-0.3)/0.5,0,1));
+  fade(beh1,t,2.34,2.80,-18);
+  fade(fro1,t,2.55,3.05,14);
+  if(t>3.1) { beh1.style.opacity=0; fro1.style.opacity=0; }
+  fade(beh2,t,3.17,3.60,-18);
+  fade(fro2,t,3.30,3.75,14);
+  if(t>3.95) { beh2.style.opacity=0; fro2.style.opacity=0; }
+  fade(beh3,t,6.70,7.10,-18);
+  fade(fro3,t,6.85,7.20,14);
+  bug.style.opacity=ease(clamp((t-0.5)/0.4,0,1));
 }
 window.beh1=document.getElementById('beh1');window.beh2=document.getElementById('beh2');window.beh3=document.getElementById('beh3');
 window.fro1=document.getElementById('fro1');window.fro2=document.getElementById('fro2');window.fro3=document.getElementById('fro3');
