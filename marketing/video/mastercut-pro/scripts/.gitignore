@@ -1,6 +1,8 @@
 # Video input/output and working files
 raw_clip.mp4
 audio.wav
+audio.mp3
+audio.json
 final.mp4
 main.mp4
 outro_seg.mp4
