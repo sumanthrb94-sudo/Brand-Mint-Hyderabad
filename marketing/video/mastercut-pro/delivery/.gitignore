@@ -1,0 +1,4 @@
+# Delivery package — video files excluded (large binaries)
+*.mp4
+*.mov
+*.webm
