@@ -4,11 +4,13 @@ audio.wav
 audio.mp3
 audio.json
 final.mp4
+final-with-sfx.mp4
 main.mp4
 outro_seg.mp4
 outro_seg_a.mp4
 outro.png
 concat.txt
+sfx_sync.txt
 
 # Frame directories
 frames/
