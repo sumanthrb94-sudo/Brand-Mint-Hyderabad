@@ -270,7 +270,7 @@ button {
   font-size: 13px;
   font-weight: 500;
   background: var(--ink);
-  color: var(--paper);
+  color: var(--cream);
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 .nav-links .nav-signup::after { display: none; }
@@ -376,7 +376,7 @@ button {
   }
   .nav-links .nav-signup {
     background: var(--ink);
-    color: var(--paper);
+    color: var(--cream);
   }
   .nav-links .nav-userchip {
     position: static;
