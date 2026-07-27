@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Portal — Brand Mint</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/bm-app.css" />
+  </head>
+  <body class="bm-body">
+    <div class="bm-shell">
+      <header class="bm-topbar">
+        <a class="bm-brand" href="/portal">
+          <span class="bm-brand-mark" aria-hidden="true"></span>
+          <span>Brand Mint <span class="bm-brand-sub">Portal</span></span>
+        </a>
+        <div class="bm-topbar-right">
+          <span class="bm-user" id="bm-org-name">—</span>
+          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/onboarding">Onboarding</a>
+          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
+        </div>
+      </header>
+
+      <div id="bm-loading" class="bm-loading">Loading your project…</div>
+      <main id="bm-main" hidden>
+        <!-- 1. Where we are -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">Where we are</p>
+          <div class="bm-card-head">
+            <h2 class="bm-card-title" id="bm-project-name">—</h2>
+            <span class="bm-pill bm-pill--muted" id="bm-project-status">—</span>
+          </div>
+          <div class="bm-row-main" style="margin-bottom:12px;">
+            <span class="bm-row-title" id="bm-next-milestone-title">No milestones yet</span>
+            <span class="bm-row-sub" id="bm-next-milestone-sub">—</span>
+          </div>
+          <div class="bm-progress">
+            <div class="bm-progress-fill" id="bm-progress-fill" style="width:0%"></div>
+          </div>
+        </section>
+
+        <!-- 2. What we need from you -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">What we need from you</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Open items</h2>
+          <div id="bm-intake-list"></div>
+        </section>
+
+        <!-- 3. Waiting on your approval -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">Waiting on your approval</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Deliverables in review</h2>
+          <div id="bm-deliverables-list"></div>
+        </section>
+
+        <!-- 4. Preview links -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">Preview links</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Links</h2>
+          <div id="bm-preview-list"></div>
+        </section>
+
+        <!-- 5. Invoices -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">Invoices</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Billing</h2>
+          <div class="bm-table-wrap">
+            <table class="bm-table">
+              <thead>
+                <tr><th>Label</th><th>Amount</th><th>Status</th><th>Due</th></tr>
+              </thead>
+              <tbody id="bm-invoices-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      import {
+        requireClientAuth,
+        getUserProfile,
+        getOrg,
+        getProjectsForOrg,
+        getMilestones,
+        getIntake,
+        getDeliverables,
+        getInvoicesForOrg,
+        setIntakeDone,
+        decideDeliverable,
+        logout,
+        daysSince,
+        formatDate,
+        formatINR,
+        escapeHtml,
+      } from "/assets/bm-app.js";
+
+      document.getElementById("bm-signout").addEventListener("click", async () => {
+        await logout();
+        window.location.href = "/login";
+      });
+
+      function ageClass(days) {
+        if (days === null) return "bm-pill--muted";
+        if (days <= 0) return "bm-pill--green";
+        if (days <= 3) return "bm-pill--amber";
+        return "bm-pill--red";
+      }
+
+      async function render() {
+        const user = await requireClientAuth();
+        if (!user) return;
+
+        const profile = await getUserProfile(user.uid);
+        const orgId = profile?.orgId;
+        const org = orgId ? await getOrg(orgId) : null;
+        document.getElementById("bm-org-name").textContent = org?.name || profile?.name || user.email;
+
+        const projects = orgId ? await getProjectsForOrg(orgId) : [];
+        const project = projects[0];
+
+        document.getElementById("bm-loading").hidden = true;
+        document.getElementById("bm-main").hidden = false;
+
+        if (!project) {
+          document.getElementById("bm-project-name").textContent = "No active project";
+          document.getElementById("bm-project-status").textContent = "—";
+          document.getElementById("bm-intake-list").innerHTML = '<p class="bm-empty">Nothing here yet.</p>';
+          document.getElementById("bm-deliverables-list").innerHTML = '<p class="bm-empty">Nothing here yet.</p>';
+          document.getElementById("bm-preview-list").innerHTML = '<p class="bm-empty">Nothing here yet.</p>';
+          document.getElementById("bm-invoices-body").innerHTML = '<tr><td colspan="4" class="bm-empty">No invoices yet.</td></tr>';
+          return;
+        }
+
+        document.getElementById("bm-project-name").textContent = project.name || "Project";
+        document.getElementById("bm-project-status").textContent = project.type || "In progress";
+        document.getElementById("bm-progress-fill").style.width = `${Math.max(0, Math.min(100, Number(project.progress) || 0))}%`;
+
+        // Next milestone: earliest due, not yet done.
+        const milestones = await getMilestones(project.id);
+        const pending = milestones
+          .filter((m) => m.status !== "done")
+          .sort((a, b) => (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0));
+        const next = pending[0];
+        if (next) {
+          document.getElementById("bm-next-milestone-title").textContent = next.title;
+          const who = next.owner === "client" ? "waiting on you" : "waiting on Brand Mint";
+          document.getElementById("bm-next-milestone-sub").textContent = `Due ${formatDate(next.dueAt)} — ${who}`;
+        } else {
+          document.getElementById("bm-next-milestone-title").textContent = "All milestones complete";
+          document.getElementById("bm-next-milestone-sub").textContent = "—";
+        }
+
+        // What we need from you — open intake, oldest first.
+        const intake = (await getIntake(project.id)).filter((i) => !i.done);
+        intake.sort((a, b) => (a.raisedAt?.toMillis?.() || 0) - (b.raisedAt?.toMillis?.() || 0));
+        const intakeList = document.getElementById("bm-intake-list");
+        if (!intake.length) {
+          intakeList.innerHTML = '<p class="bm-empty">Nothing outstanding — you\'re all caught up.</p>';
+        } else {
+          intakeList.innerHTML = intake
+            .map((item) => {
+              const days = daysSince(item.raisedAt);
+              return `<div class="bm-row">
+                <div class="bm-row-main">
+                  <span class="bm-row-title">${escapeHtml(item.label)}</span>
+                  <span class="bm-row-sub">${escapeHtml(item.group || "")} · raised ${formatDate(item.raisedAt)}</span>
+                </div>
+                <span class="bm-pill ${ageClass(days)}">${days === null ? "—" : days + "d"}</span>
+              </div>`;
+            })
+            .join("");
+        }
+
+        // Waiting on your approval.
+        const deliverables = await getDeliverables(project.id);
+        const inReview = deliverables.filter((d) => d.status === "in_review");
+        const delivList = document.getElementById("bm-deliverables-list");
+        if (!inReview.length) {
+          delivList.innerHTML = '<p class="bm-empty">Nothing waiting on you right now.</p>';
+        } else {
+          delivList.innerHTML = inReview
+            .map(
+              (d) => `<div class="bm-row">
+                <div class="bm-row-main">
+                  <span class="bm-row-title">${escapeHtml(d.title)} <span class="bm-row-sub">v${escapeHtml(d.version ?? "1")}</span></span>
+                  ${d.url ? `<a class="bm-link bm-row-sub" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open preview</a>` : ""}
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="bm-btn bm-btn--sm" data-approve="${d.id}">Approve</button>
+                  <button class="bm-btn bm-btn--ghost bm-btn--sm" data-changes="${d.id}">Request changes</button>
+                </div>
+              </div>`
+            )
+            .join("");
+
+          delivList.querySelectorAll("[data-approve]").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              btn.disabled = true;
+              await decideDeliverable(project.id, btn.dataset.approve, "approved");
+              render();
+            });
+          });
+          delivList.querySelectorAll("[data-changes]").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              btn.disabled = true;
+              await decideDeliverable(project.id, btn.dataset.changes, "changes_requested");
+              render();
+            });
+          });
+        }
+
+        // Preview links — every deliverable that has one.
+        const withUrls = deliverables.filter((d) => d.url);
+        const previewList = document.getElementById("bm-preview-list");
+        previewList.innerHTML = withUrls.length
+          ? withUrls
+              .map(
+                (d) => `<div class="bm-row">
+                  <span class="bm-row-title">${escapeHtml(d.title)} <span class="bm-row-sub">v${escapeHtml(d.version ?? "1")}</span></span>
+                  <a class="bm-link" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>
+                </div>`
+              )
+              .join("")
+          : '<p class="bm-empty">No preview links yet.</p>';
+
+        // Invoices.
+        const invoices = orgId ? await getInvoicesForOrg(orgId) : [];
+        const invBody = document.getElementById("bm-invoices-body");
+        invBody.innerHTML = invoices.length
+          ? invoices
+              .map(
+                (inv) => `<tr class="${inv.status === "due" ? "bm-row--highlight" : ""}">
+                  <td>${escapeHtml(inv.label)}</td>
+                  <td>${formatINR(inv.amount)}</td>
+                  <td><span class="bm-pill ${inv.status === "due" ? "bm-pill--red" : "bm-pill--green"}">${escapeHtml(inv.status)}</span></td>
+                  <td>${formatDate(inv.dueAt)}</td>
+                </tr>`
+              )
+              .join("")
+          : '<tr><td colspan="4" class="bm-empty">No invoices yet.</td></tr>';
+      }
+
+      render();
+    </script>
+  </body>
+</html>

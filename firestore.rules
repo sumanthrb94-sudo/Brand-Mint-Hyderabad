@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return request.auth != null && request.auth.token.email == 'admin@brandmintstudios.in'; }
+    function me()    { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function myOrg() { return me().orgId; }
+    function projectOrg(pid) { return get(/databases/$(database)/documents/projects/$(pid)).data.orgId; }
+    function mine(pid) { return signedIn() && projectOrg(pid) == myOrg(); }
+    function onlyTouches(fields) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields); }
+    match /users/{uid} { allow read: if isAdmin() || (signedIn() && request.auth.uid == uid); allow write: if isAdmin(); }
+    match /organisations/{orgId} { allow read: if isAdmin() || (signedIn() && orgId == myOrg()); allow write: if isAdmin(); }
+    match /projects/{pid} { allow read: if isAdmin() || mine(pid); allow write: if isAdmin();
+      match /milestones/{id} { allow read: if isAdmin() || mine(pid); allow write: if isAdmin(); }
+      match /intake/{id} { allow read: if isAdmin() || mine(pid); allow create, delete: if isAdmin();
+        allow update: if isAdmin() || (mine(pid) && onlyTouches(['done','clearedAt']) && request.resource.data.done is bool); }
+      match /deliverables/{id} { allow read: if isAdmin() || mine(pid); allow create, delete: if isAdmin();
+        allow update: if isAdmin() || (mine(pid) && onlyTouches(['status','decidedAt','decidedBy']) && request.resource.data.status in ['approved','changes_requested']); }
+    }
+    match /invoices/{id} { allow read: if isAdmin() || (signedIn() && resource.data.orgId == myOrg()); allow write: if isAdmin(); }
+    match /leads/{id} { allow read, write: if isAdmin(); }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
