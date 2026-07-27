@@ -247,7 +247,7 @@ Signed MRR against break-even · leads with first-response capture · plan vs
 actual · Client Access · delivery health · per-project CRUD · three org tables
 · seed button.
 
-**Break-even is ₹96,100/month**, exported once as `BREAK_EVEN_MONTHLY` from
+**Break-even is ₹1,00,000/month**, exported once as `BREAK_EVEN_MONTHLY` from
 `bm-app.js`. Do not scatter copies.
 
 > The ₹6.5 L/month break-even in `brand-mint-admin/06-FINANCIAL-MODEL.md` is a

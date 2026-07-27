@@ -350,7 +350,7 @@ export function probeProjectAccess(projectId) {
 // This is the solo studio's actual monthly survival line. The ₹6.5L figure in
 // brand-mint-admin/06-FINANCIAL-MODEL.md is a Y1 plan for a three-person
 // studio that has not been hired — it is a target, not this month's bar.
-export const BREAK_EVEN_MONTHLY = 96100;
+export const BREAK_EVEN_MONTHLY = 100000;
 
 export const SERVICE_TYPES = [
   { id: "site", label: "Custom website" },
