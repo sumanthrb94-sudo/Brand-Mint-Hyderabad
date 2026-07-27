@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Studio — Brand Mint</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/bm-app.css" />
+  </head>
+  <body class="bm-body">
+    <div class="bm-shell">
+      <header class="bm-topbar">
+        <a class="bm-brand" href="/studio">
+          <span class="bm-brand-mark" aria-hidden="true"></span>
+          <span>Brand Mint <span class="bm-brand-sub">Studio</span></span>
+        </a>
+        <div class="bm-topbar-right">
+          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-seed">Seed the database</button>
+          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
+        </div>
+      </header>
+
+      <div id="bm-loading" class="bm-loading">Loading the studio dashboard…</div>
+      <main id="bm-main" hidden>
+        <div class="bm-stats">
+          <div class="bm-stat">
+            <p class="bm-stat-label">Signed MRR</p>
+            <p class="bm-stat-value" id="bm-mrr">—</p>
+            <p class="bm-stat-sub" id="bm-mrr-sub">Break-even: Rs 96,100/month</p>
+          </div>
+          <div class="bm-stat">
+            <p class="bm-stat-label">Open leads</p>
+            <p class="bm-stat-value" id="bm-leads-open">—</p>
+            <p class="bm-stat-sub" id="bm-leads-sub">—</p>
+          </div>
+          <div class="bm-stat">
+            <p class="bm-stat-label">Median first response</p>
+            <p class="bm-stat-value" id="bm-first-response">—</p>
+          </div>
+        </div>
+
+        <section class="bm-card">
+          <p class="bm-eyebrow">Revenue breakdown</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Retainers</h2>
+          <div id="bm-retainer-list"></div>
+        </section>
+
+        <section class="bm-card">
+          <p class="bm-eyebrow">Delivery health</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Per-project status</h2>
+          <div class="bm-table-wrap">
+            <table class="bm-table">
+              <thead>
+                <tr><th>Project</th><th>Next milestone</th><th>Waiting on</th><th>Oldest blocker</th></tr>
+              </thead>
+              <tbody id="bm-delivery-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="bm-card">
+          <p class="bm-eyebrow">Active clients</p>
+          <div class="bm-table-wrap">
+            <table class="bm-table">
+              <thead><tr><th>Name</th><th>Retainer</th><th>Status</th><th>Note</th></tr></thead>
+              <tbody id="bm-active-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="bm-card">
+          <p class="bm-eyebrow">Internal</p>
+          <div class="bm-table-wrap">
+            <table class="bm-table">
+              <thead><tr><th>Name</th><th>Note</th></tr></thead>
+              <tbody id="bm-internal-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="bm-card">
+          <p class="bm-eyebrow">Archived</p>
+          <div class="bm-table-wrap">
+            <table class="bm-table">
+              <thead><tr><th>Name</th><th>Note</th></tr></thead>
+              <tbody id="bm-archived-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      import {
+        requireAdminAuth,
+        getAllOrgs,
+        getAllProjects,
+        getAllInvoices,
+        getAllLeads,
+        getMilestones,
+        getIntake,
+        seedDatabase,
+        logout,
+        daysSince,
+        formatINR,
+        escapeHtml,
+      } from "/assets/bm-app.js";
+
+      const BREAK_EVEN = 96100;
+
+      document.getElementById("bm-signout").addEventListener("click", async () => {
+        await logout();
+        window.location.href = "/login";
+      });
+
+      function ageClass(days) {
+        if (days === null) return "bm-pill--muted";
+        if (days <= 0) return "bm-pill--green";
+        if (days <= 3) return "bm-pill--amber";
+        return "bm-pill--red";
+      }
+
+      document.getElementById("bm-seed").addEventListener("click", async () => {
+        const ok = confirm(
+          "This writes the fixed seed dataset (orgs, projects, invoices) with " +
+            "deterministic IDs. Safe to re-run, but it will overwrite those " +
+            "documents with the seed values. Continue?"
+        );
+        if (!ok) return;
+        const btn = document.getElementById("bm-seed");
+        btn.disabled = true;
+        btn.textContent = "Seeding…";
+        try {
+          await seedDatabase();
+          btn.textContent = "Seeded ✓";
+        } catch (err) {
+          btn.textContent = "Seed the database";
+          alert("Seeding failed: " + (err?.message || err));
+        } finally {
+          btn.disabled = false;
+          load();
+        }
+      });
+
+      async function load() {
+        const user = await requireAdminAuth();
+        if (!user) return;
+
+        const [orgs, projects, invoices, leads] = await Promise.all([
+          getAllOrgs(),
+          getAllProjects(),
+          getAllInvoices(),
+          getAllLeads(),
+        ]);
+
+        document.getElementById("bm-loading").hidden = true;
+        document.getElementById("bm-main").hidden = false;
+
+        const orgById = Object.fromEntries(orgs.map((o) => [o.id, o]));
+
+        // --- MRR ---
+        const signedClients = orgs.filter(
+          (o) => o.kind === "client" && o.status === "active" && o.retainerStatus === "signed"
+        );
+        const mrr = signedClients.reduce((sum, o) => sum + (Number(o.retainer) || 0), 0);
+        document.getElementById("bm-mrr").textContent = formatINR(mrr);
+        document.getElementById("bm-mrr").classList.toggle("bm-stat-value--green", mrr >= BREAK_EVEN);
+        document.getElementById("bm-mrr").classList.toggle("bm-stat-value--red", mrr < BREAK_EVEN);
+        document.getElementById("bm-mrr-sub").textContent =
+          mrr >= BREAK_EVEN
+            ? `Rs ${(mrr - BREAK_EVEN).toLocaleString("en-IN")} over break-even (Rs 96,100/month)`
+            : `Rs ${(BREAK_EVEN - mrr).toLocaleString("en-IN")} short of break-even (Rs 96,100/month)`;
+
+        // Retainer breakdown — proposals render faded and are never summed.
+        const retainerList = document.getElementById("bm-retainer-list");
+        const clientOrgs = orgs.filter((o) => o.kind === "client" && o.status === "active");
+        retainerList.innerHTML = clientOrgs.length
+          ? clientOrgs
+              .map((o) => {
+                const faded = o.retainerStatus !== "signed";
+                const pillClass =
+                  o.retainerStatus === "signed" ? "bm-pill--green" : o.retainerStatus === "proposed" ? "bm-pill--amber" : "bm-pill--muted";
+                return `<div class="bm-row ${faded ? "" : ""}" style="${faded ? "opacity:.55" : ""}">
+                  <div class="bm-row-main">
+                    <span class="bm-row-title">${escapeHtml(o.name)}</span>
+                    ${o.note ? `<span class="bm-row-sub">${escapeHtml(o.note)}</span>` : ""}
+                  </div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <span>${formatINR(o.retainer)}</span>
+                    <span class="bm-pill ${pillClass}">${escapeHtml(o.retainerStatus || "none")}</span>
+                  </div>
+                </div>`;
+              })
+              .join("")
+          : '<p class="bm-empty">No client orgs yet.</p>';
+
+        // --- Leads ---
+        const CLOSED_STAGES = new Set(["won", "lost", "closed"]);
+        const openLeads = leads.filter((l) => !CLOSED_STAGES.has(l.stage));
+        const leadsOpenEl = document.getElementById("bm-leads-open");
+        leadsOpenEl.textContent = String(openLeads.length);
+        leadsOpenEl.classList.toggle("bm-stat-value--red", openLeads.length === 0);
+        document.getElementById("bm-leads-sub").textContent =
+          leads.length === 0 ? "Zero open leads — that's the number that decides the month." : `${leads.length} total`;
+
+        const responseTimes = leads
+          .filter((l) => l.firstResponseAt && l.createdAt)
+          .map((l) => (l.firstResponseAt.toMillis() - l.createdAt.toMillis()) / 3600000)
+          .sort((a, b) => a - b);
+        const responseEl = document.getElementById("bm-first-response");
+        if (!responseTimes.length) {
+          responseEl.textContent = "No leads yet";
+          responseEl.classList.add("bm-stat-value--red");
+        } else {
+          const mid = Math.floor(responseTimes.length / 2);
+          const median =
+            responseTimes.length % 2 ? responseTimes[mid] : (responseTimes[mid - 1] + responseTimes[mid]) / 2;
+          responseEl.textContent = `${median.toFixed(1)}h`;
+          responseEl.classList.remove("bm-stat-value--red");
+        }
+
+        // --- Delivery health ---
+        const deliveryBody = document.getElementById("bm-delivery-body");
+        const activeProjects = projects.filter((p) => orgById[p.orgId]?.status === "active");
+        if (!activeProjects.length) {
+          deliveryBody.innerHTML = '<tr><td colspan="4" class="bm-empty">No active projects yet.</td></tr>';
+        } else {
+          const rows = await Promise.all(
+            activeProjects.map(async (p) => {
+              const [milestones, intake] = await Promise.all([getMilestones(p.id), getIntake(p.id)]);
+              const pending = milestones
+                .filter((m) => m.status !== "done")
+                .sort((a, b) => (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0));
+              const next = pending[0];
+              const openBlockers = intake.filter((i) => !i.done);
+              const oldest = openBlockers
+                .map((i) => daysSince(i.raisedAt))
+                .filter((d) => d !== null)
+                .sort((a, b) => b - a)[0];
+              const orgName = orgById[p.orgId]?.name || p.orgId;
+              return `<tr>
+                <td><strong>${escapeHtml(p.name || orgName)}</strong><br><span class="bm-row-sub">${escapeHtml(orgName)}</span></td>
+                <td>${next ? escapeHtml(next.title) : "All complete"}</td>
+                <td>${next ? (next.owner === "client" ? "Client" : "Brand Mint") : "—"}</td>
+                <td><span class="bm-pill ${ageClass(oldest ?? null)}">${oldest === undefined || oldest === null ? "0d" : oldest + "d"}</span></td>
+              </tr>`;
+            })
+          );
+          deliveryBody.innerHTML = rows.join("");
+        }
+
+        // --- Org tables ---
+        const activeClients = orgs.filter((o) => o.kind === "client" && o.status === "active");
+        const internalOrgs = orgs.filter((o) => o.kind === "internal" && o.status !== "archived");
+        const archivedOrgs = orgs.filter((o) => o.status === "archived");
+
+        document.getElementById("bm-active-body").innerHTML = activeClients.length
+          ? activeClients
+              .map(
+                (o) => `<tr>
+                  <td>${escapeHtml(o.name)}</td>
+                  <td>${formatINR(o.retainer)}</td>
+                  <td><span class="bm-pill ${o.retainerStatus === "signed" ? "bm-pill--green" : "bm-pill--muted"}">${escapeHtml(o.retainerStatus || "none")}</span></td>
+                  <td class="bm-row-sub">${escapeHtml(o.note || "—")}</td>
+                </tr>`
+              )
+              .join("")
+          : '<tr><td colspan="4" class="bm-empty">None yet.</td></tr>';
+
+        document.getElementById("bm-internal-body").innerHTML = internalOrgs.length
+          ? internalOrgs
+              .map((o) => `<tr><td>${escapeHtml(o.name)}</td><td class="bm-row-sub">${escapeHtml(o.note || "—")}</td></tr>`)
+              .join("")
+          : '<tr><td colspan="2" class="bm-empty">None yet.</td></tr>';
+
+        document.getElementById("bm-archived-body").innerHTML = archivedOrgs.length
+          ? archivedOrgs
+              .map((o) => `<tr><td>${escapeHtml(o.name)}</td><td class="bm-row-sub">${escapeHtml(o.note || "—")}</td></tr>`)
+              .join("")
+          : '<tr><td colspan="2" class="bm-empty">None yet.</td></tr>';
+      }
+
+      load();
+    </script>
+  </body>
+</html>
