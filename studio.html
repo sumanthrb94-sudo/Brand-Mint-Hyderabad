@@ -39,7 +39,28 @@
 
       <div id="bm-loading" class="bm-loading">Loading the studio dashboard…</div>
       <main id="bm-main" hidden>
-        <div class="bm-stats">
+        <nav class="bm-tabs" id="bm-tabs" aria-label="Dashboard sections">
+          <button type="button" data-tab="today" aria-current="page">Today</button>
+          <button type="button" data-tab="money">Money</button>
+          <button type="button" data-tab="delivery">Delivery</button>
+          <button type="button" data-tab="clients">Clients</button>
+          <button type="button" data-tab="sales">Sales</button>
+        </nav>
+        <!-- What needs you today.
+             The dashboard used to open on nine stacked panels and leave you to
+             work out which mattered. This says it. Every line is computed from
+             real data and links to the thing that fixes it; when there is
+             nothing to do it says that rather than showing an empty box. -->
+        <section class="bm-card" data-sect="today">
+          <p class="bm-eyebrow">Start here</p>
+          <h2 class="bm-card-title" style="margin-bottom:4px;">What needs you today</h2>
+          <p class="bm-row-sub" style="margin-bottom:14px;">
+            Worked out from your own data. Nothing here is a suggestion — each line is
+            something that is currently true.
+          </p>
+          <div id="bm-today"></div>
+        </section>
+        <div class="bm-stats" data-sect="money">
           <div class="bm-stat">
             <p class="bm-stat-label">Signed MRR</p>
             <p class="bm-stat-value" id="bm-mrr">—</p>
@@ -57,14 +78,16 @@
           </div>
         </div>
 
-        <section class="bm-card">
+
+
+        <section class="bm-card" data-sect="money">
           <p class="bm-eyebrow">Revenue breakdown</p>
           <h2 class="bm-card-title" style="margin-bottom:16px;">Retainers</h2>
           <div id="bm-retainer-list"></div>
         </section>
 
         <!-- Leads: capture + first response -->
-        <section class="bm-card">
+        <section class="bm-card" data-sect="sales">
           <p class="bm-eyebrow">Pipeline</p>
           <h2 class="bm-card-title" style="margin-bottom:6px;">Leads</h2>
           <p class="bm-card-note" style="margin-bottom:16px;">
@@ -84,7 +107,7 @@
         </section>
 
         <!-- Plan targets vs actuals -->
-        <section class="bm-card">
+        <section class="bm-card" data-sect="sales">
           <p class="bm-eyebrow">Plan vs actual</p>
           <h2 class="bm-card-title" style="margin-bottom:6px;">Funnel &amp; mix against the playbook</h2>
           <p class="bm-card-note" style="margin-bottom:20px;">
@@ -107,7 +130,7 @@
         </section>
 
         <!-- Client access -->
-        <section class="bm-card">
+        <section class="bm-card" data-sect="clients">
           <p class="bm-eyebrow">Client access</p>
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
             <h2 class="bm-card-title" style="margin:0;">Give a client a login</h2>
@@ -141,7 +164,7 @@
           </form>
         </section>
 
-        <section class="bm-card">
+        <section class="bm-card" data-sect="delivery">
           <p class="bm-eyebrow">Delivery health</p>
           <h2 class="bm-card-title" style="margin-bottom:16px;">Per-project status</h2>
           <div class="bm-table-wrap">
@@ -154,13 +177,13 @@
           </div>
         </section>
 
-        <section class="bm-card">
+        <section class="bm-card" data-sect="delivery">
           <p class="bm-eyebrow">Manage projects</p>
           <h2 class="bm-card-title" style="margin-bottom:16px;">Project details, milestones, intake &amp; deliverables</h2>
           <div id="bm-manage-projects"></div>
         </section>
 
-        <section class="bm-card">
+        <section class="bm-card" data-sect="clients">
           <p class="bm-eyebrow">Active clients</p>
           <div class="bm-table-wrap">
             <table class="bm-table">
@@ -170,7 +193,7 @@
           </div>
         </section>
 
-        <section class="bm-card">
+        <section class="bm-card" data-sect="clients">
           <p class="bm-eyebrow">Internal</p>
           <div class="bm-table-wrap">
             <table class="bm-table">
@@ -180,7 +203,7 @@
           </div>
         </section>
 
-        <section class="bm-card">
+        <section class="bm-card" data-sect="clients">
           <p class="bm-eyebrow">Archived</p>
           <div class="bm-table-wrap">
             <table class="bm-table">
@@ -1009,9 +1032,31 @@
         if (!activeProjects.length) {
           deliveryBody.innerHTML = '<tr><td colspan="4" class="bm-empty">No active projects yet.</td></tr>';
         } else {
+          const deliveryFacts = [];
           const rows = await Promise.all(
             activeProjects.map(async (p) => {
               const [milestones, intake] = await Promise.all([getMilestones(p.id), getIntake(p.id)]);
+              // Gathered here because this is the one place milestones and
+              // intake are already loaded; re-fetching for the Today panel
+              // would double every read on this page.
+              const openNow = intake.filter((i) => !i.done);
+              const oldestOpen = openNow
+                .map((i) => daysSince(i.raisedAt))
+                .filter((d) => d !== null)
+                .sort((a, b) => b - a)[0];
+              const labelCounts = new Map();
+              intake.forEach((i) => {
+                const k = String(i.label || "").trim().toLowerCase();
+                labelCounts.set(k, (labelCounts.get(k) || 0) + 1);
+              });
+              deliveryFacts.push({
+                id: p.id,
+                name: p.name || orgById[p.orgId]?.name || p.orgId,
+                milestones: milestones.length,
+                openIntake: openNow.length,
+                oldestOpenDays: oldestOpen === undefined ? null : oldestOpen,
+                duplicateIntake: [...labelCounts.values()].filter((n) => n > 1).length,
+              });
               const pending = milestones
                 .filter((m) => m.status !== "done")
                 .sort((a, b) => (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0));
@@ -1071,6 +1116,14 @@
           deliveryBody.innerHTML = rows.join("");
         }
 
+        renderToday({
+          mrr,
+          openLeads,
+          leadsAwaitingResponse: openLeads.filter((l) => !l.firstResponseAt),
+          delivery: deliveryFacts,
+          activeProjectCount: activeProjects.length,
+        });
+
         await renderManageProjects(projects, orgById);
 
         // --- Org tables ---
@@ -1108,6 +1161,135 @@
 
       /* Playbooks. Capturing, so a Playbook button inside a clickable row
          opens the drawer without also triggering the row. */
+      /* The Today panel.
+         Every line is a fact computed from the data on this page, written as a
+         sentence rather than a metric, with the button that fixes it attached.
+         Ordered by what costs most to ignore: money owed to you, then leads
+         going cold, then clients you are blocked on.
+
+         When there is genuinely nothing to do it says so plainly. It never
+         prints a reassuring zero and never shows a green all-clear over an
+         empty database — an empty system and a finished one look identical on
+         a dashboard and mean opposite things. */
+      function renderToday(f) {
+        const items = [];
+        const inr = (n) => "Rs " + Math.round(n).toLocaleString("en-IN");
+
+        // 1. Leads with no first response. The single most valuable number in
+        //    the business, so it goes first when it is non-zero.
+        if (f.leadsAwaitingResponse.length) {
+          items.push({
+            tone: "bad",
+            what: `${f.leadsAwaitingResponse.length} lead${f.leadsAwaitingResponse.length === 1 ? " has" : "s have"} had no first response`,
+            why: "Median in this market is around 42 hours. Replying inside five minutes makes qualification far more likely. This is the cheapest thing on the page to fix.",
+            action: { label: "Go to Sales", goto: "sales" },
+          });
+        }
+
+        // 2. Clients sitting on requests.
+        const blocked = f.delivery.filter((d) => d.openIntake > 0);
+        if (blocked.length) {
+          const worst = blocked.slice().sort((a, b) => (b.oldestOpenDays || 0) - (a.oldestOpenDays || 0))[0];
+          items.push({
+            tone: worst.oldestOpenDays >= 7 ? "bad" : "warn",
+            what: `${blocked.length} project${blocked.length === 1 ? " is" : "s are"} waiting on the client`,
+            why: `Oldest is ${worst.name} at ${worst.oldestOpenDays ?? 0} day${worst.oldestOpenDays === 1 ? "" : "s"}. The portal is already showing them, dated — you do not need to send a chasing message.`,
+            action: { label: "Go to Delivery", goto: "delivery" },
+          });
+        }
+
+        // 3. Duplicate intake, because it makes the client's list unreadable.
+        const dupes = f.delivery.filter((d) => d.duplicateIntake > 0);
+        if (dupes.length) {
+          items.push({
+            tone: "bad",
+            what: `${dupes.length} project${dupes.length === 1 ? " has" : "s have"} duplicate requests on the client's list`,
+            why: "The same request appearing several times reads as broken, and a client who decides the list is broken ignores all of it. Use Remove duplicates on the project.",
+            action: { label: "Go to Delivery", goto: "delivery" },
+          });
+        }
+
+        // 4. Projects with no schedule.
+        const unscheduled = f.delivery.filter((d) => d.milestones === 0);
+        if (unscheduled.length) {
+          items.push({
+            tone: "warn",
+            what: `${unscheduled.length} project${unscheduled.length === 1 ? " has" : "s have"} no milestones`,
+            why: "The client cannot see where the project is, and delivery health cannot tell you whether it is late. Apply a template and give it a start date.",
+            action: { label: "Go to Delivery", goto: "delivery" },
+          });
+        }
+
+        // 5. Money, last — it is context, not a task.
+        const gap = BREAK_EVEN_MONTHLY - f.mrr;
+        items.push({
+          tone: gap > 0 ? "warn" : "ok",
+          what: gap > 0
+            ? `Signed MRR is ${inr(f.mrr)} — ${inr(gap)} short of break-even`
+            : `Signed MRR is ${inr(f.mrr)}, above break-even`,
+          why: gap > 0
+            ? `Only signed retainers count here. Four Growth retainers at ${inr(25000)} would clear ${inr(BREAK_EVEN_MONTHLY)}.`
+            : "Cash only — proposals are not counted.",
+          action: { label: "Go to Money", goto: "money" },
+        });
+
+        const el = document.getElementById("bm-today");
+
+        if (!f.activeProjectCount && !f.openLeads.length) {
+          el.innerHTML = `<p class="bm-empty">
+            Nothing is set up yet — no active projects and no leads. That is an empty
+            system, not a clear day. Add an organisation and a project to begin.
+          </p>`;
+          return;
+        }
+
+        el.innerHTML = items.map((i) => `
+          <div class="bm-today-row bm-today-row--${i.tone}">
+            <div>
+              <p class="bm-today-what">${escapeHtml(i.what)}</p>
+              <p class="bm-today-why">${escapeHtml(i.why)}</p>
+            </div>
+            <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-goto="${i.action.goto}">${escapeHtml(i.action.label)}</button>
+          </div>`).join("");
+      }
+
+      /* One section at a time.
+         Nine panels stacked on one page meant every visit started with a scroll
+         and a guess about which one mattered. The dashboard now opens on Today
+         and everything else is a tab away. State lives in the URL hash so a
+         reload keeps you where you were. */
+      const TAB_LABELS = { today: "Today", money: "Money", delivery: "Delivery", clients: "Clients", sales: "Sales" };
+
+      function showTab(tab) {
+        const wanted = TAB_LABELS[tab] ? tab : "today";
+        document.querySelectorAll("[data-sect]").forEach((el) => {
+          el.hidden = el.getAttribute("data-sect") !== wanted;
+        });
+        document.querySelectorAll("#bm-tabs button").forEach((b) => {
+          const on = b.getAttribute("data-tab") === wanted;
+          b.setAttribute("aria-current", on ? "page" : "false");
+        });
+        if (location.hash.slice(1) !== wanted) history.replaceState(null, "", `#${wanted}`);
+      }
+
+      document.getElementById("bm-tabs").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-tab]");
+        if (!b) return;
+        showTab(b.getAttribute("data-tab"));
+        window.scrollTo({ top: 0, behavior: "instant" });
+      });
+
+      // Deep links from the Today panel.
+      document.addEventListener("click", (e) => {
+        const jump = e.target.closest("[data-goto]");
+        if (!jump) return;
+        e.preventDefault();
+        showTab(jump.getAttribute("data-goto"));
+        window.scrollTo({ top: 0, behavior: "instant" });
+      });
+
+      showTab(location.hash.slice(1) || "today");
+
       bindRunbookButtons();
     </script>
   </body>

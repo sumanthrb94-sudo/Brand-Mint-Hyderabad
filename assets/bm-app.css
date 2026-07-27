@@ -689,18 +689,111 @@ a.bm-link { color: var(--mint-3); }
 
 /* The Help affordance itself. Reads as a control, not decoration. */
 .bm-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--bm-green);
+  background: var(--bm-green-bg);
+  color: var(--bm-green);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+/* The "?" is generated, so no page has to remember to include it. */
+.bm-help::before {
+  content: "?";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--bm-green);
+  color: var(--bm-green-bg);
+  font-size: 10px;
+  font-weight: 800;
+}
+.bm-help:hover { filter: brightness(0.94); }
+
+@media (max-width: 640px) {
+  .bm-rb-drawer { width: 100%; padding: 20px 18px 56px; }
+}
+
+
+/* ── studio: tabs and the Today panel ──────────────────────────
+   The dashboard was nine panels stacked on one page. Every visit began with
+   a scroll and a guess about which one mattered. */
+
+.bm-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  margin: 0 0 20px;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.bm-tabs button {
+  flex: none;
   border: 1px solid var(--bm-line);
   background: transparent;
   color: var(--bm-muted);
   border-radius: 999px;
-  padding: 3px 11px;
-  font-size: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  white-space: nowrap;
 }
-.bm-help:hover { color: var(--ink); border-color: var(--ink); }
+.bm-tabs button[aria-current="page"] {
+  background: var(--bm-btn-bg);
+  color: var(--bm-btn-fg);
+  border-color: transparent;
+}
 
+.bm-today-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-top: 1px solid var(--bm-line);
+}
+.bm-today-row:first-child { border-top: 0; padding-top: 0; }
+.bm-today-what {
+  margin: 0 0 3px;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.bm-today-why {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--bm-muted);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+/* Tone is carried by a rule on the left rather than by text colour, so the
+   sentence itself stays at full contrast in both themes. */
+.bm-today-row--bad  { box-shadow: inset 3px 0 0 -0 var(--bm-red); padding-left: 12px; }
+.bm-today-row--warn { box-shadow: inset 3px 0 0 -0 var(--bm-amber); padding-left: 12px; }
+.bm-today-row--ok   { box-shadow: inset 3px 0 0 -0 var(--bm-green); padding-left: 12px; }
+
+@media (max-width: 560px) {
+  .bm-today-row { flex-direction: column; align-items: stretch; gap: 10px; }
+  .bm-today-row .bm-btn { align-self: flex-start; }
+}
+
+
+/* The studio topbar had six controls wrapping onto three lines on a phone,
+   with "Scope & quote" broken across three. Scrolls sideways instead. */
 @media (max-width: 640px) {
-  .bm-rb-drawer { width: 100%; padding: 20px 18px 56px; }
+  .bm-topbar-right {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .bm-topbar-right > * { flex: none; white-space: nowrap; }
 }
