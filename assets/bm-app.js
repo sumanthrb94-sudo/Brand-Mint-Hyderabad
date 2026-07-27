@@ -195,7 +195,11 @@ const SEED_ORGS = [
   // answer "can I cover this month", not "what is this worth".
   { id: "inventory", name: "Inventory Manager", kind: "client", status: "active", retainer: 12500, retainerInKind: 12500, retainerStatus: "signed", note: "Rs 12,500/mo cash + Claude Max in kind. Shopify launch, then the commerce platform, paced over ~12 months." },
   { id: "greenbasket", name: "Green Basket", kind: "client", status: "active", retainer: 0, retainerStatus: "none", note: "COD-only web app + Play Store APK. Quoted Rs 95,000, Rs 15,000 received." },
-  { id: "tresor", name: "Tresor Couture", kind: "client", status: "active", retainer: 0, retainerStatus: "none", note: "Zero to production, unpaid." },
+  // Rs 10,000/mo is expected once the store is production-ready and deployed —
+  // not yet agreed, so it is `proposed`. Proposals render faded and are never
+  // summed into MRR. It becomes real the day it is signed, not the day it is
+  // hoped for.
+  { id: "tresor", name: "Tresor Couture", kind: "client", status: "active", retainer: 10000, retainerStatus: "proposed", note: "Zero to production, unpaid so far. Rs 10,000/mo expected once live and deployed." },
   { id: "modcon", name: "Modcon HR", kind: "internal", status: "active", retainer: 0, retainerStatus: "none", note: "Free side build with an intern." },
   { id: "simplysip", name: "SimplySip", kind: "client", status: "archived", retainer: 0, retainerStatus: "none" },
 ];

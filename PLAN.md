@@ -30,7 +30,7 @@ which does not exist. At your own published rate it takes ten.
 |---|---|---|---|
 | Inventory Manager | ₹12,500 | ~3.8 d/mo | + Claude Max in kind. Recurring, no sales cost. |
 | Green Basket | — | done soon | **₹80,000 outstanding**, already built |
-| Tresor Couture | ₹0 | — | unpaid |
+| Tresor Couture | ₹0 | — | **₹10,000/mo proposed** once live — not counted until signed |
 | Modcon HR | ₹0 | — | internal, free |
 | **Total cash MRR** | **₹12,500** | | gap to break-even: **₹87,500** |
 
@@ -56,9 +56,10 @@ get quoted with `npm run quote` and sent as a scope document.
 | Line | Cash | Days |
 |---|---|---|
 | Inventory Manager | ₹12,500 | 3.8 |
+| Tresor @ ₹10,000 once live | ₹10,000 | ~1 |
 | 2 retainers @ ₹25,000 | ₹50,000 | ~3 |
 | 4 project days @ ₹10,000 | ₹40,000 | 4 |
-| **Total** | **₹1,02,500** | **~10.8 of 15** |
+| **Total** | **₹1,12,500** | **~11.8 of 15** |
 
 Two more retainers and four billable days a month. That is the whole gap.
 
@@ -127,8 +128,9 @@ and no client has ever logged in.
    scope on the site. If it was a one-off concession it should not become the
    default. Right now the quote tool prices a real site build at ₹1,45,000 and
    the website says ₹2 L — close enough not to embarrass you, but not the same.
-2. **What Tresor Couture is.** Currently unpaid with no retainer. Either it
-   converts to something with a number on it or it is a portfolio piece — both
-   are fine, but it should be labelled.
+2. **Tresor Couture → ₹10,000/mo.** Recorded as `proposed`, so it shows on
+   the board but is never summed into MRR. Get it signed at handover, not
+   "later" — the catalog's own conversion target is 30% within 60 days, and the
+   conversation is easiest the day you hand over a working store.
 3. **Which two retainers.** The gap is two clients at ₹25,000. That is the only
    sales target that matters this quarter.
