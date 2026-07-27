@@ -29,6 +29,7 @@
           <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/services">Services</a>
           <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/quote">Scope &amp; quote</a>
           <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/tenancy-check">Tenancy check</a>
+          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-sync-payments">Sync payments</button>
           <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-seed">Seed the database</button>
           <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
         </div>
@@ -233,6 +234,8 @@
         FAST_RESPONSE_MINUTES,
         MARKET_MEDIAN_RESPONSE_HOURS,
         mountThemeToggle,
+        syncPayments,
+        paymentError,
       } from "/assets/bm-app.js";
 
       // Theme toggle, mounted before anything async so it works even if
@@ -266,6 +269,62 @@
       function pct(n) {
         return `${Math.round(n * 100)}%`;
       }
+
+      /* Sync payments.
+         Razorpay is asked what it was actually paid; this browser — signed in
+         as the admin, which firestore.rules already trusts to write invoices —
+         does the writing. That is why no service account exists anywhere in
+         this deployment: the only thing that marks an invoice paid is a human
+         admin's own session.
+
+         The report is deliberately verbose about what it did NOT do. A sync
+         that silently changed nothing is indistinguishable from one that had
+         nothing to change, and the difference matters when you are chasing a
+         payment a client says they made. */
+      document.getElementById("bm-sync-payments").addEventListener("click", async (event) => {
+        const btn = event.currentTarget;
+        if (btn.disabled) return;
+        btn.disabled = true;
+        const label = btn.textContent;
+        btn.textContent = "Syncing…";
+
+        try {
+          const r = await syncPayments(60);
+          const lines = [];
+
+          lines.push(
+            r.updated.length
+              ? `Marked ${r.updated.length} invoice${r.updated.length === 1 ? "" : "s"} paid:\n` +
+                r.updated.map((u) => `  ${u.invoiceId} — ${formatINR(u.amount)} (${u.method || "?"})`).join("\n")
+              : "No new payments to apply."
+          );
+
+          if (r.skipped.length) {
+            lines.push(
+              `\nSkipped ${r.skipped.length}:\n` +
+                r.skipped.map((sk) => `  ${sk.invoiceId} — ${sk.why}`).join("\n")
+            );
+          }
+          if (r.unsettled.length) {
+            lines.push(
+              `\n${r.unsettled.length} order${r.unsettled.length === 1 ? " was" : "s were"} started but never paid. ` +
+                "Those are abandoned checkouts, not missing money."
+            );
+          }
+          if (r.truncated) lines.push("\nWARNING: this sync was INCOMPLETE — too many orders in the window.");
+          lines.push(`\n${r.note}`);
+
+          alert(lines.join("\n"));
+          btn.textContent = r.updated.length ? `Synced ${r.updated.length} ✓` : "Nothing new";
+          if (r.updated.length) render();
+        } catch (err) {
+          alert("Sync failed: " + paymentError(err));
+          btn.textContent = label;
+        } finally {
+          btn.disabled = false;
+          setTimeout(() => { btn.textContent = label; }, 6000);
+        }
+      });
 
       // --- Seed ---
 

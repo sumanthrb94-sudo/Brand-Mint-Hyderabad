@@ -79,11 +79,12 @@
           <div class="bm-table-wrap">
             <table class="bm-table">
               <thead>
-                <tr><th>Label</th><th>Amount</th><th>Status</th><th>Due</th></tr>
+                <tr><th>Label</th><th>Amount</th><th>Status</th><th>Due</th><th></th></tr>
               </thead>
               <tbody id="bm-invoices-body"></tbody>
             </table>
           </div>
+          <p id="bm-pay-status" class="bm-muted" style="margin-top:12px;font-size:13px;" hidden></p>
         </section>
       </main>
     </div>
@@ -107,6 +108,8 @@
         escapeHtml,
         SERVICE_TYPES,
         mountThemeToggle,
+        payInvoice,
+        paymentError,
       } from "/assets/bm-app.js";
 
       // Theme toggle, mounted before anything async so it works even if
@@ -147,7 +150,7 @@
           document.getElementById("bm-intake-list").innerHTML = '<p class="bm-empty">Nothing here yet.</p>';
           document.getElementById("bm-deliverables-list").innerHTML = '<p class="bm-empty">Nothing here yet.</p>';
           document.getElementById("bm-preview-list").innerHTML = '<p class="bm-empty">Nothing here yet.</p>';
-          document.getElementById("bm-invoices-body").innerHTML = '<tr><td colspan="4" class="bm-empty">No invoices yet.</td></tr>';
+          document.getElementById("bm-invoices-body").innerHTML = '<tr><td colspan="5" class="bm-empty">No invoices yet.</td></tr>';
           return;
         }
 
@@ -289,11 +292,59 @@
                   <td>${formatINR(inv.amount)}</td>
                   <td><span class="bm-pill ${inv.status === "due" ? "bm-pill--red" : "bm-pill--green"}">${escapeHtml(inv.status)}</span></td>
                   <td>${formatDate(inv.dueAt)}</td>
+                  <td style="text-align:right">${
+                    inv.status === "due" && Number(inv.amount) > 0
+                      ? `<button class="bm-btn bm-btn--sm" data-pay="${escapeHtml(inv.id)}">Pay now</button>`
+                      : ""
+                  }</td>
                 </tr>`
               )
               .join("")
-          : '<tr><td colspan="4" class="bm-empty">No invoices yet.</td></tr>';
+          : '<tr><td colspan="5" class="bm-empty">No invoices yet.</td></tr>';
       }
+
+      /* Pay now.
+         Bound once, here — delegated from the table body so it survives every
+         re-render. Binding inside render() would add a second listener on each
+         pass, and on a payment screen a doubly-bound click is a double charge. */
+      const payStatus = document.getElementById("bm-pay-status");
+      function sayPayment(message, tone) {
+        payStatus.hidden = false;
+        payStatus.textContent = message;
+        payStatus.style.color =
+          tone === "bad" ? "var(--bm-red)" : tone === "ok" ? "var(--bm-green)" : "";
+      }
+
+      document.getElementById("bm-invoices-body").addEventListener("click", async (event) => {
+        const button = event.target.closest("[data-pay]");
+        if (!button || button.disabled) return;
+        const invoiceId = button.getAttribute("data-pay");
+        const label = button.textContent;
+
+        button.disabled = true;
+        button.textContent = "Opening…";
+        sayPayment("Opening the payment window…");
+
+        try {
+          const result = await payInvoice(invoiceId, {
+            onDismiss: () => sayPayment("Payment cancelled. Nothing was charged."),
+          });
+          button.textContent = "Paid";
+          sayPayment(
+            `Payment of ${formatINR(result.amount)} confirmed. This invoice still shows as due ` +
+              "until we reconcile it, usually the same day. Nothing more is needed from you.",
+            "ok"
+          );
+        } catch (err) {
+          if (err.message === "payment_cancelled") {
+            sayPayment("Payment cancelled. Nothing was charged.");
+          } else {
+            sayPayment(paymentError(err), "bad");
+          }
+          button.disabled = false;
+          button.textContent = label;
+        }
+      });
 
       render();
     </script>

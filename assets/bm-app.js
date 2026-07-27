@@ -911,3 +911,158 @@ export function escapeHtml(value) {
     "'": "&#39;",
   })[ch]);
 }
+
+/* ───────────────────────── payments ─────────────────────────
+   Razorpay, through /api. The browser never sees a key secret and never
+   decides an amount — both live server-side, in Vercel environment
+   variables and in Firestore respectively. See api/_lib/firestore.js for
+   why there is no service account anywhere in this deployment. */
+
+/** Every payment call carries the caller's Firebase ID token. The server uses
+ *  it to read Firestore *as them*, so firestore.rules stays the one boundary. */
+async function authedFetch(path, options = {}) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Sign in first.");
+  const token = await user.getIdToken();
+  const res = await fetch(path, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${token}`,
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+    },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(body.error || `request_failed_${res.status}`);
+    err.status = res.status;
+    err.body = body;
+    throw err;
+  }
+  return body;
+}
+
+/** Human wording for the machine codes the endpoints return. */
+export const PAYMENT_ERRORS = {
+  payments_not_configured: "Online payment is not switched on yet. Pay by transfer, or ask us for details.",
+  already_paid: "This invoice is already paid. Refresh to see it update.",
+  not_your_invoice: "That invoice does not belong to your account.",
+  invoice_not_found: "That invoice no longer exists.",
+  invoice_has_no_amount: "This invoice has no amount set. We will fix it and let you know.",
+  signature_mismatch: "We could not confirm that payment. Nothing has been charged twice — contact us before retrying.",
+  amount_mismatch: "The amount paid does not match the invoice. We are looking into it — do not pay again.",
+  order_mismatch: "We could not match that payment to this invoice. Contact us before retrying.",
+  sign_in_required: "Your session expired. Sign in again.",
+  admin_only: "Admin only.",
+};
+
+export function paymentError(err) {
+  const code = String((err && err.message) || "");
+  if (PAYMENT_ERRORS[code]) return PAYMENT_ERRORS[code];
+  if (code.startsWith("payment_")) return `The payment did not complete (${code.replace("payment_", "")}). Nothing was charged.`;
+  return "Something went wrong with the payment. Nothing has been charged twice — contact us before retrying.";
+}
+
+/** Loads Razorpay Checkout on demand. Not in any page's <head>: a marketing
+ *  visitor should not fetch a payment SDK to read the homepage. */
+function loadCheckout() {
+  if (window.Razorpay) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("checkout_script_blocked"));
+    document.head.appendChild(s);
+  });
+}
+
+/**
+ * Pays one invoice. Resolves with the verification result, or rejects.
+ *
+ * Deliberately resolves with `{ verified: true, settledInDatabase: false }`.
+ * The payment is real and Razorpay has the money; the invoice row still says
+ * due until the studio syncs, because nothing in this deployment is permitted
+ * to write an invoice except the admin. Telling the client that plainly is
+ * better than a green tick that the next page refresh contradicts.
+ */
+export async function payInvoice(invoiceId, { onDismiss } = {}) {
+  const order = await authedFetch("/api/payments/create-order", {
+    method: "POST",
+    body: JSON.stringify({ invoiceId }),
+  });
+
+  await loadCheckout();
+
+  return new Promise((resolve, reject) => {
+    const rzp = new window.Razorpay({
+      key: order.keyId,
+      order_id: order.orderId,
+      amount: order.amount,
+      currency: order.currency,
+      name: "Brand Mint Studios",
+      description: order.invoice.label || "Invoice",
+      prefill: { email: auth.currentUser ? auth.currentUser.email : "" },
+      theme: { color: "#0b6b4f" },
+      modal: {
+        ondismiss: () => {
+          onDismiss?.();
+          reject(new Error("payment_cancelled"));
+        },
+      },
+      handler: (response) => {
+        // Verification is server-side. A handler that trusted this callback
+        // would be trusting the page it is running in.
+        authedFetch("/api/payments/verify", {
+          method: "POST",
+          body: JSON.stringify({ invoiceId, ...response }),
+        })
+          .then((v) => resolve({ ...v, settledInDatabase: false }))
+          .catch(reject);
+      },
+    });
+    rzp.open();
+  });
+}
+
+/** Admin only. Asks Razorpay which invoices were actually paid. Writes nothing. */
+export async function fetchSettledPayments(days = 60) {
+  return authedFetch(`/api/payments/reconcile?days=${encodeURIComponent(days)}`);
+}
+
+/**
+ * Admin only. Marks settled invoices paid, from the admin's own browser —
+ * which firestore.rules already permits. This is why no server credential
+ * exists: the only thing that writes an invoice is a signed-in admin.
+ *
+ * Returns what changed and what it skipped, because a sync that silently
+ * did nothing is indistinguishable from one that had nothing to do.
+ */
+export async function syncPayments(days = 60) {
+  const report = await fetchSettledPayments(days);
+  const updated = [];
+  const skipped = [];
+
+  for (const row of report.settled) {
+    const ref = doc(db, "invoices", row.invoiceId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) { skipped.push({ ...row, why: "invoice no longer exists" }); continue; }
+    if (snap.data().status === "paid") { skipped.push({ ...row, why: "already marked paid" }); continue; }
+
+    const expected = Number(snap.data().amount);
+    if (Number.isFinite(expected) && Math.abs(expected - row.amount) > 0.5) {
+      // Never overwrite an amount to make a payment fit. Flag it instead.
+      skipped.push({ ...row, why: `paid ${formatINR(row.amount)} against ${formatINR(expected)} — check this` });
+      continue;
+    }
+
+    await updateDoc(ref, {
+      status: "paid",
+      paidAt: row.at || new Date().toISOString(),
+      paymentId: row.paymentId,
+      paymentMethod: row.method || null,
+    });
+    updated.push(row);
+  }
+
+  return { updated, skipped, unsettled: report.unsettled, truncated: report.truncated, note: report.note };
+}
