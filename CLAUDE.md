@@ -66,8 +66,17 @@ auth fails with `auth/unauthorized-domain`. Currently: `localhost`, the two
 
 ## 3. Architecture — read before writing a line
 
-**There is no server.** Static HTML, CSS and ES modules on Vercel. Firebase is
-reached from the browser with the Web SDK.
+**There is almost no server.** Static HTML, CSS and ES modules on Vercel.
+Firebase is reached from the browser with the Web SDK.
+
+The exception, added when invoice payments landed, is `/api` — three Vercel
+serverless functions handling Razorpay. They hold the Razorpay key in a Vercel
+environment variable and **read Firestore using the caller's own ID token**, so
+they act with exactly that user's authority and never above it. There is still
+no privileged server identity anywhere in this deployment. See `docs/PAYMENTS.md`.
+
+The static site itself is unchanged: no build step for it, and the pages still
+serve as files.
 
 Which means: **`firestore.rules` is the security boundary. Nothing else is.**
 Every check in the UI is a convenience. If the rules allow it, a client can do
@@ -85,7 +94,15 @@ The Firebase web config is **public by design** and ships in every Firebase
 web app. It is not a credential. The **service account private key is the
 opposite** — root credential, never expires, bypasses every rule. It must
 never be committed, pasted, logged, or put in an env var. Nothing here needs
-it.
+it, and the payment functions were deliberately designed so that stays true.
+
+> §9 below lists "Admin SDK server-side" as a legitimate option, which would
+> require exactly the env var this paragraph forbids. **These two contradict
+> each other.** The payments work sidestepped it rather than settling it, by
+> having `/api` read Firestore with the caller's ID token instead of a service
+> account. If a future feature genuinely needs to write without a signed-in
+> user, that is the moment to decide which of these two paragraphs wins —
+> and to write the audit log (§9 item 4) first.
 
 ### Usernames on a system that has none
 
@@ -153,6 +170,9 @@ studio.html         -> /studio          admin dashboard, client access, CRUD
 tenancy-check.html  -> /tenancy-check   proves isolation from a client session
 assets/bm-app.js                        Firebase init and every read and write
 assets/bm-app.css                       shared styles, all classes prefixed bm-
+assets/bm-runbooks.js                   playbook drawer + lazy loader
+assets/runbooks/*.js                    the playbooks themselves, as data
+api/payments/*.js                       Razorpay, serverless. No service account.
 firestore.rules                         the security boundary
 ```
 
@@ -273,7 +293,9 @@ date**, so no schedule is ever invented.
    reports "inconclusive". Create a client login, sign in as them, load the
    page, confirm "Isolated". Until this is done isolation is designed but
    unproven.
-2. **Invoices are admin-entered only.** No payment link, no reconciliation.
+2. ~~**Invoices are admin-entered only.**~~ **Done.** Clients pay from
+   `/portal`; the admin reconciles from `/studio` with one click. No webhook
+   and no service account — see `docs/PAYMENTS.md`.
 3. **Notifications** — blocker raised, deliverable ready, invoice due. Nothing
    exists.
 4. **Audit log** — an append-only `activity` collection. Build this *before*

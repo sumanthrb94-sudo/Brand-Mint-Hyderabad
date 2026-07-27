@@ -600,3 +600,107 @@ a.bm-link { color: var(--mint-3); }
   :root:not([data-theme="light"]) a.bm-link { color: var(--mint-2); }
 }
 :root[data-theme="dark"] a.bm-link { color: var(--mint-2); }
+
+/* ───────────────────────── playbook drawer ─────────────────────────
+   A Help button next to every service and next to the studio panels whose
+   procedure is easy to get wrong. Contrast computed, not eyeballed:
+   --bm-white is #ffffff in light and #101a16 in dark, and ink/muted/green/red
+   clear 4.5:1 against both (measured: 17.1/5.1/6.5/6.5 light,
+   16.4/8.0/11.3/7.8 dark). */
+
+.bm-rb-scrim {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  z-index: 90;
+}
+
+.bm-rb-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(620px, 100%);
+  overflow-y: auto;
+  background: var(--bm-white);
+  color: var(--ink);
+  border-left: 1px solid var(--bm-line);
+  box-shadow: var(--bm-shadow);
+  z-index: 91;
+  padding: 28px 30px 64px;
+}
+
+.bm-rb-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: -8px -8px 0 0;
+  width: 36px;
+  height: 36px;
+  font-size: 22px;
+  line-height: 1;
+  border-radius: 10px;
+  border: 1px solid var(--bm-line);
+  background: var(--bm-white);
+  color: var(--ink);
+  cursor: pointer;
+}
+.bm-rb-close:hover { border-color: var(--ink); }
+
+.bm-rb-title { font-size: 24px; line-height: 1.2; margin: 4px 0 8px; letter-spacing: -0.01em; }
+.bm-rb-summary { color: var(--ink); font-size: 15px; line-height: 1.6; margin: 0 0 6px; }
+.bm-rb-meta { color: var(--bm-muted); font-size: 13px; margin: 0; }
+
+.bm-rb-section { margin-top: 26px; }
+.bm-rb-h {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--bm-muted);
+  margin: 0 0 8px;
+}
+.bm-rb-note {
+  font-size: 13px;
+  color: var(--bm-muted);
+  margin: 0 0 10px;
+  padding-left: 12px;
+  border-left: 2px solid var(--bm-line);
+}
+
+.bm-rb-list { margin: 0; padding-left: 20px; }
+.bm-rb-list li { margin-bottom: 7px; line-height: 1.6; }
+.bm-rb-list--ok li::marker { color: var(--bm-green); }
+.bm-rb-list--bad li::marker { color: var(--bm-red); }
+
+.bm-rb-steps { margin: 0; padding-left: 22px; }
+.bm-rb-steps li { margin-bottom: 14px; line-height: 1.55; }
+.bm-rb-steps li::marker { color: var(--bm-muted); font-weight: 700; }
+.bm-rb-step-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.bm-rb-do { font-weight: 600; }
+.bm-rb-detail { margin: 4px 0 0; font-size: 13.5px; color: var(--bm-muted); line-height: 1.6; }
+
+.bm-rb-missing { padding: 20px 0; }
+.bm-rb-missing code {
+  background: var(--bg);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+/* The Help affordance itself. Reads as a control, not decoration. */
+.bm-help {
+  border: 1px solid var(--bm-line);
+  background: transparent;
+  color: var(--bm-muted);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.bm-help:hover { color: var(--ink); border-color: var(--ink); }
+
+@media (max-width: 640px) {
+  .bm-rb-drawer { width: 100%; padding: 20px 18px 56px; }
+}

@@ -113,6 +113,7 @@
       import {
         requireAdminAuth, logout, formatINR, escapeHtml, mountThemeToggle,
       } from "/assets/bm-app.js";
+      import { bindRunbookButtons } from "/assets/bm-runbooks.js";
       import {
         FEATURES, FEATURES_BY_ID, CATEGORY_LABELS, DAY_RATE, FLOOR_DAY_RATE,
         SCALE_LABELS, quote, checkPrice, withDependencies,
@@ -153,6 +154,12 @@
             <span class="bm-pill bm-pill--muted">${f.buildDays}d</span>
             ${f.monthlyDays ? `<span class="bm-pill bm-pill--muted">+${formatINR(f.monthlyDays * DAY_RATE)}/mo</span>` : ""}
             ${f.needsServer ? `<span class="bm-pill bm-pill--amber">needs a server</span>` : ""}
+            <button type="button" class="bm-help" style="margin-left:auto"
+              data-runbook="${f.id}"
+              data-runbook-label="${escapeHtml(f.label)}"
+              data-runbook-days="${f.buildDays}"
+              data-runbook-server="${f.needsServer ? "1" : "0"}"
+              aria-label="How we deliver ${escapeHtml(f.label)}">Playbook</button>
           </div>
         </div>`;
       }
@@ -255,6 +262,10 @@
         document.getElementById("bm-main").hidden = false;
         render();
       })();
+
+      /* One capturing listener for every Playbook button on the page,
+         including cards that have not been rendered yet. */
+      bindRunbookButtons();
     </script>
   </body>
 </html>

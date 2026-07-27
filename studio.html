@@ -29,7 +29,9 @@
           <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/services">Services</a>
           <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/quote">Scope &amp; quote</a>
           <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/tenancy-check">Tenancy check</a>
+          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">Onboarding playbook</button>
           <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-sync-payments">Sync payments</button>
+          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-runbook="ops-payments-setup" data-runbook-label="Switch on invoice payments">Payments playbook</button>
           <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-seed">Seed the database</button>
           <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
         </div>
@@ -107,7 +109,10 @@
         <!-- Client access -->
         <section class="bm-card">
           <p class="bm-eyebrow">Client access</p>
-          <h2 class="bm-card-title" style="margin-bottom:12px;">Give a client a login</h2>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+            <h2 class="bm-card-title" style="margin:0;">Give a client a login</h2>
+            <button type="button" class="bm-help" data-runbook="ops-client-login" data-runbook-label="Create a client login" aria-label="Playbook: Create a client login">Playbook</button>
+          </div>
           <ol style="margin:0 0 20px; padding-left:20px; font-size:13px; color:var(--bm-muted); display:flex; flex-direction:column; gap:6px;">
             <li>Firebase Console → Authentication → Users → Add user. Use the synthetic email shown below as the email, and set a password <strong>there</strong> — never in this app.</li>
             <li>Copy the UID from the new row in the console.</li>
@@ -237,6 +242,7 @@
         syncPayments,
         paymentError,
       } from "/assets/bm-app.js";
+      import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
       // Theme toggle, mounted before anything async so it works even if
       // the data below fails to load.
@@ -1060,6 +1066,10 @@
       }
 
       load();
+
+      /* Playbooks. Capturing, so a Playbook button inside a clickable row
+         opens the drawer without also triggering the row. */
+      bindRunbookButtons();
     </script>
   </body>
 </html>
