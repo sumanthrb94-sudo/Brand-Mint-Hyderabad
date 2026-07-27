@@ -22,6 +22,7 @@
           <span>Brand Mint <span class="bm-brand-sub">Studio</span></span>
         </a>
         <div class="bm-topbar-right">
+          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/tenancy-check">Tenancy check</a>
           <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-seed">Seed the database</button>
           <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
         </div>
@@ -33,7 +34,7 @@
           <div class="bm-stat">
             <p class="bm-stat-label">Signed MRR</p>
             <p class="bm-stat-value" id="bm-mrr">—</p>
-            <p class="bm-stat-sub" id="bm-mrr-sub">Break-even: Rs 96,100/month</p>
+            <p class="bm-stat-sub" id="bm-mrr-sub"></p>
           </div>
           <div class="bm-stat">
             <p class="bm-stat-label">Open leads</p>
@@ -43,6 +44,7 @@
           <div class="bm-stat">
             <p class="bm-stat-label">Median first response</p>
             <p class="bm-stat-value" id="bm-first-response">—</p>
+            <p class="bm-stat-sub" id="bm-first-response-sub">—</p>
           </div>
         </div>
 
@@ -52,7 +54,50 @@
           <div id="bm-retainer-list"></div>
         </section>
 
-        <!-- BLOCKER 1: client access -->
+        <!-- Leads: capture + first response -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">Pipeline</p>
+          <h2 class="bm-card-title" style="margin-bottom:6px;">Leads</h2>
+          <p class="bm-card-note" style="margin-bottom:16px;">
+            Log the first reply the moment you send it. Market median is ~42h;
+            replying inside 5 minutes makes qualification roughly 21× more likely.
+          </p>
+          <div id="bm-leads-list"></div>
+          <div class="bm-manage-group" style="margin-top:20px;">
+            <p class="bm-manage-group-title">Add a lead</p>
+            <div class="bm-manage-row" id="bm-add-lead">
+              <input class="bm-mn-title" data-new="name" placeholder="Name or company" />
+              <select data-new="source" id="bm-new-lead-source"></select>
+              <select data-new="stage" id="bm-new-lead-stage"></select>
+              <button type="button" class="bm-btn bm-btn--sm" id="bm-add-lead-btn">Add lead</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Plan targets vs actuals -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">Plan vs actual</p>
+          <h2 class="bm-card-title" style="margin-bottom:6px;">Funnel &amp; mix against the playbook</h2>
+          <p class="bm-card-note" style="margin-bottom:20px;">
+            Targets come from the sales playbook. Actuals are computed from the
+            leads above — where there is no data, this says so rather than
+            printing a zero.
+          </p>
+          <div class="bm-manage-group">
+            <p class="bm-manage-group-title">Stage conversion</p>
+            <div id="bm-kpi-funnel"></div>
+          </div>
+          <div class="bm-manage-group">
+            <p class="bm-manage-group-title">Source mix</p>
+            <div id="bm-kpi-sources"></div>
+          </div>
+          <div class="bm-manage-group">
+            <p class="bm-manage-group-title">Loss reasons</p>
+            <div id="bm-kpi-losses"></div>
+          </div>
+        </section>
+
+        <!-- Client access -->
         <section class="bm-card">
           <p class="bm-eyebrow">Client access</p>
           <h2 class="bm-card-title" style="margin-bottom:12px;">Give a client a login</h2>
@@ -97,10 +142,9 @@
           </div>
         </section>
 
-        <!-- BLOCKER 2(b): milestones / intake / deliverables CRUD -->
         <section class="bm-card">
           <p class="bm-eyebrow">Manage projects</p>
-          <h2 class="bm-card-title" style="margin-bottom:16px;">Milestones, intake &amp; deliverables</h2>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Project details, milestones, intake &amp; deliverables</h2>
           <div id="bm-manage-projects"></div>
         </section>
 
@@ -157,16 +201,36 @@
         addDeliverable,
         updateDeliverable,
         deleteDeliverable,
+        addLead,
+        updateLead,
+        deleteLead,
+        markLeadFirstResponse,
+        updateProject,
+        applyMilestoneTemplate,
         resolveUsernameToEmail,
         logout,
         daysSince,
         formatDate,
         formatINR,
+        formatDuration,
+        minutesBetween,
+        minutesSince,
         escapeHtml,
+        BREAK_EVEN_MONTHLY,
+        SERVICE_TYPES,
+        MILESTONE_TEMPLATES,
+        LEAD_STAGES,
+        OPEN_LEAD_STAGES,
+        FUNNEL_TARGETS,
+        LEAD_SOURCES,
+        LOSS_REASONS,
+        FAST_RESPONSE_MINUTES,
+        MARKET_MEDIAN_RESPONSE_HOURS,
       } from "/assets/bm-app.js";
 
-      const BREAK_EVEN = 96100;
       const GROUP_LABEL = { assets: "Assets", content: "Content", access: "Access", decisions: "Decisions" };
+      const STAGE_LABEL = Object.fromEntries(LEAD_STAGES.map((s) => [s.id, s.label]));
+      const SOURCE_LABEL = Object.fromEntries(LEAD_SOURCES.map((s) => [s.id, s.label]));
 
       document.getElementById("bm-signout").addEventListener("click", async () => {
         await logout();
@@ -187,6 +251,10 @@
         return d.toISOString().slice(0, 10);
       }
 
+      function pct(n) {
+        return `${Math.round(n * 100)}%`;
+      }
+
       // --- Seed ---
 
       document.getElementById("bm-seed").addEventListener("click", async () => {
@@ -196,7 +264,9 @@
             "doc — with deterministic IDs. Safe to re-run, but it will " +
             "overwrite those specific documents with the seed values (so if " +
             "a client has already approved one of the two seeded " +
-            "deliverables, re-seeding resets it to in_review). Continue?"
+            "deliverables, re-seeding resets it to in_review, and any project " +
+            "type/dueAt/progress you have edited is reset). Leads and " +
+            "milestones you have entered are never touched. Continue?"
         );
         if (!ok) return;
         const btn = document.getElementById("bm-seed");
@@ -264,7 +334,191 @@
         }
       });
 
-      // --- Manage projects: milestones / intake / deliverables ---
+      // --- Leads ---
+
+      document.getElementById("bm-new-lead-source").innerHTML = LEAD_SOURCES.map(
+        (s) => `<option value="${s.id}">${escapeHtml(s.label)}</option>`
+      ).join("");
+      document.getElementById("bm-new-lead-stage").innerHTML = LEAD_STAGES.map(
+        (s) => `<option value="${s.id}" ${s.id === "inbound" ? "selected" : ""}>${escapeHtml(s.label)}</option>`
+      ).join("");
+
+      document.getElementById("bm-add-lead-btn").addEventListener("click", async () => {
+        const row = document.getElementById("bm-add-lead");
+        const name = row.querySelector('[data-new="name"]').value.trim();
+        if (!name) return;
+        const source = row.querySelector('[data-new="source"]').value;
+        const stage = row.querySelector('[data-new="stage"]').value;
+        await addLead({ name, source, stage });
+        row.querySelector('[data-new="name"]').value = "";
+        load();
+      });
+
+      function leadRowHtml(l) {
+        const responded = !!l.firstResponseAt;
+        const responseMins = responded ? minutesBetween(l.createdAt, l.firstResponseAt) : null;
+        const waitingMins = !responded ? minutesSince(l.createdAt) : null;
+
+        let responseCell;
+        if (responded) {
+          const fast = responseMins !== null && responseMins <= FAST_RESPONSE_MINUTES;
+          responseCell = `<span class="bm-pill ${fast ? "bm-pill--green" : "bm-pill--muted"}">${formatDuration(responseMins)}</span>`;
+        } else {
+          const urgent = waitingMins !== null && waitingMins > FAST_RESPONSE_MINUTES;
+          responseCell = `<button type="button" class="bm-btn bm-btn--sm" data-action="respond" data-id="${l.id}">Log first response</button>
+            <span class="bm-pill ${urgent ? "bm-pill--red" : "bm-pill--amber"}">waiting ${formatDuration(waitingMins)}</span>`;
+        }
+
+        const isLost = l.stage === "lost";
+        return `<div class="bm-manage-row" data-lead="${l.id}">
+          <input class="bm-mn-title" data-lfield="name" value="${escapeHtml(l.name || "")}" placeholder="Name" />
+          <select data-lfield="source">
+            ${LEAD_SOURCES.map((s) => `<option value="${s.id}" ${l.source === s.id ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("")}
+          </select>
+          <select data-lfield="stage">
+            ${LEAD_STAGES.map((s) => `<option value="${s.id}" ${l.stage === s.id ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("")}
+          </select>
+          ${
+            isLost
+              ? `<select data-lfield="lossReason">
+                  <option value="">Why lost?</option>
+                  ${LOSS_REASONS.map((r) => `<option value="${r.id}" ${l.lossReason === r.id ? "selected" : ""}>${escapeHtml(r.label)}</option>`).join("")}
+                </select>`
+              : ""
+          }
+          <span class="bm-row-sub">Created ${formatDate(l.createdAt)}</span>
+          ${responseCell}
+          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="delete-lead" data-id="${l.id}">Delete</button>
+        </div>`;
+      }
+
+      document.getElementById("bm-leads-list").addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-action]");
+        if (!btn) return;
+        if (btn.dataset.action === "respond") {
+          btn.disabled = true;
+          await markLeadFirstResponse(btn.dataset.id);
+          return load();
+        }
+        if (btn.dataset.action === "delete-lead") {
+          if (!confirm("Delete this lead?")) return;
+          await deleteLead(btn.dataset.id);
+          return load();
+        }
+      });
+
+      document.getElementById("bm-leads-list").addEventListener("change", async (e) => {
+        const row = e.target.closest("[data-lead]");
+        if (!row) return;
+        const patch = {};
+        for (const el of row.querySelectorAll("[data-lfield]")) {
+          patch[el.dataset.lfield] = el.value;
+        }
+        // Clearing the lost stage clears the reason with it.
+        if (patch.stage !== "lost") patch.lossReason = null;
+        await updateLead(row.dataset.lead, patch);
+        load();
+      });
+
+      // --- Plan vs actual ---
+      // Every one of these must distinguish "no data" from a real zero.
+
+      function renderKpis(leads) {
+        const funnelEl = document.getElementById("bm-kpi-funnel");
+        const sourcesEl = document.getElementById("bm-kpi-sources");
+        const lossesEl = document.getElementById("bm-kpi-losses");
+
+        if (!leads.length) {
+          const msg = '<p class="bm-empty">No leads recorded yet — nothing to measure against the plan.</p>';
+          funnelEl.innerHTML = msg;
+          sourcesEl.innerHTML = msg;
+          lossesEl.innerHTML = msg;
+          return;
+        }
+
+        // Stage conversion. A lead's current stage implies it passed every
+        // earlier stage. Lost leads are excluded because we do not record how
+        // far they got — that is stated rather than silently assumed.
+        const order = LEAD_STAGES.map((s) => s.id).filter((id) => id !== "lost");
+        const live = leads.filter((l) => l.stage !== "lost");
+        const reached = (stageId) => {
+          const idx = order.indexOf(stageId);
+          return live.filter((l) => order.indexOf(l.stage) >= idx).length;
+        };
+
+        const lostCount = leads.length - live.length;
+        funnelEl.innerHTML =
+          FUNNEL_TARGETS.map((t) => {
+            const from = reached(t.from);
+            const to = reached(t.to);
+            const actual = from > 0 ? to / from : null;
+            const meets = actual !== null && actual >= t.target;
+            return `<div class="bm-row">
+              <div class="bm-row-main">
+                <span class="bm-row-title">${escapeHtml(STAGE_LABEL[t.from])} → ${escapeHtml(STAGE_LABEL[t.to])}</span>
+                <span class="bm-row-sub">${from} reached ${escapeHtml(STAGE_LABEL[t.from])}${from > 0 ? `, ${to} reached ${escapeHtml(STAGE_LABEL[t.to])}` : ""}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span class="bm-row-sub">target ${pct(t.target)}</span>
+                ${
+                  actual === null
+                    ? `<span class="bm-pill bm-pill--muted">no data</span>`
+                    : `<span class="bm-pill ${meets ? "bm-pill--green" : "bm-pill--amber"}">${pct(actual)}</span>`
+                }
+              </div>
+            </div>`;
+          }).join("") +
+          (lostCount
+            ? `<p class="bm-card-note" style="margin-top:10px;">${lostCount} lost ${lostCount === 1 ? "lead is" : "leads are"} excluded — the stage they were lost at is not recorded.</p>`
+            : "");
+
+        // Source mix.
+        sourcesEl.innerHTML = LEAD_SOURCES.map((s) => {
+          const count = leads.filter((l) => l.source === s.id).length;
+          const share = count / leads.length;
+          const over = share > 0.5;
+          return `<div class="bm-row">
+            <div class="bm-row-main">
+              <span class="bm-row-title">${escapeHtml(s.label)}</span>
+              <span class="bm-row-sub">${count} of ${leads.length}</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="bm-row-sub">target ${pct(s.targetShare)}</span>
+              <span class="bm-pill ${over ? "bm-pill--red" : "bm-pill--muted"}">${pct(share)}</span>
+            </div>
+          </div>`;
+        }).join("") +
+          `<p class="bm-card-note" style="margin-top:10px;">Any single channel above 50% makes the pipeline fragile.</p>`;
+
+        // Loss reasons.
+        const lost = leads.filter((l) => l.stage === "lost");
+        if (!lost.length) {
+          lossesEl.innerHTML = '<p class="bm-empty">No lost deals recorded yet.</p>';
+          return;
+        }
+        const unattributed = lost.filter((l) => !l.lossReason).length;
+        lossesEl.innerHTML =
+          LOSS_REASONS.map((r) => {
+            const count = lost.filter((l) => l.lossReason === r.id).length;
+            const share = count / lost.length;
+            const alert = r.alertAbove !== null && share > r.alertAbove;
+            return `<div class="bm-row">
+              <div class="bm-row-main">
+                <span class="bm-row-title">${escapeHtml(r.label)}</span>
+                ${alert ? `<span class="bm-row-sub">Above ${pct(r.alertAbove)} — ${escapeHtml(r.then)}.</span>` : ""}
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span class="bm-row-sub">${count} of ${lost.length}</span>
+                <span class="bm-pill ${alert ? "bm-pill--red" : "bm-pill--muted"}">${pct(share)}</span>
+              </div>
+            </div>`;
+          }).join("") +
+          (unattributed
+            ? `<p class="bm-card-note" style="margin-top:10px;">${unattributed} lost ${unattributed === 1 ? "deal has" : "deals have"} no reason set — these shares are incomplete.</p>`
+            : "");
+      }
+
+      // --- Manage projects ---
 
       function readRow(row, fields) {
         const out = {};
@@ -274,6 +528,32 @@
           out[f] = el.type === "checkbox" ? el.checked : el.value;
         }
         return out;
+      }
+
+      function projectFieldsHtml(p) {
+        return `<div class="bm-manage-row" data-project-fields="${p.id}">
+          <input class="bm-mn-title" data-pfield="name" value="${escapeHtml(p.name || "")}" placeholder="Project name" />
+          <select data-pfield="type">
+            <option value="">Type not set</option>
+            ${SERVICE_TYPES.map((t) => `<option value="${t.id}" ${p.type === t.id ? "selected" : ""}>${escapeHtml(t.label)}</option>`).join("")}
+          </select>
+          <input class="bm-mn-narrow" type="date" data-pfield="dueAt" value="${dateInputValue(p.dueAt)}" title="Due date" />
+          <input class="bm-mn-narrow" type="number" min="0" max="100" data-pfield="progress" value="${p.progress === null || p.progress === undefined ? "" : escapeHtml(p.progress)}" placeholder="% done" title="Progress — leave blank if not set" />
+          <label class="bm-mn-check"><input type="checkbox" data-pfield="billable" ${p.billable ? "checked" : ""} /> Billable</label>
+        </div>`;
+      }
+
+      function templateRowHtml(p) {
+        const has = p.type && MILESTONE_TEMPLATES[p.type];
+        return `<div class="bm-manage-row" data-template="${p.id}">
+          ${
+            has
+              ? `<span class="bm-row-sub">Stamp the ${escapeHtml(SERVICE_TYPES.find((t) => t.id === p.type)?.label || p.type)} template (${MILESTONE_TEMPLATES[p.type].length} milestones) from a start date:</span>
+                 <input class="bm-mn-narrow" type="date" data-tpl="start" />
+                 <button type="button" class="bm-btn bm-btn--sm" data-action="apply-template" data-pid="${p.id}" data-type="${p.type}">Apply template</button>`
+              : `<span class="bm-row-sub">Set a project type above to stamp a milestone template.</span>`
+          }
+        </div>`;
       }
 
       function milestoneRowHtml(pid, m) {
@@ -366,6 +646,11 @@
               <h3 class="bm-manage-card-title">${escapeHtml(orgName)}</h3>
 
               <div class="bm-manage-group">
+                <p class="bm-manage-group-title">Project</p>
+                ${projectFieldsHtml(p)}
+                ${templateRowHtml(p)}
+              </div>
+              <div class="bm-manage-group">
                 <p class="bm-manage-group-title">Milestones</p>
                 ${milestones.length ? milestones.map((m) => milestoneRowHtml(p.id, m)).join("") : '<p class="bm-empty">No milestones yet.</p>'}
               </div>
@@ -388,13 +673,24 @@
         container.innerHTML = cards.join("");
       }
 
-      // Event delegation: one listener handles every project card.
       document.getElementById("bm-manage-projects").addEventListener("click", async (e) => {
         const btn = e.target.closest("[data-action]");
         if (!btn) return;
         const action = btn.dataset.action;
         const pid = btn.dataset.pid;
 
+        if (action === "apply-template") {
+          const row = btn.closest("[data-template]");
+          const start = row.querySelector('[data-tpl="start"]').value;
+          if (!start) {
+            alert("Pick a start date first — the template dates are counted from it.");
+            return;
+          }
+          btn.disabled = true;
+          const n = await applyMilestoneTemplate(pid, btn.dataset.type, start);
+          alert(`Added ${n} milestones. Edit or delete any that do not apply.`);
+          return load();
+        }
         if (action === "delete-milestone") {
           if (!confirm("Delete this milestone?")) return;
           await deleteMilestone(pid, btn.dataset.id);
@@ -440,14 +736,31 @@
       });
 
       document.getElementById("bm-manage-projects").addEventListener("change", async (e) => {
-        const milestoneRow = e.target.closest("[data-milestone]");
-        const intakeRow = e.target.closest("[data-intake]");
-        const deliverableRow = e.target.closest("[data-deliverable]");
         const card = e.target.closest("[data-project]");
         if (!card) return;
         const pid = card.dataset.project;
 
-        if (milestoneRow) {
+        const projectRow = e.target.closest("[data-project-fields]");
+        const milestoneRow = e.target.closest("[data-milestone]");
+        const intakeRow = e.target.closest("[data-intake]");
+        const deliverableRow = e.target.closest("[data-deliverable]");
+
+        if (projectRow) {
+          const name = projectRow.querySelector('[data-pfield="name"]').value.trim();
+          const type = projectRow.querySelector('[data-pfield="type"]').value;
+          const dueVal = projectRow.querySelector('[data-pfield="dueAt"]').value;
+          const progressVal = projectRow.querySelector('[data-pfield="progress"]').value;
+          const billable = projectRow.querySelector('[data-pfield="billable"]').checked;
+          await updateProject(pid, {
+            name,
+            type: type || null,
+            dueAt: dueVal ? new Date(dueVal) : null,
+            // Blank means "not set", which the portal renders as such — it is
+            // never coerced to a reassuring 0%.
+            progress: progressVal === "" ? null : Number(progressVal),
+            billable,
+          });
+        } else if (milestoneRow) {
           const { title, owner, status, dueAt } = readRow(milestoneRow, ["title", "owner", "status", "dueAt"]);
           await updateMilestone(pid, milestoneRow.dataset.milestone, {
             title,
@@ -470,8 +783,6 @@
           return;
         }
 
-        // A milestone/intake edit can change what Delivery Health above
-        // should say (done, waiting-on, blocker age) — refresh it too.
         load();
       });
 
@@ -502,13 +813,14 @@
           (o) => o.kind === "client" && o.status === "active" && o.retainerStatus === "signed"
         );
         const mrr = signedClients.reduce((sum, o) => sum + (Number(o.retainer) || 0), 0);
-        document.getElementById("bm-mrr").textContent = formatINR(mrr);
-        document.getElementById("bm-mrr").classList.toggle("bm-stat-value--green", mrr >= BREAK_EVEN);
-        document.getElementById("bm-mrr").classList.toggle("bm-stat-value--red", mrr < BREAK_EVEN);
+        const mrrEl = document.getElementById("bm-mrr");
+        mrrEl.textContent = formatINR(mrr);
+        mrrEl.classList.toggle("bm-stat-value--green", mrr >= BREAK_EVEN_MONTHLY);
+        mrrEl.classList.toggle("bm-stat-value--red", mrr < BREAK_EVEN_MONTHLY);
         document.getElementById("bm-mrr-sub").textContent =
-          mrr >= BREAK_EVEN
-            ? `Rs ${(mrr - BREAK_EVEN).toLocaleString("en-IN")} over break-even (Rs 96,100/month)`
-            : `Rs ${(BREAK_EVEN - mrr).toLocaleString("en-IN")} short of break-even (Rs 96,100/month)`;
+          mrr >= BREAK_EVEN_MONTHLY
+            ? `Rs ${(mrr - BREAK_EVEN_MONTHLY).toLocaleString("en-IN")} over break-even (Rs ${BREAK_EVEN_MONTHLY.toLocaleString("en-IN")}/month)`
+            : `Rs ${(BREAK_EVEN_MONTHLY - mrr).toLocaleString("en-IN")} short of break-even (Rs ${BREAK_EVEN_MONTHLY.toLocaleString("en-IN")}/month)`;
 
         // Retainer breakdown — proposals render faded and are never summed.
         const retainerList = document.getElementById("bm-retainer-list");
@@ -534,36 +846,53 @@
           : '<p class="bm-empty">No client orgs yet.</p>';
 
         // --- Leads ---
-        const CLOSED_STAGES = new Set(["won", "lost", "closed"]);
-        const openLeads = leads.filter((l) => !CLOSED_STAGES.has(l.stage));
+        const openLeads = leads.filter((l) => OPEN_LEAD_STAGES.includes(l.stage));
         const leadsOpenEl = document.getElementById("bm-leads-open");
         leadsOpenEl.textContent = String(openLeads.length);
         leadsOpenEl.classList.toggle("bm-stat-value--red", openLeads.length === 0);
         document.getElementById("bm-leads-sub").textContent =
-          leads.length === 0 ? "Zero open leads — that's the number that decides the month." : `${leads.length} total`;
+          leads.length === 0
+            ? "Zero leads — that's the number that decides the month."
+            : `${openLeads.length} open of ${leads.length} total`;
 
         const responseTimes = leads
-          .filter((l) => l.firstResponseAt && l.createdAt)
-          .map((l) => (l.firstResponseAt.toMillis() - l.createdAt.toMillis()) / 3600000)
+          .map((l) => minutesBetween(l.createdAt, l.firstResponseAt))
+          .filter((m) => m !== null)
           .sort((a, b) => a - b);
         const responseEl = document.getElementById("bm-first-response");
+        const responseSubEl = document.getElementById("bm-first-response-sub");
+        const awaiting = leads.filter((l) => !l.firstResponseAt && OPEN_LEAD_STAGES.includes(l.stage)).length;
         if (!responseTimes.length) {
-          responseEl.textContent = "No leads yet";
+          responseEl.textContent = leads.length ? "Not recorded" : "No leads yet";
           responseEl.classList.add("bm-stat-value--red");
+          responseSubEl.textContent = leads.length
+            ? `${awaiting} awaiting a first response`
+            : `Market median is ~${MARKET_MEDIAN_RESPONSE_HOURS}h`;
         } else {
           const mid = Math.floor(responseTimes.length / 2);
           const median =
             responseTimes.length % 2 ? responseTimes[mid] : (responseTimes[mid - 1] + responseTimes[mid]) / 2;
-          responseEl.textContent = `${median.toFixed(1)}h`;
-          responseEl.classList.remove("bm-stat-value--red");
+          responseEl.textContent = formatDuration(median);
+          const good = median <= FAST_RESPONSE_MINUTES;
+          responseEl.classList.toggle("bm-stat-value--red", !good);
+          responseEl.classList.toggle("bm-stat-value--green", good);
+          responseSubEl.textContent = `${responseTimes.length} recorded · market median ~${MARKET_MEDIAN_RESPONSE_HOURS}h${awaiting ? ` · ${awaiting} still awaiting` : ""}`;
         }
+
+        const leadsList = document.getElementById("bm-leads-list");
+        const sortedLeads = [...leads].sort(
+          (a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+        );
+        leadsList.innerHTML = sortedLeads.length
+          ? sortedLeads.map(leadRowHtml).join("")
+          : '<p class="bm-empty">No leads yet. Zero open leads is the true state — and the number that decides the month.</p>';
+
+        renderKpis(leads);
 
         // --- Delivery health ---
         // An empty milestones/intake subcollection means "nobody has set this
         // project up yet" — it must never render the same as "done" or
-        // "on track". Only a project with milestone docs, all of them
-        // status:'done', is "All complete". Only a project with intake docs
-        // and zero open ones is a genuine "0d, all clear".
+        // "on track".
         const deliveryBody = document.getElementById("bm-delivery-body");
         const activeProjects = projects.filter((p) => orgById[p.orgId]?.status === "active");
         if (!activeProjects.length) {
@@ -615,7 +944,6 @@
           deliveryBody.innerHTML = rows.join("");
         }
 
-        // --- Manage projects ---
         await renderManageProjects(projects, orgById);
 
         // --- Org tables ---
