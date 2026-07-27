@@ -3,8 +3,9 @@
 Marketing site for **Brand Mint**, a digital media & marketing studio that
 builds custom websites and bespoke internal tools.
 
-The client portal and studio dashboard live in [`brandmint-os/`](brandmint-os/README.md) —
-a separate Next.js app in this same repo, deployed as its own Vercel project.
+The client portal (`/portal`, `/onboarding`) and studio dashboard (`/studio`) are
+built directly into this same static site — see `assets/bm-app.js` and
+`firestore.rules`. No build step, no server: Firebase Auth + Firestore only.
 
 ## Stack
 
