@@ -1,5 +1,17 @@
 .DS_Store
+# Both forms: the trailing slash matches a real directory, the bare name also
+# matches a symlink. tests/README.md has you symlink node_modules from /tmp,
+# because ESM ignores NODE_PATH — without the bare form that symlink shows up
+# as an untracked file.
 node_modules/
+node_modules
+
+# Firebase emulator artefacts
+firestore-debug.log
+firebase-debug.log
+ui-debug.log
+*-debug.log
+.firebase/
 .env
 .env.*
 !.env.example
