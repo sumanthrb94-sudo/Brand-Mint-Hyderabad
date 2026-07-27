@@ -190,7 +190,10 @@ export async function decideDeliverable(projectId, deliverableId, status) {
 
 const SEED_ORGS = [
   { id: "brandmint", name: "Brand Mint Studios", kind: "studio", status: "active", retainer: 0, retainerStatus: "none" },
-  { id: "inventory", name: "Inventory Manager", kind: "client", status: "active", retainer: 25000, retainerStatus: "signed" },
+  // Rs 12,500 cash + a Claude Max subscription. Only the cash counts toward
+  // MRR — a subscription cannot pay a bill, and the break-even gauge exists to
+  // answer "can I cover this month", not "what is this worth".
+  { id: "inventory", name: "Inventory Manager", kind: "client", status: "active", retainer: 12500, retainerInKind: 12500, retainerStatus: "signed", note: "Rs 12,500/mo cash + Claude Max in kind. Shopify launch, then the commerce platform, paced over ~12 months." },
   { id: "greenbasket", name: "Green Basket", kind: "client", status: "active", retainer: 0, retainerStatus: "none", note: "COD-only web app + Play Store APK. Quoted Rs 95,000, Rs 15,000 received." },
   { id: "tresor", name: "Tresor Couture", kind: "client", status: "active", retainer: 0, retainerStatus: "none", note: "Zero to production, unpaid." },
   { id: "modcon", name: "Modcon HR", kind: "internal", status: "active", retainer: 0, retainerStatus: "none", note: "Free side build with an intern." },

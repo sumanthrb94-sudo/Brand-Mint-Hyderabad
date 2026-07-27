@@ -813,15 +813,22 @@
         const signedClients = orgs.filter(
           (o) => o.kind === "client" && o.status === "active" && o.retainerStatus === "signed"
         );
+        // Cash only. Compensation in kind (a subscription, a swap) is real
+        // value but it cannot pay a bill, and this gauge answers "can I cover
+        // this month". Counting it here would flatter the number that decides
+        // whether the studio survives.
         const mrr = signedClients.reduce((sum, o) => sum + (Number(o.retainer) || 0), 0);
+        const inKind = signedClients.reduce((sum, o) => sum + (Number(o.retainerInKind) || 0), 0);
         const mrrEl = document.getElementById("bm-mrr");
         mrrEl.textContent = formatINR(mrr);
         mrrEl.classList.toggle("bm-stat-value--green", mrr >= BREAK_EVEN_MONTHLY);
         mrrEl.classList.toggle("bm-stat-value--red", mrr < BREAK_EVEN_MONTHLY);
-        document.getElementById("bm-mrr-sub").textContent =
+        const gap =
           mrr >= BREAK_EVEN_MONTHLY
             ? `Rs ${(mrr - BREAK_EVEN_MONTHLY).toLocaleString("en-IN")} over break-even (Rs ${BREAK_EVEN_MONTHLY.toLocaleString("en-IN")}/month)`
             : `Rs ${(BREAK_EVEN_MONTHLY - mrr).toLocaleString("en-IN")} short of break-even (Rs ${BREAK_EVEN_MONTHLY.toLocaleString("en-IN")}/month)`;
+        document.getElementById("bm-mrr-sub").textContent =
+          inKind > 0 ? `${gap} · plus ${formatINR(inKind)}/mo in kind, not counted` : gap;
 
         // Retainer breakdown — proposals render faded and are never summed.
         const retainerList = document.getElementById("bm-retainer-list");
@@ -838,7 +845,11 @@
                     ${o.note ? `<span class="bm-row-sub">${escapeHtml(o.note)}</span>` : ""}
                   </div>
                   <div style="display:flex; align-items:center; gap:10px;">
-                    <span>${formatINR(o.retainer)}</span>
+                    <span>${formatINR(o.retainer)}${
+                      o.retainerInKind
+                        ? ` <span class="bm-row-sub">+ ${formatINR(o.retainerInKind)} in kind</span>`
+                        : ""
+                    }</span>
                     <span class="bm-pill ${pillClass}">${escapeHtml(o.retainerStatus || "none")}</span>
                   </div>
                 </div>`;
