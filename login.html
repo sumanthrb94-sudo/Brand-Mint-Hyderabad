@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Log in — Brand Mint</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/bm-app.css" />
+  </head>
+  <body class="bm-body">
+    <div class="bm-auth-shell">
+      <div class="bm-auth-card">
+        <div class="bm-auth-head">
+          <div class="bm-brand-mark" aria-hidden="true"></div>
+          <h1 class="bm-auth-title">Brand Mint portal</h1>
+          <p class="bm-auth-sub">Sign in with the username we gave you.</p>
+        </div>
+
+        <form id="bm-login-form" novalidate>
+          <div class="bm-field">
+            <label for="bm-username">Username</label>
+            <input
+              id="bm-username"
+              name="username"
+              type="text"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+              required
+            />
+          </div>
+          <div class="bm-field">
+            <label for="bm-password">Password</label>
+            <input
+              id="bm-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+          <button type="submit" class="bm-btn" id="bm-login-submit" style="width:100%">
+            Sign in
+          </button>
+          <p class="bm-status bm-status--error" id="bm-login-status" hidden></p>
+        </form>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        loginWithUsername,
+        redirectIfSignedIn,
+        isAdminUser,
+        auth,
+      } from "/assets/bm-app.js";
+
+      redirectIfSignedIn();
+
+      const form = document.getElementById("bm-login-form");
+      const status = document.getElementById("bm-login-status");
+      const submit = document.getElementById("bm-login-submit");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        status.hidden = true;
+
+        const username = document.getElementById("bm-username").value;
+        const password = document.getElementById("bm-password").value;
+
+        submit.disabled = true;
+        submit.textContent = "Signing in…";
+
+        try {
+          await loginWithUsername(username, password);
+          window.location.replace(isAdminUser(auth.currentUser) ? "/studio" : "/portal");
+        } catch (err) {
+          submit.disabled = false;
+          submit.textContent = "Sign in";
+          status.hidden = false;
+          status.textContent = "Wrong username or password.";
+        }
+      });
+    </script>
+  </body>
+</html>
