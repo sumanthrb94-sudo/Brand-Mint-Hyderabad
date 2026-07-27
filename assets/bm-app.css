@@ -14,11 +14,17 @@
   --bm-white: #ffffff;
   --bm-red: #b3261e;
   --bm-red-bg: #fbe9e7;
-  --bm-amber: #92700f;
+  --bm-amber: #6b4f08;
   --bm-amber-bg: #faf1da;
   --bm-green: #0b6b4f;
   --bm-green-bg: #e3f5ec;
   --bm-shadow: 0 20px 50px rgba(11, 31, 26, 0.08);
+
+  /* Fixed (non theme-adaptive) pair for the solid brand button. --ink and
+     --cream flip meaning between themes (see below) — the primary CTA
+     must not, or its fg/bg collide in dark mode. Verified 16.37:1. */
+  --bm-btn-bg: #0b1f1a;
+  --bm-btn-fg: #fbfaf2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,9 +34,15 @@
     --bm-muted: #9ab3a8;
     --bm-line: rgba(242, 247, 244, 0.14);
     --bm-white: #101a16;
-    --bm-red-bg: rgba(179, 38, 30, 0.18);
-    --bm-amber-bg: rgba(146, 112, 15, 0.2);
-    --bm-green-bg: rgba(16, 185, 129, 0.16);
+    /* Solid (non-alpha) dark-mode badge colors — verified against the
+       badge's own background, not blended over whatever it happens to
+       sit on. All ratios >= 6.7:1. */
+    --bm-red: #ff8a80;
+    --bm-red-bg: #3a1210;
+    --bm-amber: #f5c96b;
+    --bm-amber-bg: #3a2c08;
+    --bm-green: #6fe3b4;
+    --bm-green-bg: #0d2a20;
     --bm-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
   }
 }
@@ -111,9 +123,9 @@ body.bm-body {
 /* Buttons */
 .bm-btn {
   appearance: none;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--cream);
+  border: 1px solid var(--bm-btn-bg);
+  background: var(--bm-btn-bg);
+  color: var(--bm-btn-fg);
   font: inherit;
   font-weight: 600;
   font-size: 14px;
