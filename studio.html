@@ -13,6 +13,10 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/assets/bm-app.css" />
+    <script>
+      // Before first paint — a module script is deferred and would flash.
+      try { var t = localStorage.getItem("bm-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
   </head>
   <body class="bm-body">
     <div class="bm-shell">
@@ -228,7 +232,13 @@
         LOSS_REASONS,
         FAST_RESPONSE_MINUTES,
         MARKET_MEDIAN_RESPONSE_HOURS,
+        mountThemeToggle,
       } from "/assets/bm-app.js";
+
+      // Theme toggle, mounted before anything async so it works even if
+      // the data below fails to load.
+      mountThemeToggle(document.querySelector(".bm-topbar-right") || document.querySelector(".bm-auth-head"));
+
 
       const GROUP_LABEL = { assets: "Assets", content: "Content", access: "Access", decisions: "Decisions" };
       const STAGE_LABEL = Object.fromEntries(LEAD_STAGES.map((s) => [s.id, s.label]));

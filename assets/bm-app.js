@@ -772,6 +772,83 @@ export async function applyMilestoneTemplate(projectId, typeId, startDate) {
   return template.length;
 }
 
+// --- Theme -------------------------------------------------------------------
+// Three states, not two: "light", "dark", and no stored choice at all, which
+// means follow the operating system. A toggle that only knows light and dark
+// can never hand control back to the OS.
+
+const THEME_KEY = "bm-theme";
+
+export function getStoredTheme() {
+  try {
+    const v = localStorage.getItem(THEME_KEY);
+    return v === "light" || v === "dark" ? v : null;
+  } catch {
+    return null; // private mode, storage disabled — fall back to the OS
+  }
+}
+
+/** What the user is actually looking at right now. */
+export function resolvedTheme() {
+  return (
+    getStoredTheme() ??
+    (window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+  );
+}
+
+export function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "light" || theme === "dark") {
+    root.dataset.theme = theme;
+    try { localStorage.setItem(THEME_KEY, theme); } catch { /* ignore */ }
+  } else {
+    delete root.dataset.theme;
+    try { localStorage.removeItem(THEME_KEY); } catch { /* ignore */ }
+  }
+}
+
+/**
+ * Mounts the toggle into a container. Both icons are in the DOM and CSS shows
+ * the right one, so switching never waits on JavaScript to redraw an icon.
+ */
+export function mountThemeToggle(container) {
+  if (!container || container.querySelector(".bm-theme-toggle")) return;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "bm-theme-toggle";
+  btn.innerHTML = `
+    <svg class="bm-icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+            stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    </svg>
+    <svg class="bm-icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"
+            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>`;
+
+  const label = () => {
+    const next = resolvedTheme() === "dark" ? "light" : "dark";
+    btn.setAttribute("aria-label", `Switch to ${next} mode`);
+    btn.setAttribute("title", `Switch to ${next} mode`);
+  };
+  label();
+
+  btn.addEventListener("click", () => {
+    applyTheme(resolvedTheme() === "dark" ? "light" : "dark");
+    label();
+  });
+
+  // If the user has expressed no preference, keep following the OS live.
+  window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener?.("change", () => {
+    if (!getStoredTheme()) label();
+  });
+
+  container.prepend(btn);
+  return btn;
+}
+
 // --- Small shared helpers ---------------------------------------------------
 
 export function daysSince(timestamp) {

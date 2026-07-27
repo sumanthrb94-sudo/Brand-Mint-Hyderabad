@@ -76,6 +76,7 @@
 
       <nav class="nav-links" aria-label="Primary">
         <a href="#services">Services</a>
+        <a href="#care">Care plans</a>
         <a href="#work">Work</a>
         <a href="#process">Process</a>
         <a href="#about">Studio</a>
@@ -239,66 +240,21 @@
         </header>
 
         <div class="services">
-          <article class="service">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <rect
-                  x="4"
-                  y="6"
-                  width="24"
-                  height="18"
-                  rx="2"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  fill="none"
-                />
-                <path
-                  d="M4 11h24M8 17h8M8 20h12"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </div>
-            <h3>Custom websites</h3>
-            <p>
-              Marketing sites, e-commerce, and editorial platforms — designed
-              from scratch and engineered for speed, SEO, and accessibility.
-              Every pixel earns its keep.
-            </p>
-            <ul class="chips">
-              <li>Next.js / Astro</li>
-              <li>Headless CMS</li>
-              <li>Shopify / Razorpay</li>
-              <li>Lighthouse 95+</li>
-            </ul>
-            <span class="service-price">From <strong>₹2 L</strong></span>
-          </article>
-
           <article class="service service--feature">
             <div class="service-icon" aria-hidden="true">
               <svg viewBox="0 0 32 32" width="28" height="28">
-                <path
-                  d="M6 22 16 6l10 16M6 22h20M11 22v-6h10v6"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
+                <rect x="4" y="5" width="24" height="22" rx="2" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M4 11h24M11 11v16M15 15h9M15 19h9M15 23h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
               </svg>
             </div>
             <h3>Custom internal tools</h3>
             <p>
-              Dashboards, CRMs, ops consoles, AI agents, and one-of-one tools
-              that replace spreadsheets and Zaps. We build the thing your team
-              keeps trying to hire for.
+              Dashboards, CRMs, inventory, HR and ops consoles that replace spreadsheets and Zaps. We build the thing your team keeps trying to hire for.
             </p>
             <ul class="chips">
               <li>React / TypeScript</li>
-              <li>Supabase / Postgres</li>
-              <li>Claude &amp; OpenAI</li>
               <li>Auth &amp; RBAC</li>
+              <li>Reporting</li>
+              <li>Ownership transfer</li>
             </ul>
             <span class="service-price">From <strong>₹4 L</strong></span>
           </article>
@@ -306,31 +262,75 @@
           <article class="service">
             <div class="service-icon" aria-hidden="true">
               <svg viewBox="0 0 32 32" width="28" height="28">
-                <circle
-                  cx="16"
-                  cy="16"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  fill="none"
-                />
-                <path
-                  d="M16 6v20M6 16h20"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                />
+                <path d="M5 11h22l-1.5 14a2 2 0 0 1-2 1.8H8.5a2 2 0 0 1-2-1.8L5 11Z" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M11 11V8a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="1.6" fill="none"/>
+              </svg>
+            </div>
+            <h3>Online stores</h3>
+            <p>
+              Catalogue, cart, checkout, orders and returns — built to run a real business, not a demo. COD or online payments, GST invoicing included.
+            </p>
+            <ul class="chips">
+              <li>COD &amp; Razorpay</li>
+              <li>GST invoicing</li>
+              <li>Order management</li>
+              <li>Returns &amp; refunds</li>
+            </ul>
+            <span class="service-price">From <strong>₹2.4 L</strong></span>
+          </article>
+
+          <article class="service">
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <rect x="4" y="6" width="24" height="18" rx="2" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M4 11h24M8 17h8M8 20h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Websites</h3>
+            <p>
+              Marketing sites and editorial platforms — designed from scratch and engineered for speed, SEO and accessibility. Every pixel earns its keep.
+            </p>
+            <ul class="chips">
+              <li>Next.js / Astro</li>
+              <li>Headless CMS</li>
+              <li>Lighthouse 95+</li>
+              <li>WCAG AA</li>
+            </ul>
+            <span class="service-price">From <strong>₹2 L</strong></span>
+          </article>
+
+          <article class="service">
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <circle cx="16" cy="16" r="4" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M16 4v6M16 22v6M4 16h6M22 16h6M8 8l4 4M20 20l4 4M24 8l-4 4M12 20l-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>AI &amp; automation</h3>
+            <p>
+              Chat agents, automated replies, document extraction and answer-your-own-documents search — woven into your product and your ops. We start from the workflow, not the model.
+            </p>
+            <ul class="chips">
+              <li>Chat agents</li>
+              <li>RAG pipelines</li>
+              <li>Doc extraction</li>
+              <li>Eval harnesses</li>
+            </ul>
+            <span class="service-price">From <strong>₹30 K</strong></span>
+          </article>
+
+          <article class="service">
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <circle cx="16" cy="16" r="11" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M11 20V12l5 4 5-4v8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
               </svg>
             </div>
             <h3>Brand &amp; identity</h3>
             <p>
-              Logo systems, type pairings, motion guidelines, and the messaging
-              spine. Your brand book becomes a tool, not a PDF nobody opens.
+              Logo systems, type pairings and the messaging spine. Your brand book ships as a working site, not a PDF nobody opens.
             </p>
             <ul class="chips">
               <li>Identity systems</li>
-              <li>Canva templates</li>
-              <li>Motion &amp; sound</li>
+              <li>Type &amp; colour</li>
               <li>Voice &amp; copy</li>
+              <li>Working brand book</li>
             </ul>
             <span class="service-price">From <strong>₹1.5 L</strong></span>
           </article>
@@ -338,26 +338,17 @@
           <article class="service">
             <div class="service-icon" aria-hidden="true">
               <svg viewBox="0 0 32 32" width="28" height="28">
-                <path
-                  d="M5 20c4-9 18-9 22 0M9 20a7 7 0 0 0 14 0"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  fill="none"
-                />
-                <circle cx="16" cy="20" r="2.5" fill="currentColor" />
+                <path d="M6 24V14M12 24V8M18 24v-7M24 24V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
               </svg>
             </div>
             <h3>Performance media</h3>
             <p>
-              Paid social, search, and creator buys with weekly readouts. We
-              ship the asset, the landing page, and the dashboard — so the
-              loop closes in days, not quarters.
+              Paid social and search with weekly readouts. We ship the creative, the landing page and the dashboard — so the loop closes in days, not quarters.
             </p>
             <ul class="chips">
-              <li>Meta &amp; TikTok</li>
-              <li>Google &amp; YouTube</li>
-              <li>Creator buys</li>
+              <li>Meta &amp; Google</li>
+              <li>Creative production</li>
+              <li>Weekly readouts</li>
               <li>Attribution</li>
             </ul>
             <span class="service-price">From <strong>₹1 L</strong>/mo</span>
@@ -366,75 +357,104 @@
           <article class="service">
             <div class="service-icon" aria-hidden="true">
               <svg viewBox="0 0 32 32" width="28" height="28">
-                <rect
-                  x="6"
-                  y="8"
-                  width="20"
-                  height="14"
-                  rx="2"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  fill="none"
-                />
-                <path
-                  d="M6 13h20M11 18h4"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
+                <circle cx="14" cy="14" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M20 20l6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
               </svg>
             </div>
-            <h3>SEO &amp; content engines</h3>
+            <h3>SEO &amp; content</h3>
             <p>
-              Programmatic SEO, content ops, and editorial systems that
-              compound monthly. We treat content like product — versioned,
-              measured, and rebuilt.
+              Keyword strategy, a content calendar and monthly publishing with technical SEO. We treat content like product — versioned, measured, rebuilt.
             </p>
             <ul class="chips">
-              <li>Programmatic SEO</li>
+              <li>Content ops</li>
+              <li>Technical SEO</li>
               <li>Editorial CMS</li>
-              <li>AI content ops</li>
-              <li>Topic graphs</li>
+              <li>Monthly reporting</li>
             </ul>
             <span class="service-price">From <strong>₹75 K</strong>/mo</span>
-          </article>
-
-          <article class="service">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <path
-                  d="M16 4v8m0 8v8M4 16h8m8 0h8"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-                <circle
-                  cx="16"
-                  cy="16"
-                  r="4"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  fill="none"
-                />
-              </svg>
-            </div>
-            <h3>AI integrations</h3>
-            <p>
-              Claude, OpenAI, and bespoke agent stacks woven into your product
-              and ops. We start from the workflow, not the model.
-            </p>
-            <ul class="chips">
-              <li>Agents &amp; MCP</li>
-              <li>RAG pipelines</li>
-              <li>Eval harnesses</li>
-              <li>Guardrails</li>
-            </ul>
-            <span class="service-price">From <strong>₹2 L</strong></span>
           </article>
         </div>
       </section>
 
       <!-- WORK / CLIENTS -->
+            <!-- CARE PLANS -->
+      <section class="section" id="care">
+        <header class="section-head">
+          <span class="kicker">02 — After launch</span>
+          <h2>The work does not stop at <em>launch.</em></h2>
+          <p>
+            A site nobody tends goes stale, then breaks, then quietly costs you
+            customers. Every build can continue on a care plan — a defined scope
+            of monthly work, not an hourly bucket. Cancel with 30 days' notice.
+          </p>
+        </header>
+
+        <div class="services">
+          <article class="service">
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <path d="M16 27s-10-6-10-13a5.5 5.5 0 0 1 10-3 5.5 5.5 0 0 1 10 3c0 7-10 13-10 13Z" stroke="currentColor" stroke-width="1.6" fill="none"/>
+              </svg>
+            </div>
+            <h3>Care</h3>
+            <p>
+              Hosting, updates, backups, uptime monitoring and small fixes.
+              Everything stays patched and online, and somebody answers when it
+              does not.
+            </p>
+            <ul class="chips">
+              <li>Hosting &amp; SSL</li>
+              <li>Security updates</li>
+              <li>Backups</li>
+              <li>Small fixes</li>
+            </ul>
+            <span class="service-price"><strong>₹12,500</strong>/mo</span>
+          </article>
+
+          <article class="service service--feature">
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <path d="M6 24V14M12 24V8M18 24v-7M24 24V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3>Growth</h3>
+            <p>
+              Everything in Care, plus content updates, a monthly report on the
+              numbers that matter, and one small feature a month. For businesses
+              that want the site to keep moving.
+            </p>
+            <ul class="chips">
+              <li>Everything in Care</li>
+              <li>Content updates</li>
+              <li>Monthly report</li>
+              <li>1 feature / month</li>
+            </ul>
+            <span class="service-price"><strong>₹25,000</strong>/mo</span>
+          </article>
+
+          <article class="service">
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <path d="M5 11h22l-1.5 14a2 2 0 0 1-2 1.8H8.5a2 2 0 0 1-2-1.8L5 11Z" stroke="currentColor" stroke-width="1.6" fill="none"/>
+                <path d="M11 11V8a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="1.6" fill="none"/>
+              </svg>
+            </div>
+            <h3>Managed commerce</h3>
+            <p>
+              Everything in Growth, plus catalogue operations, campaign
+              management and priority support. For stores where a broken
+              checkout is a bad day, not a ticket.
+            </p>
+            <ul class="chips">
+              <li>Everything in Growth</li>
+              <li>Catalogue ops</li>
+              <li>Campaigns</li>
+              <li>Priority support</li>
+            </ul>
+            <span class="service-price"><strong>₹50,000</strong>/mo</span>
+          </article>
+        </div>
+      </section>
+
       <section class="bm-clients" id="work">
         <style>
           /* ─── SCOPED STYLES ─── */

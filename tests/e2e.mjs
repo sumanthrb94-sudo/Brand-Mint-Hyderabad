@@ -114,10 +114,29 @@ try {
     found.length ? `still present: ${found.join(", ")}` : "none of 16 banned strings present");
 
   // 2. Services and prices still intact (these are verified-true, must survive)
-  const mustKeep = ["₹2 L", "₹4 L", "₹1.5 L", "₹1 L", "₹75 K", "Custom websites", "AI integrations"];
+  // The menu after stores were split out of websites and care plans added.
+  const mustKeep = [
+    "Custom internal tools", "Online stores", "Websites", "AI & automation",
+    "Brand & identity", "Performance media", "SEO & content",
+    "Care", "Growth", "Managed commerce",
+    "₹4 L", "₹2.4 L", "₹2 L", "₹30 K", "₹1.5 L", "₹75 K",
+    "₹12,500", "₹25,000", "₹50,000",
+  ];
   const missing = mustKeep.filter((s) => !bodyText.includes(s));
-  record("marketing: six services and prices intact", missing.length === 0,
-    missing.length ? `missing: ${missing.join(", ")}` : "all 6 services + price floors present");
+  record("marketing: menu and prices intact", missing.length === 0,
+    missing.length ? `missing: ${missing.join(", ")}` : `${mustKeep.length} services and prices present`);
+
+  // The fix that matters: e-commerce must not be sold at the website price.
+  const websitesPitch = (bodyText.match(/Websites\s+([\s\S]{0,220})/) || [])[1] || "";
+  record("marketing: e-commerce is not sold under Websites",
+    !/e-commerce/i.test(websitesPitch),
+    "stores have their own line at ₹2.4 L");
+
+  // Promises with no deliverable behind them.
+  const unscoped = ["Canva templates", "Programmatic SEO", "Topic graphs", "Guardrails"];
+  const stillThere = unscoped.filter((s) => bodyText.includes(s));
+  record("marketing: no unscoped chips", stillThere.length === 0,
+    stillThere.length ? `still promising: ${stillThere.join(", ")}` : "all removed");
 
   // 3. Nav "Log in" points at the real portal, no Sign up
   const loginHref = await home.getAttribute("a.nav-signin", "href");
@@ -137,7 +156,7 @@ try {
   // 5. Signed-out redirects for every protected route.
   // Also asserts the fail-closed property: even when the guard cannot run,
   // no page may leak content to a signed-out visitor.
-  for (const route of ["/portal", "/studio", "/onboarding", "/quote", "/tenancy-check"]) {
+  for (const route of ["/portal", "/studio", "/onboarding", "/quote", "/tenancy-check", "/services"]) {
     const page = await ctx.newPage();
     await page.goto(`${BASE}${route}`);
     if (firebaseReachable) {

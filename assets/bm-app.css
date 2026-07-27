@@ -27,24 +27,102 @@
   --bm-btn-fg: #fbfaf2;
 }
 
+/* ── Dark palette ────────────────────────────────────────────────────────
+   Declared TWICE on purpose:
+     1. under prefers-color-scheme, for anyone who has not chosen
+     2. under [data-theme="dark"], for anyone who has
+
+   :not([data-theme="light"]) is what lets an explicit "light" choice beat the
+   system preference. The two blocks must stay identical — tests/theme.test.mjs
+   asserts they define exactly the same tokens, so drift fails the build rather
+   than shipping a half-dark screen. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b1310;
-    --ink: #f2f7f4;
-    --bm-muted: #9ab3a8;
-    --bm-line: rgba(242, 247, 244, 0.14);
-    --bm-white: #101a16;
-    /* Solid (non-alpha) dark-mode badge colors — verified against the
-       badge's own background, not blended over whatever it happens to
-       sit on. All ratios >= 6.7:1. */
-    --bm-red: #ff8a80;
-    --bm-red-bg: #3a1210;
-    --bm-amber: #f5c96b;
-    --bm-amber-bg: #3a2c08;
-    --bm-green: #6fe3b4;
-    --bm-green-bg: #0d2a20;
-    --bm-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+  --bg: #0b1310;
+  --ink: #f2f7f4;
+  --bm-muted: #9ab3a8;
+  --bm-line: rgba(242, 247, 244, 0.14);
+  --bm-white: #101a16;
+  /* Solid (non-alpha) dark-mode badge colors — verified against the
+  badge's own background, not blended over whatever it happens to
+  sit on. All ratios >= 6.7:1. */
+  --bm-red: #ff8a80;
+  --bm-red-bg: #3a1210;
+  --bm-amber: #f5c96b;
+  --bm-amber-bg: #3a2c08;
+  --bm-green: #6fe3b4;
+  --bm-green-bg: #0d2a20;
+  --bm-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1310;
+  --ink: #f2f7f4;
+  --bm-muted: #9ab3a8;
+  --bm-line: rgba(242, 247, 244, 0.14);
+  --bm-white: #101a16;
+  /* Solid (non-alpha) dark-mode badge colors — verified against the
+  badge's own background, not blended over whatever it happens to
+  sit on. All ratios >= 6.7:1. */
+  --bm-red: #ff8a80;
+  --bm-red-bg: #3a1210;
+  --bm-amber: #f5c96b;
+  --bm-amber-bg: #3a2c08;
+  --bm-green: #6fe3b4;
+  --bm-green-bg: #0d2a20;
+  --bm-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+
+/* One transition for the whole switch. Only the properties that actually
+   change colour, so it cannot cause layout work. */
+body.bm-body,
+body.bm-body .bm-card,
+body.bm-body .bm-stat,
+body.bm-body .bm-auth-card,
+body.bm-body .bm-topbar,
+body.bm-body .bm-btn,
+body.bm-body .bm-pill,
+body.bm-body .bm-field input,
+body.bm-body .bm-manage-row input,
+body.bm-body .bm-manage-row select {
+  transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.bm-body,
+  body.bm-body * { transition: none !important; }
+}
+
+/* Theme toggle */
+.bm-theme-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--bm-line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  flex: none;
+}
+.bm-theme-toggle:hover { border-color: var(--mint); }
+.bm-theme-toggle:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+.bm-theme-toggle svg { width: 17px; height: 17px; display: block; }
+.bm-theme-toggle .bm-icon-sun { display: none; }
+:root[data-theme="dark"] .bm-theme-toggle .bm-icon-sun { display: block; }
+:root[data-theme="dark"] .bm-theme-toggle .bm-icon-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .bm-theme-toggle .bm-icon-sun { display: block; }
+  :root:not([data-theme="light"]) .bm-theme-toggle .bm-icon-moon { display: none; }
 }
 
 * { box-sizing: border-box; }
@@ -198,8 +276,9 @@ body.bm-body {
 }
 
 @media (prefers-color-scheme: dark) {
-  .bm-eyebrow { color: var(--mint-2); }
+  :root:not([data-theme="light"]) .bm-eyebrow { color: var(--mint-2); }
 }
+:root[data-theme="dark"] .bm-eyebrow { color: var(--mint-2); }
 
 /* Progress bar */
 .bm-progress {
@@ -356,8 +435,9 @@ body.bm-body {
   margin: 0 0 10px;
 }
 @media (prefers-color-scheme: dark) {
-  .bm-check-group-title { color: var(--mint-2); }
+  :root:not([data-theme="light"]) .bm-check-group-title { color: var(--mint-2); }
 }
+:root[data-theme="dark"] .bm-check-group-title { color: var(--mint-2); }
 .bm-check {
   display: flex;
   align-items: flex-start;
@@ -444,8 +524,9 @@ body.bm-body {
   margin: 0 0 10px;
 }
 @media (prefers-color-scheme: dark) {
-  .bm-manage-group-title { color: var(--mint-2); }
+  :root:not([data-theme="light"]) .bm-manage-group-title { color: var(--mint-2); }
 }
+:root[data-theme="dark"] .bm-manage-group-title { color: var(--mint-2); }
 .bm-manage-row {
   display: flex;
   flex-wrap: wrap;
@@ -516,5 +597,6 @@ body.bm-body {
 
 a.bm-link { color: var(--mint-3); }
 @media (prefers-color-scheme: dark) {
-  a.bm-link { color: var(--mint-2); }
+  :root:not([data-theme="light"]) a.bm-link { color: var(--mint-2); }
 }
+:root[data-theme="dark"] a.bm-link { color: var(--mint-2); }
