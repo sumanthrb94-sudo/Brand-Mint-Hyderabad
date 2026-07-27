@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Tenancy check — Brand Mint</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/bm-app.css" />
+  </head>
+  <body class="bm-body">
+    <div class="bm-shell">
+      <header class="bm-topbar">
+        <a class="bm-brand" href="/portal">
+          <span class="bm-brand-mark" aria-hidden="true"></span>
+          <span>Brand Mint <span class="bm-brand-sub">Tenancy check</span></span>
+        </a>
+        <div class="bm-topbar-right">
+          <span class="bm-user" id="bm-who">—</span>
+          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
+        </div>
+      </header>
+
+      <div id="bm-loading" class="bm-loading">Probing every tenant…</div>
+
+      <main id="bm-main" hidden>
+        <section class="bm-card">
+          <p class="bm-eyebrow">Verdict</p>
+          <h1 class="bm-card-title" id="bm-verdict" style="margin-bottom:10px;">—</h1>
+          <p class="bm-card-note" id="bm-verdict-note"></p>
+        </section>
+
+        <section class="bm-card">
+          <p class="bm-eyebrow">How to read this</p>
+          <p class="bm-card-note" style="margin-bottom:0;">
+            This page reads every known organisation and project id directly, as
+            whoever is signed in right now. Rules are the only thing deciding
+            each result — this page has no allow-list of its own. Signed in as a
+            client, exactly one organisation and its own projects should say
+            <strong>allowed</strong> and everything else must say
+            <strong>denied</strong>. Signed in as the admin, everything is
+            allowed and that is expected, which is why this test only proves
+            anything from a client session.
+          </p>
+        </section>
+
+        <section class="bm-card">
+          <p class="bm-eyebrow">Organisations</p>
+          <div class="bm-table-wrap">
+            <table class="bm-table">
+              <thead><tr><th>Organisation id</th><th>Result</th><th>Detail</th></tr></thead>
+              <tbody id="bm-orgs-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="bm-card">
+          <p class="bm-eyebrow">Projects</p>
+          <div class="bm-table-wrap">
+            <table class="bm-table">
+              <thead><tr><th>Project id</th><th>Result</th><th>Detail</th></tr></thead>
+              <tbody id="bm-projects-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      import {
+        requireClientAuth,
+        getUserProfile,
+        isAdminUser,
+        probeOrgAccess,
+        probeProjectAccess,
+        logout,
+        escapeHtml,
+        SEED_ORG_IDS,
+        SEED_PROJECT_IDS,
+      } from "/assets/bm-app.js";
+
+      document.getElementById("bm-signout").addEventListener("click", async () => {
+        await logout();
+        window.location.href = "/login";
+      });
+
+      // Colour by whether the result matches what isolation requires, not by
+      // allowed/denied. For a foreign tenant, "denied" IS the pass condition —
+      // painting it red would report correct behaviour as a problem.
+      function resultCell(r, expectedAllowed) {
+        if (r.allowed && expectedAllowed) {
+          return `<span class="bm-pill bm-pill--green">allowed</span>`;
+        }
+        if (!r.allowed && !expectedAllowed) {
+          return `<span class="bm-pill bm-pill--green">denied — correct</span>`;
+        }
+        if (r.allowed && !expectedAllowed) {
+          return `<span class="bm-pill bm-pill--red">allowed — LEAK</span>`;
+        }
+        return `<span class="bm-pill bm-pill--amber">denied — unexpected</span>`;
+      }
+
+      function detailCell(r) {
+        if (r.allowed) return r.exists ? "read ok" : "read ok (no such document)";
+        return escapeHtml(r.code);
+      }
+
+      async function run() {
+        const user = await requireClientAuth();
+        if (!user) return;
+
+        const admin = isAdminUser(user);
+        const profile = await getUserProfile(user.uid).catch(() => null);
+        document.getElementById("bm-who").textContent = admin
+          ? `${user.email} (admin)`
+          : `${user.email}${profile?.orgId ? ` · ${profile.orgId}` : ""}`;
+
+        const myOrg = profile?.orgId || null;
+
+        // What isolation requires of each id for THIS session. Project
+        // ownership uses the seeded `<orgId>-project` naming convention,
+        // since a correctly isolated client cannot read a foreign project to
+        // discover its orgId — that is the whole point of the test.
+        const orgExpected = (id) => admin || id === myOrg;
+        const projectExpected = (id) => admin || (!!myOrg && id.startsWith(`${myOrg}-`));
+
+        const orgResults = await Promise.all(
+          SEED_ORG_IDS.map(async (id) => ({ id, r: await probeOrgAccess(id) }))
+        );
+        const projectResults = await Promise.all(
+          SEED_PROJECT_IDS.map(async (id) => ({ id, r: await probeProjectAccess(id) }))
+        );
+
+        document.getElementById("bm-loading").hidden = true;
+        document.getElementById("bm-main").hidden = false;
+
+        document.getElementById("bm-orgs-body").innerHTML = orgResults
+          .map(
+            ({ id, r }) =>
+              `<tr><td><code>${escapeHtml(id)}</code></td><td>${resultCell(r, orgExpected(id))}</td><td class="bm-row-sub">${detailCell(r)}</td></tr>`
+          )
+          .join("");
+
+        document.getElementById("bm-projects-body").innerHTML = projectResults
+          .map(
+            ({ id, r }) =>
+              `<tr><td><code>${escapeHtml(id)}</code></td><td>${resultCell(r, projectExpected(id))}</td><td class="bm-row-sub">${detailCell(r)}</td></tr>`
+          )
+          .join("");
+
+        const verdictEl = document.getElementById("bm-verdict");
+        const noteEl = document.getElementById("bm-verdict-note");
+
+        if (admin) {
+          verdictEl.textContent = "Inconclusive — signed in as admin";
+          noteEl.textContent =
+            "The admin is allowed to read everything by design, so this run proves nothing about isolation. Sign in as a client and reload this page to get a real verdict.";
+          return;
+        }
+
+        if (!myOrg) {
+          verdictEl.textContent = "Cannot judge — no users document";
+          noteEl.textContent =
+            "This account has no users/{uid} record, so it has no org to compare against. Create it in the Client access panel on /studio first.";
+          return;
+        }
+
+        const leaks = [
+          ...orgResults.filter((x) => x.r.allowed && !orgExpected(x.id)),
+          ...projectResults.filter((x) => x.r.allowed && !projectExpected(x.id)),
+        ].map((x) => x.id);
+
+        if (leaks.length === 0) {
+          verdictEl.textContent = "Isolated";
+          verdictEl.style.color = "var(--bm-green)";
+          noteEl.textContent = `This client can read only ${myOrg} and its own projects. Every other tenant returned permission-denied — enforced by rules, not by the interface.`;
+        } else {
+          verdictEl.textContent = "LEAK — another tenant is readable";
+          verdictEl.style.color = "var(--bm-red)";
+          noteEl.textContent = `Readable that should not be: ${leaks.join(
+            ", "
+          )}. Fix firestore.rules before letting a second client onto this system.`;
+        }
+      }
+
+      run();
+    </script>
+  </body>
+</html>
