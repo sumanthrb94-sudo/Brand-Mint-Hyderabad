@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Services — Brand Mint</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/bm-app.css" />
+    <style>
+      .bm-svc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+      .bm-svc {
+        border:1px solid var(--bm-line); border-radius:14px; padding:16px;
+        background:var(--bm-white); display:flex; flex-direction:column; gap:8px;
+        cursor:pointer; transition:border-color .12s, transform .08s;
+      }
+      .bm-svc:hover { border-color:var(--mint); }
+      .bm-svc.is-on { border-color:var(--mint); box-shadow:inset 0 0 0 1px var(--mint); }
+      .bm-svc-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+      .bm-svc-name { font-weight:700; font-size:14px; line-height:1.35; }
+      .bm-svc-price { font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:16px; white-space:nowrap; }
+      .bm-svc-sum { font-size:12px; color:var(--bm-muted); line-height:1.5; }
+      .bm-svc-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:6px; }
+      .bm-cat-nav { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+      .bm-cat-nav a {
+        font-size:13px; padding:7px 13px; border-radius:999px; text-decoration:none;
+        border:1px solid var(--bm-line); color:var(--ink);
+      }
+      .bm-cat-nav a:hover { border-color:var(--mint); }
+      .bm-basket {
+        position:sticky; bottom:0; background:var(--bm-white);
+        border:1px solid var(--bm-line); border-radius:14px; padding:16px;
+        box-shadow:var(--bm-shadow); margin-top:24px;
+      }
+      .bm-basket-row { display:flex; flex-wrap:wrap; align-items:center; gap:14px; justify-content:space-between; }
+      .bm-basket-fig { font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; font-size:22px; }
+    </style>
+  </head>
+  <body class="bm-body">
+    <div class="bm-shell">
+      <header class="bm-topbar">
+        <a class="bm-brand" href="/studio">
+          <span class="bm-brand-mark" aria-hidden="true"></span>
+          <span>Brand Mint <span class="bm-brand-sub">Services</span></span>
+        </a>
+        <div class="bm-topbar-right">
+          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/studio">Studio</a>
+          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/quote">Scope &amp; quote</a>
+          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
+        </div>
+      </header>
+
+      <div id="bm-loading" class="bm-loading">Loading the catalogue…</div>
+
+      <main id="bm-main" hidden>
+        <section class="bm-card">
+          <p class="bm-eyebrow">Catalogue</p>
+          <h1 class="bm-card-title" style="margin-bottom:8px;">What we sell</h1>
+          <p class="bm-card-note" id="bm-intro" style="margin-bottom:16px;"></p>
+          <div class="bm-stats" style="margin-bottom:0;">
+            <div class="bm-stat">
+              <p class="bm-stat-label">Ready now</p>
+              <p class="bm-stat-value bm-stat-value--green" id="bm-n-ready">—</p>
+              <p class="bm-stat-sub">Shipped before — estimates are grounded</p>
+            </div>
+            <div class="bm-stat">
+              <p class="bm-stat-label">Adjacent</p>
+              <p class="bm-stat-value" id="bm-n-next">—</p>
+              <p class="bm-stat-sub">Low risk — quote with confidence</p>
+            </div>
+            <div class="bm-stat">
+              <p class="bm-stat-label">Needs discovery</p>
+              <p class="bm-stat-value bm-stat-value--red" id="bm-n-later">—</p>
+              <p class="bm-stat-sub">Sell a paid discovery day before quoting</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="bm-cat-nav" id="bm-cat-nav"></div>
+        <div id="bm-categories"></div>
+
+        <div class="bm-basket" id="bm-basket">
+          <div class="bm-basket-row">
+            <div>
+              <div class="bm-row-sub" id="bm-basket-count">Nothing selected</div>
+              <div class="bm-basket-fig" id="bm-basket-total">—</div>
+              <div class="bm-row-sub" id="bm-basket-sub"></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <label class="bm-row-sub" for="bm-scale">Scale</label>
+              <select id="bm-scale" style="font:inherit;font-size:13px;padding:7px 9px;border-radius:9px;border:1px solid var(--bm-line);background:var(--bg);color:var(--ink);"></select>
+              <input id="bm-agreed" type="number" placeholder="Agreed price"
+                style="font:inherit;font-size:13px;padding:7px 9px;width:130px;border-radius:9px;border:1px solid var(--bm-line);background:var(--bg);color:var(--ink);" />
+              <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-clear">Clear</button>
+            </div>
+          </div>
+          <div id="bm-verdict" style="margin-top:12px;"></div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import { requireAdminAuth, logout, formatINR, escapeHtml } from "/assets/bm-app.js";
+      import {
+        FEATURES, FEATURES_BY_ID, CATEGORY_LABELS, DAY_RATE, FLOOR_DAY_RATE,
+        SCALE_LABELS, quote, checkPrice, withDependencies,
+      } from "/assets/bm-catalog.js";
+
+      document.getElementById("bm-signout").addEventListener("click", async () => {
+        await logout();
+        window.location.href = "/login";
+      });
+
+      const READY = {
+        ready: { pill: "bm-pill--green", label: "shipped before" },
+        next:  { pill: "bm-pill--amber", label: "adjacent" },
+        later: { pill: "bm-pill--red",   label: "needs discovery" },
+      };
+
+      const selected = new Set();
+      const scaleEl = document.getElementById("bm-scale");
+      scaleEl.innerHTML = Object.entries(SCALE_LABELS)
+        .map(([k, v]) => `<option value="${k}" ${k === "standard" ? "selected" : ""}>${escapeHtml(v)}</option>`)
+        .join("");
+
+      function card(f) {
+        const r = READY[f.readiness] || READY.ready;
+        return `<div class="bm-svc ${selected.has(f.id) ? "is-on" : ""}" data-svc="${f.id}" role="button" tabindex="0" aria-pressed="${selected.has(f.id)}">
+          <div class="bm-svc-head">
+            <span class="bm-svc-name">${escapeHtml(f.label)}</span>
+            <span class="bm-svc-price">${formatINR(f.buildDays * DAY_RATE)}</span>
+          </div>
+          <div class="bm-svc-sum">${escapeHtml(f.summary || "")}</div>
+          ${f.evidence.length ? `<div class="bm-row-sub">Built for: ${escapeHtml(f.evidence.join(", "))}</div>` : ""}
+          <div class="bm-svc-meta">
+            <span class="bm-pill ${r.pill}">${r.label}</span>
+            <span class="bm-pill bm-pill--muted">${f.buildDays}d</span>
+            ${f.monthlyDays ? `<span class="bm-pill bm-pill--muted">+${formatINR(f.monthlyDays * DAY_RATE)}/mo</span>` : ""}
+            ${f.needsServer ? `<span class="bm-pill bm-pill--amber">needs a server</span>` : ""}
+          </div>
+        </div>`;
+      }
+
+      function render() {
+        const cats = [...new Set(FEATURES.map((f) => f.category))];
+        document.getElementById("bm-cat-nav").innerHTML = cats
+          .map((c) => `<a href="#cat-${c}">${escapeHtml(CATEGORY_LABELS[c] || c)} <span class="bm-row-sub">${FEATURES.filter(f => f.category === c).length}</span></a>`)
+          .join("");
+
+        document.getElementById("bm-categories").innerHTML = cats
+          .map((c) => {
+            const items = FEATURES.filter((f) => f.category === c);
+            return `<section class="bm-card" id="cat-${c}">
+              <p class="bm-eyebrow">${escapeHtml(CATEGORY_LABELS[c] || c)}</p>
+              <h2 class="bm-card-title" style="margin-bottom:14px;">${items.length} services</h2>
+              <div class="bm-svc-grid">${items.map(card).join("")}</div>
+            </section>`;
+          })
+          .join("");
+
+        for (const k of ["ready", "next", "later"]) {
+          document.getElementById(`bm-n-${k}`).textContent =
+            FEATURES.filter((f) => (f.readiness || "ready") === k).length;
+        }
+        document.getElementById("bm-intro").textContent =
+          `${FEATURES.length} services across ${cats.length} categories. Prices are build days x ${formatINR(DAY_RATE)}. ` +
+          `Tap any card to add it to a quote — anything it depends on is added and priced automatically.`;
+        basket();
+      }
+
+      function basket() {
+        const ids = [...selected];
+        const countEl = document.getElementById("bm-basket-count");
+        const totalEl = document.getElementById("bm-basket-total");
+        const subEl = document.getElementById("bm-basket-sub");
+        const verdictEl = document.getElementById("bm-verdict");
+
+        if (!ids.length) {
+          countEl.textContent = "Nothing selected";
+          totalEl.textContent = "—";
+          subEl.textContent = "";
+          verdictEl.innerHTML = "";
+          return;
+        }
+
+        const q = quote(ids, scaleEl.value);
+        const extra = q.impliedIds.length;
+        countEl.textContent =
+          `${ids.length} selected${extra ? ` · ${extra} added as dependencies` : ""} · ${q.buildDays} build days`;
+        totalEl.textContent = formatINR(q.oneOff);
+        subEl.textContent =
+          `+ ${formatINR(q.gst)} GST = ${formatINR(q.oneOff + q.gst)}` +
+          (q.monthly ? ` · then ${formatINR(q.monthly)}/month` : "");
+
+        const agreed = Number(document.getElementById("bm-agreed").value);
+        let html = "";
+        if (extra) {
+          html += `<p class="bm-row-sub">Added automatically: ${q.impliedIds.map((i) => escapeHtml(FEATURES_BY_ID[i].label)).join(", ")}. Quoting a checkout without the catalogue under it is how a fixed price loses money.</p>`;
+        }
+        if (q.needsServer) {
+          html += `<p class="bm-note" style="margin:8px 0 0;">Needs serverless functions — this cannot be a static site.</p>`;
+        }
+        if (agreed > 0) {
+          const c = checkPrice(agreed, q);
+          const cls = c.verdict === "healthy" ? "bm-status--ok" : "bm-status--error";
+          html += `<p class="bm-status ${cls}" style="margin-top:10px;">
+            At ${formatINR(agreed)} you are paid <strong>${formatINR(c.impliedDayRate)}/day</strong> —
+            ${c.verdict === "healthy" ? `at or above the ${formatINR(DAY_RATE)} standard rate. Sign it.`
+              : c.verdict === "thin" ? `above the ${formatINR(FLOOR_DAY_RATE)} floor but below standard. Once, not as a default.`
+              : `<strong>BELOW the ${formatINR(FLOOR_DAY_RATE)} floor — do not sign.</strong>
+                 Raise to ${formatINR(c.floorPrice)}, or cut the build from ${q.buildDays} to ${c.daysNeededAtFloor.toFixed(1)} days.`}
+          </p>`;
+        }
+        verdictEl.innerHTML = html;
+      }
+
+      document.getElementById("bm-categories").addEventListener("click", (e) => {
+        const card = e.target.closest("[data-svc]");
+        if (!card) return;
+        const id = card.dataset.svc;
+        selected.has(id) ? selected.delete(id) : selected.add(id);
+        render();
+      });
+      document.getElementById("bm-categories").addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        const card = e.target.closest("[data-svc]");
+        if (!card) return;
+        e.preventDefault();
+        card.click();
+      });
+      scaleEl.addEventListener("change", basket);
+      document.getElementById("bm-agreed").addEventListener("input", basket);
+      document.getElementById("bm-clear").addEventListener("click", () => { selected.clear(); render(); });
+
+      (async () => {
+        const user = await requireAdminAuth();
+        if (!user) return;
+        document.getElementById("bm-loading").hidden = true;
+        document.getElementById("bm-main").hidden = false;
+        render();
+      })();
+    </script>
+  </body>
+</html>

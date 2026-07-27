@@ -41,3 +41,18 @@ node tests/e2e.mjs
 Six auth checks need the Firebase CDN. Where it is blocked they report SKIP,
 never a pass — a green tick for a check that did not run is worse than a red
 one. Each has a static counterpart that still runs.
+
+## Regenerating the service catalogue
+
+`assets/bm-catalog.js` is GENERATED from
+`commerce-skeleton/src/config/features.ts`. Never edit it by hand.
+
+```bash
+node tools/gen-catalog.mjs          # SKELETON_DIR=... if it lives elsewhere
+```
+
+One source of truth: the quote CLI and the portal's /services page read the
+same 43 services and the same day rate, so a price shown to a client can never
+disagree with one computed on the command line. Before this existed the portal
+had 15 services and the skeleton had 43 — exactly the drift the generator now
+prevents.

@@ -818,7 +818,11 @@ export function formatDate(timestamp) {
 
 export function formatINR(amount) {
   if (amount === null || amount === undefined) return "—";
-  return `Rs ${Number(amount).toLocaleString("en-IN")}`;
+  const n = Number(amount);
+  if (Number.isNaN(n)) return "—";
+  // Round. A derived figure — an implied day rate, a share of a total — is a
+  // float, and "Rs 3,846.154" is not a rupee amount anybody recognises.
+  return `Rs ${Math.round(n).toLocaleString("en-IN")}`;
 }
 
 export function escapeHtml(value) {
