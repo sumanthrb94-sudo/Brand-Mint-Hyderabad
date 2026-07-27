@@ -143,13 +143,18 @@
         document.getElementById("bm-project-status").textContent = project.type || "In progress";
         document.getElementById("bm-progress-fill").style.width = `${Math.max(0, Math.min(100, Number(project.progress) || 0))}%`;
 
-        // Next milestone: earliest due, not yet done.
+        // Next milestone: earliest due, not yet done. An empty milestones
+        // subcollection means nobody has set the project up yet — that must
+        // never read the same as "all complete".
         const milestones = await getMilestones(project.id);
         const pending = milestones
           .filter((m) => m.status !== "done")
           .sort((a, b) => (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0));
         const next = pending[0];
-        if (next) {
+        if (!milestones.length) {
+          document.getElementById("bm-next-milestone-title").textContent = "No milestones yet";
+          document.getElementById("bm-next-milestone-sub").textContent = "—";
+        } else if (next) {
           document.getElementById("bm-next-milestone-title").textContent = next.title;
           const who = next.owner === "client" ? "waiting on you" : "waiting on Brand Mint";
           document.getElementById("bm-next-milestone-sub").textContent = `Due ${formatDate(next.dueAt)} — ${who}`;
@@ -158,11 +163,15 @@
           document.getElementById("bm-next-milestone-sub").textContent = "—";
         }
 
-        // What we need from you — open intake, oldest first.
-        const intake = (await getIntake(project.id)).filter((i) => !i.done);
+        // What we need from you — open intake, oldest first. Same rule: no
+        // intake docs at all is "nothing set up yet", not "you're caught up".
+        const allIntake = await getIntake(project.id);
+        const intake = allIntake.filter((i) => !i.done);
         intake.sort((a, b) => (a.raisedAt?.toMillis?.() || 0) - (b.raisedAt?.toMillis?.() || 0));
         const intakeList = document.getElementById("bm-intake-list");
-        if (!intake.length) {
+        if (!allIntake.length) {
+          intakeList.innerHTML = '<p class="bm-empty">Nothing set up yet.</p>';
+        } else if (!intake.length) {
           intakeList.innerHTML = '<p class="bm-empty">Nothing outstanding — you\'re all caught up.</p>';
         } else {
           intakeList.innerHTML = intake
