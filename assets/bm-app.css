@@ -492,6 +492,21 @@ body.bm-body {
   margin: 0 0 16px;
 }
 
+/* The scope document prints as the client-facing deliverable; every control
+   around it is screen-only. */
+@media print {
+  .bm-no-print { display: none !important; }
+  body.bm-body { background: #fff; color: #000; }
+  .bm-card {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+  }
+  .bm-shell { padding: 0; max-width: none; }
+}
+
 .bm-loading {
   text-align: center;
   padding: 60px 0;

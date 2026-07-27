@@ -19,6 +19,7 @@ service cloud.firestore {
     }
     match /invoices/{id} { allow read: if isAdmin() || (signedIn() && resource.data.orgId == myOrg()); allow write: if isAdmin(); }
     match /leads/{id} { allow read, write: if isAdmin(); }
+    match /catalog/{id} { allow read, write: if isAdmin(); }
     match /{document=**} { allow read, write: if false; }
   }
 }

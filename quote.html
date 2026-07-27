@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Scope &amp; quote — Brand Mint</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/bm-app.css" />
+  </head>
+  <body class="bm-body">
+    <div class="bm-shell">
+      <header class="bm-topbar bm-no-print">
+        <a class="bm-brand" href="/studio">
+          <span class="bm-brand-mark" aria-hidden="true"></span>
+          <span>Brand Mint <span class="bm-brand-sub">Scope &amp; quote</span></span>
+        </a>
+        <div class="bm-topbar-right">
+          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/studio">Back to studio</a>
+          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
+        </div>
+      </header>
+
+      <div id="bm-loading" class="bm-loading">Loading the catalog…</div>
+
+      <main id="bm-main" hidden>
+        <!-- Builder -->
+        <section class="bm-card bm-no-print">
+          <p class="bm-eyebrow">1 · Build the scope</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">What are we quoting?</h2>
+
+          <div class="bm-field">
+            <label for="bm-client-name">Client / organisation</label>
+            <input id="bm-client-name" placeholder="Green Basket" />
+          </div>
+          <div class="bm-field">
+            <label for="bm-base-service">Base service</label>
+            <select id="bm-base-service"></select>
+            <span class="bm-row-sub" id="bm-base-note"></span>
+          </div>
+
+          <div id="bm-feature-groups"></div>
+        </section>
+
+        <!-- Pricing -->
+        <section class="bm-card bm-no-print">
+          <p class="bm-eyebrow">2 · Prices</p>
+          <h2 class="bm-card-title" style="margin-bottom:6px;">Set once, reused forever</h2>
+          <p class="bm-card-note" style="margin-bottom:16px;">
+            Add-on prices are yours to set — nothing here is guessed. A feature
+            with no price cannot be quoted, and the total below will refuse to
+            render until every selected feature has one. Prices save as you type
+            and persist for every future quote.
+          </p>
+          <div id="bm-pricing-rows"></div>
+        </section>
+
+        <!-- Output -->
+        <section class="bm-card">
+          <p class="bm-eyebrow bm-no-print">3 · The document</p>
+          <div id="bm-scope-doc"></div>
+        </section>
+
+        <!-- Build skeleton -->
+        <section class="bm-card bm-no-print">
+          <p class="bm-eyebrow">Internal — not for the client</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Build skeleton</h2>
+          <div id="bm-skeleton"></div>
+        </section>
+
+        <!-- Push to intake -->
+        <section class="bm-card bm-no-print">
+          <p class="bm-eyebrow">Hand off</p>
+          <h2 class="bm-card-title" style="margin-bottom:6px;">Turn requirements into client blockers</h2>
+          <p class="bm-card-note" style="margin-bottom:16px;">
+            Writes every "what we need from you" line above into the project's
+            intake list, dated today. The client then sees them on /onboarding
+            and they start ageing on your delivery health — instead of sitting
+            in an email nobody re-reads.
+          </p>
+          <div class="bm-manage-row">
+            <select id="bm-intake-project"></select>
+            <button type="button" class="bm-btn bm-btn--sm" id="bm-push-intake">Add to project intake</button>
+          </div>
+          <p class="bm-status" id="bm-intake-status" hidden></p>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      import {
+        requireAdminAuth,
+        getAllOrgs,
+        getAllProjects,
+        getFeaturePricing,
+        setFeaturePricing,
+        pushRequirementsToIntake,
+        logout,
+        formatINR,
+        escapeHtml,
+        SERVICE_TYPES,
+        FEATURE_CATALOG,
+        FEATURE_CATEGORIES,
+        SCOPE_TERMS,
+      } from "/assets/bm-app.js";
+
+      document.getElementById("bm-signout").addEventListener("click", async () => {
+        await logout();
+        window.location.href = "/login";
+      });
+
+      let pricing = {};
+      let projects = [];
+      let orgById = {};
+
+      const selected = new Set();
+
+      function selectedFeatures() {
+        return FEATURE_CATALOG.filter((f) => selected.has(f.id));
+      }
+
+      function baseService() {
+        return SERVICE_TYPES.find((s) => s.id === document.getElementById("bm-base-service").value);
+      }
+
+      // --- Builder ---
+
+      function renderFeatureGroups() {
+        document.getElementById("bm-feature-groups").innerHTML = FEATURE_CATEGORIES.map((cat) => {
+          const items = FEATURE_CATALOG.filter((f) => f.category === cat.id);
+          if (!items.length) return "";
+          return `<div class="bm-manage-group">
+            <p class="bm-manage-group-title">${escapeHtml(cat.label)}</p>
+            ${items
+              .map(
+                (f) => `<label class="bm-check">
+                  <input type="checkbox" data-feature="${f.id}" ${selected.has(f.id) ? "checked" : ""} />
+                  <span>
+                    <div class="bm-check-label">${escapeHtml(f.label)}${
+                      f.needsServer
+                        ? ` <span class="bm-pill bm-pill--amber">needs a server</span>`
+                        : ""
+                    }</div>
+                    <div class="bm-check-cleared">${escapeHtml(f.delivers.join(" · "))}</div>
+                  </span>
+                </label>`
+              )
+              .join("")}
+          </div>`;
+        }).join("");
+      }
+
+      document.getElementById("bm-feature-groups").addEventListener("change", (e) => {
+        const cb = e.target.closest("[data-feature]");
+        if (!cb) return;
+        if (cb.checked) selected.add(cb.dataset.feature);
+        else selected.delete(cb.dataset.feature);
+        renderAll();
+      });
+
+      // --- Pricing ---
+
+      function renderPricing() {
+        const chosen = selectedFeatures();
+        const el = document.getElementById("bm-pricing-rows");
+        if (!chosen.length) {
+          el.innerHTML = '<p class="bm-empty">Select a feature above to price it.</p>';
+          return;
+        }
+        el.innerHTML = chosen
+          .map((f) => {
+            const p = pricing[f.id] || {};
+            const unpriced = p.price === null || p.price === undefined;
+            return `<div class="bm-manage-row" data-price-row="${f.id}">
+              <span class="bm-mn-title">${escapeHtml(f.label)}</span>
+              <input class="bm-mn-narrow" type="number" min="0" data-price="${f.id}" value="${unpriced ? "" : p.price}" placeholder="Price" />
+              <select data-pricetype="${f.id}">
+                <option value="fixed" ${p.priceType !== "monthly" ? "selected" : ""}>one-off</option>
+                <option value="monthly" ${p.priceType === "monthly" ? "selected" : ""}>per month</option>
+              </select>
+              <input class="bm-mn-narrow" type="number" min="0" data-builddays="${f.id}" value="${p.buildDays ?? ""}" placeholder="Days" title="Build days — your estimate, for your reference only" />
+              ${unpriced ? `<span class="bm-pill bm-pill--red">no price set</span>` : ""}
+            </div>`;
+          })
+          .join("");
+      }
+
+      document.getElementById("bm-pricing-rows").addEventListener("change", async (e) => {
+        const row = e.target.closest("[data-price-row]");
+        if (!row) return;
+        const id = row.dataset.priceRow;
+        await setFeaturePricing(id, {
+          price: row.querySelector(`[data-price="${id}"]`).value,
+          priceType: row.querySelector(`[data-pricetype="${id}"]`).value,
+          buildDays: row.querySelector(`[data-builddays="${id}"]`).value,
+        });
+        pricing = await getFeaturePricing();
+        renderAll();
+      });
+
+      // --- The client-facing document ---
+
+      function renderScopeDoc() {
+        const base = baseService();
+        const chosen = selectedFeatures();
+        const client = document.getElementById("bm-client-name").value.trim() || "—";
+
+        const unpriced = chosen.filter((f) => {
+          const p = pricing[f.id] || {};
+          return p.price === null || p.price === undefined;
+        });
+
+        const oneOff = chosen.filter((f) => (pricing[f.id] || {}).priceType !== "monthly");
+        const monthly = chosen.filter((f) => (pricing[f.id] || {}).priceType === "monthly");
+
+        const baseOneOff = base && !base.recurring ? base.priceFloor : 0;
+        const baseMonthly = base && base.recurring ? base.priceFloor : 0;
+
+        const oneOffTotal = baseOneOff + oneOff.reduce((s, f) => s + (pricing[f.id]?.price || 0), 0);
+        const monthlyTotal = baseMonthly + monthly.reduce((s, f) => s + (pricing[f.id]?.price || 0), 0);
+
+        const included = [
+          ...(base ? [`${base.label} — as scoped below`] : []),
+          ...chosen.map((f) => f.label),
+        ];
+
+        const requirements = chosen.flatMap((f) => f.requires.map((r) => `${f.label}: ${r}`));
+
+        document.getElementById("bm-scope-doc").innerHTML = `
+          <h1 class="bm-card-title" style="font-size:24px; margin-bottom:4px;">Scope of work</h1>
+          <p class="bm-row-sub" style="margin-bottom:24px;">${escapeHtml(client)} · prepared by Brand Mint Studios</p>
+
+          <h3 class="bm-manage-group-title">What you get at this price</h3>
+          ${
+            included.length
+              ? `<ul style="margin:0 0 24px; padding-left:20px; font-size:14px; line-height:1.9;">
+                  ${included.map((i) => `<li>${escapeHtml(i)}</li>`).join("")}
+                </ul>`
+              : '<p class="bm-empty">Nothing selected yet.</p>'
+          }
+
+          <h3 class="bm-manage-group-title">Investment</h3>
+          ${
+            unpriced.length
+              ? `<p class="bm-status bm-status--error">Cannot be quoted yet — ${unpriced.length} selected ${
+                  unpriced.length === 1 ? "feature has" : "features have"
+                } no price set: ${escapeHtml(unpriced.map((f) => f.label).join(", "))}. Set them in section 2. This document is not sendable until then.</p>`
+              : `<div style="margin-bottom:8px;">
+                  ${oneOffTotal ? `<div class="bm-row"><span class="bm-row-title">One-off</span><strong>${formatINR(oneOffTotal)}</strong></div>` : ""}
+                  ${monthlyTotal ? `<div class="bm-row"><span class="bm-row-title">Retainer</span><strong>${formatINR(monthlyTotal)} / month</strong></div>` : ""}
+                </div>
+                <p class="bm-row-sub" style="margin-bottom:24px;">${escapeHtml(SCOPE_TERMS.gst)}. ${escapeHtml(SCOPE_TERMS.paymentSchedule)}.</p>`
+          }
+
+          <h3 class="bm-manage-group-title">What we need from you</h3>
+          ${
+            requirements.length
+              ? `<ul style="margin:0 0 8px; padding-left:20px; font-size:14px; line-height:1.9;">
+                  ${requirements.map((r) => `<li>${escapeHtml(r)}</li>`).join("")}
+                </ul>
+                <p class="bm-note" style="margin-bottom:24px;">Never send us a password. For anything that needs access, add hello@brandmintstudios.in as a user on your own account.</p>`
+              : '<p class="bm-row-sub" style="margin-bottom:24px;">Nothing yet — select features above.</p>'
+          }
+
+          <h3 class="bm-manage-group-title">What is free after launch</h3>
+          <p style="font-size:14px; line-height:1.8; margin:0 0 8px;">${escapeHtml(SCOPE_TERMS.freeAfterLaunch)}</p>
+          <p class="bm-row-sub" style="margin-bottom:24px;">${SCOPE_TERMS.reviewRoundsIncluded} review rounds are included during the build.</p>
+
+          <h3 class="bm-manage-group-title">What costs extra</h3>
+          <ul style="margin:0 0 8px; padding-left:20px; font-size:14px; line-height:1.9;">
+            ${SCOPE_TERMS.chargeable.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}
+          </ul>
+          <p style="font-size:14px; line-height:1.8; margin:0 0 4px;"><strong>${escapeHtml(SCOPE_TERMS.chargeableRule)}</strong></p>
+          <p class="bm-row-sub" style="margin-bottom:24px;">Review rounds beyond the ${SCOPE_TERMS.reviewRoundsIncluded} included are ${formatINR(
+            SCOPE_TERMS.extraReviewRoundPrice
+          )} each.</p>
+
+          <h3 class="bm-manage-group-title">Not included</h3>
+          <p style="font-size:14px; line-height:1.8; margin:0;">
+            Anything not listed under "What you get at this price" above is out of
+            scope. That is not a refusal — it is a separate quote, and we would be
+            glad to give you one.
+          </p>
+
+          <button type="button" class="bm-btn bm-btn--sm bm-no-print" style="margin-top:24px;" onclick="window.print()">Print / save as PDF</button>
+        `;
+      }
+
+      // --- Internal skeleton ---
+
+      function renderSkeleton() {
+        const chosen = selectedFeatures();
+        const el = document.getElementById("bm-skeleton");
+        if (!chosen.length) {
+          el.innerHTML = '<p class="bm-empty">Select features to see what to build.</p>';
+          return;
+        }
+        const modules = [...new Set(chosen.flatMap((f) => f.skeleton))];
+        const serverFeatures = chosen.filter((f) => f.needsServer);
+        const days = chosen.reduce((s, f) => s + (pricing[f.id]?.buildDays || 0), 0);
+
+        el.innerHTML = `
+          ${
+            serverFeatures.length
+              ? `<p class="bm-note">${serverFeatures.length} selected ${
+                  serverFeatures.length === 1 ? "feature needs" : "features need"
+                } server-side code — this static site cannot host them. They require Vercel serverless functions in /api. Never solve this by putting a secret in the browser.</p>`
+              : ""
+          }
+          <p class="bm-manage-group-title">Modules to clone or build</p>
+          <ul style="margin:0 0 16px; padding-left:20px; font-size:14px; line-height:1.9;">
+            ${modules.map((m) => `<li>${escapeHtml(m)}</li>`).join("")}
+          </ul>
+          <p class="bm-row-sub">${modules.length} modules${
+            days ? ` · ${days} build days by your own estimates` : " · no build-day estimates set"
+          }</p>
+        `;
+      }
+
+      // --- Push requirements to intake ---
+
+      document.getElementById("bm-push-intake").addEventListener("click", async () => {
+        const status = document.getElementById("bm-intake-status");
+        const projectId = document.getElementById("bm-intake-project").value;
+        const chosen = selectedFeatures();
+        status.hidden = true;
+
+        if (!projectId || !chosen.length) {
+          status.hidden = false;
+          status.className = "bm-status bm-status--error";
+          status.textContent = "Pick a project and at least one feature first.";
+          return;
+        }
+        const count = chosen.reduce((s, f) => s + f.requires.length, 0);
+        if (!confirm(`Add ${count} intake items to this project? They will appear on the client's /onboarding immediately and start ageing today.`)) return;
+
+        try {
+          const written = await pushRequirementsToIntake(projectId, [...selected]);
+          status.hidden = false;
+          status.className = "bm-status bm-status--ok";
+          status.textContent = `Added ${written} intake items. The client can see them on /onboarding now.`;
+        } catch (err) {
+          status.hidden = false;
+          status.className = "bm-status bm-status--error";
+          status.textContent = "Couldn't write intake items: " + (err?.message || err);
+        }
+      });
+
+      function renderAll() {
+        renderFeatureGroups();
+        renderPricing();
+        renderScopeDoc();
+        renderSkeleton();
+      }
+
+      document.getElementById("bm-client-name").addEventListener("input", renderScopeDoc);
+      document.getElementById("bm-base-service").addEventListener("change", () => {
+        const base = baseService();
+        document.getElementById("bm-base-note").textContent = base
+          ? `Published floor: ${formatINR(base.priceFloor)}${base.recurring ? " / month" : ""}. Verified against the live site and the service catalog.`
+          : "";
+        renderScopeDoc();
+      });
+
+      async function load() {
+        const user = await requireAdminAuth();
+        if (!user) return;
+
+        const [orgs, allProjects, prices] = await Promise.all([
+          getAllOrgs(),
+          getAllProjects(),
+          getFeaturePricing().catch(() => ({})),
+        ]);
+        pricing = prices;
+        projects = allProjects;
+        orgById = Object.fromEntries(orgs.map((o) => [o.id, o]));
+
+        document.getElementById("bm-base-service").innerHTML =
+          `<option value="">No base service</option>` +
+          SERVICE_TYPES.filter((s) => s.priceFloor > 0)
+            .map((s) => `<option value="${s.id}">${escapeHtml(s.label)} — from ${formatINR(s.priceFloor)}${s.recurring ? "/mo" : ""}</option>`)
+            .join("");
+
+        document.getElementById("bm-intake-project").innerHTML = projects
+          .map((p) => `<option value="${p.id}">${escapeHtml(orgById[p.orgId]?.name || p.orgId)}</option>`)
+          .join("");
+
+        document.getElementById("bm-loading").hidden = true;
+        document.getElementById("bm-main").hidden = false;
+        renderAll();
+      }
+
+      load();
+    </script>
+  </body>
+</html>

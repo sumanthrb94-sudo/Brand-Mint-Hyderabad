@@ -352,15 +352,265 @@ export function probeProjectAccess(projectId) {
 // studio that has not been hired — it is a target, not this month's bar.
 export const BREAK_EVEN_MONTHLY = 100000;
 
+// priceFloor is the published "from" price. These six are verified to match
+// both the live marketing site and brand-mint-admin/03-SERVICE-CATALOG.md
+// exactly, so they are safe to hardcode. Add-on prices are NOT hardcoded —
+// see FEATURE_CATALOG.
 export const SERVICE_TYPES = [
-  { id: "site", label: "Custom website" },
-  { id: "tool", label: "Custom internal tool" },
-  { id: "brand", label: "Brand system" },
-  { id: "media", label: "Performance media" },
-  { id: "seo", label: "SEO & content engine" },
-  { id: "ai", label: "AI integration" },
-  { id: "internal", label: "Internal build" },
+  { id: "site", label: "Custom website", priceFloor: 200000, recurring: false },
+  { id: "tool", label: "Custom internal tool", priceFloor: 400000, recurring: false },
+  { id: "brand", label: "Brand system", priceFloor: 150000, recurring: false },
+  { id: "media", label: "Performance media", priceFloor: 100000, recurring: true },
+  { id: "seo", label: "SEO & content engine", priceFloor: 75000, recurring: true },
+  { id: "ai", label: "AI integration", priceFloor: 200000, recurring: false },
+  { id: "internal", label: "Internal build", priceFloor: 0, recurring: false },
 ];
+
+// Standing commercial terms. Every one of these is stated in the service
+// catalog — none is invented.
+export const SCOPE_TERMS = {
+  warrantyDays: 30,
+  reviewRoundsIncluded: 2,
+  extraReviewRoundPrice: 15000,
+  paymentSchedule: "50% advance to start, 50% at launch",
+  gst: "GST extra",
+  freeAfterLaunch: "Bugs — anything that does not behave as specified in this document — are fixed free for 30 days after launch.",
+  chargeable: [
+    "Design changes after sign-off",
+    "New integrations not listed below",
+    "Additional pages, screens or features",
+    "Review rounds beyond the two included",
+  ],
+  chargeableRule:
+    "Any of the above requires either a new fixed-scope contract or an open retainer. We will quote before starting, never after.",
+};
+
+// Add-on features. Deliberately NO prices here — a wrong number in a
+// client-facing quote is a direct financial loss, so prices are set once by
+// the admin on /quote and stored in Firestore. `requires` is the access a
+// client must grant, always phrased so no password is ever requested.
+// `needsServer` marks features that cannot run on this static architecture
+// and require Vercel serverless functions — that is a cost and a decision,
+// not a detail.
+export const FEATURE_CATEGORIES = [
+  { id: "commerce", label: "Commerce" },
+  { id: "support", label: "Support & comms" },
+  { id: "content", label: "Content & media" },
+  { id: "automation", label: "Automation" },
+  { id: "platform", label: "Platform" },
+];
+
+export const FEATURE_CATALOG = [
+  {
+    id: "cod",
+    label: "Cash on delivery",
+    category: "commerce",
+    needsServer: false,
+    delivers: ["COD checkout without a payment gateway", "Order confirmation screen", "Admin order list"],
+    requires: ["Delivery pin codes you serve", "COD order value limits, if any"],
+    skeleton: ["cart module", "COD checkout flow", "order store", "admin order list"],
+  },
+  {
+    id: "payments-razorpay",
+    label: "Online payments (Razorpay)",
+    category: "commerce",
+    needsServer: true,
+    delivers: ["Cards, UPI and netbanking checkout", "Payment webhook and reconciliation", "Refund initiation from admin"],
+    requires: [
+      "Razorpay account — add hello@brandmintstudios.in as a team member on your own account",
+      "Business PAN and GSTIN for Razorpay KYC",
+      "Settlement bank account already verified inside Razorpay",
+    ],
+    skeleton: ["checkout module", "payment webhook handler (serverless)", "order state machine", "reconciliation view"],
+  },
+  {
+    id: "returns-refunds",
+    label: "Returns & refunds",
+    category: "commerce",
+    needsServer: true,
+    delivers: ["Customer-initiated return request", "Return approval queue for you", "Refund trigger back to the gateway"],
+    requires: ["Your written returns policy and window", "Who approves a return", "Restocking rules, if any"],
+    skeleton: ["return request form", "approval queue", "refund handler (serverless)", "status notifications"],
+  },
+  {
+    id: "invoicing-gst",
+    label: "GST invoicing",
+    category: "commerce",
+    needsServer: true,
+    delivers: ["GST-compliant invoice per order", "Sequential invoice numbering", "PDF download and email"],
+    requires: [
+      "GSTIN, registered legal name and address",
+      "HSN/SAC codes for what you sell",
+      "Invoice series prefix you want to use",
+    ],
+    skeleton: ["invoice generator (serverless)", "numbering sequence", "PDF template", "email dispatch"],
+  },
+  {
+    id: "inventory",
+    label: "Inventory management",
+    category: "commerce",
+    needsServer: false,
+    delivers: ["Stock count per product", "Out-of-stock handling at checkout", "Low-stock view for you"],
+    requires: ["Opening stock per SKU", "Low-stock threshold you want alerting on"],
+    skeleton: ["product/SKU model", "stock decrement on order", "low-stock view"],
+  },
+  {
+    id: "fulfilment-tracking",
+    label: "Fulfilment & order tracking",
+    category: "commerce",
+    needsServer: true,
+    delivers: ["Order status pipeline", "Customer-facing tracking page", "Courier AWB capture"],
+    requires: [
+      "Courier or aggregator you use — add hello@brandmintstudios.in as a user on that account",
+      "Your fulfilment stages, in order",
+    ],
+    skeleton: ["status pipeline", "tracking page", "courier webhook (serverless)"],
+  },
+  {
+    id: "chat-support",
+    label: "Chat support",
+    category: "support",
+    needsServer: true,
+    delivers: ["In-site chat widget", "Conversation inbox", "Office-hours and away handling"],
+    requires: [
+      "Chat provider account if you have a preference — add hello@brandmintstudios.in as a user",
+      "Who answers, and during which hours",
+    ],
+    skeleton: ["chat widget", "inbox view", "availability rules"],
+  },
+  {
+    id: "auto-replies",
+    label: "Automated replies",
+    category: "automation",
+    needsServer: true,
+    delivers: ["Auto-response to common questions", "Escalation to a human on no-match", "Reply log you can audit"],
+    requires: ["Your top questions and the answers you want given", "What must always escalate to a human"],
+    skeleton: ["intent matcher", "reply templates", "escalation rule", "audit log"],
+  },
+  {
+    id: "notifications",
+    label: "Email & SMS notifications",
+    category: "support",
+    needsServer: true,
+    delivers: ["Order and shipping notifications", "Templated sender identity", "Delivery/failure log"],
+    requires: [
+      "Sending domain — add hello@brandmintstudios.in to your DNS or email provider as a user",
+      "SMS provider account if SMS is wanted",
+      "Approved message wording",
+    ],
+    skeleton: ["template set", "dispatch queue (serverless)", "delivery log"],
+  },
+  {
+    id: "image-system",
+    label: "Image system",
+    category: "content",
+    needsServer: false,
+    delivers: ["Responsive image pipeline", "Automatic compression and modern formats", "Consistent product crops"],
+    requires: ["Source images at highest available resolution", "Crop ratio and background preference"],
+    skeleton: ["image pipeline", "responsive srcset", "placeholder strategy"],
+  },
+  {
+    id: "video-system",
+    label: "Video system (Higgsfield)",
+    category: "content",
+    needsServer: true,
+    delivers: ["Generated product/brand video", "Hosting and playback", "Repeatable render pipeline"],
+    requires: [
+      "Higgsfield account — add hello@brandmintstudios.in as a user on your own account",
+      "Brand assets and any script or shot direction",
+      "Written confirmation you hold rights to all source material",
+    ],
+    skeleton: ["render pipeline (serverless)", "asset store", "player embed"],
+  },
+  {
+    id: "instagram",
+    label: "Instagram integration",
+    category: "automation",
+    needsServer: true,
+    delivers: ["Feed embed on site", "Scheduled posting", "Comment and DM auto-reply"],
+    requires: [
+      "Instagram Business account linked to a Facebook Page",
+      "Add hello@brandmintstudios.in as a user in Meta Business Suite — never send login details",
+      "Confirmation you accept Meta's automated-messaging policies",
+    ],
+    skeleton: ["Meta Graph API client (serverless)", "token refresh job", "scheduler", "reply automation"],
+  },
+  {
+    id: "analytics",
+    label: "Analytics dashboard",
+    category: "platform",
+    needsServer: false,
+    delivers: ["Traffic and conversion view", "Privacy-friendly, no cookie banner needed", "Monthly summary"],
+    requires: ["Which events matter to you", "Analytics account — add hello@brandmintstudios.in as a user"],
+    skeleton: ["event instrumentation", "dashboard view"],
+  },
+  {
+    id: "multi-language",
+    label: "Multi-language",
+    category: "platform",
+    needsServer: false,
+    delivers: ["Language switcher", "Translated content model", "Per-language SEO tags"],
+    requires: ["Languages wanted", "Who supplies and signs off translations"],
+    skeleton: ["i18n content model", "language switcher", "hreflang tags"],
+  },
+  {
+    id: "play-store-apk",
+    label: "Play Store APK",
+    category: "platform",
+    needsServer: false,
+    delivers: ["Installable Android build of the web app", "Store listing assets", "Submission support"],
+    requires: [
+      "Google Play Developer account — add hello@brandmintstudios.in as a user on your own account",
+      "App icon, screenshots and store description",
+      "Privacy policy URL (required by Google)",
+    ],
+    skeleton: ["app shell wrapper", "store assets", "signing and submission"],
+  },
+];
+
+// --- Feature pricing (admin sets these; never hardcoded) --------------------
+
+export async function getFeaturePricing() {
+  const snap = await getDocs(collection(db, "catalog"));
+  return Object.fromEntries(snap.docs.map((d) => [d.id, d.data()]));
+}
+
+export async function setFeaturePricing(featureId, { price, priceType, buildDays }) {
+  await setDoc(
+    doc(db, "catalog", featureId),
+    {
+      price: price === "" || price === null || price === undefined ? null : Number(price),
+      priceType: priceType || "fixed",
+      buildDays: buildDays === "" || buildDays === null || buildDays === undefined ? null : Number(buildDays),
+    },
+    { merge: true }
+  );
+}
+
+// Turns the features chosen for a quote into real intake items on a project,
+// so what the client must supply becomes dated blockers they can see on
+// /onboarding instead of living in an email nobody re-reads.
+export async function pushRequirementsToIntake(projectId, featureIds) {
+  const chosen = FEATURE_CATALOG.filter((f) => featureIds.includes(f.id));
+  const batch = writeBatch(db);
+  let count = 0;
+  for (const feature of chosen) {
+    for (const requirement of feature.requires) {
+      batch.set(doc(collection(db, "projects", projectId, "intake")), {
+        label: `${feature.label}: ${requirement}`,
+        // Anything mentioning an account or being added as a user is access;
+        // everything else is an asset the client owes us.
+        group: /account|add hello@|user on|DNS|GSTIN|PAN/i.test(requirement) ? "access" : "assets",
+        done: false,
+        raisedAt: serverTimestamp(),
+        clearedAt: null,
+      });
+      count++;
+    }
+  }
+  await batch.commit();
+  return count;
+}
 
 // Milestone templates per service type. `offsetDays` is measured from a start
 // date the admin picks at apply time — no date is ever invented here, the
