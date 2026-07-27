@@ -4,6 +4,17 @@ node_modules/
 .env.*
 !.env.example
 !**/.env.example
+
+# Firebase service account keys. These are ROOT credentials: they bypass every
+# rule in firestore.rules, they never expire, and nothing in this project needs
+# one (there is no server — see CLAUDE.md section 3). If a file matching these
+# ever appears, do not commit it, do not paste it, revoke it in the console.
+*adminsdk*.json
+*service-account*.json
+*serviceaccount*.json
+serviceAccountKey.json
+firebase-adminsdk-*.json
+*-firebase-adminsdk-*.json
 .vscode/
 .idea/
 dist/
