@@ -25,7 +25,9 @@ import {
   assertFails,
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
+import {
+  doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where,
+} from "firebase/firestore";
 
 const ADMIN_EMAIL = "admin@brandmintstudios.in";
 let env;
@@ -254,4 +256,45 @@ test("a signed-in user with no users document can read nothing", async () => {
   await assertFails(getDoc(doc(ghost, "organisations/greenbasket")));
   await assertFails(getDoc(doc(ghost, "projects/gb-project")));
   await assertFails(getDoc(doc(ghost, "invoices/gb-1")));
+});
+
+
+/* ── listing, not just reading one document ────────────────────
+   The portal's core query is "give me my projects", a LIST. Every test above
+   reads a single document, and a rule can permit get while denying list —
+   which is exactly what happened: `mine(pid)` calls get(/projects/$(pid)),
+   and on a list the wildcard is unbound, so it resolved to /projects/null and
+   failed with "Null value error". Clients could never list their projects and
+   nothing here noticed. */
+
+test("a client can LIST their own projects, not only read one", async () => {
+  await assertSucceeds(
+    getDocs(query(collection(client(), "projects"), where("orgId", "==", "greenbasket")))
+  );
+});
+
+test("a client cannot list ALL projects", async () => {
+  await assertFails(getDocs(collection(client(), "projects")));
+});
+
+test("a client cannot list another org's projects", async () => {
+  await assertFails(
+    getDocs(query(collection(client(), "projects"), where("orgId", "==", "tresor")))
+  );
+});
+
+test("a client can LIST their own invoices", async () => {
+  await assertSucceeds(
+    getDocs(query(collection(client(), "invoices"), where("orgId", "==", "greenbasket")))
+  );
+});
+
+test("a client cannot list another org's invoices", async () => {
+  await assertFails(
+    getDocs(query(collection(client(), "invoices"), where("orgId", "==", "tresor")))
+  );
+});
+
+test("an admin can list every project", async () => {
+  await assertSucceeds(getDocs(collection(admin(), "projects")));
 });

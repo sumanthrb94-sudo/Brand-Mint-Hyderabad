@@ -4,6 +4,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getAuth,
+  connectAuthEmulator,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
@@ -21,7 +22,9 @@ import {
   where,
   getDocs,
   writeBatch,
+  runTransaction,
   serverTimestamp,
+  connectFirestoreEmulator,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -36,6 +39,32 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+/* Local emulators, and ONLY on a local host.
+ *
+ * The whole journey — a lead becoming a signed client, an intake item being
+ * ticked, an invoice being paid — cannot be rehearsed against production
+ * without inventing fake clients in the real database, which is exactly what
+ * this project forbids. It has to be rehearsed somewhere, so it is rehearsed
+ * here.
+ *
+ * The gate is the hostname, checked against an explicit list. Not "is not
+ * brandmintstudios.in", because a negative test passes for every host nobody
+ * thought of, including a Vercel preview URL — and a preview silently talking
+ * to an emulator that is not running would look exactly like the database
+ * being down. A positive list can only be wrong in the safe direction.
+ */
+const LOCAL_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "[::1]"];
+export const USING_EMULATOR =
+  typeof location !== "undefined" && LOCAL_HOSTS.includes(location.hostname);
+
+if (USING_EMULATOR) {
+  connectAuthEmulator(auth, `http://${location.hostname}:9099`, { disableWarnings: true });
+  connectFirestoreEmulator(db, location.hostname, 8080);
+  // Loud on purpose. Silence here would leave you wondering why production
+  // data is missing when you are simply not looking at production.
+  console.info("[bm] Firebase emulators — nothing here touches the live project.");
+}
 
 export const ADMIN_EMAIL = "admin@brandmintstudios.in";
 const USERNAME_DOMAIN = "brandmintstudios.in";
@@ -849,8 +878,106 @@ export async function deleteLead(id) {
 
 // First response is first — once stamped it is never moved, or the metric
 // stops meaning anything.
+/**
+ * Stamps the first response, once.
+ *
+ * It used to write unconditionally, so pressing the button a second time reset
+ * the clock — a lead answered three days late became zero minutes, and the
+ * single most valuable number in the business quietly became decoration.
+ * CLAUDE.md said "stamped once and never moved" the whole time; the code did
+ * not do it.
+ *
+ * A transaction rather than a read-then-write, because two admins on the same
+ * lead would otherwise both see null and both write.
+ *
+ * Returns { stamped, at } — stamped false means it already had a date, which
+ * the caller should say rather than silently doing nothing.
+ */
 export async function markLeadFirstResponse(id) {
-  await updateDoc(doc(db, "leads", id), { firstResponseAt: serverTimestamp() });
+  const ref = doc(db, "leads", id);
+  return runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) return { stamped: false, at: null };
+    const existing = snap.data().firstResponseAt;
+    if (existing) return { stamped: false, at: existing };
+    tx.update(ref, { firstResponseAt: serverTimestamp() });
+    return { stamped: true, at: null };
+  });
+}
+
+// --- Organisations, projects, invoices (admin only) -------------------------
+//
+// These existed only as seed data until now. The admin could add milestones,
+// intake and deliverables to a project that already existed, and manage leads
+// — but there was no way to create the client, the project or the invoice in
+// the first place. Onboarding a real client was impossible without editing
+// Firestore by hand, which is not a workflow, it is a workaround.
+
+/**
+ * A new client, internal team, or archived org.
+ *
+ * `retainerStatus` defaults to "proposed", never "signed". Signing is a
+ * separate, deliberate act — a retainer that counts as revenue the moment it
+ * is typed is how a dashboard starts flattering its owner.
+ */
+export async function createOrg({ name, kind, status, retainer, retainerStatus, note }) {
+  const ref = await addDoc(collection(db, "organisations"), {
+    name: String(name || "").trim(),
+    kind: kind || "client",
+    status: status || "active",
+    retainer: Number(retainer) || 0,
+    retainerStatus: retainerStatus || "proposed",
+    note: note || "",
+  });
+  return ref.id;
+}
+
+export async function updateOrg(orgId, data) {
+  await updateDoc(doc(db, "organisations", orgId), data);
+}
+
+/**
+ * A new project for an org.
+ *
+ * `progress` is null, not 0. Zero draws an empty bar that reads as "started,
+ * nothing done"; null renders as unrecorded, which is the truth on day one.
+ * `dueAt` is only set if the admin supplies one — no date is ever invented.
+ */
+export async function createProject({ orgId, name, type, dueAt, billable }) {
+  const ref = await addDoc(collection(db, "projects"), {
+    orgId,
+    name: String(name || "").trim(),
+    type: type || null,
+    dueAt: dueAt ? new Date(dueAt) : null,
+    progress: null,
+    billable: billable !== false,
+  });
+  return ref.id;
+}
+
+export async function deleteProject(projectId) {
+  await deleteDoc(doc(db, "projects", projectId));
+}
+
+/** An invoice. Always created `due` — an invoice is not paid until money
+ *  arrives, and there is no path that creates one already settled. */
+export async function createInvoice({ orgId, label, amount, dueAt }) {
+  const ref = await addDoc(collection(db, "invoices"), {
+    orgId,
+    label: String(label || "").trim(),
+    amount: Number(amount) || 0,
+    status: "due",
+    dueAt: dueAt ? new Date(dueAt) : null,
+  });
+  return ref.id;
+}
+
+export async function updateInvoice(invoiceId, data) {
+  await updateDoc(doc(db, "invoices", invoiceId), data);
+}
+
+export async function deleteInvoice(invoiceId) {
+  await deleteDoc(doc(db, "invoices", invoiceId));
 }
 
 // --- Projects (admin only) --------------------------------------------------

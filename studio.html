@@ -184,6 +184,96 @@
         </section>
 
         <section class="bm-card" data-sect="clients">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+            <p class="bm-eyebrow" style="margin:0;">Onboarding</p>
+            <button type="button" class="bm-help" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">Playbook</button>
+          </div>
+          <h2 class="bm-card-title" style="margin-bottom:6px;">Add a client</h2>
+          <p class="bm-row-sub" style="margin-bottom:14px;">
+            Creates the organisation. A retainer starts as <strong>proposed</strong> and is not
+            counted as revenue until you mark it signed — a number that flatters you is worse
+            than no number.
+          </p>
+          <form id="bm-new-org" class="bm-form">
+            <div class="bm-field">
+              <label for="bm-org-name">Business name</label>
+              <input id="bm-org-name" placeholder="Green Basket" required />
+            </div>
+            <div class="bm-field">
+              <label for="bm-org-kind">Kind</label>
+              <select id="bm-org-kind">
+                <option value="client">Client</option>
+                <option value="internal">Internal</option>
+              </select>
+            </div>
+            <div class="bm-field">
+              <label for="bm-org-retainer">Monthly retainer (Rs, 0 if none)</label>
+              <input id="bm-org-retainer" type="number" min="0" step="500" value="0" />
+            </div>
+            <button type="submit" class="bm-btn bm-btn--sm">Add client</button>
+            <p class="bm-status" id="bm-new-org-status" hidden></p>
+          </form>
+        </section>
+
+        <section class="bm-card" data-sect="delivery">
+          <p class="bm-eyebrow">Onboarding</p>
+          <h2 class="bm-card-title" style="margin-bottom:6px;">Add a project</h2>
+          <p class="bm-row-sub" style="margin-bottom:14px;">
+            Progress stays unrecorded until there is something real to record. A zero draws an
+            empty bar that reads as started-and-stalled.
+          </p>
+          <form id="bm-new-project" class="bm-form">
+            <div class="bm-field">
+              <label for="bm-proj-org">Client</label>
+              <select id="bm-proj-org" required></select>
+            </div>
+            <div class="bm-field">
+              <label for="bm-proj-name">Project name</label>
+              <input id="bm-proj-name" placeholder="Green Basket store" required />
+            </div>
+            <div class="bm-field">
+              <label for="bm-proj-type">Type</label>
+              <select id="bm-proj-type"></select>
+            </div>
+            <div class="bm-field">
+              <label for="bm-proj-due">Due date (optional)</label>
+              <input id="bm-proj-due" type="date" />
+            </div>
+            <button type="submit" class="bm-btn bm-btn--sm">Add project</button>
+            <p class="bm-status" id="bm-new-project-status" hidden></p>
+          </form>
+        </section>
+
+        <section class="bm-card" data-sect="money">
+          <p class="bm-eyebrow">Billing</p>
+          <h2 class="bm-card-title" style="margin-bottom:6px;">Raise an invoice</h2>
+          <p class="bm-row-sub" style="margin-bottom:14px;">
+            Appears on the client's portal immediately, with a Pay button if online payment is
+            switched on. Always created unpaid — money is counted when it arrives.
+          </p>
+          <form id="bm-new-invoice" class="bm-form">
+            <div class="bm-field">
+              <label for="bm-inv-org">Client</label>
+              <select id="bm-inv-org" required></select>
+            </div>
+            <div class="bm-field">
+              <label for="bm-inv-label">What it is for</label>
+              <input id="bm-inv-label" placeholder="50% advance" required />
+            </div>
+            <div class="bm-field">
+              <label for="bm-inv-amount">Amount (Rs)</label>
+              <input id="bm-inv-amount" type="number" min="1" step="100" required />
+            </div>
+            <div class="bm-field">
+              <label for="bm-inv-due">Due date (optional)</label>
+              <input id="bm-inv-due" type="date" />
+            </div>
+            <button type="submit" class="bm-btn bm-btn--sm">Raise invoice</button>
+            <p class="bm-status" id="bm-new-invoice-status" hidden></p>
+          </form>
+        </section>
+
+        <section class="bm-card" data-sect="clients">
           <p class="bm-eyebrow">Active clients</p>
           <div class="bm-table-wrap">
             <table class="bm-table">
@@ -265,6 +355,9 @@
         syncPayments,
         paymentError,
         dedupeIntake,
+        createOrg,
+        createProject,
+        createInvoice,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
@@ -498,7 +591,12 @@
         if (!btn) return;
         if (btn.dataset.action === "respond") {
           btn.disabled = true;
-          await markLeadFirstResponse(btn.dataset.id);
+          const r = await markLeadFirstResponse(btn.dataset.id);
+          // Say when nothing happened. Silently doing nothing looks identical
+          // to it working, and the whole point is that this date never moves.
+          if (r && r.stamped === false) {
+            alert("This lead already has a first response recorded. That date never moves — it is the number the whole funnel is measured against.");
+          }
           return load();
         }
         if (btn.dataset.action === "delete-lead") {
@@ -1029,10 +1127,15 @@
         // "on track".
         const deliveryBody = document.getElementById("bm-delivery-body");
         const activeProjects = projects.filter((p) => orgById[p.orgId]?.status === "active");
+        // Declared out here on purpose: the Today panel is rendered after this
+        // block and needs these facts in BOTH branches. Declaring it inside the
+        // else meant Today crashed when there were projects, and never rendered
+        // at all when there were none — so an empty system showed an empty
+        // panel instead of saying it was empty.
+        const deliveryFacts = [];
         if (!activeProjects.length) {
           deliveryBody.innerHTML = '<tr><td colspan="4" class="bm-empty">No active projects yet.</td></tr>';
         } else {
-          const deliveryFacts = [];
           const rows = await Promise.all(
             activeProjects.map(async (p) => {
               const [milestones, intake] = await Promise.all([getMilestones(p.id), getIntake(p.id)]);
@@ -1124,6 +1227,7 @@
           activeProjectCount: activeProjects.length,
         });
 
+        fillOrgSelects(orgs);
         await renderManageProjects(projects, orgById);
 
         // --- Org tables ---
@@ -1161,6 +1265,102 @@
 
       /* Playbooks. Capturing, so a Playbook button inside a clickable row
          opens the drawer without also triggering the row. */
+      /* Onboarding forms.
+         These are new because the product had no way to create a client, a
+         project or an invoice — only a seed button that writes fixed demo
+         data. Onboarding a real client meant editing Firestore by hand, which
+         is not a workflow, it is a workaround. */
+
+      function fillOrgSelects(orgs) {
+        const options = orgs
+          .filter((o) => o.status === "active")
+          .map((o) => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.name)}</option>`)
+          .join("");
+        for (const id of ["bm-proj-org", "bm-inv-org"]) {
+          const el = document.getElementById(id);
+          if (!el) continue;
+          const keep = el.value;
+          el.innerHTML = options || `<option value="">Add a client first</option>`;
+          if (keep) el.value = keep;
+        }
+        const typeSel = document.getElementById("bm-proj-type");
+        if (typeSel && !typeSel.options.length) {
+          typeSel.innerHTML =
+            `<option value="">Not set</option>` +
+            SERVICE_TYPES.map((t) => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.label)}</option>`).join("");
+        }
+      }
+
+      function say(id, message, ok = true) {
+        const el = document.getElementById(id);
+        el.hidden = false;
+        el.className = `bm-status bm-status--${ok ? "ok" : "error"}`;
+        el.textContent = message;
+      }
+
+      document.getElementById("bm-new-org").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("bm-org-name").value.trim();
+        if (!name) return;
+        try {
+          await createOrg({
+            name,
+            kind: document.getElementById("bm-org-kind").value,
+            status: "active",
+            retainer: Number(document.getElementById("bm-org-retainer").value) || 0,
+            retainerStatus: "proposed",
+          });
+          say("bm-new-org-status", `${name} added. The retainer is proposed — mark it signed once it actually is.`);
+          e.target.reset();
+          await load();
+        } catch (err) {
+          say("bm-new-org-status", "Could not add: " + (err?.message || err), false);
+        }
+      });
+
+      document.getElementById("bm-new-project").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const orgId = document.getElementById("bm-proj-org").value;
+        const name = document.getElementById("bm-proj-name").value.trim();
+        if (!orgId || !name) {
+          say("bm-new-project-status", "Pick a client and give the project a name.", false);
+          return;
+        }
+        try {
+          await createProject({
+            orgId,
+            name,
+            type: document.getElementById("bm-proj-type").value || null,
+            dueAt: document.getElementById("bm-proj-due").value || null,
+            billable: true,
+          });
+          say("bm-new-project-status", `${name} created. Apply a milestone template next so the client can see where it is going.`);
+          e.target.reset();
+          await load();
+        } catch (err) {
+          say("bm-new-project-status", "Could not add: " + (err?.message || err), false);
+        }
+      });
+
+      document.getElementById("bm-new-invoice").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const orgId = document.getElementById("bm-inv-org").value;
+        const label = document.getElementById("bm-inv-label").value.trim();
+        const amount = Number(document.getElementById("bm-inv-amount").value);
+        if (!orgId || !label || !(amount > 0)) {
+          say("bm-new-invoice-status", "Pick a client, say what it is for, and give an amount above zero.", false);
+          return;
+        }
+        try {
+          await createInvoice({ orgId, label, amount, dueAt: document.getElementById("bm-inv-due").value || null });
+          say("bm-new-invoice-status", `${label} for ${formatINR(amount)} raised. The client can see it now.`);
+          e.target.reset();
+          await load();
+        } catch (err) {
+          say("bm-new-invoice-status", "Could not raise it: " + (err?.message || err), false);
+        }
+      });
+
       /* The Today panel.
          Every line is a fact computed from the data on this page, written as a
          sentence rather than a metric, with the button that fixes it attached.
