@@ -197,18 +197,21 @@ const SEED_ORGS = [
   { id: "simplysip", name: "SimplySip", kind: "client", status: "archived", retainer: 0, retainerStatus: "none" },
 ];
 
-// type/dueAt/progress are set on every project so the schema is complete and
-// the portal always has something consistent to render — but only with
-// facts we actually have. `type` is a plain category, not a fabricated
-// business detail; dueAt stays null and progress stays 0 rather than
-// inventing a schedule or a completion percentage nobody has confirmed.
+// `type` uses the service-catalog vocabulary (see SERVICE_TYPES) so milestone
+// templates can key off it. It is set only where the evidence is unambiguous —
+// Inventory Manager is a tool, Green Basket is a COD web app, Modcon HR is the
+// internal build. Tresor and SimplySip are left null rather than guessed; the
+// admin picks their type in one click on /studio.
+// dueAt stays null and progress stays null rather than inventing a schedule or
+// a completion percentage nobody has confirmed. null progress renders as
+// "not set", never as a reassuring 0% bar.
 const SEED_PROJECTS = [
-  { id: "inventory-project", orgId: "inventory", name: "Inventory Manager", type: "web", dueAt: null, progress: 0, billable: true },
-  { id: "greenbasket-project", orgId: "greenbasket", name: "Green Basket", type: "web+mobile", dueAt: null, progress: 0, billable: true },
-  { id: "tresor-project", orgId: "tresor", name: "Tresor Couture", type: "web", dueAt: null, progress: 0, billable: false },
-  { id: "modcon-project", orgId: "modcon", name: "Modcon HR", type: "internal", dueAt: null, progress: 0, billable: false },
+  { id: "inventory-project", orgId: "inventory", name: "Inventory Manager", type: "tool", dueAt: null, progress: null, billable: true },
+  { id: "greenbasket-project", orgId: "greenbasket", name: "Green Basket", type: "site", dueAt: null, progress: null, billable: true },
+  { id: "tresor-project", orgId: "tresor", name: "Tresor Couture", type: null, dueAt: null, progress: null, billable: false },
+  { id: "modcon-project", orgId: "modcon", name: "Modcon HR", type: "internal", dueAt: null, progress: null, billable: false },
   // Archived org — never billable.
-  { id: "simplysip-project", orgId: "simplysip", name: "SimplySip", type: "web", dueAt: null, progress: 0, billable: false },
+  { id: "simplysip-project", orgId: "simplysip", name: "SimplySip", type: null, dueAt: null, progress: null, billable: false },
 ];
 
 const SEED_INVOICES = [
@@ -313,6 +316,205 @@ export async function deleteDeliverable(projectId, id) {
   await deleteDoc(doc(db, "projects", projectId, "deliverables", id));
 }
 
+// --- Tenancy probes ---------------------------------------------------------
+// Used by /tenancy-check to demonstrate isolation from a real client session
+// rather than assuming it. A probe never writes; a rules rejection is the
+// expected, successful outcome for a foreign tenant.
+
+export const SEED_ORG_IDS = SEED_ORGS.map((o) => o.id);
+export const SEED_PROJECT_IDS = SEED_PROJECTS.map((p) => p.id);
+
+async function probe(ref) {
+  try {
+    const snap = await getDoc(ref);
+    return { allowed: true, exists: snap.exists() };
+  } catch (err) {
+    return { allowed: false, code: err?.code || "unknown", message: err?.message || String(err) };
+  }
+}
+
+export function probeOrgAccess(orgId) {
+  return probe(doc(db, "organisations", orgId));
+}
+
+export function probeProjectAccess(projectId) {
+  return probe(doc(db, "projects", projectId));
+}
+
+// --- Business structure -----------------------------------------------------
+// Shapes (not numbers, not client facts) lifted from the studio's own service
+// catalog and sales playbook in brand-mint-admin/. These describe how work and
+// deals are structured here; they never seed data on their own.
+
+// The one break-even constant. Do not scatter copies of this number.
+// This is the solo studio's actual monthly survival line. The ₹6.5L figure in
+// brand-mint-admin/06-FINANCIAL-MODEL.md is a Y1 plan for a three-person
+// studio that has not been hired — it is a target, not this month's bar.
+export const BREAK_EVEN_MONTHLY = 96100;
+
+export const SERVICE_TYPES = [
+  { id: "site", label: "Custom website" },
+  { id: "tool", label: "Custom internal tool" },
+  { id: "brand", label: "Brand system" },
+  { id: "media", label: "Performance media" },
+  { id: "seo", label: "SEO & content engine" },
+  { id: "ai", label: "AI integration" },
+  { id: "internal", label: "Internal build" },
+];
+
+// Milestone templates per service type. `offsetDays` is measured from a start
+// date the admin picks at apply time — no date is ever invented here, the
+// template only supplies the shape and the ownership split.
+export const MILESTONE_TEMPLATES = {
+  site: [
+    { title: "Mint workshop + IA brief", owner: "us", offsetDays: 7 },
+    { title: "Content + assets supplied", owner: "client", offsetDays: 5 },
+    { title: "Design system + key screens", owner: "us", offsetDays: 14 },
+    { title: "Build", owner: "us", offsetDays: 28 },
+    { title: "QA + accessibility pass", owner: "us", offsetDays: 32 },
+    { title: "Launch", owner: "us", offsetDays: 35 },
+  ],
+  tool: [
+    { title: "Architecture review + system diagram", owner: "us", offsetDays: 7 },
+    { title: "Access to systems granted", owner: "client", offsetDays: 5 },
+    { title: "Auth + role-based access", owner: "us", offsetDays: 14 },
+    { title: "Primary screens", owner: "us", offsetDays: 28 },
+    { title: "LLM automation", owner: "us", offsetDays: 35 },
+    { title: "Handover + ownership transfer", owner: "us", offsetDays: 42 },
+  ],
+  brand: [
+    { title: "Discovery + competitor mood-board", owner: "us", offsetDays: 5 },
+    { title: "Three directions presented", owner: "us", offsetDays: 12 },
+    { title: "Direction narrowed to one", owner: "client", offsetDays: 16 },
+    { title: "Final marks + type + colour system", owner: "us", offsetDays: 24 },
+    { title: "Brand book site", owner: "us", offsetDays: 28 },
+  ],
+  media: [
+    { title: "Ad account access granted", owner: "client", offsetDays: 3 },
+    { title: "ICP + funnel + bid plan", owner: "us", offsetDays: 7 },
+    { title: "First creative set", owner: "us", offsetDays: 14 },
+    { title: "Campaigns live", owner: "us", offsetDays: 18 },
+    { title: "Monthly written deep-dive", owner: "us", offsetDays: 30 },
+  ],
+  seo: [
+    { title: "CMS + Search Console access granted", owner: "client", offsetDays: 3 },
+    { title: "SEO audit + roadmap", owner: "us", offsetDays: 10 },
+    { title: "Content calendar agreed", owner: "us", offsetDays: 14 },
+    { title: "First articles published", owner: "us", offsetDays: 30 },
+    { title: "Technical fix sprint", owner: "us", offsetDays: 30 },
+  ],
+  ai: [
+    { title: "Use-case workshop", owner: "us", offsetDays: 7 },
+    { title: "Architecture diagram + cost estimate", owner: "us", offsetDays: 12 },
+    { title: "Implementation + auth + observability", owner: "us", offsetDays: 30 },
+    { title: "Eval suite (top 20 prompts)", owner: "us", offsetDays: 37 },
+    { title: "Documentation + handover", owner: "us", offsetDays: 42 },
+  ],
+  internal: [
+    { title: "Scope agreed", owner: "us", offsetDays: 7 },
+    { title: "Build", owner: "us", offsetDays: 28 },
+    { title: "Ship", owner: "us", offsetDays: 35 },
+  ],
+};
+
+// Funnel stages, in order, from the sales playbook.
+export const LEAD_STAGES = [
+  { id: "inbound", label: "Inbound" },
+  { id: "discovery", label: "Discovery call" },
+  { id: "workshop", label: "Mint workshop" },
+  { id: "proposal", label: "Proposal" },
+  { id: "signed", label: "Signed" },
+  { id: "lost", label: "Lost" },
+];
+
+export const OPEN_LEAD_STAGES = ["inbound", "discovery", "workshop", "proposal"];
+
+// Target conversion between consecutive stages.
+export const FUNNEL_TARGETS = [
+  { from: "inbound", to: "discovery", target: 0.4 },
+  { from: "discovery", to: "workshop", target: 0.5 },
+  { from: "workshop", to: "proposal", target: 0.8 },
+  { from: "proposal", to: "signed", target: 0.6 },
+];
+
+export const LEAD_SOURCES = [
+  { id: "site", label: "Site inbound", targetShare: 0.35 },
+  { id: "warm", label: "Founder warm intro", targetShare: 0.25 },
+  { id: "linkedin", label: "LinkedIn outbound", targetShare: 0.15 },
+  { id: "referral", label: "Partner / referral", targetShare: 0.15 },
+  { id: "writing", label: "Speaking / writing", targetShare: 0.1 },
+];
+
+// Loss reasons and the share at which the playbook says something is broken.
+export const LOSS_REASONS = [
+  { id: "price", label: "Price", alertAbove: 0.3, then: "we are priced wrong" },
+  { id: "timing", label: "Timing", alertAbove: null, then: null },
+  { id: "scope", label: "Scope mismatch", alertAbove: null, then: null },
+  { id: "trust", label: "Trust", alertAbove: 0.25, then: "we need more case studies or referrals" },
+  { id: "politics", label: "Internal politics", alertAbove: null, then: null },
+  { id: "no_reply", label: "No reply", alertAbove: 0.4, then: "discovery to workshop is broken" },
+];
+
+// Median first response in this market is ~42h; under 5 minutes makes
+// qualification roughly 21x more likely. This is the most valuable number
+// in the business — see the handoff doc.
+export const FAST_RESPONSE_MINUTES = 5;
+export const MARKET_MEDIAN_RESPONSE_HOURS = 42;
+
+// --- Leads (admin only) -----------------------------------------------------
+
+export async function addLead({ name, source, stage }) {
+  await addDoc(collection(db, "leads"), {
+    name,
+    source,
+    stage: stage || "inbound",
+    createdAt: serverTimestamp(),
+    firstResponseAt: null,
+    lossReason: null,
+  });
+}
+
+export async function updateLead(id, data) {
+  await updateDoc(doc(db, "leads", id), data);
+}
+
+export async function deleteLead(id) {
+  await deleteDoc(doc(db, "leads", id));
+}
+
+// First response is first — once stamped it is never moved, or the metric
+// stops meaning anything.
+export async function markLeadFirstResponse(id) {
+  await updateDoc(doc(db, "leads", id), { firstResponseAt: serverTimestamp() });
+}
+
+// --- Projects (admin only) --------------------------------------------------
+
+export async function updateProject(projectId, data) {
+  await updateDoc(doc(db, "projects", projectId), data);
+}
+
+// Stamps a service-type template onto a project. `startDate` is supplied by
+// the admin — nothing here guesses a schedule.
+export async function applyMilestoneTemplate(projectId, typeId, startDate) {
+  const template = MILESTONE_TEMPLATES[typeId];
+  if (!template || !startDate) return 0;
+
+  const batch = writeBatch(db);
+  for (const step of template) {
+    const dueAt = new Date(startDate);
+    dueAt.setDate(dueAt.getDate() + step.offsetDays);
+    batch.set(doc(collection(db, "projects", projectId, "milestones")), {
+      title: step.title,
+      owner: step.owner,
+      status: "todo",
+      dueAt,
+    });
+  }
+  await batch.commit();
+  return template.length;
+}
+
 // --- Small shared helpers ---------------------------------------------------
 
 export function daysSince(timestamp) {
@@ -320,6 +522,34 @@ export function daysSince(timestamp) {
   const then = typeof timestamp.toDate === "function" ? timestamp.toDate() : new Date(timestamp);
   const ms = Date.now() - then.getTime();
   return Math.max(0, Math.floor(ms / 86400000));
+}
+
+function toDate(timestamp) {
+  if (!timestamp) return null;
+  const d = typeof timestamp.toDate === "function" ? timestamp.toDate() : new Date(timestamp);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+export function minutesBetween(from, to) {
+  const a = toDate(from);
+  const b = toDate(to);
+  if (!a || !b) return null;
+  return (b.getTime() - a.getTime()) / 60000;
+}
+
+export function minutesSince(timestamp) {
+  const d = toDate(timestamp);
+  if (!d) return null;
+  return (Date.now() - d.getTime()) / 60000;
+}
+
+// "4m", "3.2h", "6d" — keeps a response time readable at every scale.
+export function formatDuration(minutes) {
+  if (minutes === null || minutes === undefined || Number.isNaN(minutes)) return "—";
+  if (minutes < 60) return `${Math.max(0, Math.round(minutes))}m`;
+  const hours = minutes / 60;
+  if (hours < 48) return `${hours.toFixed(1)}h`;
+  return `${Math.floor(hours / 24)}d`;
 }
 
 export function formatDate(timestamp) {
