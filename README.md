@@ -3,6 +3,9 @@
 Marketing site for **Brand Mint**, a digital media & marketing studio that
 builds custom websites and bespoke internal tools.
 
+The client portal and studio dashboard live in [`brandmint-os/`](brandmint-os/README.md) —
+a separate Next.js app in this same repo, deployed as its own Vercel project.
+
 ## Stack
 
 - Static HTML / CSS / JS — no build step
