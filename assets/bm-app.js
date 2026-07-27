@@ -12,7 +12,10 @@ import {
   getFirestore,
   doc,
   getDoc,
+  setDoc,
+  addDoc,
   updateDoc,
+  deleteDoc,
   collection,
   query,
   where,
@@ -194,18 +197,32 @@ const SEED_ORGS = [
   { id: "simplysip", name: "SimplySip", kind: "client", status: "archived", retainer: 0, retainerStatus: "none" },
 ];
 
+// type/dueAt/progress are set on every project so the schema is complete and
+// the portal always has something consistent to render — but only with
+// facts we actually have. `type` is a plain category, not a fabricated
+// business detail; dueAt stays null and progress stays 0 rather than
+// inventing a schedule or a completion percentage nobody has confirmed.
 const SEED_PROJECTS = [
-  { id: "inventory-project", orgId: "inventory", name: "Inventory Manager", billable: true },
-  { id: "greenbasket-project", orgId: "greenbasket", name: "Green Basket", billable: true },
-  { id: "tresor-project", orgId: "tresor", name: "Tresor Couture", billable: false },
-  { id: "modcon-project", orgId: "modcon", name: "Modcon HR", billable: false },
-  { id: "simplysip-project", orgId: "simplysip", name: "SimplySip", billable: true },
+  { id: "inventory-project", orgId: "inventory", name: "Inventory Manager", type: "web", dueAt: null, progress: 0, billable: true },
+  { id: "greenbasket-project", orgId: "greenbasket", name: "Green Basket", type: "web+mobile", dueAt: null, progress: 0, billable: true },
+  { id: "tresor-project", orgId: "tresor", name: "Tresor Couture", type: "web", dueAt: null, progress: 0, billable: false },
+  { id: "modcon-project", orgId: "modcon", name: "Modcon HR", type: "internal", dueAt: null, progress: 0, billable: false },
+  // Archived org — never billable.
+  { id: "simplysip-project", orgId: "simplysip", name: "SimplySip", type: "web", dueAt: null, progress: 0, billable: false },
 ];
 
 const SEED_INVOICES = [
   { id: "greenbasket-inv-deposit", orgId: "greenbasket", label: "Deposit received", amount: 15000, status: "paid" },
   { id: "greenbasket-inv-balance", orgId: "greenbasket", label: "Balance of Rs 95,000 quote", amount: 80000, status: "due" },
   { id: "inventory-inv-retainer", orgId: "inventory", label: "Monthly retainer", amount: 25000, status: "paid" },
+];
+
+// The only two Green Basket deliverables confirmed real — nothing else is
+// invented. Everything else gets entered through the studio's own
+// milestone/intake/deliverable forms.
+const SEED_GREENBASKET_DELIVERABLES = [
+  { id: "cod-web-app", title: "COD-only web application", version: 1, status: "in_review", url: null },
+  { id: "play-store-apk", title: "Play Store APK", version: 1, status: "in_review", url: null },
 ];
 
 // Deterministic IDs + a full overwrite each time make this safe to run
@@ -225,8 +242,75 @@ export async function seedDatabase() {
     const { id, ...data } = invoice;
     batch.set(doc(db, "invoices", id), data);
   }
+  for (const deliverable of SEED_GREENBASKET_DELIVERABLES) {
+    const { id, ...data } = deliverable;
+    batch.set(doc(db, "projects", "greenbasket-project", "deliverables", id), data);
+  }
+
+  // Without this, the admin's own users/{uid} doc never exists and every
+  // rule that calls me()/myOrg() would fail for them too — isAdmin() saves
+  // /studio itself, but nothing else.
+  if (auth.currentUser) {
+    batch.set(doc(db, "users", auth.currentUser.uid), {
+      orgId: "brandmint",
+      role: "admin",
+      name: "Admin",
+      username: "admin",
+    });
+  }
 
   await batch.commit();
+}
+
+// --- Client access (admin only) --------------------------------------------
+
+// The only way a client's users/{uid} doc gets created. No password ever
+// passes through this — that only ever exists in the Firebase Console.
+export async function setClientUser(uid, { orgId, role, name, username }) {
+  await setDoc(doc(db, "users", uid), {
+    orgId,
+    role: role || "client",
+    name,
+    username,
+  });
+}
+
+// --- Admin CRUD: milestones / intake / deliverables ------------------------
+
+export async function addMilestone(projectId, data) {
+  await addDoc(collection(db, "projects", projectId, "milestones"), data);
+}
+export async function updateMilestone(projectId, id, data) {
+  await updateDoc(doc(db, "projects", projectId, "milestones", id), data);
+}
+export async function deleteMilestone(projectId, id) {
+  await deleteDoc(doc(db, "projects", projectId, "milestones", id));
+}
+
+export async function addIntakeItem(projectId, { label, group }) {
+  await addDoc(collection(db, "projects", projectId, "intake"), {
+    label,
+    group,
+    done: false,
+    raisedAt: serverTimestamp(),
+    clearedAt: null,
+  });
+}
+export async function updateIntakeItem(projectId, id, data) {
+  await updateDoc(doc(db, "projects", projectId, "intake", id), data);
+}
+export async function deleteIntakeItem(projectId, id) {
+  await deleteDoc(doc(db, "projects", projectId, "intake", id));
+}
+
+export async function addDeliverable(projectId, data) {
+  await addDoc(collection(db, "projects", projectId, "deliverables"), data);
+}
+export async function updateDeliverable(projectId, id, data) {
+  await updateDoc(doc(db, "projects", projectId, "deliverables", id), data);
+}
+export async function deleteDeliverable(projectId, id) {
+  await deleteDoc(doc(db, "projects", projectId, "deliverables", id));
 }
 
 // --- Small shared helpers ---------------------------------------------------
