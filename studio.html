@@ -52,6 +52,38 @@
           <div id="bm-retainer-list"></div>
         </section>
 
+        <!-- BLOCKER 1: client access -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">Client access</p>
+          <h2 class="bm-card-title" style="margin-bottom:12px;">Give a client a login</h2>
+          <ol style="margin:0 0 20px; padding-left:20px; font-size:13px; color:var(--bm-muted); display:flex; flex-direction:column; gap:6px;">
+            <li>Firebase Console → Authentication → Users → Add user. Use the synthetic email shown below as the email, and set a password <strong>there</strong> — never in this app.</li>
+            <li>Copy the UID from the new row in the console.</li>
+            <li>Paste that UID below, pick the organisation, fill in the display name and username, and save.</li>
+          </ol>
+          <form id="bm-access-form">
+            <div class="bm-field">
+              <label for="bm-access-username">Username</label>
+              <input id="bm-access-username" autocapitalize="none" spellcheck="false" placeholder="greenbasket" required />
+              <span class="bm-row-sub" id="bm-access-email-preview">Signs in as —</span>
+            </div>
+            <div class="bm-field">
+              <label for="bm-access-name">Display name</label>
+              <input id="bm-access-name" placeholder="Green Basket" required />
+            </div>
+            <div class="bm-field">
+              <label for="bm-access-org">Organisation</label>
+              <select id="bm-access-org" required></select>
+            </div>
+            <div class="bm-field">
+              <label for="bm-access-uid">Firebase Auth UID</label>
+              <input id="bm-access-uid" placeholder="paste the UID from the console" required />
+            </div>
+            <button type="submit" class="bm-btn bm-btn--sm">Save</button>
+            <p class="bm-status" id="bm-access-status" hidden></p>
+          </form>
+        </section>
+
         <section class="bm-card">
           <p class="bm-eyebrow">Delivery health</p>
           <h2 class="bm-card-title" style="margin-bottom:16px;">Per-project status</h2>
@@ -63,6 +95,13 @@
               <tbody id="bm-delivery-body"></tbody>
             </table>
           </div>
+        </section>
+
+        <!-- BLOCKER 2(b): milestones / intake / deliverables CRUD -->
+        <section class="bm-card">
+          <p class="bm-eyebrow">Manage projects</p>
+          <h2 class="bm-card-title" style="margin-bottom:16px;">Milestones, intake &amp; deliverables</h2>
+          <div id="bm-manage-projects"></div>
         </section>
 
         <section class="bm-card">
@@ -106,14 +145,28 @@
         getAllLeads,
         getMilestones,
         getIntake,
+        getDeliverables,
         seedDatabase,
+        setClientUser,
+        addMilestone,
+        updateMilestone,
+        deleteMilestone,
+        addIntakeItem,
+        updateIntakeItem,
+        deleteIntakeItem,
+        addDeliverable,
+        updateDeliverable,
+        deleteDeliverable,
+        resolveUsernameToEmail,
         logout,
         daysSince,
+        formatDate,
         formatINR,
         escapeHtml,
       } from "/assets/bm-app.js";
 
       const BREAK_EVEN = 96100;
+      const GROUP_LABEL = { assets: "Assets", content: "Content", access: "Access", decisions: "Decisions" };
 
       document.getElementById("bm-signout").addEventListener("click", async () => {
         await logout();
@@ -127,11 +180,23 @@
         return "bm-pill--red";
       }
 
+      function dateInputValue(ts) {
+        if (!ts) return "";
+        const d = typeof ts.toDate === "function" ? ts.toDate() : new Date(ts);
+        if (Number.isNaN(d.getTime())) return "";
+        return d.toISOString().slice(0, 10);
+      }
+
+      // --- Seed ---
+
       document.getElementById("bm-seed").addEventListener("click", async () => {
         const ok = confirm(
-          "This writes the fixed seed dataset (orgs, projects, invoices) with " +
-            "deterministic IDs. Safe to re-run, but it will overwrite those " +
-            "documents with the seed values. Continue?"
+          "This writes the fixed seed dataset — orgs, projects, invoices, the " +
+            "two confirmed Green Basket deliverables, and your own admin user " +
+            "doc — with deterministic IDs. Safe to re-run, but it will " +
+            "overwrite those specific documents with the seed values (so if " +
+            "a client has already approved one of the two seeded " +
+            "deliverables, re-seeding resets it to in_review). Continue?"
         );
         if (!ok) return;
         const btn = document.getElementById("bm-seed");
@@ -149,6 +214,269 @@
         }
       });
 
+      // --- Client access form ---
+
+      const accessForm = document.getElementById("bm-access-form");
+      const accessUsername = document.getElementById("bm-access-username");
+      const accessEmailPreview = document.getElementById("bm-access-email-preview");
+      const accessOrgSelect = document.getElementById("bm-access-org");
+      const accessStatus = document.getElementById("bm-access-status");
+
+      function updateEmailPreview() {
+        const email = resolveUsernameToEmail(accessUsername.value || "username");
+        accessEmailPreview.textContent = `Signs in as ${email}`;
+      }
+      accessUsername.addEventListener("input", updateEmailPreview);
+      updateEmailPreview();
+
+      accessForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        accessStatus.hidden = true;
+
+        const uid = document.getElementById("bm-access-uid").value.trim();
+        const name = document.getElementById("bm-access-name").value.trim();
+        const orgId = accessOrgSelect.value;
+        const email = resolveUsernameToEmail(accessUsername.value);
+        const username = email.split("@")[0];
+
+        if (!uid || !name || !orgId || !username) {
+          accessStatus.hidden = false;
+          accessStatus.className = "bm-status bm-status--error";
+          accessStatus.textContent = "Fill in every field.";
+          return;
+        }
+
+        const submitBtn = accessForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        try {
+          await setClientUser(uid, { orgId, role: "client", name, username });
+          accessStatus.hidden = false;
+          accessStatus.className = "bm-status bm-status--ok";
+          accessStatus.textContent = `Saved. ${username} signs in with ${email} and whatever password you set in the Firebase Console.`;
+          accessForm.reset();
+          updateEmailPreview();
+        } catch (err) {
+          accessStatus.hidden = false;
+          accessStatus.className = "bm-status bm-status--error";
+          accessStatus.textContent = "Couldn't save: " + (err?.message || err);
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      // --- Manage projects: milestones / intake / deliverables ---
+
+      function readRow(row, fields) {
+        const out = {};
+        for (const f of fields) {
+          const el = row.querySelector(`[data-field="${f}"]`);
+          if (!el) continue;
+          out[f] = el.type === "checkbox" ? el.checked : el.value;
+        }
+        return out;
+      }
+
+      function milestoneRowHtml(pid, m) {
+        return `<div class="bm-manage-row" data-milestone="${m.id}">
+          <input class="bm-mn-title" data-field="title" value="${escapeHtml(m.title || "")}" placeholder="Title" />
+          <select data-field="owner">
+            <option value="us" ${m.owner === "us" ? "selected" : ""}>Us</option>
+            <option value="client" ${m.owner === "client" ? "selected" : ""}>Client</option>
+          </select>
+          <select data-field="status">
+            <option value="todo" ${m.status === "todo" ? "selected" : ""}>To do</option>
+            <option value="in_progress" ${m.status === "in_progress" ? "selected" : ""}>In progress</option>
+            <option value="done" ${m.status === "done" ? "selected" : ""}>Done</option>
+          </select>
+          <input class="bm-mn-narrow" type="date" data-field="dueAt" value="${dateInputValue(m.dueAt)}" />
+          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="delete-milestone" data-pid="${pid}" data-id="${m.id}">Delete</button>
+        </div>`;
+      }
+
+      function intakeRowHtml(pid, i) {
+        return `<div class="bm-manage-row" data-intake="${i.id}">
+          <input class="bm-mn-title" data-field="label" value="${escapeHtml(i.label || "")}" placeholder="Label" />
+          <select data-field="group">
+            ${Object.entries(GROUP_LABEL).map(([k, v]) => `<option value="${k}" ${i.group === k ? "selected" : ""}>${v}</option>`).join("")}
+          </select>
+          <label class="bm-mn-check"><input type="checkbox" data-field="done" ${i.done ? "checked" : ""} /> Done</label>
+          <span class="bm-row-sub">Raised ${formatDate(i.raisedAt)}</span>
+          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="delete-intake" data-pid="${pid}" data-id="${i.id}">Delete</button>
+        </div>`;
+      }
+
+      function deliverableRowHtml(pid, d) {
+        return `<div class="bm-manage-row" data-deliverable="${d.id}">
+          <input class="bm-mn-title" data-field="title" value="${escapeHtml(d.title || "")}" placeholder="Title" />
+          <input class="bm-mn-narrow" data-field="version" value="${escapeHtml(d.version ?? "")}" placeholder="Version" />
+          <input class="bm-mn-url" data-field="url" value="${escapeHtml(d.url || "")}" placeholder="https://…" />
+          <select data-field="status">
+            <option value="in_review" ${d.status === "in_review" ? "selected" : ""}>In review</option>
+            <option value="approved" ${d.status === "approved" ? "selected" : ""}>Approved</option>
+            <option value="changes_requested" ${d.status === "changes_requested" ? "selected" : ""}>Changes requested</option>
+          </select>
+          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="delete-deliverable" data-pid="${pid}" data-id="${d.id}">Delete</button>
+        </div>`;
+      }
+
+      function addFormHtml(pid) {
+        return `
+          <div class="bm-manage-row" data-add-milestone="${pid}">
+            <input class="bm-mn-title" data-new="title" placeholder="New milestone title" />
+            <select data-new="owner"><option value="us">Us</option><option value="client">Client</option></select>
+            <select data-new="status"><option value="todo" selected>To do</option><option value="in_progress">In progress</option><option value="done">Done</option></select>
+            <input class="bm-mn-narrow" type="date" data-new="dueAt" />
+            <button type="button" class="bm-btn bm-btn--sm" data-action="add-milestone" data-pid="${pid}">Add milestone</button>
+          </div>
+          <div class="bm-manage-row" data-add-intake="${pid}">
+            <input class="bm-mn-title" data-new="label" placeholder="New intake item" />
+            <select data-new="group">
+              ${Object.entries(GROUP_LABEL).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}
+            </select>
+            <button type="button" class="bm-btn bm-btn--sm" data-action="add-intake" data-pid="${pid}">Add intake item</button>
+          </div>
+          <div class="bm-manage-row" data-add-deliverable="${pid}">
+            <input class="bm-mn-title" data-new="title" placeholder="New deliverable title" />
+            <input class="bm-mn-narrow" data-new="version" placeholder="Version" />
+            <input class="bm-mn-url" data-new="url" placeholder="https://…" />
+            <button type="button" class="bm-btn bm-btn--sm" data-action="add-deliverable" data-pid="${pid}">Add deliverable</button>
+          </div>`;
+      }
+
+      async function renderManageProjects(projects, orgById) {
+        const container = document.getElementById("bm-manage-projects");
+        const sorted = [...projects].sort((a, b) =>
+          (orgById[a.orgId]?.name || "").localeCompare(orgById[b.orgId]?.name || "")
+        );
+
+        if (!sorted.length) {
+          container.innerHTML = '<p class="bm-empty">No projects yet.</p>';
+          return;
+        }
+
+        const cards = await Promise.all(
+          sorted.map(async (p) => {
+            const [milestones, intake, deliverables] = await Promise.all([
+              getMilestones(p.id),
+              getIntake(p.id),
+              getDeliverables(p.id),
+            ]);
+            const orgName = orgById[p.orgId]?.name || p.orgId;
+            return `<div class="bm-manage-card" data-project="${p.id}">
+              <h3 class="bm-manage-card-title">${escapeHtml(orgName)}</h3>
+
+              <div class="bm-manage-group">
+                <p class="bm-manage-group-title">Milestones</p>
+                ${milestones.length ? milestones.map((m) => milestoneRowHtml(p.id, m)).join("") : '<p class="bm-empty">No milestones yet.</p>'}
+              </div>
+              <div class="bm-manage-group">
+                <p class="bm-manage-group-title">Intake</p>
+                ${intake.length ? intake.map((i) => intakeRowHtml(p.id, i)).join("") : '<p class="bm-empty">No intake items yet.</p>'}
+              </div>
+              <div class="bm-manage-group">
+                <p class="bm-manage-group-title">Deliverables</p>
+                ${deliverables.length ? deliverables.map((d) => deliverableRowHtml(p.id, d)).join("") : '<p class="bm-empty">No deliverables yet.</p>'}
+              </div>
+              <div class="bm-manage-group">
+                <p class="bm-manage-group-title">Add new</p>
+                ${addFormHtml(p.id)}
+              </div>
+            </div>`;
+          })
+        );
+
+        container.innerHTML = cards.join("");
+      }
+
+      // Event delegation: one listener handles every project card.
+      document.getElementById("bm-manage-projects").addEventListener("click", async (e) => {
+        const btn = e.target.closest("[data-action]");
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const pid = btn.dataset.pid;
+
+        if (action === "delete-milestone") {
+          if (!confirm("Delete this milestone?")) return;
+          await deleteMilestone(pid, btn.dataset.id);
+          return load();
+        }
+        if (action === "delete-intake") {
+          if (!confirm("Delete this intake item?")) return;
+          await deleteIntakeItem(pid, btn.dataset.id);
+          return load();
+        }
+        if (action === "delete-deliverable") {
+          if (!confirm("Delete this deliverable?")) return;
+          await deleteDeliverable(pid, btn.dataset.id);
+          return load();
+        }
+        if (action === "add-milestone") {
+          const row = btn.closest("[data-add-milestone]");
+          const title = row.querySelector('[data-new="title"]').value.trim();
+          if (!title) return;
+          const owner = row.querySelector('[data-new="owner"]').value;
+          const status = row.querySelector('[data-new="status"]').value;
+          const dueVal = row.querySelector('[data-new="dueAt"]').value;
+          await addMilestone(pid, { title, owner, status, dueAt: dueVal ? new Date(dueVal) : null });
+          return load();
+        }
+        if (action === "add-intake") {
+          const row = btn.closest("[data-add-intake]");
+          const label = row.querySelector('[data-new="label"]').value.trim();
+          if (!label) return;
+          const group = row.querySelector('[data-new="group"]').value;
+          await addIntakeItem(pid, { label, group });
+          return load();
+        }
+        if (action === "add-deliverable") {
+          const row = btn.closest("[data-add-deliverable]");
+          const title = row.querySelector('[data-new="title"]').value.trim();
+          if (!title) return;
+          const version = row.querySelector('[data-new="version"]').value.trim();
+          const url = row.querySelector('[data-new="url"]').value.trim();
+          await addDeliverable(pid, { title, version, url: url || null, status: "in_review" });
+          return load();
+        }
+      });
+
+      document.getElementById("bm-manage-projects").addEventListener("change", async (e) => {
+        const milestoneRow = e.target.closest("[data-milestone]");
+        const intakeRow = e.target.closest("[data-intake]");
+        const deliverableRow = e.target.closest("[data-deliverable]");
+        const card = e.target.closest("[data-project]");
+        if (!card) return;
+        const pid = card.dataset.project;
+
+        if (milestoneRow) {
+          const { title, owner, status, dueAt } = readRow(milestoneRow, ["title", "owner", "status", "dueAt"]);
+          await updateMilestone(pid, milestoneRow.dataset.milestone, {
+            title,
+            owner,
+            status,
+            dueAt: dueAt ? new Date(dueAt) : null,
+          });
+        } else if (intakeRow) {
+          const { label, group, done } = readRow(intakeRow, ["label", "group", "done"]);
+          await updateIntakeItem(pid, intakeRow.dataset.intake, {
+            label,
+            group,
+            done,
+            clearedAt: done ? new Date() : null,
+          });
+        } else if (deliverableRow) {
+          const { title, version, url, status } = readRow(deliverableRow, ["title", "version", "url", "status"]);
+          await updateDeliverable(pid, deliverableRow.dataset.deliverable, { title, version, url: url || null, status });
+        } else {
+          return;
+        }
+
+        // A milestone/intake edit can change what Delivery Health above
+        // should say (done, waiting-on, blocker age) — refresh it too.
+        load();
+      });
+
+      // --- Main load ---
+
       async function load() {
         const user = await requireAdminAuth();
         if (!user) return;
@@ -164,6 +492,10 @@
         document.getElementById("bm-main").hidden = false;
 
         const orgById = Object.fromEntries(orgs.map((o) => [o.id, o]));
+
+        accessOrgSelect.innerHTML = orgs
+          .map((o) => `<option value="${o.id}">${escapeHtml(o.name)}${o.status === "archived" ? " (archived)" : ""}</option>`)
+          .join("");
 
         // --- MRR ---
         const signedClients = orgs.filter(
@@ -187,7 +519,7 @@
                 const faded = o.retainerStatus !== "signed";
                 const pillClass =
                   o.retainerStatus === "signed" ? "bm-pill--green" : o.retainerStatus === "proposed" ? "bm-pill--amber" : "bm-pill--muted";
-                return `<div class="bm-row ${faded ? "" : ""}" style="${faded ? "opacity:.55" : ""}">
+                return `<div class="bm-row" style="${faded ? "opacity:.55" : ""}">
                   <div class="bm-row-main">
                     <span class="bm-row-title">${escapeHtml(o.name)}</span>
                     ${o.note ? `<span class="bm-row-sub">${escapeHtml(o.note)}</span>` : ""}
@@ -227,6 +559,11 @@
         }
 
         // --- Delivery health ---
+        // An empty milestones/intake subcollection means "nobody has set this
+        // project up yet" — it must never render the same as "done" or
+        // "on track". Only a project with milestone docs, all of them
+        // status:'done', is "All complete". Only a project with intake docs
+        // and zero open ones is a genuine "0d, all clear".
         const deliveryBody = document.getElementById("bm-delivery-body");
         const activeProjects = projects.filter((p) => orgById[p.orgId]?.status === "active");
         if (!activeProjects.length) {
@@ -239,22 +576,47 @@
                 .filter((m) => m.status !== "done")
                 .sort((a, b) => (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0));
               const next = pending[0];
-              const openBlockers = intake.filter((i) => !i.done);
-              const oldest = openBlockers
-                .map((i) => daysSince(i.raisedAt))
-                .filter((d) => d !== null)
-                .sort((a, b) => b - a)[0];
+
+              let milestoneCell;
+              let waitingCell;
+              if (!milestones.length) {
+                milestoneCell = `<span class="bm-pill bm-pill--muted">No milestones yet</span>`;
+                waitingCell = "—";
+              } else if (!next) {
+                milestoneCell = `<span class="bm-pill bm-pill--green">All complete</span>`;
+                waitingCell = "—";
+              } else {
+                milestoneCell = `${escapeHtml(next.title)}<br><span class="bm-row-sub">Due ${formatDate(next.dueAt)}</span>`;
+                waitingCell = next.owner === "client" ? "Client" : "Brand Mint";
+              }
+
+              let blockerCell;
+              if (!intake.length) {
+                blockerCell = `<span class="bm-pill bm-pill--muted">Not set up</span>`;
+              } else {
+                const openBlockers = intake.filter((i) => !i.done);
+                const oldest = openBlockers
+                  .map((i) => daysSince(i.raisedAt))
+                  .filter((d) => d !== null)
+                  .sort((a, b) => b - a)[0];
+                const days = oldest === undefined ? 0 : oldest;
+                blockerCell = `<span class="bm-pill ${ageClass(days)}">${days}d</span>`;
+              }
+
               const orgName = orgById[p.orgId]?.name || p.orgId;
               return `<tr>
-                <td><strong>${escapeHtml(p.name || orgName)}</strong><br><span class="bm-row-sub">${escapeHtml(orgName)}</span></td>
-                <td>${next ? escapeHtml(next.title) : "All complete"}</td>
-                <td>${next ? (next.owner === "client" ? "Client" : "Brand Mint") : "—"}</td>
-                <td><span class="bm-pill ${ageClass(oldest ?? null)}">${oldest === undefined || oldest === null ? "0d" : oldest + "d"}</span></td>
+                <td><strong>${escapeHtml(p.name || orgName)}</strong></td>
+                <td>${milestoneCell}</td>
+                <td>${waitingCell}</td>
+                <td>${blockerCell}</td>
               </tr>`;
             })
           );
           deliveryBody.innerHTML = rows.join("");
         }
+
+        // --- Manage projects ---
+        await renderManageProjects(projects, orgById);
 
         // --- Org tables ---
         const activeClients = orgs.filter((o) => o.kind === "client" && o.status === "active");
