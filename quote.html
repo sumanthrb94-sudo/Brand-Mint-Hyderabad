@@ -348,13 +348,18 @@
           return;
         }
         const count = chosen.reduce((s, f) => s + f.requires.length, 0);
-        if (!confirm(`Add ${count} intake items to this project? They will appear on the client's /onboarding immediately and start ageing today.`)) return;
+        if (!confirm(`Push ${count} requirements to this project? Anything not already there appears on the client's /onboarding immediately and starts ageing today. Requirements already raised keep their original date.`)) return;
 
         try {
-          const written = await pushRequirementsToIntake(projectId, [...selected]);
+          const { added, skipped } = await pushRequirementsToIntake(projectId, [...selected]);
           status.hidden = false;
           status.className = "bm-status bm-status--ok";
-          status.textContent = `Added ${written} intake items. The client can see them on /onboarding now.`;
+          // Report the skips. Silence here would look identical to a failed
+          // push, and re-running is now the normal thing to do when scope grows.
+          status.textContent = added
+            ? `Added ${added} intake item${added === 1 ? "" : "s"}. The client can see them on /onboarding now.` +
+              (skipped ? ` ${skipped} were already there and were left untouched, dates and all.` : "")
+            : `Nothing new — all ${skipped} requirements are already on this project, with their original dates.`;
         } catch (err) {
           status.hidden = false;
           status.className = "bm-status bm-status--error";

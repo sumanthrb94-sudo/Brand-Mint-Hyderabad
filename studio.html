@@ -241,6 +241,7 @@
         mountThemeToggle,
         syncPayments,
         paymentError,
+        dedupeIntake,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
@@ -691,6 +692,7 @@
               ${Object.entries(GROUP_LABEL).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}
             </select>
             <button type="button" class="bm-btn bm-btn--sm" data-action="add-intake" data-pid="${pid}">Add intake item</button>
+            <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="dedupe-intake" data-pid="${pid}">Remove duplicates</button>
           </div>
           <div class="bm-manage-row" data-add-deliverable="${pid}">
             <input class="bm-mn-title" data-new="title" placeholder="New deliverable title" />
@@ -799,6 +801,27 @@
           if (!label) return;
           const group = row.querySelector('[data-new="group"]').value;
           await addIntakeItem(pid, { label, group });
+          return load();
+        }
+        if (action === "dedupe-intake") {
+          /* Cleans up the duplicate sets left by the old non-idempotent push.
+             Keeps the oldest of each label so the blocker's true age survives,
+             and a ticked item always beats an unticked one — losing a client's
+             tick would make them do the work twice. */
+          btn.disabled = true;
+          try {
+            const { removed, kept } = await dedupeIntake(pid);
+            alert(
+              removed
+                ? `Removed ${removed} duplicate intake item${removed === 1 ? "" : "s"}. ` +
+                  `${kept} remain, each with its original date.`
+                : `No duplicates — all ${kept} intake items are already unique.`
+            );
+          } catch (err) {
+            alert("Could not remove duplicates: " + (err?.message || err));
+          } finally {
+            btn.disabled = false;
+          }
           return load();
         }
         if (action === "add-deliverable") {
@@ -994,17 +1017,33 @@
                 .sort((a, b) => (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0));
               const next = pending[0];
 
+              // Open intake is a real answer to "who are we waiting on", and
+              // often the only one. A project with no milestones but thirty
+              // unanswered requests was showing "—", which reads as nobody is
+              // holding anything up — the exact opposite of the truth, on the
+              // one screen that exists to say who is holding things up.
+              const openIntake = intake.filter((i) => !i.done).length;
+
               let milestoneCell;
               let waitingCell;
               if (!milestones.length) {
                 milestoneCell = `<span class="bm-pill bm-pill--muted">No milestones yet</span>`;
-                waitingCell = "—";
+                waitingCell = openIntake
+                  ? `Client<br><span class="bm-row-sub">${openIntake} open request${openIntake === 1 ? "" : "s"}</span>`
+                  : "—";
               } else if (!next) {
                 milestoneCell = `<span class="bm-pill bm-pill--green">All complete</span>`;
-                waitingCell = "—";
+                waitingCell = openIntake
+                  ? `Client<br><span class="bm-row-sub">${openIntake} still open</span>`
+                  : "—";
               } else {
                 milestoneCell = `${escapeHtml(next.title)}<br><span class="bm-row-sub">Due ${formatDate(next.dueAt)}</span>`;
                 waitingCell = next.owner === "client" ? "Client" : "Brand Mint";
+                if (next.owner !== "client" && openIntake) {
+                  // Both can be true: we owe the next milestone AND they still
+                  // owe us assets. Saying only one hides half the problem.
+                  waitingCell += `<br><span class="bm-row-sub">${openIntake} open with the client</span>`;
+                }
               }
 
               let blockerCell;

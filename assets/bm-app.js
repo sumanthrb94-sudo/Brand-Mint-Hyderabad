@@ -597,13 +597,69 @@ export async function setFeaturePricing(featureId, { price, priceType, buildDays
 // Turns the features chosen for a quote into real intake items on a project,
 // so what the client must supply becomes dated blockers they can see on
 // /onboarding instead of living in an email nobody re-reads.
+/**
+ * A stable document id for one feature's requirement.
+ *
+ * This is the whole fix for duplicate intake. The previous version wrote with
+ * `doc(collection(...))`, which mints a fresh random id on every call — so
+ * pushing the same quote twice produced two complete sets, and a client's
+ * "What we need from you" list showed the same request five times. A list that
+ * repeats itself reads as broken, and a client who decides the list is broken
+ * ignores all of it, which is the one thing this portal cannot afford.
+ *
+ * A short hash is appended because slugs truncate, and two different
+ * requirements on the same feature could otherwise collide and silently
+ * overwrite each other.
+ */
+function intakeIdFor(featureId, requirement) {
+  const raw = `${featureId}--${requirement}`;
+  let h = 0x811c9dc5;
+  for (let i = 0; i < raw.length; i += 1) {
+    h ^= raw.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  const slug = raw
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 90);
+  return `${slug || featureId}-${h.toString(36)}`;
+}
+
+/**
+ * Turns the features chosen for a quote into real intake items on a project,
+ * so what the client must supply becomes dated blockers they can see on
+ * /onboarding instead of living in an email nobody re-reads.
+ *
+ * Idempotent. Running it again after adding a service to the scope adds only
+ * the new requirements and leaves every existing one exactly as it is.
+ *
+ * An existing item is SKIPPED, never rewritten. Overwriting would reset
+ * `raisedAt` to now, and the age of a blocker is the entire mechanism that
+ * makes it move — a nine-day-old request silently becoming zero days old is
+ * worse than not re-running this at all.
+ *
+ * Returns { added, skipped }.
+ */
 export async function pushRequirementsToIntake(projectId, featureIds) {
   const chosen = FEATURE_CATALOG.filter((f) => featureIds.includes(f.id));
+
+  const existingSnap = await getDocs(collection(db, "projects", projectId, "intake"));
+  const existing = new Set(existingSnap.docs.map((d) => d.id));
+
   const batch = writeBatch(db);
-  let count = 0;
+  let added = 0;
+  let skipped = 0;
+
   for (const feature of chosen) {
     for (const requirement of feature.requires) {
-      batch.set(doc(collection(db, "projects", projectId, "intake")), {
+      const id = intakeIdFor(feature.id, requirement);
+      if (existing.has(id)) {
+        skipped += 1;
+        continue;
+      }
+      existing.add(id); // the same requirement twice in one push is still one item
+      batch.set(doc(db, "projects", projectId, "intake", id), {
         label: `${feature.label}: ${requirement}`,
         // Anything mentioning an account or being added as a user is access;
         // everything else is an asset the client owes us.
@@ -612,11 +668,63 @@ export async function pushRequirementsToIntake(projectId, featureIds) {
         raisedAt: serverTimestamp(),
         clearedAt: null,
       });
-      count++;
+      added += 1;
     }
   }
-  await batch.commit();
-  return count;
+
+  if (added) await batch.commit();
+  return { added, skipped };
+}
+
+/**
+ * Removes duplicate intake items left behind by the pre-idempotent version.
+ *
+ * Keeps the OLDEST of each identical label and deletes the rest, so the
+ * surviving item carries the original raisedAt and the blocker's true age is
+ * preserved. An item that has been ticked wins over one that has not,
+ * whatever the dates — losing a client's tick would make them do the work
+ * twice, which is worse than losing a few days of age.
+ *
+ * Returns { removed, kept }.
+ */
+export async function dedupeIntake(projectId) {
+  const snap = await getDocs(collection(db, "projects", projectId, "intake"));
+  const byLabel = new Map();
+
+  for (const d of snap.docs) {
+    const data = d.data();
+    const key = String(data.label || "").trim().toLowerCase();
+    const current = byLabel.get(key);
+    if (!current) {
+      byLabel.set(key, { id: d.id, data, losers: [] });
+      continue;
+    }
+    const currentDone = current.data.done === true;
+    const candidateDone = data.done === true;
+    const currentAt = current.data.raisedAt?.toMillis?.() ?? Infinity;
+    const candidateAt = data.raisedAt?.toMillis?.() ?? Infinity;
+
+    // A ticked item always wins; otherwise the older one wins.
+    const candidateWins = candidateDone !== currentDone ? candidateDone : candidateAt < currentAt;
+    if (candidateWins) {
+      current.losers.push(current.id);
+      byLabel.set(key, { id: d.id, data, losers: current.losers });
+    } else {
+      current.losers.push(d.id);
+    }
+  }
+
+  const doomed = [...byLabel.values()].flatMap((v) => v.losers);
+  // Firestore batches cap at 500 writes.
+  for (let i = 0; i < doomed.length; i += 400) {
+    const batch = writeBatch(db);
+    for (const id of doomed.slice(i, i + 400)) {
+      batch.delete(doc(db, "projects", projectId, "intake", id));
+    }
+    await batch.commit();
+  }
+
+  return { removed: doomed.length, kept: byLabel.size };
 }
 
 // Milestone templates per service type. `offsetDays` is measured from a start
