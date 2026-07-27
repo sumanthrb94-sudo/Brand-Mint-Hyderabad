@@ -41,9 +41,10 @@
             <span class="bm-row-title" id="bm-next-milestone-title">No milestones yet</span>
             <span class="bm-row-sub" id="bm-next-milestone-sub">—</span>
           </div>
-          <div class="bm-progress">
+          <div class="bm-progress" id="bm-progress" hidden>
             <div class="bm-progress-fill" id="bm-progress-fill" style="width:0%"></div>
           </div>
+          <p class="bm-row-sub" id="bm-progress-note" hidden></p>
         </section>
 
         <!-- 2. What we need from you -->
@@ -100,6 +101,7 @@
         formatDate,
         formatINR,
         escapeHtml,
+        SERVICE_TYPES,
       } from "/assets/bm-app.js";
 
       document.getElementById("bm-signout").addEventListener("click", async () => {
@@ -140,8 +142,34 @@
         }
 
         document.getElementById("bm-project-name").textContent = project.name || "Project";
-        document.getElementById("bm-project-status").textContent = project.type || "In progress";
-        document.getElementById("bm-progress-fill").style.width = `${Math.max(0, Math.min(100, Number(project.progress) || 0))}%`;
+
+        // Type pill: show the real service label, or nothing at all. Never
+        // invent a status like "In progress" from an unset field.
+        const statusPill = document.getElementById("bm-project-status");
+        const typeLabel = SERVICE_TYPES.find((t) => t.id === project.type)?.label;
+        if (typeLabel) {
+          statusPill.textContent = typeLabel;
+          statusPill.hidden = false;
+        } else {
+          statusPill.hidden = true;
+        }
+
+        // A progress bar sitting at 0% reads as "started, nothing done".
+        // An unset progress field means nobody has recorded one — say that
+        // instead of drawing an empty bar.
+        const progressEl = document.getElementById("bm-progress");
+        const progressNote = document.getElementById("bm-progress-note");
+        const progressValue = Number(project.progress);
+        if (project.progress === null || project.progress === undefined || Number.isNaN(progressValue)) {
+          progressEl.hidden = true;
+          progressNote.hidden = false;
+          progressNote.textContent = "Progress not set yet.";
+        } else {
+          progressEl.hidden = false;
+          progressNote.hidden = true;
+          document.getElementById("bm-progress-fill").style.width =
+            `${Math.max(0, Math.min(100, progressValue))}%`;
+        }
 
         // Next milestone: earliest due, not yet done. An empty milestones
         // subcollection means nobody has set the project up yet — that must
