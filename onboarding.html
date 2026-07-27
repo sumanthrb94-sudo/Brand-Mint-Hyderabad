@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Onboarding — Brand Mint</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/bm-app.css" />
+  </head>
+  <body class="bm-body">
+    <div class="bm-shell">
+      <header class="bm-topbar">
+        <a class="bm-brand" href="/portal">
+          <span class="bm-brand-mark" aria-hidden="true"></span>
+          <span>Brand Mint <span class="bm-brand-sub">Onboarding</span></span>
+        </a>
+        <div class="bm-topbar-right">
+          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/portal">Back to portal</a>
+          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
+        </div>
+      </header>
+
+      <p class="bm-note">
+        Never send us a password. For anything that needs access, add
+        <strong>hello@brandmintstudios.in</strong> as a user on your own account.
+      </p>
+
+      <div id="bm-loading" class="bm-loading">Loading your checklist…</div>
+      <main id="bm-main" hidden>
+        <div class="bm-card">
+          <p class="bm-eyebrow">Intake checklist</p>
+          <h1 class="bm-card-title" style="margin-bottom:20px;" id="bm-project-name">—</h1>
+          <div id="bm-groups"></div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import {
+        requireClientAuth,
+        getUserProfile,
+        getProjectsForOrg,
+        getIntake,
+        setIntakeDone,
+        logout,
+        formatDate,
+        escapeHtml,
+      } from "/assets/bm-app.js";
+
+      document.getElementById("bm-signout").addEventListener("click", async () => {
+        await logout();
+        window.location.href = "/login";
+      });
+
+      const GROUP_ORDER = ["assets", "content", "access", "decisions"];
+      const GROUP_LABEL = {
+        assets: "Assets",
+        content: "Content",
+        access: "Access",
+        decisions: "Decisions",
+      };
+
+      async function render() {
+        const user = await requireClientAuth();
+        if (!user) return;
+
+        const profile = await getUserProfile(user.uid);
+        const orgId = profile?.orgId;
+        const projects = orgId ? await getProjectsForOrg(orgId) : [];
+        const project = projects[0];
+
+        document.getElementById("bm-loading").hidden = true;
+        document.getElementById("bm-main").hidden = false;
+
+        if (!project) {
+          document.getElementById("bm-project-name").textContent = "No active project";
+          document.getElementById("bm-groups").innerHTML = '<p class="bm-empty">Nothing here yet.</p>';
+          return;
+        }
+
+        document.getElementById("bm-project-name").textContent = project.name || "Project";
+
+        const intake = await getIntake(project.id);
+        const groupsEl = document.getElementById("bm-groups");
+
+        if (!intake.length) {
+          groupsEl.innerHTML = '<p class="bm-empty">No checklist items yet.</p>';
+          return;
+        }
+
+        const byGroup = {};
+        for (const item of intake) {
+          const g = GROUP_LABEL[item.group] ? item.group : "decisions";
+          (byGroup[g] = byGroup[g] || []).push(item);
+        }
+
+        groupsEl.innerHTML = GROUP_ORDER.filter((g) => byGroup[g]?.length)
+          .map((g) => {
+            const items = byGroup[g].sort((a, b) => (a.label || "").localeCompare(b.label || ""));
+            return `<div class="bm-check-group">
+              <p class="bm-check-group-title">${GROUP_LABEL[g]}</p>
+              ${items
+                .map(
+                  (item) => `<label class="bm-check ${item.done ? "is-done" : ""}">
+                    <input type="checkbox" data-intake="${item.id}" ${item.done ? "checked" : ""} />
+                    <span>
+                      <div class="bm-check-label">${escapeHtml(item.label)}</div>
+                      ${item.done ? `<div class="bm-check-cleared">Cleared ${formatDate(item.clearedAt)}</div>` : ""}
+                    </span>
+                  </label>`
+                )
+                .join("")}
+            </div>`;
+          })
+          .join("");
+
+        groupsEl.querySelectorAll("[data-intake]").forEach((input) => {
+          input.addEventListener("change", async () => {
+            input.disabled = true;
+            await setIntakeDone(project.id, input.dataset.intake, input.checked);
+            render();
+          });
+        });
+      }
+
+      render();
+    </script>
+  </body>
+</html>
