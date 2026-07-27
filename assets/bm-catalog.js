@@ -162,7 +162,9 @@ export const CATALOG = {
         "seo"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Astro or Next static export · Vercel",
+      "howToBuild": "Build from a content collection, one component per section, no database. Deploy to Vercel with cleanUrls. Trap: do not add a CMS 'just in case' — the moment content needs editing it is the dynamic tier and should be priced as one."
     },
     {
       "id": "dynamic-site",
@@ -186,7 +188,9 @@ export const CATALOG = {
         "admin-shell"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Next.js App Router · Firestore · shadcn/ui",
+      "howToBuild": "Content lives in Firestore collections; the admin shell sits behind auth; public pages render server-side and revalidate. Agree who edits what BEFORE designing the schema — retrofitting an editable field is a rewrite of the form, the rules and the migration."
     },
     {
       "id": "deployment",
@@ -212,7 +216,9 @@ export const CATALOG = {
         "Vercel (free tier usually sufficient)",
         "Domain registration ~₹1,000/yr"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Vercel · your registrar's DNS",
+      "howToBuild": "Create the project, point DNS, add the domain, promote by hand so a push never goes live on its own. Trap: add the live host to Firebase authorized domains or sign-in fails with auth/unauthorized-domain and looks like a code bug."
     },
     {
       "id": "catalog-basic",
@@ -238,7 +244,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "dynamic-site"
-      ]
+      ],
+      "stack": "Firestore · Next server components",
+      "howToBuild": "Take the product model from FreshKart src/lib/types.ts. Server-render list and detail, client-side search index under ~500 SKUs, Typesense above that. Trap: capture unit price onto the order line at order time — a later price change must never rewrite history."
     },
     {
       "id": "catalog-bulk",
@@ -263,7 +271,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "catalog-basic"
-      ]
+      ],
+      "stack": "papaparse · Firestore batch writes",
+      "howToBuild": "CSV in, dry-run diff shown before anything commits, then a batched write with a price-history row per change. Lift the shape from FreshKart admin/prices. Trap: never import without a preview — one bad column silently reprices the whole catalogue."
     },
     {
       "id": "inventory",
@@ -287,7 +297,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "catalog-basic"
-      ]
+      ],
+      "stack": "Firestore transactions",
+      "howToBuild": "A stock field per SKU, decremented inside the same transaction that writes the order. Trap: read-then-write loses the last unit under concurrency — it must be a transaction, not two operations."
     },
     {
       "id": "cart-cod",
@@ -313,7 +325,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "catalog-basic"
-      ]
+      ],
+      "stack": "React context · commerce-core",
+      "howToBuild": "Lift Tresor's CartContext, persist to localStorage for recovery, and drive every status change through commerce-core's transition(). Trap: recompute the total server-side at checkout. A cart total posted from the browser is a number the customer chose."
     },
     {
       "id": "payments",
@@ -341,7 +355,9 @@ export const CATALOG = {
       ],
       "dependsOn": [
         "cart-cod"
-      ]
+      ],
+      "stack": "Razorpay Orders API · checkout.js · Vercel /api",
+      "howToBuild": "Create the order server-side, open checkout with that id, then reconcile in a webhook — verifying the signature with HMAC-SHA256. Port Tresor api/payments/*. Trap: reconcile on the webhook, never the redirect; customers close the tab and the money still arrives."
     },
     {
       "id": "coupons",
@@ -364,7 +380,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "cart-cod"
-      ]
+      ],
+      "stack": "commerce-core/coupons",
+      "howToBuild": "Already built and tested — wire the admin CRUD and apply it server-side at checkout. Trap: validate on the server. A discount computed in the browser is a discount the customer sets."
     },
     {
       "id": "gst-invoicing",
@@ -390,7 +408,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "cart-cod"
-      ]
+      ],
+      "stack": "commerce-core/gst · serverless PDF",
+      "howToBuild": "splitGst decides CGST+SGST vs IGST from the state codes; a Firestore transaction issues the sequential number; a serverless function renders the PDF. Trap: invoice numbers must never skip or repeat — that is a filing problem, not a bug."
     },
     {
       "id": "order-management",
@@ -415,7 +435,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "cart-cod"
-      ]
+      ],
+      "stack": "commerce-core state machine · admin queue",
+      "howToBuild": "One admin screen over transition(). Every move is validated, every move is logged. Trap: never assign order.status directly — that is exactly how a cancelled order got marked shipped in one app and not the other."
     },
     {
       "id": "delivery-tracking",
@@ -442,7 +464,9 @@ export const CATALOG = {
       ],
       "dependsOn": [
         "order-management"
-      ]
+      ],
+      "stack": "one aggregator (Shiprocket / Delhivery) · webhook",
+      "howToBuild": "Push the shipment, store the AWB on the order, take status back by webhook, show a customer tracking page. Trap: integrate ONE aggregator. Two doubles the surface and halves the reliability."
     },
     {
       "id": "returns-refunds",
@@ -468,7 +492,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "order-management"
-      ]
+      ],
+      "stack": "FreshKart returns.ts · Razorpay refunds API",
+      "howToBuild": "Customer raises a request against a delivered order, it lands in an approval queue, approval triggers the refund. Trap: refunds must be idempotent — a double-click must not refund twice."
     },
     {
       "id": "chat-support",
@@ -493,7 +519,9 @@ export const CATALOG = {
       "thirdPartyCost": [
         "Chat provider, if a hosted one is chosen"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Firestore conversations · admin inbox (or Crisp)",
+      "howToBuild": "Widget writes to a conversation collection, admin inbox reads it live, availability rules handle out-of-hours. Hosted is fine if they have a preference. Trap: set office hours in the product or you have silently promised 24/7."
     },
     {
       "id": "auto-replies",
@@ -521,7 +549,9 @@ export const CATALOG = {
       ],
       "dependsOn": [
         "chat-support"
-      ]
+      ],
+      "stack": "intent match · LLM fallback · escalation",
+      "howToBuild": "Match the top questions first and only fall through to an LLM when nothing matches — cheaper, faster, and far more predictable. Trap: log every automated reply. Without an audit trail you cannot answer 'what did it tell my customer'."
     },
     {
       "id": "notifications",
@@ -547,7 +577,9 @@ export const CATALOG = {
         "Email sending ~₹0.10/mail",
         "SMS ~₹0.20/message"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Resend (email) · MSG91 (SMS India) · queue",
+      "howToBuild": "Templates in code, a dispatch queue in Firestore, a serverless worker sending and recording delivery. Trap: Indian SMS needs DLT registration and pre-approved templates — start that paperwork in week one, it is not a code task."
     },
     {
       "id": "image-system",
@@ -569,7 +601,9 @@ export const CATALOG = {
         "responsive-srcset"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "sharp / next-image · AVIF + WebP",
+      "howToBuild": "One pipeline: source at max resolution, generate responsive sizes, serve modern formats with a blur placeholder. Trap: get originals at the highest resolution available up front. You cannot un-compress what the client sent from WhatsApp."
     },
     {
       "id": "video-system",
@@ -595,7 +629,9 @@ export const CATALOG = {
       "thirdPartyCost": [
         "Higgsfield or equivalent, per render"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Remotion or ffmpeg · serverless render",
+      "howToBuild": "Compose programmatically, render on a queue, host and embed. Trap: Remotion is free at your size but needs a paid company licence above three people — plan for it before it is a surprise invoice."
     },
     {
       "id": "instagram",
@@ -620,7 +656,9 @@ export const CATALOG = {
         "reply-automation"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Meta Graph API · token refresh job",
+      "howToBuild": "Business account linked to a Page, long-lived token with a scheduled refresh, then feed embed, scheduler and reply automation. Trap: tokens expire. A refresh job you never wrote is an integration that dies in sixty days."
     },
     {
       "id": "analytics",
@@ -641,7 +679,9 @@ export const CATALOG = {
         "dashboard"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Vercel Analytics or Plausible",
+      "howToBuild": "Instrument the five events that matter, not everything. Trap: decide those five with the client first, or you will build a dashboard nobody opens."
     },
     {
       "id": "seo-schema",
@@ -663,7 +703,9 @@ export const CATALOG = {
         "meta"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "JSON-LD · Next metadata API · sitemap",
+      "howToBuild": "Structured data per page type, generated sitemap, per-page metadata. Trap: schema that does not match visible page content is a manual action from Google, not a ranking boost."
     },
     {
       "id": "whatsapp-notifications",
@@ -690,7 +732,9 @@ export const CATALOG = {
       "thirdPartyCost": [
         "WhatsApp Business API, per conversation"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Meta WhatsApp Business API via a BSP",
+      "howToBuild": "Register templates with Meta, send through the BSP, handle delivery receipts and opt-outs. Trap: template approval takes days and rejections are common — submit before you need them, and never send outside an approved template."
     },
     {
       "id": "abandoned-cart",
@@ -717,7 +761,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "cart-cod"
-      ]
+      ],
+      "stack": "cart events · scheduled recovery",
+      "howToBuild": "Mark carts idle after an agreed window, send a recovery message, attribute recovered revenue so the feature can prove itself. Trap: one message, not a sequence. Three is spam and gets the sending domain flagged."
     },
     {
       "id": "loyalty",
@@ -744,7 +790,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "cart-cod"
-      ]
+      ],
+      "stack": "points ledger · redemption at checkout",
+      "howToBuild": "An append-only ledger — never a mutable balance field — with redemption applied server-side. Trap: an append-only ledger is what lets you answer 'why do I have these points', which is the only support question this feature generates."
     },
     {
       "id": "subscriptions",
@@ -773,7 +821,9 @@ export const CATALOG = {
       ],
       "dependsOn": [
         "payments"
-      ]
+      ],
+      "stack": "Razorpay eMandate · scheduler",
+      "howToBuild": "Plans, a mandate per customer, a scheduler creating orders, plus pause, skip and cancel. Trap: build pause and skip on day one. Without them the only self-service option is cancel."
     },
     {
       "id": "pos",
@@ -802,7 +852,9 @@ export const CATALOG = {
       "thirdPartyCost": [],
       "dependsOn": [
         "catalog-basic"
-      ]
+      ],
+      "stack": "offline-first queue · thermal receipt printing",
+      "howToBuild": "Counter screen with an offline-tolerant queue sharing stock with the online store. Extract from FreshKart admin/pos. Trap: the till must keep working when the internet does not — queue locally and sync."
     },
     {
       "id": "multi-vendor",
@@ -833,7 +885,9 @@ export const CATALOG = {
       "dependsOn": [
         "payments",
         "order-management"
-      ]
+      ],
+      "stack": "vendor accounts · order splitting · commission ledger",
+      "howToBuild": "Vendors onboard to their own storefront, orders split per vendor, commission accrues to a ledger, payouts run on a schedule. Trap: settle the commission model in writing before building. Changing it later rewrites the ledger and every historical payout."
     },
     {
       "id": "crm",
@@ -861,7 +915,9 @@ export const CATALOG = {
         "crm"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Next.js · Firestore · shared admin shell",
+      "howToBuild": "Contacts, a drag-and-drop pipeline, an activity log. Extract from REAL-ESTATE-CRM. Trap: model their pipeline stages, not a generic one. A CRM that does not match how they sell will not be opened twice."
     },
     {
       "id": "hrms",
@@ -889,7 +945,9 @@ export const CATALOG = {
         "hrms"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Next.js · Firestore · payroll export",
+      "howToBuild": "Employee records, attendance, leave, and an export their payroll provider actually accepts. Extract from Modcon-HR. Trap: confirm the payroll export format on day one — it is the only deliverable that must be byte-correct."
     },
     {
       "id": "approvals",
@@ -914,7 +972,9 @@ export const CATALOG = {
         "approvals"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "state machine · role routing · audit trail",
+      "howToBuild": "Chains defined as data, not code, so a rule change is configuration. Trap: build escalation from the start. Approvals that stall with no timeout become the reason people go back to email."
     },
     {
       "id": "reporting",
@@ -941,7 +1001,9 @@ export const CATALOG = {
         "reporting"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Firestore aggregation · scheduled exports",
+      "howToBuild": "Pre-aggregate the numbers they review weekly; do not compute them per page load. Extract from FreshKart admin/reports. Trap: ask which five numbers they check on a Monday and build exactly those."
     },
     {
       "id": "rag-docs",
@@ -969,7 +1031,9 @@ export const CATALOG = {
         "LLM API usage, metered",
         "Vector store hosting"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "embeddings · pgvector or Firestore vector · promptfoo",
+      "howToBuild": "Ingest, chunk, embed, retrieve, answer WITH citations back to the source. Build the eval suite alongside, not after. Trap: an answer without a citation cannot be checked, and an unverifiable answer is worse than no answer."
     },
     {
       "id": "doc-extraction",
@@ -997,7 +1061,9 @@ export const CATALOG = {
       "thirdPartyCost": [
         "LLM API usage, per document"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "LLM structured output · confidence routing",
+      "howToBuild": "Extract to a strict schema, route anything low-confidence to a human queue, export to their accounting tool. Trap: get 50 real sample documents before quoting. Invoice layouts vary far more than anyone expects."
     },
     {
       "id": "lead-qualifier",
@@ -1024,7 +1090,9 @@ export const CATALOG = {
       "thirdPartyCost": [
         "LLM API usage, metered"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "LLM rubric · calendar API",
+      "howToBuild": "Intake form, LLM scores against the written rubric, qualified leads book straight into the calendar, everything uncertain escalates. Trap: write the rubric down first — you cannot automate a judgement nobody has articulated."
     },
     {
       "id": "voice-agent",
@@ -1056,7 +1124,9 @@ export const CATALOG = {
         "Speech-to-text and text-to-speech per minute",
         "LLM per call"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Exotel/Twilio · STT · LLM · TTS",
+      "howToBuild": "Telephony in, speech to text, an LLM turn, speech back, with a clean handoff to a human. Sell a paid discovery day FIRST. Trap: latency is the product — over roughly a second of silence and callers hang up. Recording consent is a legal requirement, not a setting."
     },
     {
       "id": "internal-copilot",
@@ -1083,7 +1153,9 @@ export const CATALOG = {
       "thirdPartyCost": [
         "LLM API usage, metered"
       ],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "tool registry · planner · audit log",
+      "howToBuild": "Register the tools it may call, plan, execute, and log everything. Discovery day first. Trap: define what it may NEVER do without a human before you define what it can do."
     },
     {
       "id": "brand-system",
@@ -1113,7 +1185,9 @@ export const CATALOG = {
         "brand"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Figma · design tokens · a brand book site",
+      "howToBuild": "Three directions, narrow to one, then export tokens and ship the brand book as a working site rather than a PDF. Trap: agree who signs off the direction before you present. Design by committee doubles every round."
     },
     {
       "id": "reel-pack",
@@ -1138,7 +1212,9 @@ export const CATALOG = {
         "video"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "ffmpeg / Remotion · caption layer",
+      "howToBuild": "Edit pipeline, caption layer synced to speech, export at each platform's aspect ratio. Trap: sell a COUNT — four reels — never 'social media'. This is the easiest service to over-deliver and the hardest to bound."
     },
     {
       "id": "motion-graphics",
@@ -1163,7 +1239,9 @@ export const CATALOG = {
         "motion"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Motion (framer-motion) · MIT",
+      "howToBuild": "Define motion tokens once — duration, easing, distance — then apply them; do not hand-tune each animation. Trap: honour prefers-reduced-motion or the site is unusable for some visitors and fails accessibility."
     },
     {
       "id": "migration",
@@ -1188,7 +1266,9 @@ export const CATALOG = {
         "migration"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "export → transform → import → redirects",
+      "howToBuild": "Export everything, transform to the new model, import, then run both in parallel before cutting over. Trap: the redirect map is the deliverable. Lose it and you lose their search rankings, which is the one damage you cannot undo."
     },
     {
       "id": "performance-rescue",
@@ -1212,7 +1292,9 @@ export const CATALOG = {
         "perf"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Lighthouse · sharp · bundle analysis",
+      "howToBuild": "Measure, fix images first (almost always the biggest win), then bundle splitting and caching, then measure again. Trap: capture the before numbers. Without them you cannot prove the work, and unprovable work does not get referred."
     },
     {
       "id": "accessibility-audit",
@@ -1236,7 +1318,9 @@ export const CATALOG = {
         "a11y"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "axe-core · manual keyboard pass · computed contrast",
+      "howToBuild": "Automated scan, then a manual keyboard and screen-reader pass, then COMPUTE every interactive contrast ratio. Trap: automation finds roughly a third of real issues, and contrast must be calculated — two invisible buttons shipped on this very site by being eyeballed."
     },
     {
       "id": "security-audit",
@@ -1262,7 +1346,9 @@ export const CATALOG = {
         "security"
       ],
       "thirdPartyCost": [],
-      "dependsOn": []
+      "dependsOn": [],
+      "stack": "Firebase emulator · rules unit tests · probe suite",
+      "howToBuild": "Write tests against the real rules in the emulator, prove tenant isolation, probe anonymously for what should be denied, and hand over a written report. Trap: an audit without tests is an opinion. This portal has 21 passing rules tests — that is what makes the service demonstrable rather than describable."
     }
   ]
 };

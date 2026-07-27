@@ -58,6 +58,8 @@ const payload = {
     modules: f.modules ?? [],
     thirdPartyCost: f.thirdPartyCost ?? [],
     dependsOn: f.dependsOn ?? [],
+    stack: f.stack ?? "",
+    howToBuild: f.howToBuild ?? "",
   })),
 };
 
