@@ -1,0 +1,354 @@
+{
+  "startedAt": "2026-07-28T04:32:59.236Z",
+  "stages": [
+    {
+      "n": 1,
+      "title": "The studio signs in to an empty system",
+      "why": "An empty database must read as empty, never as a finished day.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "the dashboard opens on What needs you today"
+        },
+        {
+          "ok": true,
+          "message": "it says the system is empty rather than showing a clear day"
+        },
+        {
+          "ok": true,
+          "message": "no all-clear language over an empty database"
+        }
+      ],
+      "client": [],
+      "failed": false,
+      "shots": [
+        {
+          "side": "admin",
+          "file": "01-admin.png"
+        }
+      ]
+    },
+    {
+      "n": 2,
+      "title": "A lead arrives and gets a first response",
+      "why": "firstResponseAt is stamped once and must never move — if it can be edited it stops meaning anything.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "the lead appears in the pipeline"
+        },
+        {
+          "ok": true,
+          "message": "first response is stamped with a real timestamp"
+        },
+        {
+          "ok": true,
+          "message": "logging it a second time does NOT move the date — the number stays meaningful"
+        }
+      ],
+      "client": [],
+      "failed": false,
+      "shots": [
+        {
+          "side": "admin",
+          "file": "02-admin.png"
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "title": "The deal is proposed, then signed",
+      "why": "A proposal is not revenue. MRR must not move until the retainer is actually signed.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "break-even gap is still shown"
+        },
+        {
+          "ok": true,
+          "message": "the PROPOSED retainer is not counted as revenue"
+        },
+        {
+          "ok": true,
+          "message": "once signed, the retainer appears in MRR (tile reads \"Rs 25,000\", org is {\"doc\":{\"kind\":\"client\",\"status\":\"active\",\"retainer\":25000,\"retainerStatus\":\"signed\"},\"orgCount\":1,\"signedCount\":1,\"sumIfComputedHere\":25000})"
+        }
+      ],
+      "client": [],
+      "failed": false,
+      "shots": [
+        {
+          "side": "admin",
+          "file": "03-admin.png"
+        }
+      ]
+    },
+    {
+      "n": 4,
+      "title": "A project is created; the client still cannot see anything",
+      "why": "Data existing is not the same as the client being able to reach it. Access is a separate, deliberate act.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "project created"
+        }
+      ],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client signs in but sees NOTHING — there is no users document yet"
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "client",
+          "file": "04-client.png"
+        }
+      ]
+    },
+    {
+      "n": 5,
+      "title": "The studio grants access — the second half of creating a login",
+      "why": "The trap this whole runbook exists for: an Auth user without a users document signs in fine and sees a blank portal.",
+      "admin": [],
+      "client": [
+        {
+          "ok": true,
+          "message": "the same client, same login, now sees their project"
+        },
+        {
+          "ok": true,
+          "message": "and sees nothing belonging to anyone else"
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "client",
+          "file": "05-client.png"
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "title": "The studio raises what it needs from the client",
+      "why": "This is the reason the portal exists: the client sees, dated, that they are the holdup.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "4 requirements raised as dated blockers"
+        },
+        {
+          "ok": true,
+          "message": "pushing the same scope again adds nothing — no duplicates on the client's list"
+        }
+      ],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client sees the request list without being told about it"
+        },
+        {
+          "ok": true,
+          "message": "the list renders (0 interactive items found)"
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "client",
+          "file": "06-client.png"
+        }
+      ]
+    },
+    {
+      "n": 7,
+      "title": "The client answers one of the requests",
+      "why": "One of only two writes a client is permitted anywhere in the system.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "the studio sees the tick immediately, no refresh dance"
+        }
+      ],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client ticks \"Cash on delivery: COD order value limits, …\""
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "admin",
+          "file": "07-admin.png"
+        }
+      ]
+    },
+    {
+      "n": 8,
+      "title": "The studio schedules the work",
+      "why": "A project with no milestones cannot tell anyone whether it is late.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "6 milestones stamped from the template and a real start date"
+        }
+      ],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client can now see where the project is going"
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "client",
+          "file": "08-client.png"
+        }
+      ]
+    },
+    {
+      "n": 9,
+      "title": "A deliverable goes up for approval",
+      "why": "The client approves in one click, and the studio sees the decision.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "the studio sees it approved"
+        },
+        {
+          "ok": true,
+          "message": "and who approved it is recorded"
+        }
+      ],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client sees it waiting on their approval"
+        },
+        {
+          "ok": true,
+          "message": "the client approves it"
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "client",
+          "file": "09-client.png"
+        }
+      ]
+    },
+    {
+      "n": 10,
+      "title": "An invoice is raised and the client tries to pay",
+      "why": "Razorpay is not configured against the emulator, so this proves the graceful path: the button says payment is off rather than erroring.",
+      "admin": [],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client sees the invoice"
+        },
+        {
+          "ok": true,
+          "message": "for the right amount"
+        },
+        {
+          "ok": true,
+          "message": "with a Pay now button on the unpaid invoice"
+        },
+        {
+          "ok": true,
+          "message": "unconfigured payment fails gracefully: \"Something went wrong with the payment. Nothing has been charged twice \""
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "client",
+          "file": "10-client.png"
+        }
+      ]
+    },
+    {
+      "n": 11,
+      "title": "The studio marks the invoice paid",
+      "why": "Only the admin may write an invoice. The client's view follows.",
+      "admin": [],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client's invoice now reads paid"
+        },
+        {
+          "ok": true,
+          "message": "and the Pay button is gone — a paid invoice cannot be paid twice"
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "client",
+          "file": "11-client.png"
+        }
+      ]
+    },
+    {
+      "n": 12,
+      "title": "Isolation, from inside the client's own session",
+      "why": "The oldest open item in the project. It only proves anything from a client session — as admin it correctly reports inconclusive.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "the same page run as admin says inconclusive rather than claiming a pass"
+        }
+      ],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client cannot reach another tenant's data"
+        },
+        {
+          "ok": true,
+          "message": "no leak reported"
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "client",
+          "file": "12-client.png"
+        }
+      ]
+    },
+    {
+      "n": 13,
+      "title": "Back to the dashboard — has the day's work moved the numbers?",
+      "why": "The Today panel must reflect everything that just happened.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "MRR includes the signed retainer"
+        },
+        {
+          "ok": true,
+          "message": "the unscheduled-project warning is gone"
+        },
+        {
+          "ok": true,
+          "message": "no duplicate-intake warning"
+        }
+      ],
+      "client": [],
+      "failed": false,
+      "shots": [
+        {
+          "side": "admin",
+          "file": "13-admin.png"
+        }
+      ]
+    }
+  ]
+}

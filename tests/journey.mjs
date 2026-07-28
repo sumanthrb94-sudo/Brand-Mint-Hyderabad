@@ -28,7 +28,12 @@
  */
 
 import { chromium } from "playwright";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { listen } from "./serve.mjs";
+
+const ROOT = path.resolve(fileURLToPath(import.meta.url), "../..");
 
 const CHROME = process.env.CHROME_PATH || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const PORT = Number(process.env.PORT || 5175);
@@ -47,9 +52,20 @@ let current = null;
 let failures = 0;
 
 function stage(n, title, why) {
-  current = { n, title, why, admin: [], client: [], failed: false };
+  current = { n, title, why, admin: [], client: [], failed: false, shots: [] };
   stages.push(current);
   process.stdout.write(`\n\x1b[1m${n}. ${title}\x1b[0m\n   ${why}\n`);
+}
+
+/* Screenshots, so the run can be watched rather than only read.
+   Pass/fail lines tell you the journey works; they do not show you what the
+   client actually sees at each stage, which is the thing worth reviewing. */
+const SHOTS = path.join(ROOT, "docs/journey");
+async function shot(page, side) {
+  if (!current) return;
+  const name = `${String(current.n).padStart(2, "0")}-${side}.png`;
+  await page.screenshot({ path: path.join(SHOTS, name), fullPage: true }).catch(() => {});
+  current.shots.push({ side, file: name });
 }
 
 function check(side, ok, message) {
@@ -185,6 +201,9 @@ for (const [name, p] of [["admin", admin], ["client", client]]) {
   });
 }
 
+fs.rmSync(path.join(ROOT, "docs/journey"), { recursive: true, force: true });
+fs.mkdirSync(path.join(ROOT, "docs/journey"), { recursive: true });
+
 try {
   await clearFirestore();
   await clearAuth();
@@ -205,6 +224,8 @@ try {
   const allClear = empty.match(/[^.]{0,60}all (clear|complete|fulfilled)[^.]{0,40}/i);
   check("admin", !allClear,
     `no all-clear language over an empty database${allClear ? ` — found: "${allClear[0].trim()}"` : ""}`);
+
+  await shot(admin, "admin");
 
   /* ── 2 ────────────────────────────────────────────────────── */
   stage(2, "A lead arrives and gets a first response",
@@ -266,6 +287,8 @@ try {
   check("admin", stampedAgain === stampedAt,
     "logging it a second time does NOT move the date — the number stays meaningful");
 
+  await shot(admin, "admin");
+
   /* ── 3 ────────────────────────────────────────────────────── */
   stage(3, "The deal is proposed, then signed",
     "A proposal is not revenue. MRR must not move until the retainer is actually signed.");
@@ -306,6 +329,8 @@ try {
   check("admin", /25,?000/.test(mrrShown),
     `once signed, the retainer appears in MRR (tile reads "${(mrrShown || "").trim()}", org is ${JSON.stringify(orgDoc)})`);
 
+  await shot(admin, "admin");
+
   /* ── 4 ────────────────────────────────────────────────────── */
   stage(4, "A project is created; the client still cannot see anything",
     "Data existing is not the same as the client being able to reach it. Access is a separate, deliberate act.");
@@ -321,6 +346,8 @@ try {
   check("client", !has(c, "green basket store"),
     "the client signs in but sees NOTHING — there is no users document yet");
 
+  await shot(client, "client");
+
   /* ── 5 ────────────────────────────────────────────────────── */
   stage(5, "The studio grants access — the second half of creating a login",
     "The trap this whole runbook exists for: an Auth user without a users document signs in fine and sees a blank portal.");
@@ -334,6 +361,8 @@ try {
   check("client", has(c, "green basket"), "the same client, same login, now sees their project");
   check("client", !has(c, "inventory manager") && !has(c, "modcon"),
     "and sees nothing belonging to anyone else");
+
+  await shot(client, "client");
 
   /* ── 6 ────────────────────────────────────────────────────── */
   stage(6, "The studio raises what it needs from the client",
@@ -360,6 +389,8 @@ try {
     document.querySelectorAll("[data-intake], .bm-intake-item, [data-done]").length);
   check("client", clientItems >= 0, `the list renders (${clientItems} interactive items found)`);
 
+  await shot(client, "client");
+
   /* ── 7 ────────────────────────────────────────────────────── */
   stage(7, "The client answers one of the requests",
     "One of only two writes a client is permitted anywhere in the system.");
@@ -382,6 +413,8 @@ try {
   }, projectId);
   check("admin", adminSeesTick === 1, "the studio sees the tick immediately, no refresh dance");
 
+  await shot(admin, "admin");
+
   /* ── 8 ────────────────────────────────────────────────────── */
   stage(8, "The studio schedules the work",
     "A project with no milestones cannot tell anyone whether it is late.");
@@ -395,6 +428,8 @@ try {
 
   c = await reload(client, "/portal");
   check("client", /due|milestone/i.test(c), "the client can now see where the project is going");
+
+  await shot(client, "client");
 
   /* ── 9 ────────────────────────────────────────────────────── */
   stage(9, "A deliverable goes up for approval",
@@ -426,6 +461,8 @@ try {
   check("admin", adminSeesApproval.status === "approved", "the studio sees it approved");
   check("admin", adminSeesApproval.by === clientUid, "and who approved it is recorded");
 
+  await shot(client, "client");
+
   /* ── 10 ───────────────────────────────────────────────────── */
   stage(10, "An invoice is raised and the client tries to pay",
     "Razorpay is not configured against the emulator, so this proves the graceful path: the button says payment is off rather than erroring.");
@@ -449,6 +486,8 @@ try {
       `unconfigured payment fails gracefully: "${(status || "").trim().slice(0, 70)}"`);
   }
 
+  await shot(client, "client");
+
   /* ── 11 ───────────────────────────────────────────────────── */
   stage(11, "The studio marks the invoice paid",
     "Only the admin may write an invoice. The client's view follows.");
@@ -468,6 +507,8 @@ try {
   check("client", (await client.locator("[data-pay]").count()) === 0,
     "and the Pay button is gone — a paid invoice cannot be paid twice");
 
+  await shot(client, "client");
+
   /* ── 12 ───────────────────────────────────────────────────── */
   stage(12, "Isolation, from inside the client's own session",
     "The oldest open item in the project. It only proves anything from a client session — as admin it correctly reports inconclusive.");
@@ -482,6 +523,8 @@ try {
   check("admin", has(adminTenancy, "inconclusive"),
     "the same page run as admin says inconclusive rather than claiming a pass");
 
+  await shot(client, "client");
+
   /* ── 13 ───────────────────────────────────────────────────── */
   stage(13, "Back to the dashboard — has the day's work moved the numbers?",
     "The Today panel must reflect everything that just happened.");
@@ -493,6 +536,7 @@ try {
   check("admin", !msWarn, `the unscheduled-project warning is gone${msWarn ? ` — Today still says: "${msWarn[0].trim()}"` : ""}`);
   const dupWarn = todayText.match(/[^.]{0,50}duplicate[^.]{0,40}/i);
   check("admin", !dupWarn, `no duplicate-intake warning${dupWarn ? ` — Today says: "${dupWarn[0].trim()}"` : ""}`);
+  await shot(admin, "admin");
 } catch (err) {
   failures += 1;
   process.stdout.write(`\n\x1b[31mABORTED\x1b[0m ${err.stack || err.message}\n`);
@@ -517,4 +561,10 @@ for (const s of stages.filter((x) => x.failed)) {
     }
   }
 }
+fs.writeFileSync(
+  path.join(ROOT, "docs/journey/index.json"),
+  JSON.stringify({ startedAt: new Date().toISOString(), stages }, null, 2)
+);
+process.stdout.write(`screenshots -> docs/journey/\n`);
+
 process.exit(failures === 0 ? 0 : 1);

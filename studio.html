@@ -185,6 +185,19 @@
 
         <section class="bm-card" data-sect="clients">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+            <p class="bm-eyebrow" style="margin:0;">Where each client is</p>
+            <button type="button" class="bm-help" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">Playbook</button>
+          </div>
+          <h2 class="bm-card-title" style="margin-bottom:6px;">Onboarding checklist</h2>
+          <p class="bm-row-sub" style="margin-bottom:14px;">
+            Six steps from signed to running. Each client shows exactly which one is next,
+            so finishing a step never leaves you wondering what follows it.
+          </p>
+          <div id="bm-onboarding"></div>
+        </section>
+
+        <section class="bm-card" data-sect="clients">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
             <p class="bm-eyebrow" style="margin:0;">Onboarding</p>
             <button type="button" class="bm-help" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">Playbook</button>
           </div>
@@ -358,6 +371,7 @@
         createOrg,
         createProject,
         createInvoice,
+        getAllUsers,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
@@ -1013,11 +1027,12 @@
         const user = await requireAdminAuth();
         if (!user) return;
 
-        const [orgs, projects, invoices, leads] = await Promise.all([
+        const [orgs, projects, invoices, leads, allUsers] = await Promise.all([
           getAllOrgs(),
           getAllProjects(),
           getAllInvoices(),
           getAllLeads(),
+          getAllUsers(),
         ]);
 
         document.getElementById("bm-loading").hidden = true;
@@ -1154,6 +1169,7 @@
               });
               deliveryFacts.push({
                 id: p.id,
+                intakeTotal: intake.length,
                 name: p.name || orgById[p.orgId]?.name || p.orgId,
                 milestones: milestones.length,
                 openIntake: openNow.length,
@@ -1218,6 +1234,9 @@
           );
           deliveryBody.innerHTML = rows.join("");
         }
+
+        const factsByProject = Object.fromEntries(deliveryFacts.map((f) => [f.id, f]));
+        renderOnboarding({ orgs, projects, users: allUsers, factsByProject });
 
         renderToday({
           mrr,
@@ -1360,6 +1379,68 @@
           say("bm-new-invoice-status", "Could not raise it: " + (err?.message || err), false);
         }
       });
+
+      /* The onboarding checklist.
+         "I got stuck after adding another project" is a product failure, not a
+         user failure: the dashboard showed nine panels and left you to work out
+         which one was next. These are the six steps, in order, with the state
+         of each computed from real data and the next one named. */
+
+      const ONBOARDING_STEPS = [
+        { id: "org", label: "Client created", hint: "The organisation exists." },
+        { id: "signed", label: "Retainer signed", hint: "Until it is signed it is not revenue and does not count towards break-even." },
+        { id: "project", label: "Project created", hint: "Add a project so there is something to schedule and show." },
+        { id: "login", label: "Login given", hint: "Firebase Console creates the account, Client Access writes the users document. Both halves, or they sign in to a blank portal." },
+        { id: "intake", label: "Requirements raised", hint: "Until you raise them, the portal has nothing to chase the client for." },
+        { id: "milestones", label: "Schedule applied", hint: "Apply a milestone template with a real start date so the client can see where the project is going." },
+      ];
+
+      function renderOnboarding({ orgs, projects, users, factsByProject }) {
+        const el = document.getElementById("bm-onboarding");
+        const clients = orgs.filter((o) => o.kind === "client" && o.status === "active");
+
+        if (!clients.length) {
+          el.innerHTML = `<p class="bm-empty">No clients yet. Add one above — that is step one.</p>`;
+          return;
+        }
+
+        el.innerHTML = clients.map((org) => {
+          const theirs = projects.filter((p) => p.orgId === org.id);
+          const facts = theirs.map((p) => factsByProject[p.id]).filter(Boolean);
+          const hasLogin = users.some((u) => u.orgId === org.id && u.role === "client");
+
+          const done = {
+            org: true,
+            signed: org.retainerStatus === "signed",
+            project: theirs.length > 0,
+            login: hasLogin,
+            intake: facts.some((f) => f.intakeTotal > 0),
+            milestones: facts.some((f) => f.milestones > 0),
+          };
+
+          const next = ONBOARDING_STEPS.find((st) => !done[st.id]);
+          const completed = ONBOARDING_STEPS.filter((st) => done[st.id]).length;
+
+          return `<div class="bm-onb">
+            <div class="bm-onb-head">
+              <strong>${escapeHtml(org.name)}</strong>
+              <span class="bm-pill ${next ? "bm-pill--amber" : "bm-pill--green"}">${completed}/6</span>
+            </div>
+            <ol class="bm-onb-steps">
+              ${ONBOARDING_STEPS.map((st) => `
+                <li class="${done[st.id] ? "is-done" : next && st.id === next.id ? "is-next" : ""}">
+                  <span class="bm-onb-mark">${done[st.id] ? "✓" : next && st.id === next.id ? "→" : "○"}</span>
+                  <span>${escapeHtml(st.label)}</span>
+                </li>`).join("")}
+            </ol>
+            ${
+              next
+                ? `<p class="bm-onb-next"><strong>Next: ${escapeHtml(next.label)}.</strong> ${escapeHtml(next.hint)}</p>`
+                : `<p class="bm-onb-next">All six done. From here it is delivery: tick blockers as they clear, put deliverables up for approval, raise invoices.</p>`
+            }
+          </div>`;
+        }).join("");
+      }
 
       /* The Today panel.
          Every line is a fact computed from the data on this page, written as a

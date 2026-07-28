@@ -797,3 +797,49 @@ a.bm-link { color: var(--mint-3); }
   }
   .bm-topbar-right > * { flex: none; white-space: nowrap; }
 }
+
+/* ── onboarding checklist ──────────────────────────────────────
+   Six steps from signed to running, per client. Exists because finishing a
+   step used to leave you staring at nine panels wondering which was next. */
+
+.bm-onb {
+  border: 1px solid var(--bm-line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.bm-onb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+.bm-onb-steps {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.bm-onb-steps li {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  font-size: 14px;
+  color: var(--bm-muted);
+}
+.bm-onb-mark { width: 14px; flex: none; font-weight: 700; }
+.bm-onb-steps li.is-done { color: var(--bm-green); }
+/* The next step is the only one in full ink, so the eye lands on it. */
+.bm-onb-steps li.is-next { color: var(--ink); font-weight: 700; }
+.bm-onb-next {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--bm-muted);
+  padding-top: 10px;
+  border-top: 1px solid var(--bm-line);
+}
+.bm-onb-next strong { color: var(--ink); }

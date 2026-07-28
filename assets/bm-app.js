@@ -147,6 +147,13 @@ export async function getOrg(orgId) {
   return snap.exists() ? withId(snap) : null;
 }
 
+/** Every users document. Admin only — the rules allow a client to read
+ *  exactly their own, so a client calling this gets nothing. */
+export async function getAllUsers() {
+  const snap = await getDocs(collection(db, "users"));
+  return snap.docs.map(withId);
+}
+
 export async function getAllOrgs() {
   const snap = await getDocs(collection(db, "organisations"));
   return snap.docs.map(withId);
