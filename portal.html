@@ -115,6 +115,7 @@
         formatDate,
         formatINR,
         escapeHtml,
+        safeUrl,
         SERVICE_TYPES,
         mountThemeToggle,
         payInvoice,
@@ -253,7 +254,7 @@
               (d) => `<div class="bm-row">
                 <div class="bm-row-main">
                   <span class="bm-row-title">${escapeHtml(d.title)} <span class="bm-row-sub">v${escapeHtml(d.version ?? "1")}</span></span>
-                  ${d.url ? `<a class="bm-link bm-row-sub" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open preview</a>` : ""}
+                  ${safeUrl(d.url) ? `<a class="bm-link bm-row-sub" href="${escapeHtml(safeUrl(d.url))}" target="_blank" rel="noopener">Open preview</a>` : ""}
                 </div>
                 <div style="display:flex; gap:8px;">
                   <button class="bm-btn bm-btn--sm" data-approve="${d.id}">Approve</button>
@@ -280,14 +281,16 @@
         }
 
         // Preview links — every deliverable that has one.
-        const withUrls = deliverables.filter((d) => d.url);
+        // Filtered on safeUrl, not on d.url: escaping stops an attribute
+        // breaking out, it does not stop a javascript: scheme running on click.
+        const withUrls = deliverables.filter((d) => safeUrl(d.url));
         const previewList = document.getElementById("bm-preview-list");
         previewList.innerHTML = withUrls.length
           ? withUrls
               .map(
                 (d) => `<div class="bm-row">
                   <span class="bm-row-title">${escapeHtml(d.title)} <span class="bm-row-sub">v${escapeHtml(d.version ?? "1")}</span></span>
-                  <a class="bm-link" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Open</a>
+                  <a class="bm-link" href="${escapeHtml(safeUrl(d.url))}" target="_blank" rel="noopener">Open</a>
                 </div>`
               )
               .join("")

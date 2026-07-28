@@ -1250,6 +1250,32 @@ export function formatINR(amount) {
   return `Rs ${Math.round(n).toLocaleString("en-IN")}`;
 }
 
+/**
+ * A URL safe to put in an href.
+ *
+ * `escapeHtml` is not enough here and it is worth being precise about why: it
+ * stops the value breaking OUT of the attribute, but `javascript:alert(1)`
+ * contains no character it escapes, so it survives intact and runs on click.
+ * Escaping and scheme-checking are different jobs; a link needs both.
+ *
+ * Returns null for anything that is not plainly http(s) or a same-site path,
+ * and the caller renders no link at all. A missing preview link is a nuisance;
+ * a preview link that runs code is a foothold on the page a client trusts.
+ */
+export function safeUrl(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+  // Relative paths and anchors are ours, and have no scheme to abuse.
+  if (/^(\/|\.\/|\.\.\/|#)/.test(raw)) return raw;
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return null; // no scheme and not a path — not something to link to
+  }
+  return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.href : null;
+}
+
 export function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (ch) => ({
     "&": "&amp;",

@@ -168,3 +168,61 @@ test("saveScope is idempotent by feature id, so re-saving cannot reset a deliver
 test("setScopeLineStatus refuses a status that is not on the ladder", () => {
   assert.match(SRC, /if \(!SCOPE_STATUS_IDS\.includes\(status\)\) throw new Error/);
 });
+
+/* ── safeUrl ──────────────────────────────────────────────────
+   Added after the security pass. escapeHtml stops a value breaking OUT of an
+   href; it does nothing about the scheme, because `javascript:alert(1)`
+   contains no character it escapes. The preview link on /portal is the one
+   place a stored URL becomes a clickable link on a page a client trusts. */
+
+const safeUrl = (await import(
+  "data:text/javascript," + encodeURIComponent(lift("safeUrl"))
+)).safeUrl;
+
+test("http and https pass through", () => {
+  assert.equal(safeUrl("https://example.com/preview"), "https://example.com/preview");
+  assert.equal(safeUrl("http://example.com/"), "http://example.com/");
+});
+
+test("javascript: is rejected — this is the whole point", () => {
+  assert.equal(safeUrl("javascript:alert(1)"), null);
+  assert.equal(safeUrl("JavaScript:alert(1)"), null);
+  assert.equal(safeUrl("  javascript:alert(1)  "), null);
+  // The classic bypass: escapeHtml leaves these characters alone, so a filter
+  // that only escapes would pass this straight through.
+  assert.equal(safeUrl("java\tscript:alert(1)"), null);
+});
+
+test("other dangerous schemes are rejected too", () => {
+  assert.equal(safeUrl("data:text/html,<script>alert(1)</script>"), null);
+  assert.equal(safeUrl("vbscript:msgbox(1)"), null);
+  assert.equal(safeUrl("file:///etc/passwd"), null);
+});
+
+test("our own paths and anchors are fine", () => {
+  assert.equal(safeUrl("/studio"), "/studio");
+  assert.equal(safeUrl("./thing"), "./thing");
+  assert.equal(safeUrl("#top"), "#top");
+});
+
+test("empty and junk produce null, so the caller renders no link at all", () => {
+  assert.equal(safeUrl(""), null);
+  assert.equal(safeUrl(null), null);
+  assert.equal(safeUrl(undefined), null);
+  assert.equal(safeUrl("   "), null);
+  assert.equal(safeUrl("not a url"), null);
+});
+
+test("/portal renders preview links through safeUrl, not escapeHtml alone", () => {
+  // The guard is only worth having if it is actually on the render path.
+  const portal = fs.readFileSync(
+    path.join(path.resolve(import.meta.dirname, ".."), "portal.html"), "utf8"
+  );
+  const hrefs = [...portal.matchAll(/href="\$\{([^}]*)\}"/g)].map((m) => m[1]);
+  for (const h of hrefs) {
+    assert.ok(/safeUrl\(/.test(h), `href interpolation without safeUrl: \${${h}}`);
+  }
+  assert.ok(hrefs.length >= 2, "expected the two deliverable link sites");
+  assert.match(portal, /deliverables\.filter\(\(d\) => safeUrl\(d\.url\)\)/,
+    "the preview panel still filters on d.url, so a rejected URL leaves a dead row");
+});

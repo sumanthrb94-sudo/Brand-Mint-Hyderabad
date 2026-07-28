@@ -27,6 +27,7 @@ import {
 } from "@firebase/rules-unit-testing";
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, query, where,
+  serverTimestamp,
 } from "firebase/firestore";
 
 const ADMIN_EMAIL = "admin@brandmintstudios.in";
@@ -137,20 +138,22 @@ test("a client cannot read leads or the price catalog", async () => {
 /* ─────────── the two writes a client is allowed ─────────── */
 
 test("a client may tick their own intake item", async () => {
+  // serverTimestamp(), not new Date() — the rules pin the clock. See the
+  // "fields a client IS allowed to touch" block at the end of this file.
   await assertSucceeds(
-    updateDoc(doc(client(), "projects/gb-project/intake/i1"), { done: true, clearedAt: new Date() })
+    updateDoc(doc(client(), "projects/gb-project/intake/i1"), { done: true, clearedAt: serverTimestamp() })
   );
 });
 
 test("a client may approve or request changes on their own deliverable", async () => {
   await assertSucceeds(
     updateDoc(doc(client(), "projects/gb-project/deliverables/d1"), {
-      status: "approved", decidedAt: new Date(), decidedBy: "gb-uid",
+      status: "approved", decidedAt: serverTimestamp(), decidedBy: "gb-uid",
     })
   );
   await assertSucceeds(
     updateDoc(doc(client(), "projects/gb-project/deliverables/d1"), {
-      status: "changes_requested", decidedAt: new Date(), decidedBy: "gb-uid",
+      status: "changes_requested", decidedAt: serverTimestamp(), decidedBy: "gb-uid",
     })
   );
 });
@@ -163,14 +166,14 @@ test("a tick cannot smuggle in another field", async () => {
     updateDoc(doc(client(), "projects/gb-project/intake/i1"), { done: true, label: "rewritten by the client" })
   );
   await assertFails(
-    updateDoc(doc(client(), "projects/gb-project/intake/i1"), { done: true, raisedAt: new Date(2020, 0, 1) })
+    updateDoc(doc(client(), "projects/gb-project/intake/i1"), { done: true, clearedAt: serverTimestamp(), raisedAt: new Date(2020, 0, 1) })
   );
 });
 
 test("a client cannot set a deliverable to a status only we may set", async () => {
   await assertFails(
     updateDoc(doc(client(), "projects/gb-project/deliverables/d1"), {
-      status: "in_review", decidedAt: new Date(), decidedBy: "gb-uid",
+      status: "in_review", decidedAt: serverTimestamp(), decidedBy: "gb-uid",
     })
   );
 });
@@ -178,14 +181,14 @@ test("a client cannot set a deliverable to a status only we may set", async () =
 test("a client cannot rewrite a deliverable's title or url", async () => {
   await assertFails(
     updateDoc(doc(client(), "projects/gb-project/deliverables/d1"), {
-      status: "approved", decidedAt: new Date(), decidedBy: "gb-uid", url: "https://evil.example",
+      status: "approved", decidedAt: serverTimestamp(), decidedBy: "gb-uid", url: "https://evil.example",
     })
   );
 });
 
 test("a client cannot tick ANOTHER tenant's intake item", async () => {
   await assertFails(
-    updateDoc(doc(client(), "projects/inv-project/intake/i1"), { done: true, clearedAt: new Date() })
+    updateDoc(doc(client(), "projects/inv-project/intake/i1"), { done: true, clearedAt: serverTimestamp() })
   );
 });
 
@@ -347,4 +350,66 @@ test("an admin can create, move and delete scope lines on any project", async ()
     updateDoc(doc(db, "projects/inv-project/scope/stock"), { status: "delivered" })
   );
   await assertSucceeds(deleteDoc(doc(db, "projects/inv-project/scope/reports")));
+});
+
+/* ── the fields a client IS allowed to touch ───────────────────
+   `onlyTouches` stops a tick smuggling in a field change. It does not stop the
+   client writing anything they like INTO the permitted fields, and for a while
+   it did not: a client could approve a deliverable and record the ADMIN's uid
+   as the approver, dated six years ago. Proven against the emulator before it
+   was fixed, which is why these exist.
+
+   This is not a leak. It is worse for what this product is: the portal's whole
+   claim is that it says who is holding something up and since when. A record
+   the interested party can forge answers nothing. */
+
+test("a client's tick must carry the SERVER's clock, not one they chose", async () => {
+  const db = client();
+  await assertFails(
+    updateDoc(doc(db, "projects/gb-project/intake/i1"), { done: true, clearedAt: new Date("2019-01-01") })
+  );
+  await assertSucceeds(
+    updateDoc(doc(db, "projects/gb-project/intake/i1"), { done: true, clearedAt: serverTimestamp() })
+  );
+  // Un-ticking clears the date rather than stamping one.
+  await assertSucceeds(
+    updateDoc(doc(db, "projects/gb-project/intake/i1"), { done: false, clearedAt: null })
+  );
+});
+
+test("a client cannot attribute their own approval to somebody else", async () => {
+  await assertFails(
+    updateDoc(doc(client(), "projects/gb-project/deliverables/d1"), {
+      status: "approved", decidedAt: serverTimestamp(), decidedBy: "admin-uid",
+    })
+  );
+});
+
+test("a client cannot backdate an approval", async () => {
+  await assertFails(
+    updateDoc(doc(client(), "projects/gb-project/deliverables/d1"), {
+      status: "approved", decidedAt: new Date("2019-06-01"), decidedBy: "gb-uid",
+    })
+  );
+});
+
+test("the honest decision — own uid, server clock — still works", async () => {
+  await assertSucceeds(
+    updateDoc(doc(client(), "projects/gb-project/deliverables/d1"), {
+      status: "approved", decidedAt: serverTimestamp(), decidedBy: "gb-uid",
+    })
+  );
+  await assertSucceeds(
+    updateDoc(doc(client(), "projects/gb-project/deliverables/d1"), {
+      status: "changes_requested", decidedAt: serverTimestamp(), decidedBy: "gb-uid",
+    })
+  );
+});
+
+test("the admin is not held to the client's pins — they may correct a record", async () => {
+  await assertSucceeds(
+    updateDoc(doc(admin(), "projects/gb-project/deliverables/d1"), {
+      status: "approved", decidedAt: new Date("2026-01-01"), decidedBy: "gb-uid",
+    })
+  );
 });

@@ -33,10 +33,28 @@ service cloud.firestore {
       // who could mark a line accepted could also mark one unaccepted.
       match /scope/{id} { allow read: if isAdmin() || mine(pid); allow write: if isAdmin(); }
       match /milestones/{id} { allow read: if isAdmin() || mine(pid); allow write: if isAdmin(); }
+      // `onlyTouches` stops a tick smuggling in a field change. It does NOT stop
+      // the client writing whatever they like INTO the fields they are allowed to
+      // touch — so the timestamps and the identity are pinned as well.
+      //
+      // Without the pins a client could set clearedAt to any value at all
+      // (proven: an arbitrary string was accepted), and could approve a
+      // deliverable while recording the admin's uid as the approver and a date
+      // six years ago. That is not a data-leak; it is worse for what this
+      // product is. The whole portal exists to answer "who is holding this up,
+      // and since when" — a record of who decided what, when, that the
+      // interested party can write, answers nothing.
+      //
+      // request.time is the server's clock, so serverTimestamp() satisfies it
+      // and a client-supplied Date cannot. The app already writes exactly this
+      // (setIntakeDone, decideDeliverable), so nothing in the UI changes.
       match /intake/{id} { allow read: if isAdmin() || mine(pid); allow create, delete: if isAdmin();
-        allow update: if isAdmin() || (mine(pid) && onlyTouches(['done','clearedAt']) && request.resource.data.done is bool); }
+        allow update: if isAdmin() || (mine(pid) && onlyTouches(['done','clearedAt']) && request.resource.data.done is bool
+          && (request.resource.data.clearedAt == request.time || request.resource.data.clearedAt == null)); }
       match /deliverables/{id} { allow read: if isAdmin() || mine(pid); allow create, delete: if isAdmin();
-        allow update: if isAdmin() || (mine(pid) && onlyTouches(['status','decidedAt','decidedBy']) && request.resource.data.status in ['approved','changes_requested']); }
+        allow update: if isAdmin() || (mine(pid) && onlyTouches(['status','decidedAt','decidedBy']) && request.resource.data.status in ['approved','changes_requested']
+          && request.resource.data.decidedBy == request.auth.uid
+          && request.resource.data.decidedAt == request.time); }
     }
     match /invoices/{id} { allow read: if isAdmin() || (signedIn() && resource.data.orgId == myOrg()); allow write: if isAdmin(); }
     match /leads/{id} { allow read, write: if isAdmin(); }

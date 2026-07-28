@@ -37,9 +37,9 @@
      2. under [data-theme="dark"], for anyone who has
 
    :not([data-theme="light"]) is what lets an explicit "light" choice beat the
-   system preference. The two blocks must stay identical — tests/theme.test.mjs
-   asserts they define exactly the same tokens, so drift fails the build rather
-   than shipping a half-dark screen. */
+   system preference. The two blocks must stay identical — tests/contrast.test.mjs
+   asserts they define exactly the same tokens with the same values, so drift
+   fails the build rather than shipping a half-dark screen. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;

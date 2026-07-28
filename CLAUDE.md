@@ -158,6 +158,13 @@ CTA was cream-on-cream at 1.03:1. Note that `--ink`/`--cream` *flip meaning*
 between colour schemes — the solid brand button therefore uses its own fixed
 `--bm-btn-bg` / `--bm-btn-fg` pair, which is why it is safe in both.
 
+`tests/contrast.test.mjs` now enforces this instead of trusting it. It reads
+the tokens out of `bm-app.css`, composites the translucent ones over the
+surface behind them, and checks every interactive pair in **both** themes —
+compositing is what caught the muted pill sitting at 4.00:1 while the token
+alone read 5.10:1. Adding a `.bm-pill--x` with no measured pair fails the
+suite.
+
 ---
 
 ## 5. Files
@@ -267,6 +274,18 @@ first admin document without already being admin.
 A client can do exactly two writes: tick an intake item, and approve or
 request changes on a deliverable. Nothing else. `onlyTouches` is what stops a
 tick from smuggling in a field change.
+
+`onlyTouches` alone is not enough, and the gap is easy to miss: it constrains
+**which** fields may change, not **what** may be written into them. Until the
+security pass a client could approve a deliverable while recording the admin's
+uid as the approver, dated six years earlier, and could set `clearedAt` to an
+arbitrary string. Proven against the emulator, not inferred. So the values are
+pinned too — `decidedBy == request.auth.uid`, and both timestamps
+`== request.time`, which only `serverTimestamp()` satisfies.
+
+That is not a leak, and it is worse than one for what this product is: the
+portal's entire claim is that it says who is holding something up and since
+when. A record the interested party can forge answers nothing.
 
 Everything the admin UI does is already covered by `isAdmin()`. Adding admin
 features has so far required **no rules changes** — if a change seems to need
