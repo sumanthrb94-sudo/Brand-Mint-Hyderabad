@@ -11,6 +11,10 @@
   --cream: #fbfaf2;
   --bm-muted: #5d7368;
   --bm-line: rgba(11, 31, 26, 0.12);
+  /* The muted pill's own foreground. --bm-muted is 5.10:1 on a card but only
+     4.00:1 once --bm-line is composited over it, and the muted pill is now a
+     button on /studio. Darkened until it clears: 5.51:1. */
+  --bm-pill-muted-fg: #4a5d54;
   --bm-white: #ffffff;
   --bm-red: #b3261e;
   --bm-red-bg: #fbe9e7;
@@ -43,6 +47,7 @@
   --ink: #f2f7f4;
   --bm-muted: #9ab3a8;
   --bm-line: rgba(242, 247, 244, 0.14);
+  --bm-pill-muted-fg: #9ab3a8;
   --bm-white: #101a16;
   /* Solid (non-alpha) dark-mode badge colors — verified against the
   badge's own background, not blended over whatever it happens to
@@ -63,6 +68,7 @@
   --ink: #f2f7f4;
   --bm-muted: #9ab3a8;
   --bm-line: rgba(242, 247, 244, 0.14);
+  --bm-pill-muted-fg: #9ab3a8;
   --bm-white: #101a16;
   /* Solid (non-alpha) dark-mode badge colors — verified against the
   badge's own background, not blended over whatever it happens to
@@ -308,6 +314,50 @@ body.bm-body {
 .bm-row-title { font-weight: 600; font-size: 14px; }
 .bm-row-sub { font-size: 12px; color: var(--bm-muted); }
 
+/* Agreed scope — the quotation, alive on the project.
+   Shares the progress-bar geometry above rather than inventing a second one,
+   so a scope bar and a project bar read as the same kind of measurement. */
+.bm-scope-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.bm-scope-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bm-line);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.bm-scope-bar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--mint-2), var(--mint));
+  border-radius: 999px;
+}
+.bm-scope-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--bm-line);
+}
+.bm-scope-row:last-child { border-bottom: none; }
+.bm-scope-label { flex: 1 1 auto; font-size: 14px; font-weight: 600; }
+
+/* The status pill on /studio is a button — it moves the line one step.
+   It must therefore look pressable, which a span does not. */
+button.bm-pill {
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+button.bm-pill:hover:not(:disabled) { border-color: currentColor; }
+button.bm-pill:disabled { cursor: default; opacity: 1; }
+
 /* Badges / pills */
 .bm-pill {
   display: inline-flex;
@@ -322,7 +372,7 @@ body.bm-body {
 .bm-pill--green { background: var(--bm-green-bg); color: var(--bm-green); }
 .bm-pill--amber { background: var(--bm-amber-bg); color: var(--bm-amber); }
 .bm-pill--red { background: var(--bm-red-bg); color: var(--bm-red); }
-.bm-pill--muted { background: var(--bm-line); color: var(--bm-muted); }
+.bm-pill--muted { background: var(--bm-line); color: var(--bm-pill-muted-fg); }
 
 /* Tables */
 .bm-table {

@@ -5,12 +5,12 @@ because finishing one step used to leave you looking at nine panels wondering
 which was next.
 
 **The dashboard now tells you this too.** `/studio` → **Clients** → *Onboarding
-checklist* shows each client's six steps, ticks the ones that are done, and
+checklist* shows each client's seven steps, ticks the ones that are done, and
 names the next one. This document is the longer version.
 
 ---
 
-## The six steps
+## The seven steps
 
 | # | Step | Where | Done when |
 |---|---|---|---|
@@ -18,11 +18,12 @@ names the next one. This document is the longer version.
 | 2 | Retainer signed | `/studio` → Clients → the org row | `retainerStatus` is `signed` |
 | 3 | Project created | `/studio` → Delivery → Add a project | A project exists for that org |
 | 4 | Login given | Firebase Console **and** `/studio` → Client Access | `users/{uid}` exists |
-| 5 | Requirements raised | `/quote` → push to intake | The project has intake items |
-| 6 | Schedule applied | `/studio` → Manage projects → Apply template | The project has milestones |
+| 5 | Agreed scope recorded | `/quote` → Save as agreed scope | The project has scope lines |
+| 6 | Requirements raised | `/quote` → push to intake | The project has intake items |
+| 7 | Schedule applied | `/studio` → Manage projects → Apply template | The project has milestones |
 
-After six, it is delivery: tick blockers as they clear, put deliverables up for
-approval, raise invoices.
+After seven, it is delivery: move scope lines along as you build, tick blockers
+as they clear, put deliverables up for approval, raise invoices.
 
 ---
 
@@ -96,11 +97,51 @@ read is denied.
 organisation, their project, their invoices. Then load `/tenancy-check` from
 that same session — it must say **Isolated**.
 
+**Next:** record what you sold.
+
+---
+
+## 5 · Record the agreed scope
+
+`/quote` → pick the services in scope → price every line → **Save as agreed
+scope**.
+
+Until this exists the quote is a document you printed and threw away. Nothing
+records what was actually sold, so "how far along are we" is a percentage typed
+from memory — and a percentage typed from memory is a percentage that flatters.
+
+Once it exists, four things stop being separate:
+
+- **Progress is derived, not typed.** Each line moves *Agreed → Building →
+  Delivered → Accepted*, one click per step on `/studio` → Delivery → Manage
+  projects. The bar is computed from where the lines are, weighted by your own
+  build-day estimates — a nine-day line and a one-day line are not each half
+  the job.
+- **The client sees the same list**, on their own portal, inside *Where we
+  are*. Not a sixth panel — the portal still shows five things. They can read
+  it; they cannot move a line. Delivery status is the studio's assertion about
+  its own work, and the rules enforce that.
+- **What is still owed is arithmetic.** Value follows *acceptance*, not effort.
+  A line half-built has earned nothing, which is the same discipline as never
+  counting a proposal as revenue.
+- **Re-saving is safe.** Scope grows; saving the same quote again adds only the
+  new lines and leaves the existing ones exactly where they are. A line you
+  marked delivered stays delivered.
+
+Price every line first — the button refuses an unpriced one, because a wrong
+money number is worse than an absent one.
+
+**What this does not do:** nothing inspects your code and decides a line is
+finished. That judgement is yours, and a scheduled job guessing at it would
+produce a progress bar that is confidently wrong — which is exactly the failure
+mode this replaces. What it removes is typing the same fact twice: mark the
+line, and the percentage, the client's portal and delivery health all follow.
+
 **Next:** raise what you need from them.
 
 ---
 
-## 5 · Raise the requirements
+## 6 · Raise the requirements
 
 `/quote` → pick the services in scope → **push to intake**.
 
@@ -122,7 +163,7 @@ every client.
 
 ---
 
-## 6 · Apply the schedule
+## 7 · Apply the schedule
 
 `/studio` → **Delivery** → Manage projects → pick the template → **give it a
 start date** → Apply template.
@@ -164,6 +205,11 @@ says **BELOW FLOOR — DO NOT SIGN**, do not sign. That gate exists because two
 engagements went out at ₹4,524/day and ₹833/day against a ₹10,000 list rate,
 and both were arithmetic nobody ran in time.
 
+Two buttons on that page write to the project, and they do different jobs:
+**Save as agreed scope** records what *you* owe *them* (step 5), and **Add to
+project intake** records what *they* owe *you* (step 6). Both are safe to press
+again when scope grows.
+
 E-signature is not built and is deliberately out of scope — Zoho Sign does
 this. The portal records the outcome, not the signing.
 
@@ -175,7 +221,7 @@ this. The portal records the outcome, not the signing.
 bash tests/run-journey.sh
 ```
 
-Two browsers — admin and client — against local emulators, through all thirteen
+Two browsers — admin and client — against local emulators, through all fourteen
 stages: lead, first response, signed, project, login, requirements, the client
 answering, milestones, deliverable, the client approving, invoice, payment
 attempt, reconciliation, isolation proven.

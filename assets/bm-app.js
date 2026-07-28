@@ -912,6 +912,112 @@ export async function markLeadFirstResponse(id) {
   });
 }
 
+// --- Agreed scope (the living quotation) ------------------------------------
+//
+// /quote produced a scope document and then threw it away. Nothing recorded
+// what was actually sold, so nothing could say how much of it had been
+// delivered — "progress" was a percentage the admin typed from memory, which
+// is a guess wearing a number's clothes.
+//
+// The scope is now stored per project, one document per agreed line. Delivery
+// is a status on each line, and progress is COMPUTED from those statuses. The
+// client sees the same list: what they are paying for, and what is done.
+
+/** Four states, in order. A line only ever moves forward through them. */
+export const SCOPE_STATUS = [
+  { id: "agreed", label: "Agreed", hint: "Signed for, not started." },
+  { id: "building", label: "Building", hint: "In progress now." },
+  { id: "delivered", label: "Delivered", hint: "Done and handed over for review." },
+  { id: "accepted", label: "Accepted", hint: "The client has confirmed it." },
+];
+
+export const SCOPE_STATUS_IDS = SCOPE_STATUS.map((s) => s.id);
+
+export async function getScope(projectId) {
+  const snap = await getDocs(collection(db, "projects", projectId, "scope"));
+  return snap.docs.map(withId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
+
+/**
+ * Writes the agreed scope onto a project.
+ *
+ * Idempotent by feature id, for the same reason intake is: re-saving after the
+ * scope grows must add the new lines and leave the existing ones — including
+ * their delivery status — exactly as they are. Overwriting would silently
+ * reset a delivered line to agreed.
+ *
+ * Returns { added, skipped }.
+ */
+export async function saveScope(projectId, lines) {
+  const existing = new Set((await getScope(projectId)).map((l) => l.id));
+  const batch = writeBatch(db);
+  let added = 0;
+  let skipped = 0;
+
+  lines.forEach((line, i) => {
+    const id = String(line.featureId || `line-${i}`);
+    if (existing.has(id)) { skipped += 1; return; }
+    batch.set(doc(db, "projects", projectId, "scope", id), {
+      featureId: line.featureId || null,
+      label: String(line.label || "").trim(),
+      amount: Number(line.amount) || 0,
+      days: Number(line.days) || 0,
+      status: "agreed",
+      order: i,
+      agreedAt: serverTimestamp(),
+      changedAt: null,
+    });
+    added += 1;
+  });
+
+  if (added) await batch.commit();
+  return { added, skipped };
+}
+
+/** Moves one line's delivery status. Admin only — the rules enforce it. */
+export async function setScopeLineStatus(projectId, lineId, status) {
+  if (!SCOPE_STATUS_IDS.includes(status)) throw new Error(`unknown scope status: ${status}`);
+  await updateDoc(doc(db, "projects", projectId, "scope", lineId), {
+    status,
+    changedAt: serverTimestamp(),
+  });
+}
+
+export async function deleteScopeLine(projectId, lineId) {
+  await deleteDoc(doc(db, "projects", projectId, "scope", lineId));
+}
+
+/**
+ * Progress, derived rather than typed.
+ *
+ * Weighted by build days, because a 10-day line and a half-day line are not
+ * the same fraction of the job — counting lines would let three trivial items
+ * report a project as half done.
+ *
+ * Returns null when there is no scope. Null renders as "not recorded"; zero
+ * would draw an empty bar that reads as started-and-stalled, and a project
+ * nobody has scoped has not stalled — it has not been scoped.
+ */
+export function scopeProgress(lines) {
+  if (!lines || !lines.length) return null;
+  const weight = (l) => (Number(l.days) > 0 ? Number(l.days) : 1);
+  const total = lines.reduce((n, l) => n + weight(l), 0);
+  if (!total) return null;
+  const credit = { agreed: 0, building: 0.5, delivered: 0.9, accepted: 1 };
+  const done = lines.reduce((n, l) => n + weight(l) * (credit[l.status] ?? 0), 0);
+  return Math.round((done / total) * 100);
+}
+
+/** What the scope is worth, and how much of it is accepted. Money follows
+ *  acceptance, not effort — a line half-built has earned nothing. */
+export function scopeValue(lines) {
+  const agreed = lines.reduce((n, l) => n + (Number(l.amount) || 0), 0);
+  const accepted = lines
+    .filter((l) => l.status === "accepted")
+    .reduce((n, l) => n + (Number(l.amount) || 0), 0);
+  return { agreed, accepted, outstanding: agreed - accepted };
+}
+
 // --- Organisations, projects, invoices (admin only) -------------------------
 //
 // These existed only as seed data until now. The admin could add milestones,

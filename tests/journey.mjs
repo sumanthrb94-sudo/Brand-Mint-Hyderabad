@@ -392,7 +392,73 @@ try {
   await shot(client, "client");
 
   /* ── 7 ────────────────────────────────────────────────────── */
-  stage(7, "The client answers one of the requests",
+  stage(7, "The quotation is recorded as the project's agreed scope",
+    "The quote used to be printed and thrown away, so 'how far along are we' was a percentage typed from memory. Recorded, it becomes the one place progress is derived from.");
+
+  const scoped = await admin.evaluate(async (pid) => {
+    const m = await import("/assets/bm-app.js");
+    const r = await m.saveScope(pid, [
+      { featureId: "cod", label: "Cash on delivery", amount: 40000, days: 4 },
+      { featureId: "inventory", label: "Inventory sync", amount: 25000, days: 6 },
+    ]);
+    const lines = await m.getScope(pid);
+    return { ...r, pct: m.scopeProgress(lines), value: m.scopeValue(lines) };
+  }, projectId);
+  check("admin", scoped.added === 2, `${scoped.added} lines recorded as the agreed scope`);
+  check("admin", scoped.pct === 0,
+    "nothing built yet reads as 0% — a scoped-and-untouched project, not an unscoped one");
+  check("admin", scoped.value.agreed === 65000 && scoped.value.accepted === 0,
+    "₹65,000 agreed, ₹0 accepted — sold is not earned");
+
+  const rescoped = await admin.evaluate(async (pid) => {
+    const m = await import("/assets/bm-app.js");
+    await m.setScopeLineStatus(pid, "cod", "delivered");
+    // Saving the same quote again is the normal thing to do when scope grows.
+    // It must not reset the line that was just delivered.
+    const r = await m.saveScope(pid, [
+      { featureId: "cod", label: "Cash on delivery", amount: 40000, days: 4 },
+      { featureId: "inventory", label: "Inventory sync", amount: 25000, days: 6 },
+    ]);
+    const lines = await m.getScope(pid);
+    return { ...r, cod: lines.find((l) => l.id === "cod")?.status, pct: m.scopeProgress(lines) };
+  }, projectId);
+  check("admin", rescoped.added === 0 && rescoped.skipped === 2,
+    "re-saving the same quote adds nothing — no duplicate scope lines");
+  check("admin", rescoped.cod === "delivered",
+    "and the line marked delivered is still delivered, not silently reset to agreed");
+  check("admin", rescoped.pct === 36,
+    `progress is weighted by build days, not line count (${rescoped.pct}%, not the 45% counting lines would give)`);
+
+  c = await reload(client, "/portal");
+  check("client", has(c, "cash on delivery") && has(c, "inventory sync"),
+    "the client sees the same agreed scope, on their own portal");
+  check("client", has(c, "delivered"),
+    "including which parts are done — without anyone sending a status email");
+
+  const clientCanWriteScope = await client.evaluate(async () => {
+    const m = await import("/assets/bm-app.js");
+    const profile = await m.getUserProfile(m.auth.currentUser.uid);
+    const projects = await m.getProjectsForOrg(profile.orgId);
+    try {
+      await m.setScopeLineStatus(projects[0].id, "inventory", "accepted");
+      return true;
+    } catch { return false; }
+  });
+  check("client", clientCanWriteScope === false,
+    "but cannot move a line themselves — delivery status is the studio's assertion, enforced by rules");
+
+  // Land the screenshot on the tab that actually shows the scope, so the
+  // reviewer sees the clickable status pills rather than whichever panel the
+  // previous stage happened to leave open.
+  s = await reload(admin, "/studio#delivery");
+  check("admin", has(s, "cash on delivery") && has(s, "36% delivered"),
+    "the same lines, and the same derived number, on the studio's own delivery tab");
+
+  await shot(admin, "admin");
+  await shot(client, "client");
+
+  /* ── 8 ────────────────────────────────────────────────────── */
+  stage(8, "The client answers one of the requests",
     "One of only two writes a client is permitted anywhere in the system.");
 
   const ticked = await client.evaluate(async () => {
@@ -415,8 +481,8 @@ try {
 
   await shot(admin, "admin");
 
-  /* ── 8 ────────────────────────────────────────────────────── */
-  stage(8, "The studio schedules the work",
+  /* ── 9 ────────────────────────────────────────────────────── */
+  stage(9, "The studio schedules the work",
     "A project with no milestones cannot tell anyone whether it is late.");
 
   const msCount = await admin.evaluate(async (pid) => {
@@ -431,8 +497,8 @@ try {
 
   await shot(client, "client");
 
-  /* ── 9 ────────────────────────────────────────────────────── */
-  stage(9, "A deliverable goes up for approval",
+  /* ── 10 ────────────────────────────────────────────────────── */
+  stage(10, "A deliverable goes up for approval",
     "The client approves in one click, and the studio sees the decision.");
 
   await admin.evaluate(async (pid) => {
@@ -463,8 +529,8 @@ try {
 
   await shot(client, "client");
 
-  /* ── 10 ───────────────────────────────────────────────────── */
-  stage(10, "An invoice is raised and the client tries to pay",
+  /* ── 11 ───────────────────────────────────────────────────── */
+  stage(11, "An invoice is raised and the client tries to pay",
     "Razorpay is not configured against the emulator, so this proves the graceful path: the button says payment is off rather than erroring.");
 
   await admin.evaluate(async (org) => {
@@ -488,8 +554,8 @@ try {
 
   await shot(client, "client");
 
-  /* ── 11 ───────────────────────────────────────────────────── */
-  stage(11, "The studio marks the invoice paid",
+  /* ── 12 ───────────────────────────────────────────────────── */
+  stage(12, "The studio marks the invoice paid",
     "Only the admin may write an invoice. The client's view follows.");
 
   await admin.evaluate(async (org) => {
@@ -509,8 +575,8 @@ try {
 
   await shot(client, "client");
 
-  /* ── 12 ───────────────────────────────────────────────────── */
-  stage(12, "Isolation, from inside the client's own session",
+  /* ── 13 ───────────────────────────────────────────────────── */
+  stage(13, "Isolation, from inside the client's own session",
     "The oldest open item in the project. It only proves anything from a client session — as admin it correctly reports inconclusive.");
 
   const tenancy = await reload(client, "/tenancy-check");
@@ -525,8 +591,8 @@ try {
 
   await shot(client, "client");
 
-  /* ── 13 ───────────────────────────────────────────────────── */
-  stage(13, "Back to the dashboard — has the day's work moved the numbers?",
+  /* ── 14 ───────────────────────────────────────────────────── */
+  stage(14, "Back to the dashboard — has the day's work moved the numbers?",
     "The Today panel must reflect everything that just happened.");
 
   s = await reload(admin, "/studio#today");

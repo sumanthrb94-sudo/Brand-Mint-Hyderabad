@@ -64,6 +64,8 @@ beforeEach(async () => {
     await setDoc(doc(db, "projects/inv-project/intake/i1"), { label: "Supplier list", group: "assets", done: false, raisedAt: new Date(), clearedAt: null });
     await setDoc(doc(db, "projects/gb-project/deliverables/d1"), { title: "COD web app", version: 1, status: "in_review", url: null });
     await setDoc(doc(db, "projects/gb-project/milestones/m1"), { title: "Launch", owner: "us", status: "todo", dueAt: new Date() });
+    await setDoc(doc(db, "projects/gb-project/scope/checkout"), { featureId: "checkout", label: "Checkout", amount: 40000, days: 4, status: "agreed", order: 0 });
+    await setDoc(doc(db, "projects/inv-project/scope/stock"), { featureId: "stock", label: "Stock counts", amount: 25000, days: 3, status: "agreed", order: 0 });
 
     await setDoc(doc(db, "invoices/gb-1"), { orgId: "greenbasket", label: "Balance", amount: 80000, status: "due" });
     await setDoc(doc(db, "invoices/inv-1"), { orgId: "inventory", label: "Retainer", amount: 12500, status: "paid" });
@@ -297,4 +299,52 @@ test("a client cannot list another org's invoices", async () => {
 
 test("an admin can list every project", async () => {
   await assertSucceeds(getDocs(collection(admin(), "projects")));
+});
+
+/* ── agreed scope ──────────────────────────────────────────────
+   The scope is the client's copy of what they bought, so they must be able to
+   read it. They must NOT be able to write it: delivery status is the studio's
+   assertion about its own work, and a client who could mark a line "accepted"
+   could equally mark a delivered one "agreed" and reopen a finished job. */
+
+test("a client can read their own scope, single doc and list", async () => {
+  await assertSucceeds(getDoc(doc(client(), "projects/gb-project/scope/checkout")));
+  await assertSucceeds(getDocs(collection(client(), "projects/gb-project/scope")));
+});
+
+test("a client cannot read another org's scope", async () => {
+  await assertFails(getDoc(doc(other(), "projects/gb-project/scope/checkout")));
+  await assertFails(getDocs(collection(other(), "projects/gb-project/scope")));
+});
+
+test("a client cannot move their own scope line along", async () => {
+  await assertFails(
+    updateDoc(doc(client(), "projects/gb-project/scope/checkout"), { status: "accepted" })
+  );
+});
+
+test("a client cannot add or delete a scope line", async () => {
+  await assertFails(
+    setDoc(doc(client(), "projects/gb-project/scope/extra"), {
+      featureId: "extra", label: "Free extra", amount: 0, days: 1, status: "agreed", order: 9,
+    })
+  );
+  await assertFails(deleteDoc(doc(client(), "projects/gb-project/scope/checkout")));
+});
+
+test("anonymous cannot read a scope", async () => {
+  await assertFails(getDoc(doc(anon(), "projects/gb-project/scope/checkout")));
+});
+
+test("an admin can create, move and delete scope lines on any project", async () => {
+  const db = admin();
+  await assertSucceeds(
+    setDoc(doc(db, "projects/inv-project/scope/reports"), {
+      featureId: "reports", label: "Reports", amount: 15000, days: 2, status: "agreed", order: 1,
+    })
+  );
+  await assertSucceeds(
+    updateDoc(doc(db, "projects/inv-project/scope/stock"), { status: "delivered" })
+  );
+  await assertSucceeds(deleteDoc(doc(db, "projects/inv-project/scope/reports")));
 });

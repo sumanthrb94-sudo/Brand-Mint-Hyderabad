@@ -49,6 +49,15 @@
             <div class="bm-progress-fill" id="bm-progress-fill" style="width:0%"></div>
           </div>
           <p class="bm-row-sub" id="bm-progress-note" hidden></p>
+
+          <!-- The agreed scope lives inside panel 1, not as a sixth panel.
+               CLAUDE.md 8 says this page shows five things and to resist the
+               sixth; every extra panel is somewhere a client gets confused and
+               sends a message, which is the cost this portal exists to remove.
+               It belongs here anyway: it is what "where we are" actually means,
+               and it replaces a progress bar somebody typed with one measured
+               from the lines that were signed for. -->
+          <div id="bm-scope"></div>
         </section>
 
         <!-- 2. What we need from you -->
@@ -110,6 +119,9 @@
         mountThemeToggle,
         payInvoice,
         paymentError,
+        getScope,
+        scopeProgress,
+        SCOPE_STATUS,
       } from "/assets/bm-app.js";
 
       // Theme toggle, mounted before anything async so it works even if
@@ -280,6 +292,37 @@
               )
               .join("")
           : '<p class="bm-empty">No preview links yet.</p>';
+
+        /* Agreed scope — the client's own copy of what they bought.
+           Read-only for them by rule: delivery status is the studio's
+           assertion, and a client who could mark a line accepted could also
+           mark one unaccepted. */
+        const scope = project ? await getScope(project.id) : [];
+        const scopeEl = document.getElementById("bm-scope");
+        const pct = scopeProgress(scope);
+
+        if (!scope.length) {
+          // Not "0% done" — nothing has been scoped, which is a different fact.
+          scopeEl.innerHTML = `<p class="bm-row-sub" style="margin-top:12px;">
+            No agreed scope recorded yet. When it is, this is where you will see exactly
+            what is included and how much of it is delivered.
+          </p>`;
+        } else {
+          const tone = { agreed: "bm-pill--muted", building: "bm-pill--amber", delivered: "bm-pill--green", accepted: "bm-pill--green" };
+          scopeEl.innerHTML = `
+            <div class="bm-scope-head" style="margin-top:16px;">
+              <strong>${pct}% delivered</strong>
+              <span class="bm-row-sub">${scope.length} item${scope.length === 1 ? "" : "s"} in scope</span>
+            </div>
+            <div class="bm-scope-bar"><span style="width:${pct}%"></span></div>
+            ${scope.map((l) => `
+              <div class="bm-scope-row">
+                <span class="bm-scope-label">${escapeHtml(l.label)}</span>
+                <span class="bm-pill ${tone[l.status] || "bm-pill--muted"}">${escapeHtml(
+                  (SCOPE_STATUS.find((x) => x.id === l.status) || {}).label || l.status
+                )}</span>
+              </div>`).join("")}`;
+        }
 
         // Invoices.
         const invoices = orgId ? await getInvoicesForOrg(orgId) : [];

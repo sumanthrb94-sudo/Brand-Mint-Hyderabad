@@ -27,6 +27,11 @@ service cloud.firestore {
       allow get: if isAdmin() || mine(pid);
       allow list: if isAdmin() || (signedIn() && resource.data.orgId == myOrg());
       allow write: if isAdmin();
+      // The agreed scope. The client MUST be able to read it — it is what they
+      // are paying for and the honest answer to "how much is done". They may
+      // not write it: delivery status is the studio's assertion, and a client
+      // who could mark a line accepted could also mark one unaccepted.
+      match /scope/{id} { allow read: if isAdmin() || mine(pid); allow write: if isAdmin(); }
       match /milestones/{id} { allow read: if isAdmin() || mine(pid); allow write: if isAdmin(); }
       match /intake/{id} { allow read: if isAdmin() || mine(pid); allow create, delete: if isAdmin();
         allow update: if isAdmin() || (mine(pid) && onlyTouches(['done','clearedAt']) && request.resource.data.done is bool); }

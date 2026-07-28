@@ -372,6 +372,12 @@
         createProject,
         createInvoice,
         getAllUsers,
+        getScope,
+        setScopeLineStatus,
+        scopeProgress,
+        scopeValue,
+        SCOPE_STATUS,
+        SCOPE_STATUS_IDS,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
@@ -837,6 +843,53 @@
           </div>`;
       }
 
+      /* The agreed scope, clickable.
+         Each line advances one step when you click it: agreed -> building ->
+         delivered -> accepted. Progress is computed from these and weighted by
+         build days, so a half-day line cannot report the same share of the job
+         as a ten-day one. Nobody types a percentage — a typed percentage is a
+         guess wearing a number's clothes. */
+      function scopeBlockHtml(pid, scope) {
+        if (!scope.length) {
+          return `<p class="bm-empty">
+            No agreed scope recorded. Build it on <a href="/quote">Scope &amp; quote</a>
+            and save it to this project — then progress is measured instead of estimated.
+          </p>`;
+        }
+        const pct = scopeProgress(scope);
+        const value = scopeValue(scope);
+        const nextOf = (st) => SCOPE_STATUS_IDS[Math.min(SCOPE_STATUS_IDS.indexOf(st) + 1, SCOPE_STATUS_IDS.length - 1)];
+        const tone = { agreed: "bm-pill--muted", building: "bm-pill--amber", delivered: "bm-pill--green", accepted: "bm-pill--green" };
+
+        return `
+          <div class="bm-scope-head">
+            <div>
+              <strong>${pct}% delivered</strong>
+              <span class="bm-row-sub"> · weighted by build days, computed from the lines below</span>
+            </div>
+            <div class="bm-row-sub">${formatINR(value.accepted)} accepted of ${formatINR(value.agreed)}</div>
+          </div>
+          <div class="bm-scope-bar"><span style="width:${pct}%"></span></div>
+          ${scope.map((l) => {
+            const isLast = l.status === "accepted";
+            const label = SCOPE_STATUS.find((x) => x.id === l.status)?.label || l.status;
+            return `<div class="bm-scope-row" data-scope-line="${escapeHtml(l.id)}">
+              <span class="bm-scope-label">${escapeHtml(l.label)}</span>
+              <span class="bm-row-sub">${l.days}d · ${formatINR(l.amount)}</span>
+              <button type="button"
+                class="bm-pill ${tone[l.status] || "bm-pill--muted"}"
+                ${isLast ? "disabled" : ""}
+                data-action="advance-scope"
+                data-pid="${pid}"
+                data-line="${escapeHtml(l.id)}"
+                data-next="${nextOf(l.status)}"
+                title="${isLast ? "Accepted — the last state" : `Click to mark ${nextOf(l.status)}`}">
+                ${escapeHtml(label)}${isLast ? "" : " →"}
+              </button>
+            </div>`;
+          }).join("")}`;
+      }
+
       async function renderManageProjects(projects, orgById) {
         const container = document.getElementById("bm-manage-projects");
         const sorted = [...projects].sort((a, b) =>
@@ -850,10 +903,11 @@
 
         const cards = await Promise.all(
           sorted.map(async (p) => {
-            const [milestones, intake, deliverables] = await Promise.all([
+            const [milestones, intake, deliverables, scope] = await Promise.all([
               getMilestones(p.id),
               getIntake(p.id),
               getDeliverables(p.id),
+              getScope(p.id),
             ]);
             const orgName = orgById[p.orgId]?.name || p.orgId;
             return `<div class="bm-manage-card" data-project="${p.id}">
@@ -863,6 +917,10 @@
                 <p class="bm-manage-group-title">Project</p>
                 ${projectFieldsHtml(p)}
                 ${templateRowHtml(p)}
+              </div>
+              <div class="bm-manage-group">
+                <p class="bm-manage-group-title">Agreed scope — what was sold, and how much is done</p>
+                ${scopeBlockHtml(p.id, scope)}
               </div>
               <div class="bm-manage-group">
                 <p class="bm-manage-group-title">Milestones</p>
@@ -936,6 +994,18 @@
           if (!label) return;
           const group = row.querySelector('[data-new="group"]').value;
           await addIntakeItem(pid, { label, group });
+          return load();
+        }
+        if (action === "advance-scope") {
+          // One click, one step forward. The project's progress figure follows
+          // automatically, so the dashboard and the client's portal both move
+          // without anything being typed twice.
+          btn.disabled = true;
+          try {
+            await setScopeLineStatus(pid, btn.dataset.line, btn.dataset.next);
+          } catch (err) {
+            alert("Could not update that line: " + (err?.message || err));
+          }
           return load();
         }
         if (action === "dedupe-intake") {
@@ -1153,7 +1223,9 @@
         } else {
           const rows = await Promise.all(
             activeProjects.map(async (p) => {
-              const [milestones, intake] = await Promise.all([getMilestones(p.id), getIntake(p.id)]);
+              const [milestones, intake, scope] = await Promise.all([
+                getMilestones(p.id), getIntake(p.id), getScope(p.id),
+              ]);
               // Gathered here because this is the one place milestones and
               // intake are already loaded; re-fetching for the Today panel
               // would double every read on this page.
@@ -1175,6 +1247,7 @@
                 openIntake: openNow.length,
                 oldestOpenDays: oldestOpen === undefined ? null : oldestOpen,
                 duplicateIntake: [...labelCounts.values()].filter((n) => n > 1).length,
+                scopeLines: scope.length,
               });
               const pending = milestones
                 .filter((m) => m.status !== "done")
@@ -1383,14 +1456,17 @@
       /* The onboarding checklist.
          "I got stuck after adding another project" is a product failure, not a
          user failure: the dashboard showed nine panels and left you to work out
-         which one was next. These are the six steps, in order, with the state
-         of each computed from real data and the next one named. */
+         which one was next. These are the steps, in order, with the state of
+         each computed from real data and the next one named. The count is read
+         off this list rather than written in prose, so adding a step here
+         cannot leave a stale "4/6" on the screen. */
 
       const ONBOARDING_STEPS = [
         { id: "org", label: "Client created", hint: "The organisation exists." },
         { id: "signed", label: "Retainer signed", hint: "Until it is signed it is not revenue and does not count towards break-even." },
         { id: "project", label: "Project created", hint: "Add a project so there is something to schedule and show." },
         { id: "login", label: "Login given", hint: "Firebase Console creates the account, Client Access writes the users document. Both halves, or they sign in to a blank portal." },
+        { id: "scope", label: "Agreed scope recorded", hint: "Build it on Scope & quote and save it to this project. Until then, progress is a number you type from memory rather than one the system can derive." },
         { id: "intake", label: "Requirements raised", hint: "Until you raise them, the portal has nothing to chase the client for." },
         { id: "milestones", label: "Schedule applied", hint: "Apply a milestone template with a real start date so the client can see where the project is going." },
       ];
@@ -1414,6 +1490,7 @@
             signed: org.retainerStatus === "signed",
             project: theirs.length > 0,
             login: hasLogin,
+            scope: facts.some((f) => f.scopeLines > 0),
             intake: facts.some((f) => f.intakeTotal > 0),
             milestones: facts.some((f) => f.milestones > 0),
           };
@@ -1424,7 +1501,7 @@
           return `<div class="bm-onb">
             <div class="bm-onb-head">
               <strong>${escapeHtml(org.name)}</strong>
-              <span class="bm-pill ${next ? "bm-pill--amber" : "bm-pill--green"}">${completed}/6</span>
+              <span class="bm-pill ${next ? "bm-pill--amber" : "bm-pill--green"}">${completed}/${ONBOARDING_STEPS.length}</span>
             </div>
             <ol class="bm-onb-steps">
               ${ONBOARDING_STEPS.map((st) => `
@@ -1436,7 +1513,7 @@
             ${
               next
                 ? `<p class="bm-onb-next"><strong>Next: ${escapeHtml(next.label)}.</strong> ${escapeHtml(next.hint)}</p>`
-                : `<p class="bm-onb-next">All six done. From here it is delivery: tick blockers as they clear, put deliverables up for approval, raise invoices.</p>`
+                : `<p class="bm-onb-next">All ${ONBOARDING_STEPS.length} done. From here it is delivery: tick blockers as they clear, put deliverables up for approval, raise invoices.</p>`
             }
           </div>`;
         }).join("");

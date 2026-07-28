@@ -200,6 +200,8 @@ projects/{projectId}    { orgId, name, type, dueAt, progress, billable }
   ../intake/{id}        { label, group: assets|content|access|decisions, raisedAt, done, clearedAt }
   ../deliverables/{id}  { title, version, url, status: in_review|approved|changes_requested,
                           decidedAt, decidedBy }
+  ../scope/{featureId}  { featureId, label, amount, days, order, agreedAt, changedAt,
+                          status: agreed|building|delivered|accepted }
 invoices/{invoiceId}    { orgId, label, amount, status: paid|due, dueAt }
 leads/{leadId}          { name, source, stage, createdAt, firstResponseAt, lossReason }
 ```
@@ -210,6 +212,31 @@ can key off it. `null` means not set, and renders as such.
 
 `project.progress` is `null` when unrecorded — **never coerce it to 0**, or the
 portal draws an empty bar that reads as "started, nothing done".
+
+### `scope` is the quotation, kept alive
+
+Written by `/quote` → *Save as agreed scope*, and it is the only thing on a
+project that records **what was sold**. The document id is the `featureId`, so
+re-saving a grown quote adds the new lines and touches nothing else — the same
+idempotence intake needed, for the same reason: a line already marked
+`delivered` must never be reset to `agreed` by a routine re-save.
+
+`scopeProgress()` derives the percentage from the lines, **weighted by
+`days`**, so a nine-day line and a one-day line are not each half the job. It
+returns `null` — never `0` — when there is no scope: zero draws an empty bar
+that reads as started-and-stalled, and an unscoped project has not stalled.
+
+`scopeValue()` counts a line as earned only at `accepted`. `delivered` is
+handed over, not confirmed. Counting effort as money is the same mistake as
+counting a proposal as revenue, one step further along.
+
+The client may **read** the scope and **not write** it. Delivery status is the
+studio's assertion about its own work; a client who could mark a line accepted
+could equally reopen a finished one.
+
+Nothing automatically decides a line is done. That judgement is the studio's,
+and a job that guessed would produce a progress bar that is confidently wrong —
+which is the failure this replaces, not a variant of it.
 
 ### The three fields that carry the most weight
 
@@ -251,7 +278,9 @@ one, stop and think about whether it is really admin-only.
 
 ### `/portal` — five things, resist the sixth
 
-1. Where we are — status, next milestone, date, progress
+1. Where we are — status, next milestone, date, progress, and the agreed
+   scope with how much of it is delivered (**folded into this panel, not a
+   sixth one**)
 2. **What we need from you** — open blockers, dated, oldest first. The reason
    this product exists.
 3. Waiting on your approval — one click
@@ -264,8 +293,13 @@ message, which is the exact cost this portal exists to remove.
 ### `/studio` — admin only
 
 Signed MRR against break-even · leads with first-response capture · plan vs
-actual · Client Access · delivery health · per-project CRUD · three org tables
-· seed button.
+actual · Client Access · delivery health · per-project CRUD including the
+agreed scope · three org tables · seed button.
+
+The scope's status pills on *Delivery → Manage projects* are **buttons**: one
+click moves a line one step along `agreed → building → delivered → accepted`.
+That is the whole daily loop — mark the line, and the percentage, the client's
+portal and delivery health all follow without anything being typed twice.
 
 **Break-even is ₹1,00,000/month**, exported once as `BREAK_EVEN_MONTHLY` from
 `bm-app.js`. Do not scatter copies.

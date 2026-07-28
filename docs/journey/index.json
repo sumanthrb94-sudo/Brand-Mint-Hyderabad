@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-07-28T04:32:59.236Z",
+  "startedAt": "2026-07-28T05:13:55.106Z",
   "stages": [
     {
       "n": 1,
@@ -163,6 +163,66 @@
     },
     {
       "n": 7,
+      "title": "The quotation is recorded as the project's agreed scope",
+      "why": "The quote used to be printed and thrown away, so 'how far along are we' was a percentage typed from memory. Recorded, it becomes the one place progress is derived from.",
+      "admin": [
+        {
+          "ok": true,
+          "message": "2 lines recorded as the agreed scope"
+        },
+        {
+          "ok": true,
+          "message": "nothing built yet reads as 0% — a scoped-and-untouched project, not an unscoped one"
+        },
+        {
+          "ok": true,
+          "message": "₹65,000 agreed, ₹0 accepted — sold is not earned"
+        },
+        {
+          "ok": true,
+          "message": "re-saving the same quote adds nothing — no duplicate scope lines"
+        },
+        {
+          "ok": true,
+          "message": "and the line marked delivered is still delivered, not silently reset to agreed"
+        },
+        {
+          "ok": true,
+          "message": "progress is weighted by build days, not line count (36%, not the 45% counting lines would give)"
+        },
+        {
+          "ok": true,
+          "message": "the same lines, and the same derived number, on the studio's own delivery tab"
+        }
+      ],
+      "client": [
+        {
+          "ok": true,
+          "message": "the client sees the same agreed scope, on their own portal"
+        },
+        {
+          "ok": true,
+          "message": "including which parts are done — without anyone sending a status email"
+        },
+        {
+          "ok": true,
+          "message": "but cannot move a line themselves — delivery status is the studio's assertion, enforced by rules"
+        }
+      ],
+      "failed": false,
+      "shots": [
+        {
+          "side": "admin",
+          "file": "07-admin.png"
+        },
+        {
+          "side": "client",
+          "file": "07-client.png"
+        }
+      ]
+    },
+    {
+      "n": 8,
       "title": "The client answers one of the requests",
       "why": "One of only two writes a client is permitted anywhere in the system.",
       "admin": [
@@ -181,12 +241,12 @@
       "shots": [
         {
           "side": "admin",
-          "file": "07-admin.png"
+          "file": "08-admin.png"
         }
       ]
     },
     {
-      "n": 8,
+      "n": 9,
       "title": "The studio schedules the work",
       "why": "A project with no milestones cannot tell anyone whether it is late.",
       "admin": [
@@ -205,12 +265,12 @@
       "shots": [
         {
           "side": "client",
-          "file": "08-client.png"
+          "file": "09-client.png"
         }
       ]
     },
     {
-      "n": 9,
+      "n": 10,
       "title": "A deliverable goes up for approval",
       "why": "The client approves in one click, and the studio sees the decision.",
       "admin": [
@@ -237,12 +297,12 @@
       "shots": [
         {
           "side": "client",
-          "file": "09-client.png"
+          "file": "10-client.png"
         }
       ]
     },
     {
-      "n": 10,
+      "n": 11,
       "title": "An invoice is raised and the client tries to pay",
       "why": "Razorpay is not configured against the emulator, so this proves the graceful path: the button says payment is off rather than erroring.",
       "admin": [],
@@ -268,12 +328,12 @@
       "shots": [
         {
           "side": "client",
-          "file": "10-client.png"
+          "file": "11-client.png"
         }
       ]
     },
     {
-      "n": 11,
+      "n": 12,
       "title": "The studio marks the invoice paid",
       "why": "Only the admin may write an invoice. The client's view follows.",
       "admin": [],
@@ -291,12 +351,12 @@
       "shots": [
         {
           "side": "client",
-          "file": "11-client.png"
+          "file": "12-client.png"
         }
       ]
     },
     {
-      "n": 12,
+      "n": 13,
       "title": "Isolation, from inside the client's own session",
       "why": "The oldest open item in the project. It only proves anything from a client session — as admin it correctly reports inconclusive.",
       "admin": [
@@ -319,12 +379,12 @@
       "shots": [
         {
           "side": "client",
-          "file": "12-client.png"
+          "file": "13-client.png"
         }
       ]
     },
     {
-      "n": 13,
+      "n": 14,
       "title": "Back to the dashboard — has the day's work moved the numbers?",
       "why": "The Today panel must reflect everything that just happened.",
       "admin": [
@@ -346,7 +406,7 @@
       "shots": [
         {
           "side": "admin",
-          "file": "13-admin.png"
+          "file": "14-admin.png"
         }
       ]
     }

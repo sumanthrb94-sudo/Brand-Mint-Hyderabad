@@ -91,7 +91,15 @@
           <div class="bm-manage-row">
             <select id="bm-intake-project"></select>
             <button type="button" class="bm-btn bm-btn--sm" id="bm-push-intake">Add to project intake</button>
+            <button type="button" class="bm-btn bm-btn--sm" id="bm-save-scope">Save as agreed scope</button>
           </div>
+          <p class="bm-card-note" style="margin-top:12px;">
+            <strong>Save as agreed scope</strong> records what was sold — every
+            selected feature, its price and your build-day estimate — as a line
+            on the project. From then on progress is <em>derived</em> from how
+            far those lines have moved, not typed from memory, and the client
+            sees the same list on their portal.
+          </p>
           <p class="bm-status" id="bm-intake-status" hidden></p>
         </section>
       </main>
@@ -105,6 +113,7 @@
         getFeaturePricing,
         setFeaturePricing,
         pushRequirementsToIntake,
+        saveScope,
         logout,
         formatINR,
         escapeHtml,
@@ -364,6 +373,77 @@
           status.hidden = false;
           status.className = "bm-status bm-status--error";
           status.textContent = "Couldn't write intake items: " + (err?.message || err);
+        }
+      });
+
+      // --- Save the agreed scope onto the project ---
+      //
+      // The quote used to be a document you printed and threw away. Nothing
+      // recorded what was actually sold, so "how far along are we" was a
+      // percentage typed from memory — and a number typed from memory is a
+      // number that flatters. Saving the scope turns the quote into the
+      // project's spine: the same lines drive progress, the client's portal,
+      // and what is still owed.
+
+      document.getElementById("bm-save-scope").addEventListener("click", async () => {
+        const status = document.getElementById("bm-intake-status");
+        const projectId = document.getElementById("bm-intake-project").value;
+        const chosen = selectedFeatures();
+        status.hidden = true;
+
+        if (!projectId || !chosen.length) {
+          status.hidden = false;
+          status.className = "bm-status bm-status--error";
+          status.textContent = "Pick a project and at least one feature first.";
+          return;
+        }
+
+        // Refuse to record a scope that has holes in it. An unpriced line makes
+        // "what is still owed" wrong, and a wrong money number is worse than
+        // an absent one.
+        const unpriced = chosen.filter((f) => {
+          const p = pricing[f.id] || {};
+          return p.price === null || p.price === undefined || p.price === "";
+        });
+        if (unpriced.length) {
+          status.hidden = false;
+          status.className = "bm-status bm-status--error";
+          status.textContent = `Price every line first — ${unpriced.length} ${
+            unpriced.length === 1 ? "has" : "have"
+          } no price: ${unpriced.map((f) => f.label).join(", ")}.`;
+          return;
+        }
+
+        const lines = chosen.map((f) => {
+          const p = pricing[f.id] || {};
+          return {
+            featureId: f.id,
+            label: f.label,
+            amount: Number(p.price) || 0,
+            days: Number(p.buildDays) || 0,
+          };
+        });
+
+        if (
+          !confirm(
+            `Record ${lines.length} line${lines.length === 1 ? "" : "s"} as the agreed scope of this project? ` +
+              `Lines already recorded keep their current delivery status — nothing already delivered gets reset.`
+          )
+        )
+          return;
+
+        try {
+          const { added, skipped } = await saveScope(projectId, lines);
+          status.hidden = false;
+          status.className = "bm-status bm-status--ok";
+          status.textContent = added
+            ? `Recorded ${added} scope line${added === 1 ? "" : "s"}. Move them along from /studio → Delivery.` +
+              (skipped ? ` ${skipped} were already on this project and were left as they are.` : "")
+            : `Nothing new — all ${skipped} lines are already the agreed scope of this project.`;
+        } catch (err) {
+          status.hidden = false;
+          status.className = "bm-status bm-status--error";
+          status.textContent = "Couldn't save the scope: " + (err?.message || err);
         }
       });
 
