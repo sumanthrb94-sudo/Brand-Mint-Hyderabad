@@ -35,3 +35,4 @@ dist/
 next-env.d.ts
 *.tsbuildinfo
 docs/journey/*.png
+.gstack/

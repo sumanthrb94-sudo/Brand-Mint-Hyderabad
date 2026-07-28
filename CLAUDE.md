@@ -357,3 +357,34 @@ node --check <(sed -n '/<script type="module">/,/<\/script>/p' portal.html | sed
 - Everything interactive clears 4.5:1 contrast, measured.
 - The client portal still shows five things.
 - The marketing site at `/` is unaffected.
+
+## gstack (recommended)
+
+This project uses [gstack](https://github.com/garrytan/gstack) for AI-assisted workflows.
+Install it for the best experience:
+
+```bash
+git clone --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
+cd ~/.claude/skills/gstack && ./setup --team
+```
+
+Skills like /qa, /ship, /review, /investigate, and /browse become available after install.
+Use /browse for all web browsing. Use ~/.claude/skills/gstack/... for gstack file paths.
+
+It is **tooling, not a dependency**: nothing in `/` or `/api` imports it, it adds no
+`package.json` to this repo, and the site builds and deploys exactly as before if it
+is absent. Optional mode deliberately — the `required` mode installs a PreToolUse hook
+that blocks work when gstack is missing, which on a fresh container means a broken
+session rather than a slower one.
+
+`./setup` ends by downloading Playwright's Chromium. If that download is blocked (a
+sandbox, a proxy, a corporate network) the rest of the install is still fine — point
+gstack at a Chromium you already have:
+
+```bash
+export PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers   # wherever yours lives
+export GSTACK_CHROMIUM_PATH="$PLAYWRIGHT_BROWSERS_PATH/chromium/chrome-linux/chrome"
+```
+
+`/browse` drives headless-shell, so that build has to be present too; if only a
+headed Chromium is installed, expect `Executable doesn't exist at .../chrome-headless-shell`.
