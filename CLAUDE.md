@@ -57,6 +57,27 @@ internal links use the clean path with no `.html`.
 **Production is promoted by hand** in the Vercel dashboard. A push creates a
 preview; it does not go live on its own. Test the preview, then promote.
 
+**Vercel does not deploy `firestore.rules`.** There are two production
+surfaces and promoting only moves one of them:
+
+| Surface | Holds | Deployed by |
+|---|---|---|
+| Vercel | the HTML, CSS, ES modules, `/api` | promote in the dashboard |
+| Firebase | **the security boundary** | Firestore → Rules → Publish |
+
+A rules change that is committed, pushed and promoted is still **not in
+force**. This is easy to get wrong in the dangerous direction: the commit is
+green, the deployment is green, and the database is still open. When a change
+touches `firestore.rules`, publish the rules *first* — new rules are almost
+always stricter, so the older code already live keeps working, whereas new
+code against old rules can be denied.
+
+Publish by pasting the file into the Console rules editor. It needs no
+credential, which is the point — see §3 on why a service account key is not an
+acceptable shortcut here. Afterwards, confirm what is actually live rather
+than trusting the dialog: Console → Firestore → Rules shows the published
+source, and it should match the file on the branch character for character.
+
 **Firebase authorized domains** must include any host you sign in from, or
 auth fails with `auth/unauthorized-domain`. Currently: `localhost`, the two
 `*.firebaseapp.com`/`*.web.app` defaults, `brandmintstudios.in`,
@@ -95,6 +116,19 @@ web app. It is not a credential. The **service account private key is the
 opposite** — root credential, never expires, bypasses every rule. It must
 never be committed, pasted, logged, or put in an env var. Nothing here needs
 it, and the payment functions were deliberately designed so that stays true.
+
+This has been tested once in anger and the rule held only partly. On
+2026-07-28 the `firebase-adminsdk-fbsvc@` key `090ec957…` was handed over to
+publish a rules change. It worked — but it was the wrong tool for a job the
+Console does in a minute with no credential at all, and the moment a key is
+pasted anywhere it is spent: it lives in the transcript regardless of what is
+deleted afterwards. That key was destroyed locally and must be treated as
+public. **A key that has been pasted is a key that must be rotated**, and the
+correct answer to "deploy the rules" is never a key.
+
+It never reached git — the working tree and all 98 commits were scanned, and
+`.gitignore` lines 24-29 exist to catch the filename patterns. That is the
+part that held.
 
 > §9 below lists "Admin SDK server-side" as a legitimate option, which would
 > require exactly the env var this paragraph forbids. **These two contradict
