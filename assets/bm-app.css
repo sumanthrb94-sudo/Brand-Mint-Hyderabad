@@ -110,8 +110,10 @@ body.bm-body .bm-manage-row select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  /* 44px, not 34px. An icon-only control has no label to widen its hit area,
+     so it needs the full touch target in both directions. */
+  width: 44px;
+  height: 44px;
   padding: 0;
   border-radius: 999px;
   border: 1px solid var(--bm-line);
@@ -245,7 +247,10 @@ body.bm-body {
   border: 1px solid var(--bm-line);
 }
 
-.bm-btn--sm { padding: 7px 14px; font-size: 13px; }
+/* 44px is the touch minimum. These were 31px, which is a miss on a phone and
+   a small target on a trackpad. Padding alone could not fix it because the
+   buttons are inline-flex with a fixed font-size, so min-height carries it. */
+.bm-btn--sm { padding: 7px 14px; font-size: 13px; min-height: 44px; }
 
 .bm-btn--danger {
   background: var(--bm-red-bg);
@@ -799,11 +804,14 @@ a.bm-link { color: var(--mint-3); }
 }
 .bm-tabs button {
   flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;              /* was 34px — under the touch minimum */
   border: 1px solid var(--bm-line);
   background: transparent;
   color: var(--bm-muted);
   border-radius: 999px;
-  padding: 8px 16px;
+  padding: 0 18px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
