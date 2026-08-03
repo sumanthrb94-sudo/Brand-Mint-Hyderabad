@@ -1,0 +1,45 @@
+# What does NOT get uploaded to the deployment.
+#
+# Root Directory is "." and vercel.json declares no exclusions, so without this
+# file EVERY file in the repo is fetchable at https://www.brandmintstudios.in/.
+# That is how /PLAN.md, /CLAUDE.md and /brand-mint-admin/ came to be public.
+#
+# Nothing below is referenced by any served page — checked before excluding.
+# This changes what is *published*, not what is in git.
+
+# ── commercially sensitive ─────────────────────────────────────
+# PLAN.md and docs/STUDIO-FACTS.md carry real cash MRR, the break-even gap,
+# named clients and which of them has not paid. brand-mint-admin/ holds
+# contract templates and a P&L. None of it belongs on a public host.
+PLAN.md
+docs/
+brand-mint-admin/
+
+# ── tells an attacker where to look ────────────────────────────
+# CLAUDE.md names the admin account, the Firebase project, and states plainly
+# that tenant isolation is unproven. firestore.rules is the security boundary
+# in full. Neither is a secret — the rules are enforced server-side and
+# obscurity is not a control — but there is no reason to hand over the map.
+CLAUDE.md
+firestore.rules
+firebase.json
+
+# ── internal notes, no public value ────────────────────────────
+BUILD-PLAYBOOK.md
+COMPONENTS.md
+REPO-INFO.md
+README.md
+
+# ── tooling: 6.5 MB of agent personas and design data ──────────
+# Would otherwise be uploaded and served on every deploy.
+.claude/
+tests/
+tools/
+.gstack/
+
+# ── never ──────────────────────────────────────────────────────
+.env
+.env.*
+*adminsdk*.json
+*service-account*.json
+node_modules/
