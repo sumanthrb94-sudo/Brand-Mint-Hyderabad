@@ -182,3 +182,27 @@ test("every interactive pill tone is covered by a pair above", () => {
     );
   }
 });
+
+/* ── [hidden] must actually hide ──────────────────────────────
+   /studio hides panels by setting the hidden attribute. The UA rule that
+   implements it has near-zero specificity, so any class carrying a `display:`
+   beats it — and `.bm-stats { display: grid }` did, which is why the Money
+   stat row appeared on every tab including Today. */
+
+test("the stylesheet forces [hidden] to win over any display rule", () => {
+  assert.match(
+    CSS,
+    /\[hidden\]\s*\{\s*display:\s*none\s*!important/,
+    "[hidden] is not forced — a class with `display:` will silently un-hide panels"
+  );
+});
+
+test("every class used as a tab panel is still covered by that rule", () => {
+  // Belt and braces: if someone removes the !important above, this names the
+  // classes that would start leaking across tabs.
+  const withDisplay = [...CSS.matchAll(/\.(bm-[\w-]+)\s*\{[^}]*display:\s*(grid|flex|block|inline-flex)/g)]
+    .map((m) => m[1]);
+  assert.ok(withDisplay.length > 0, "expected some bm- classes to set display");
+  assert.match(CSS, /\[hidden\]\s*\{\s*display:\s*none\s*!important/,
+    `these set display and would leak: ${[...new Set(withDisplay)].join(", ")}`);
+});

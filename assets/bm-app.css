@@ -131,6 +131,18 @@ body.bm-body .bm-manage-row select {
   :root:not([data-theme="light"]) .bm-theme-toggle .bm-icon-moon { display: none; }
 }
 
+/* [hidden] must actually hide.
+   The UA stylesheet's `[hidden] { display: none }` carries almost no
+   specificity, so ANY class with a `display:` rule silently beats it. That is
+   not theoretical here: `.bm-stats { display: grid }` meant the Money stat row
+   stayed on screen on every tab of /studio — Today, Delivery, Clients, Sales —
+   because showTab() hides by setting the hidden attribute. A panel that never
+   goes away is a real part of "the admin UI is very complex".
+
+   Declared once, globally, so the next element with a display rule cannot
+   reintroduce it. */
+[hidden] { display: none !important; }
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -893,3 +905,139 @@ a.bm-link { color: var(--mint-3); }
   border-top: 1px solid var(--bm-line);
 }
 .bm-onb-next strong { color: var(--ink); }
+
+/* ── The admin landing ──────────────────────────────────────────
+   Rebuilt after the report: "the admin UI is very complex, I'm unable to
+   understand anything, and I don't see any click or any light button."
+
+   All three were true. The Today panel rendered as a `.bm-card` identical to
+   the ten panels beneath it, its actions were `.bm-btn--ghost` — a transparent
+   border on a white card — and the one number that decides whether the month
+   works was a stat tile the same size as "Open leads".
+
+   So: one question at the top, one number given real room, and each item is a
+   whole card that is itself the link. Nothing here adds a feature; it changes
+   what is loud. */
+
+.bm-hero {
+  background: var(--bm-white);
+  border: 1px solid var(--bm-line);
+  border-radius: 20px;
+  padding: clamp(20px, 3vw, 30px);
+  box-shadow: var(--bm-shadow);
+  margin-bottom: 24px;
+}
+
+.bm-hero-head {
+  display: flex; flex-wrap: wrap; gap: 24px;
+  align-items: flex-start; justify-content: space-between;
+  margin-bottom: 22px;
+}
+.bm-hero-intro { min-width: 260px; flex: 1 1 320px; }
+.bm-hero-hi {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--mint-3);
+  margin: 0 0 8px;
+}
+:root[data-theme="dark"] .bm-hero-hi { color: var(--mint-2); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .bm-hero-hi { color: var(--mint-2); } }
+
+.bm-hero-q {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  font-weight: 700; letter-spacing: -0.025em; line-height: 1.1;
+  margin: 0 0 8px;
+}
+.bm-hero-sub { margin: 0; font-size: 13px; color: var(--bm-muted); max-width: 52ch; }
+
+/* The gauge. The only number on the page with this much room, because it is
+   the only one that decides whether the month works. */
+.bm-gauge {
+  flex: 0 0 auto; min-width: 210px;
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--bm-red-bg);
+  border: 1px solid transparent;
+}
+.bm-gauge.is-clear { background: var(--bm-green-bg); }
+.bm-gauge-label {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--bm-red);
+}
+.bm-gauge.is-clear .bm-gauge-label { color: var(--bm-green); }
+.bm-gauge-value {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 1.9rem; font-weight: 700; line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--bm-red);
+}
+.bm-gauge.is-clear .bm-gauge-value { color: var(--bm-green); }
+.bm-gauge-bar {
+  height: 6px; border-radius: 999px; overflow: hidden;
+  background: rgba(11, 31, 26, 0.13); margin: 3px 0 2px;
+}
+:root[data-theme="dark"] .bm-gauge-bar { background: rgba(242, 247, 244, 0.16); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .bm-gauge-bar { background: rgba(242, 247, 244, 0.16); } }
+.bm-gauge-bar > span {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, var(--mint-2), var(--mint));
+  transition: width 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.bm-gauge-foot { font-size: 11px; color: var(--bm-muted); }
+
+/* Each item is a card, and the whole card is the link. The previous version
+   put a ghost button at the end of a row — a transparent border on white,
+   which is exactly the "I don't see any button" report. */
+.bm-today { display: grid; gap: 10px; }
+
+.bm-act {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--bm-line);
+  border-left: 3px solid var(--bm-muted);
+  border-radius: 12px;
+  background: var(--bg);
+  text-decoration: none; color: inherit; cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.22, 0.61, 0.36, 1),
+              box-shadow 160ms cubic-bezier(0.22, 0.61, 0.36, 1),
+              border-color 160ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.bm-act[href]:hover { transform: translateX(2px); box-shadow: var(--bm-shadow); }
+.bm-act[href]:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+.bm-act--bad   { border-left-color: var(--bm-red); }
+.bm-act--warn  { border-left-color: var(--bm-amber); }
+.bm-act--ok    { border-left-color: var(--bm-green); }
+.bm-act--clear { border-left-color: var(--bm-green); cursor: default; }
+.bm-act--empty { border-left-color: var(--bm-amber); }
+
+.bm-act-n {
+  flex: none;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--bm-line); color: var(--bm-pill-muted-fg);
+  font-size: 11px; font-weight: 700;
+  margin-top: 1px;
+}
+.bm-act-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.bm-act-what { font-size: 14px; font-weight: 600; line-height: 1.35; }
+.bm-act-why  { font-size: 12.5px; color: var(--bm-muted); line-height: 1.5; }
+
+/* A real button, not a transparent outline. */
+.bm-act-go {
+  flex: none; align-self: center;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 38px; padding: 0 14px;
+  border-radius: 999px;
+  background: var(--bm-btn-bg); color: var(--bm-btn-fg);
+  font-size: 12.5px; font-weight: 600; white-space: nowrap;
+}
+.bm-act-go svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+.bm-act[href]:hover .bm-act-go { background: var(--mint-3); }
+
+@media (max-width: 620px) {
+  .bm-act { flex-wrap: wrap; }
+  .bm-act-go { width: 100%; justify-content: center; margin-top: 4px; }
+}

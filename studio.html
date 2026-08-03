@@ -51,14 +51,30 @@
              work out which mattered. This says it. Every line is computed from
              real data and links to the thing that fixes it; when there is
              nothing to do it says that rather than showing an empty box. -->
-        <section class="bm-card" data-sect="today">
-          <p class="bm-eyebrow">Start here</p>
-          <h2 class="bm-card-title" style="margin-bottom:4px;">What needs you today</h2>
-          <p class="bm-row-sub" style="margin-bottom:14px;">
-            Worked out from your own data. Nothing here is a suggestion — each line is
-            something that is currently true.
-          </p>
-          <div id="bm-today"></div>
+        <!-- The admin landing. One question, answered, with the thing to click
+             attached to each answer. Everything else stays a tab away.
+
+             It replaces a panel that looked identical to the ten below it. The
+             report was "I am unable to understand anything, and I don't see any
+             click or any light button", and that was fair. -->
+        <section class="bm-hero" data-sect="today">
+          <div class="bm-hero-head">
+            <div class="bm-hero-intro">
+              <p class="bm-hero-hi" id="bm-greet">Good morning</p>
+              <h1 class="bm-hero-q">What needs you today</h1>
+              <p class="bm-hero-sub">
+                Worked out from your own data. Nothing here is a suggestion — every
+                line is something that is currently true.
+              </p>
+            </div>
+            <div class="bm-gauge" id="bm-gauge" hidden>
+              <span class="bm-gauge-label">Short of break-even</span>
+              <span class="bm-gauge-value" id="bm-gauge-value">—</span>
+              <div class="bm-gauge-bar"><span id="bm-gauge-fill"></span></div>
+              <span class="bm-gauge-foot" id="bm-gauge-foot"></span>
+            </div>
+          </div>
+          <div id="bm-today" class="bm-today"></div>
         </section>
         <div class="bm-stats" data-sect="money">
           <div class="bm-stat">
@@ -1592,23 +1608,73 @@
         });
 
         const el = document.getElementById("bm-today");
+        const gaugeEl = document.getElementById("bm-gauge");
 
+        const hour = new Date().getHours();
+        document.getElementById("bm-greet").textContent =
+          hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+        // The gauge. One number decides whether the month works, so it is the
+        // only number given this much room. Signed cash only — counting a
+        // proposal here is the dashboard flattering its owner (section 4).
+        if (f.activeProjectCount || f.openLeads.length || f.mrr) {
+          const pct = Math.max(0, Math.min(100, Math.round((f.mrr / BREAK_EVEN_MONTHLY) * 100)));
+          gaugeEl.hidden = false;
+          gaugeEl.classList.toggle("is-clear", gap <= 0);
+          gaugeEl.querySelector(".bm-gauge-label").textContent =
+            gap > 0 ? "Short of break-even" : "Break-even";
+          document.getElementById("bm-gauge-value").textContent = gap > 0 ? inr(gap) : "Cleared";
+          document.getElementById("bm-gauge-fill").style.width = pct + "%";
+          document.getElementById("bm-gauge-foot").textContent =
+            gap > 0
+              ? inr(f.mrr) + " signed of " + inr(BREAK_EVEN_MONTHLY) + " · " + pct + "%"
+              : inr(f.mrr) + " signed — above break-even";
+        } else {
+          gaugeEl.hidden = true;
+        }
+
+        // An empty system is not a clear day. Telling someone "nothing needs
+        // you" when they have simply not set anything up yet is the exact
+        // failure section 4 names — empty is not the same as done.
         if (!f.activeProjectCount && !f.openLeads.length) {
-          el.innerHTML = `<p class="bm-empty">
-            Nothing is set up yet — no active projects and no leads. That is an empty
-            system, not a clear day. Add an organisation and a project to begin.
-          </p>`;
+          el.innerHTML = `<a class="bm-act bm-act--empty" href="#clients" data-goto="clients">
+            <span class="bm-act-body">
+              <span class="bm-act-what">Nothing is set up yet</span>
+              <span class="bm-act-why">No active projects and no leads. That is an empty system,
+                not a clear day. Add a client and a project to begin.</span>
+            </span>
+            <span class="bm-act-go">Add a client<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </a>`;
           return;
         }
 
-        el.innerHTML = items.map((i) => `
-          <div class="bm-today-row bm-today-row--${i.tone}">
-            <div>
-              <p class="bm-today-what">${escapeHtml(i.what)}</p>
-              <p class="bm-today-why">${escapeHtml(i.why)}</p>
-            </div>
-            <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-goto="${i.action.goto}">${escapeHtml(i.action.label)}</button>
-          </div>`).join("");
+        // Money is context, not a task — it is in the gauge above, so it only
+        // stays in the list when there is genuinely nothing else to do.
+        const tasks = items.filter((i) => i.action.goto !== "money" || items.length === 1);
+
+        if (!tasks.length) {
+          el.innerHTML = `<div class="bm-act bm-act--clear">
+            <span class="bm-act-body">
+              <span class="bm-act-what">Nothing is waiting on you</span>
+              <span class="bm-act-why">No unanswered lead, no client sitting on a request,
+                every project scheduled. Computed from your data, not assumed.</span>
+            </span>
+          </div>`;
+          return;
+        }
+
+        el.innerHTML = tasks
+          .map(
+            (i, n) => `<a class="bm-act bm-act--${i.tone}" href="#${i.action.goto}" data-goto="${i.action.goto}">
+              <span class="bm-act-n" aria-hidden="true">${n + 1}</span>
+              <span class="bm-act-body">
+                <span class="bm-act-what">${escapeHtml(i.what)}</span>
+                <span class="bm-act-why">${escapeHtml(i.why)}</span>
+              </span>
+              <span class="bm-act-go">${escapeHtml(i.action.label.replace(/^Go to /, ""))}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+            </a>`
+          )
+          .join("");
       }
 
       /* One section at a time.
