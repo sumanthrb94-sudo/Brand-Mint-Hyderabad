@@ -1,0 +1,429 @@
+/* Brand Mint — home screen, regenerated.
+   Serves at /home-v2. index.html and styles.css are untouched (CLAUDE.md §5).
+
+   PALETTE: identical to styles.css, token for token. The site is live and the
+   brand does not change here. The ui-ux-pro-max skill recommended an academic
+   navy + gold system; it was rejected for exactly that reason. What was taken
+   from it is the *structure* — the "Trust & Authority + Conversion" pattern
+   (credibility hero -> proof -> solution -> single CTA path) and its
+   pre-delivery checklist.
+
+   Two contrast bugs from the live page are fixed here rather than carried
+   over: gold at 11.5px on white measured 2.25:1, and .kicker--gold 4.30:1.
+   Both now use --mint-3 at 9.02:1. See docs/PALETTE-AUDIT.md. */
+
+:root {
+  /* ── brand tokens, copied verbatim from styles.css ── */
+  --bg: #f5f7f4;
+  --bg-2: #ecefe9;
+  --ink: #0b1f1a;
+  --ink-2: #294a40;
+  --muted: #5d7368;
+  --line: #d8e0d4;
+  --mint: #10b981;
+  --mint-2: #7cf6c8;
+  --mint-3: #064e3b;
+  --gold: #c9a961;
+  --cream: #fbfaf2;
+  --white: #ffffff;
+
+  /* Fixed pair for the solid CTA — 16.37:1, never theme-adaptive. Same
+     reasoning as the portal's --bm-btn-bg/--bm-btn-fg. */
+  --cta-bg: #0b1f1a;
+  --cta-fg: #fbfaf2;
+
+  --radius: 14px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 1px 2px rgba(11, 31, 26, 0.05), 0 4px 12px rgba(11, 31, 26, 0.04);
+  --shadow-md: 0 8px 30px rgba(11, 31, 26, 0.08);
+  --shadow-lg: 0 24px 60px rgba(11, 31, 26, 0.14);
+
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Instrument Serif", "Playfair Display", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  --maxw: 1180px;
+  --pad: clamp(20px, 5vw, 48px);
+
+  /* Motion: 150–300ms per the skill's checklist. One easing, used everywhere. */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --fast: 160ms;
+  --slow: 280ms;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;              /* skill checklist: base 16px */
+  line-height: 1.6;             /* and 1.5 minimum */
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;           /* no horizontal scroll, ever */
+}
+
+img, svg { max-width: 100%; display: block; }
+
+/* Focus is never removed — only restyled. Removing it is the skill's #1
+   listed anti-pattern and locks out every keyboard user. */
+:focus-visible {
+  outline: 2px solid var(--mint-3);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad); }
+
+/* ── type scale ─────────────────────────────────────────── */
+
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.022em; line-height: 1.1; }
+
+.display {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 6.2vw, 4.6rem);
+  line-height: 1.03;
+  letter-spacing: -0.03em;
+}
+.display em { font-style: italic; color: var(--mint-3); }
+
+h2.section-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+.lede { font-size: clamp(1.02rem, 1.5vw, 1.18rem); color: var(--ink-2); max-width: 62ch; }
+.sub { color: var(--muted); font-size: 0.95rem; }
+
+/* The eyebrow. --mint-3 at 9.02:1, not gold at 2.25:1 — this is one of the
+   two contrast bugs the live page has. */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mint-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 18px;
+}
+.eyebrow::before {
+  content: "";
+  width: 22px; height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+/* ── buttons — 44px min target per the skill's touch rules ── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease),
+              border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+.btn--primary { background: var(--cta-bg); color: var(--cta-fg); }
+.btn--primary:hover { background: var(--mint-3); transform: translateY(-1px); }
+.btn--ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn--ghost:hover { border-color: var(--mint-3); color: var(--mint-3); }
+.btn--light { background: var(--mint-2); color: var(--ink); }
+.btn--light:hover { background: var(--white); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+/* ── header ─────────────────────────────────────────────── */
+
+.hdr {
+  position: sticky; top: 0; z-index: 60;
+  background: rgba(245, 247, 244, 0.82);
+  backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--slow) var(--ease), background var(--slow) var(--ease);
+}
+.hdr.is-stuck { border-bottom-color: var(--line); }
+.hdr-in { display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 68px; }
+
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 9px; flex: none;
+  background: linear-gradient(140deg, var(--mint-2), var(--mint));
+  display: grid; place-items: center;
+  color: var(--ink); font-weight: 800; font-size: 15px;
+  font-family: var(--serif);
+}
+.brand-name { font-weight: 700; font-size: 1.03rem; letter-spacing: -0.02em; }
+.brand-city { font-family: var(--mono); font-size: 0.66rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+.nav { display: flex; align-items: center; gap: 4px; }
+/* 44px minimum touch target — the skill's priority-2 CRITICAL rule. The
+   sweep found these at 41px and the footer links at 23px. */
+.nav a {
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: 0 13px; border-radius: 8px;
+  color: var(--ink-2); text-decoration: none;
+  font-size: 0.9rem; font-weight: 500;
+  transition: color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.nav a:hover { color: var(--ink); background: var(--bg-2); }
+@media (max-width: 900px) { .nav { display: none; } }
+
+/* ── hero ───────────────────────────────────────────────── */
+
+.hero { position: relative; padding: clamp(56px, 9vw, 104px) 0 clamp(40px, 6vw, 72px); }
+.hero::before {
+  content: "";
+  position: absolute; inset: -20% -10% auto -10%; height: 620px; z-index: -1;
+  background:
+    radial-gradient(46% 52% at 18% 12%, rgba(124, 246, 200, 0.30), transparent 66%),
+    radial-gradient(40% 46% at 86% 4%, rgba(16, 185, 129, 0.14), transparent 62%);
+  pointer-events: none;
+}
+.hero-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(32px, 5vw, 64px); align-items: center; }
+@media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; } }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 13px 6px 9px; border-radius: 999px;
+  background: var(--white); border: 1px solid var(--line);
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-2);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 22px;
+}
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); flex: none; }
+
+.hero p.lede { margin: 22px 0 30px; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+
+/* Trust strip — the skill's "proof" beat, directly under the fold. */
+.trust { margin-top: 34px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 26px 40px; }
+.trust-item { display: flex; flex-direction: column; gap: 2px; }
+.trust-k { font-family: var(--serif); font-size: 1.55rem; line-height: 1; color: var(--ink); }
+.trust-k span { font-family: var(--sans); font-size: 0.82rem; font-weight: 600; color: var(--mint-3); margin-left: 2px; }
+.trust-v { font-size: 0.78rem; color: var(--muted); }
+
+/* hero card */
+.hcard {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, #14352d, var(--ink));
+  color: var(--cream);
+  padding: 26px;
+  box-shadow: var(--shadow-lg);
+}
+.hcard-top { display: flex; align-items: center; gap: 7px; margin-bottom: 20px; }
+.hcard-top i { width: 10px; height: 10px; border-radius: 50%; background: rgba(251, 250, 242, 0.22); }
+.hcard-top i:first-child { background: var(--mint-2); }
+.hcard-label { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(251, 250, 242, 0.62); margin-left: auto; }
+.hcard-row { display: flex; justify-content: space-between; align-items: baseline; padding: 13px 0; border-bottom: 1px solid rgba(251, 250, 242, 0.1); }
+.hcard-row:last-child { border-bottom: 0; }
+.hcard-row dt { font-size: 0.85rem; color: rgba(251, 250, 242, 0.68); margin: 0; }
+.hcard-row dd { margin: 0; font-weight: 600; font-size: 0.93rem; color: var(--mint-2); }
+.hcard dl { margin: 0; }
+
+/* ── sections ───────────────────────────────────────────── */
+
+.sec { padding: clamp(56px, 8vw, 96px) 0; }
+.sec--alt { background: var(--bg-2); }
+.sec--dark { background: var(--ink); color: var(--cream); }
+.sec--dark .section-title { color: var(--cream); }
+.sec--dark .lede { color: rgba(251, 250, 242, 0.76); }
+.sec--dark .eyebrow { color: var(--mint-2); }
+
+.sec-head { max-width: 68ch; margin-bottom: clamp(28px, 4vw, 48px); }
+.sec-head .lede { margin-top: 14px; }
+
+/* ── cards ──────────────────────────────────────────────── */
+
+.grid { display: grid; gap: 18px; }
+.grid--3 { grid-template-columns: repeat(3, 1fr); }
+.grid--4 { grid-template-columns: repeat(4, 1fr); }
+.grid--2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 980px) { .grid--3, .grid--4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .grid--3, .grid--4, .grid--2 { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: transform var(--slow) var(--ease), box-shadow var(--slow) var(--ease), border-color var(--slow) var(--ease);
+}
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(16, 185, 129, 0.4); }
+.card h3 { font-size: 1.06rem; }
+.card p { margin: 0; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+
+.card-ico {
+  width: 40px; height: 40px; border-radius: 11px;
+  background: rgba(16, 185, 129, 0.11);
+  color: var(--mint-3);
+  display: grid; place-items: center;
+  margin-bottom: 6px;
+}
+.card-ico svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+
+.price {
+  margin-top: auto; padding-top: 14px;
+  font-family: var(--mono); font-size: 0.78rem;
+  color: var(--mint-3); font-weight: 500;
+}
+
+.sec--dark .card { background: rgba(251, 250, 242, 0.045); border-color: rgba(251, 250, 242, 0.13); }
+.sec--dark .card h3 { color: var(--cream); }
+.sec--dark .card p { color: rgba(251, 250, 242, 0.66); }
+.sec--dark .card:hover { border-color: rgba(124, 246, 200, 0.42); }
+.sec--dark .card-ico { background: rgba(124, 246, 200, 0.13); color: var(--mint-2); }
+.sec--dark .price { color: var(--mint-2); }
+
+/* care plans */
+.plan { position: relative; }
+.plan--featured { border-color: var(--mint); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.11); }
+.plan-tag {
+  position: absolute; top: -11px; left: 24px;
+  background: var(--mint-3); color: var(--cream);
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px;
+}
+.plan-amt { font-family: var(--serif); font-size: 2rem; line-height: 1; color: var(--ink); }
+.plan-amt small { font-family: var(--sans); font-size: 0.8rem; color: var(--muted); font-weight: 500; }
+
+/* process */
+.steps { counter-reset: s; display: grid; gap: 2px; }
+.step {
+  counter-increment: s;
+  display: grid; grid-template-columns: 62px 1fr; gap: 20px;
+  padding: 24px 0; border-top: 1px solid rgba(251, 250, 242, 0.13);
+}
+.step:last-child { border-bottom: 1px solid rgba(251, 250, 242, 0.13); }
+.step-n { font-family: var(--mono); font-size: 0.76rem; color: var(--mint-2); padding-top: 5px; }
+.step-n::before { content: "0" counter(s); }
+.step h3 { font-family: var(--serif); font-weight: 400; font-size: 1.5rem; color: var(--cream); margin-bottom: 7px; }
+.step p { margin: 0; color: rgba(251, 250, 242, 0.68); font-size: 0.93rem; max-width: 60ch; }
+@media (max-width: 620px) { .step { grid-template-columns: 1fr; gap: 6px; } }
+
+/* work */
+.work { display: grid; gap: 18px; grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 980px) { .work { grid-template-columns: 1fr; } }
+.work-card {
+  border-radius: var(--radius); overflow: hidden;
+  background: var(--white); border: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  transition: transform var(--slow) var(--ease), box-shadow var(--slow) var(--ease);
+}
+.work-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.work-visual { aspect-ratio: 16 / 10; position: relative; }
+.work-visual--1 { background: linear-gradient(140deg, #0d2520, #081612); }
+.work-visual--2 { background: linear-gradient(140deg, #1a3329, #0a1f17); }
+.work-visual--3 { background: linear-gradient(140deg, #14352d, var(--mint-3)); }
+.work-visual span {
+  position: absolute; inset: auto auto 16px 18px;
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--mint-2);
+}
+.work-body { padding: 20px; display: flex; flex-direction: column; gap: 7px; }
+.work-body h3 { font-size: 1.04rem; }
+.work-body p { margin: 0; font-size: 0.88rem; color: var(--muted); }
+.work-meta { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+.tag {
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em;
+  padding: 4px 9px; border-radius: 999px;
+  background: var(--bg-2); color: var(--ink-2);
+}
+
+/* quotes */
+.quote { display: flex; flex-direction: column; gap: 16px; }
+.quote blockquote { margin: 0; font-family: var(--serif); font-size: 1.16rem; line-height: 1.45; color: var(--ink); }
+.sec--dark .quote blockquote { color: var(--cream); }
+.quote figcaption { font-size: 0.82rem; color: var(--muted); }
+.sec--dark .quote figcaption { color: rgba(251, 250, 242, 0.6); }
+
+/* people */
+.person { display: flex; gap: 16px; align-items: flex-start; }
+.person-av {
+  width: 52px; height: 52px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  font-family: var(--serif); font-size: 1.25rem; color: var(--ink);
+  background: linear-gradient(140deg, var(--mint-2), var(--mint));
+}
+.person-av--alt { background: linear-gradient(140deg, #e8d49c, var(--gold)); }
+/* was gold at 11.5px on white = 2.25:1. Now 9.02:1. */
+.person-role {
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--mint-3); margin: 3px 0 8px;
+}
+
+/* faq */
+.faq { border-top: 1px solid var(--line); }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary {
+  padding: 20px 40px 20px 0; cursor: pointer; position: relative;
+  font-weight: 600; font-size: 1rem; list-style: none;
+  transition: color var(--fast) var(--ease);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary:hover { color: var(--mint-3); }
+.faq summary::after {
+  content: ""; position: absolute; right: 6px; top: 50%;
+  width: 9px; height: 9px; margin-top: -6px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform var(--slow) var(--ease);
+}
+.faq details[open] summary::after { transform: rotate(-135deg); margin-top: -2px; }
+.faq-a { padding: 0 0 22px; color: var(--muted); font-size: 0.94rem; max-width: 72ch; margin: 0; }
+
+/* cta */
+.cta-band {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, #14352d, var(--ink));
+  color: var(--cream);
+  padding: clamp(34px, 6vw, 62px);
+  text-align: center;
+}
+/* The band is dark but sits inside a light section, so it misses the
+   `.sec--dark .eyebrow` override. Caught by the contrast sweep at 1.37:1
+   (--mint-3 on the band's own gradient) — this is the fix. */
+.cta-band .eyebrow { color: var(--mint-2); }
+.cta-band h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(1.9rem, 4vw, 2.8rem); color: var(--cream); }
+.cta-band p { color: rgba(251, 250, 242, 0.76); max-width: 54ch; margin: 16px auto 28px; }
+.cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* footer */
+.ftr { padding: 44px 0 56px; border-top: 1px solid var(--line); }
+.ftr-in { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center; }
+.ftr a { color: var(--ink-2); text-decoration: none; font-size: 0.88rem; }
+.ftr-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.ftr a:hover { color: var(--mint-3); text-decoration: underline; }
+.ftr-links { display: flex; gap: 4px 20px; flex-wrap: wrap; align-items: center; }
+
+/* reveal — opacity/transform only, never width/height (skill anti-pattern) */
+.rv { opacity: 0; transform: translateY(14px); transition: opacity 480ms var(--ease), transform 480ms var(--ease); }
+.rv.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; } }

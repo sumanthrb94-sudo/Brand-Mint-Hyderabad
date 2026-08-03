@@ -189,3 +189,16 @@ In the order I would do them:
 
 1–3 all touch `index.html`/`styles.css` and therefore need an explicit override
 of CLAUDE.md §5. Say the word.
+
+---
+
+## Update — fixed in the regenerated home screen
+
+`/home-v2` (`home-v2.html` + `assets/home-v2.css`) carries 2 and 3 already:
+the eyebrow and the person-role label both use `--mint-3` at 9.02:1 instead of
+gold at 2.25:1, and it uses `hello@brandmintstudios.in`. Measured in a browser
+across 155 text elements: **0 contrast failures, 0 touch targets under 44px**.
+
+The palette itself is unchanged — every token copied from `styles.css` value
+for value. So if `/home-v2` ever replaces `index.html`, findings 1, 2 and 3
+close with it and no §5 override is needed for the live files.
