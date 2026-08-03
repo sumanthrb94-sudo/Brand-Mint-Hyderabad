@@ -364,6 +364,21 @@ portal and delivery health all follow without anything being typed twice.
 
 ### Business docs → structure, not data
 
+> **The quarantine is wider than this file used to say.** `06-FINANCIAL-MODEL.md`
+> is named below, but **five more files have the same defect or worse**:
+> `finance/y1-pnl-model.md` (the same fiction to rupee precision, and it says
+> "update monthly with actuals" while containing none — the most misleading
+> file in the repo, because precision reads as authority),
+> `finance/pricing-calculator.md` (**actively contradicts production**: ₹25,000/day
+> against the real ₹10,000, so anything quoting from it prices 2.5× the live
+> site — treat as superseded by `assets/bm-catalog.js`),
+> `11-HIRING-ROADMAP.md` (six salaries and ESOP percentages for a one-person
+> company), `00-EXECUTIVE-SUMMARY.md` ("Currently 18 inbound leads/month",
+> present tense, unsupported anywhere), and `12-METRICS-AND-KPIS.md`.
+>
+> `docs/STUDIO-FACTS.md` is the curated answer: every number in it is traceable
+> to a line of source. Agents read that and nothing else.
+
 `brand-mint-admin/*.md` contributes **shapes only**: `SERVICE_TYPES` and
 `MILESTONE_TEMPLATES` from the service catalog, `LEAD_STAGES`,
 `FUNNEL_TARGETS`, `LEAD_SOURCES` and `LOSS_REASONS` from the sales playbook.
@@ -398,6 +413,51 @@ functions in `/api` (holding e.g. `RAZORPAY_WEBHOOK_SECRET` as a Vercel env
 var, Admin SDK server-side, static front end undisturbed), or Firebase Cloud
 Functions (needs the Blaze plan). Whichever: verify the webhook signature,
 never log the raw body, never log or print a secret.
+
+---
+
+## 9a. The agent bench
+
+`.claude/agents/` holds 264 vendored personas from
+[`msitarzewski/agency-agents`](https://github.com/msitarzewski/agency-agents)
+(MIT), pinned to upstream `c89557f`, plus one written here:
+**`brand-mint-ceo.md`**.
+
+Vendored into the repo rather than installed with upstream's script, on
+purpose. That script copies to `~/.claude/agents/` — machine-wide, invisible to
+review, gone when a container is reclaimed, and with no uninstall. In the repo
+they are committed, diffable, and removed with `git rm`. **Never run
+`./scripts/install.sh` bare from inside this repo** — with no `--tool` flag it
+installs for every detected tool and drops `CONVENTIONS.md`, `.windsurfrules`
+and `.cursor/rules/` into the working directory.
+
+**Every agent carries an explicit `tools:` line, and that is the whole safety
+model.** Upstream ships 253 of 270 with no `tools:` field at all, and in Claude
+Code an agent that omits it inherits *everything the main thread has* — Bash,
+and every connected MCP server, which here means Vercel, GitHub and Supabase
+against a live studio. Inheriting that by omission is not a decision anyone
+made. The grant is:
+
+```
+Read, Grep, Glob, Edit, Write, WebSearch, WebFetch
+```
+
+No Bash. No `mcp__*`. `tests/agents.test.mjs` asserts it — an agent added
+without a grant fails the suite instead of quietly acquiring the keys.
+
+This is how §9 item 4 is satisfied without building the audit log first: that
+rule gates writes to **the database**, and no agent can reach it. Repo edits
+land in git, get reviewed in a commit, and revert. **The moment an agent is
+asked to write business data, the audit log becomes mandatory.**
+
+`.claude/agents-quarantined/` holds six files that are vendored but not loaded
+— prompts instructing the agent to act without approval, or demanding API keys
+(§4: never collect a credential). Its README says why for each.
+
+Re-vendor with `node tools/vendor-agents.mjs --source <clone>` (`--check`
+first). It is idempotent and re-applies the grant.
+
+**The CEO reads `docs/STUDIO-FACTS.md`, not `brand-mint-admin/`.**
 
 ---
 
