@@ -103,7 +103,15 @@ Which means: **`firestore.rules` is the security boundary. Nothing else is.**
 Every check in the UI is a convenience. If the rules allow it, a client can do
 it with a console open.
 
-- No framework, no build step, no `package.json`, **no npm dependency**.
+- No framework, no build step, no `package.json`.
+- **One vendored runtime dependency, and only on `/home-v2`:**
+  `assets/vendor/anime.esm.min.js` (anime.js v4.5.0, MIT, zero deps of its
+  own). §11 says not to add one without saying why and getting a yes; the yes
+  was explicit — smoother motion on the home screen. ~40 KB gzipped, vendored
+  rather than fetched from a CDN for the same reason Firebase comes from
+  Google's own servers, and **deferred**: `/home-v2` renders and is readable
+  before it arrives. Nothing else in the repo imports it, and no other page
+  loads it. See `assets/vendor/README.md`.
 - Firebase v10.14.1 as ES modules from
   `https://www.gstatic.com/firebasejs/10.14.1/`. Google's own CDN — not
   esm.sh, so auth does not depend on a third party's uptime.
@@ -185,6 +193,14 @@ how a dashboard starts lying to its owner. Use only facts Sumanth has actually
 stated, or leave it empty and let him fill it in. The legacy `admin/` CRM seed
 is a museum of what not to do (invented clients, a fake GSTIN, a fake bank
 account) — **never import it into Firestore.**
+
+**Never hide content in CSS and rely on JavaScript to reveal it.** The usual
+scroll-reveal pattern — `opacity: 0` in the stylesheet, JS to put it back — is
+a blank page the day the script 404s or an extension blocks it.
+`assets/home-v2-motion.js` hides elements itself, at runtime, immediately
+before animating them, so a script that never loads leaves the page whole.
+`tests/motion.mjs` blocks both the motion script and anime.js and asserts the
+page is still fully readable in each case.
 
 **Minimum contrast 4.5:1 on anything interactive. Compute it, do not eyeball
 it.** Two invisible buttons have already shipped; the portal's primary Sign in

@@ -423,7 +423,9 @@ h2.section-title {
 .ftr a:hover { color: var(--mint-3); text-decoration: underline; }
 .ftr-links { display: flex; gap: 4px 20px; flex-wrap: wrap; align-items: center; }
 
-/* reveal — opacity/transform only, never width/height (skill anti-pattern) */
-.rv { opacity: 0; transform: translateY(14px); transition: opacity 480ms var(--ease), transform 480ms var(--ease); }
-.rv.in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; } }
+/* No reveal state lives here on purpose.
+   The previous version set `.rv { opacity: 0 }` in CSS and relied on JS to put
+   it back — which is a blank page the day the script fails to load.
+   assets/home-v2-motion.js now hides elements at runtime, immediately before
+   animating them, so a missing or blocked script leaves the page fully
+   visible. Nothing in this stylesheet hides content. */
