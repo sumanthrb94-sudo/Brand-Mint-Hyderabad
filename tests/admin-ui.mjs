@@ -49,7 +49,7 @@ const ADMIN = { email: "admin@brandmintstudios.in", password: "adminpass123" };
 const SHOTS = path.join(ROOT, "docs/admin-ui");
 fs.mkdirSync(SHOTS, { recursive: true });
 
-const VIEWS = ["today", "pipeline", "clients", "delivery", "money", "access"];
+const VIEWS = ["today", "pipeline", "clients", "delivery", "money", "access", "activity"];
 
 let pass = 0;
 let fail = 0;
@@ -179,6 +179,20 @@ try {
       "and NOT 'nothing is waiting on you' — empty is not done");
     check(/no invoices raised yet|empty, not settled/i.test(body),
       "the unpaid tile says it is empty rather than showing a reassuring Rs 0");
+
+    /* The audit log at the one moment it is genuinely empty — nothing has been
+       done yet. Checked here rather than later because seeding is itself a
+       logged action, so by section 8 the log correctly has an entry in it. */
+    await page.click('#bm-nav [data-view="activity"]');
+    await page.waitForTimeout(1400);
+    const log0 = await page.evaluate(`document.querySelector("#view-activity").innerText`);
+    check(/no entries yet/i.test(log0), "an empty log says it is empty", log0.slice(0, 130).replace(/\s+/g, " "));
+    check(/cannot reconstruct|not claiming nothing did/i.test(log0),
+      "and does not let an empty log read as a quiet week");
+    check(!/not published|permission/i.test(log0),
+      "the rules ARE live against the emulator, so it is not showing the denied message");
+    await page.click('#bm-nav [data-view="today"]');
+    await page.waitForTimeout(300);
   }
 
   /* ── seed, then everything else runs against real rows ──────── */
@@ -329,8 +343,38 @@ try {
     check(/signed mrr/i.test(text) && /outstanding/i.test(text), "and MRR is separated from what is merely outstanding");
   }
 
+  /* ── 8. the audit log ──────────────────────────────────────── */
+  section("8. The audit log records what just happened, and says so honestly when empty");
+  {
+    // Seeding is itself a logged action, so by now there is already an entry.
+    await page.click('#bm-nav [data-view="activity"]');
+    await page.waitForTimeout(1400);
+    const before = await page.evaluate(`document.querySelector("#bm-activity-list").innerText`);
+    check(/db\.seed/i.test(before), "seeding the database was itself recorded",
+      before.slice(0, 130).replace(/\s+/g, " "));
+
+    // Now do something worth logging: mark an invoice paid by hand.
+    await page.click('#bm-nav [data-view="money"]');
+    await page.waitForTimeout(500);
+    const hadUnpaid = await page.evaluate(`!!document.querySelector("[data-inv-pay]")`);
+    check(hadUnpaid, "there is an unpaid invoice to settle");
+
+    if (hadUnpaid) {
+      await page.click("[data-inv-pay]");
+      await page.waitForTimeout(2200);
+
+      await page.click('#bm-nav [data-view="activity"]');
+      await page.waitForTimeout(1500);
+      const after = await page.evaluate(`document.querySelector("#bm-activity-list").innerText`);
+      check(/invoice\.paid/i.test(after), "the log now carries an invoice.paid entry", after.slice(0, 140).replace(/\s+/g, " "));
+      check(/by hand/i.test(after), "and records that it was settled by hand rather than reconciled");
+      check(/admin@brandmintstudios\.in/i.test(after), "attributed to the account that did it");
+      check(!/no entries yet/i.test(after), "and no longer claims to be empty");
+    }
+  }
+
   /* ── 8. search finds a record by name ──────────────────────── */
-  section("8. The command palette finds a record by typing its name");
+  section("9. The command palette finds a record by typing its name");
   {
     await page.keyboard.press("/");
     await page.waitForTimeout(500);
@@ -349,7 +393,7 @@ try {
   }
 
   /* ── 9. THE BLANK PAGE TEST ────────────────────────────────── */
-  section("9. With the motion script blocked, the CRM is still fully usable");
+  section("10. With the motion script blocked, the CRM is still fully usable");
   {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 960 } });
     const p2 = await ctx.newPage();
@@ -382,7 +426,7 @@ try {
   }
 
   /* ── 10. the phone ─────────────────────────────────────────── */
-  section("10. On a phone the sections are still reachable");
+  section("11. On a phone the sections are still reachable");
   {
     await page.setViewportSize({ width: 390, height: 844 });
     await goStudio(page, "today");
@@ -401,7 +445,7 @@ try {
   }
 
   /* ── 11. nothing threw ─────────────────────────────────────── */
-  section("11. No console errors along the way");
+  section("12. No console errors along the way");
   check(consoleErrors.length === 0, "clean console", consoleErrors.slice(0, 3).join(" | "));
 
   await goStudio(page, "today");

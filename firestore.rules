@@ -59,6 +59,46 @@ service cloud.firestore {
     match /invoices/{id} { allow read: if isAdmin() || (signedIn() && resource.data.orgId == myOrg()); allow write: if isAdmin(); }
     match /leads/{id} { allow read, write: if isAdmin(); }
     match /catalog/{id} { allow read, write: if isAdmin(); }
+
+    // THE AUDIT LOG (§9 item 4).
+    //
+    // Append-only, and append-only for EVERYONE — including the admin. That is
+    // the entire point and it is why `update` and `delete` are `if false`
+    // rather than `if isAdmin()`: a log its own subject can rewrite answers
+    // nothing. The admin is the only actor who can write business data here,
+    // so the admin is exactly the actor the log exists to record.
+    //
+    // The same pinning the intake/deliverable rules needed, for the same
+    // reason. `onlyTouches` constrains WHICH fields may change, never WHAT is
+    // written into them, and a create has no `resource` to diff against at
+    // all — so every field that makes an entry mean something is pinned to a
+    // value the writer cannot choose:
+    //
+    //   at         == request.time      -> only serverTimestamp() satisfies it,
+    //                                      so an entry cannot be backdated
+    //   actor      == request.auth.uid  -> cannot be attributed to someone else
+    //   actorEmail == the token's email -> ditto, and readable without a join
+    //
+    // Sizes are capped so a runaway loop cannot write a 1 MB document per
+    // click. Anything not named here (orgId, target, amount) is free-form
+    // context and is never trusted for identity or ordering.
+    //
+    // Read is admin-only. The client portal deliberately shows five things
+    // (§8) and this is not one of them.
+    match /activity/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.at == request.time
+        && request.resource.data.actor == request.auth.uid
+        && request.resource.data.actorEmail == request.auth.token.email
+        && request.resource.data.action is string
+        && request.resource.data.action.size() > 0
+        && request.resource.data.action.size() <= 64
+        && request.resource.data.summary is string
+        && request.resource.data.summary.size() <= 300;
+      allow update, delete: if false;
+    }
+
     match /{document=**} { allow read, write: if false; }
   }
 }

@@ -93,6 +93,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.5" width="16" height="9.5" rx="2.2"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/></svg>
             Access
           </button>
+          <button type="button" data-view="activity">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6h5"/></svg>
+            Activity
+          </button>
         </nav>
 
         <p class="bm-crm-navlabel">Tools</p>
@@ -158,6 +162,7 @@
         <section class="bm-view" id="view-delivery" hidden></section>
         <section class="bm-view" id="view-money" hidden></section>
         <section class="bm-view" id="view-access" hidden></section>
+        <section class="bm-view" id="view-activity" hidden></section>
       </main>
     </div>
 
@@ -186,6 +191,7 @@
         FAST_RESPONSE_MINUTES, MARKET_MEDIAN_RESPONSE_HOURS,
         SCOPE_STATUS, SCOPE_STATUS_IDS,
         mountThemeToggle, syncPayments, paymentError,
+        logActivity, getActivity,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
@@ -304,6 +310,7 @@
         delivery: { title: "Delivery", sub: "Projects, scope, blockers and approvals" },
         money:    { title: "Money", sub: "Retainers and the invoice ledger" },
         access:   { title: "Access", sub: "Who can sign in to a client portal" },
+        activity: { title: "Activity", sub: "Append-only. Nobody can edit or delete an entry, including you." },
       };
 
       function renderChrome() {
@@ -1317,6 +1324,9 @@
           }
           try {
             await setClientUser(uid, { orgId, role: "client", name, username });
+            await logActivity("access.grant",
+              `Portal login granted: ${username} → ${S.orgById[orgId]?.name || orgId}`,
+              { orgId, target: username });
             st.hidden = false; st.className = "bm-status bm-status--ok";
             st.textContent = `Saved. ${username} signs in with ${email} and the password you set in the Console.`;
             await refresh();
@@ -1324,6 +1334,96 @@
             st.hidden = false; st.className = "bm-status bm-status--error";
             st.textContent = "Couldn't save: " + (err?.message || err);
           }
+        });
+      };
+
+      /* ══════════════════════════════════════════════════════════
+         ACTIVITY — the audit log (§9 item 4)
+         ══════════════════════════════════════════════════════════ */
+
+      const stamp = (ts) => {
+        if (!ts) return "—";
+        const d = typeof ts.toDate === "function" ? ts.toDate() : new Date(ts);
+        return Number.isNaN(d.getTime()) ? "—"
+          : d.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+      };
+
+      /* Loaded lazily, NOT in loadAll(). If the rules for this collection are
+         not published yet the read is denied, and a denied read inside the
+         boot fetch would take the whole CRM down with it. Here it takes down
+         one panel, which then explains itself. */
+      RENDER.activity = () => {
+        $("view-activity").innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>Activity</h2>
+              <p>Every action that changes money, access or delivery status, as it happened.
+                 Append-only — entries cannot be edited or deleted by anyone, including you.
+                 That is what makes it worth reading.</p>
+            </div>
+            <div class="bm-view-actions">
+              <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-act-reload">Reload</button>
+            </div>
+          </div>
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-list" id="bm-activity-list">
+              <p class="bm-empty" style="padding:22px;">Loading…</p>
+            </div>
+          </div>`;
+
+        $("bm-act-reload").addEventListener("click", () => RENDER.activity());
+
+        getActivity(200).then((rows) => {
+          const el = $("bm-activity-list");
+          if (!el) return;
+
+          /* An empty log is NOT a quiet week — it may be a log that has never
+             recorded anything because nothing has happened SINCE it was
+             switched on. Saying so is the same rule as everywhere else on this
+             screen: empty is not the same as done. */
+          if (!rows.length) {
+            el.innerHTML = `<p class="bm-empty" style="padding:22px;">
+              No entries yet. The log only records what happens from the moment its rules
+              go live — it cannot reconstruct anything that happened before that, and it is
+              not claiming nothing did.
+            </p>`;
+            return;
+          }
+
+          el.innerHTML = rows.map((r) => `
+            <div class="bm-listrow" style="cursor:default;">
+              <span class="bm-listrow-main">
+                <span class="bm-listrow-title">${escapeHtml(r.summary || r.action || "—")}</span>
+                <span class="bm-listrow-sub">${escapeHtml(r.actorEmail || r.actor || "unknown")} · ${escapeHtml(stamp(r.at))}</span>
+              </span>
+              <span class="bm-listrow-right">
+                <span class="bm-pill bm-pill--muted">${escapeHtml(r.action || "—")}</span>
+                ${r.amount ? `<span class="bm-pill bm-pill--muted">${escapeHtml(formatINR(r.amount))}</span>` : ""}
+              </span>
+            </div>`).join("");
+          mo.rows(el.children);
+        }).catch((err) => {
+          const el = $("bm-activity-list");
+          if (!el) return;
+          /* Detect on the SDK's error CODE, not on its message. An earlier
+             version matched /permission|insufficient/ against the message and
+             missed the real one: the emulator says "false for 'list' @ L62"
+             (L62 being the catch-all deny), which contains neither word. The
+             code is the stable contract; the message is not. */
+          const denied = err?.code === "permission-denied"
+            || /permission|insufficient|false for/i.test(err?.message || "");
+          /* Denied and empty must not look the same. A blank panel here would
+             read as "nothing has happened" when the truth is "this cannot be
+             read at all yet". */
+          el.innerHTML = `<p class="bm-empty" style="padding:22px;">
+            ${denied
+              ? `<strong>The rules for this collection are not published yet.</strong><br>
+                 Firestore is refusing the read, which is correct — <code>activity</code> is
+                 denied by the catch-all until the updated <code>firestore.rules</code> is
+                 published in the Firebase Console. Everything else on this screen works
+                 normally; entries are being discarded rather than stored until then.`
+              : escapeHtml("Could not read the log: " + (err?.message || err))}
+          </p>`;
         });
       };
 
@@ -1622,7 +1722,13 @@
             const retainer = Number($("bm-d-retainer").value) || 0;
             const retainerStatus = $("bm-d-rstatus").value;
             btn.disabled = true;
+            const was = S.orgById[d.orgSave] || {};
             await updateOrg(d.orgSave, { retainer, retainerStatus });
+            // Logged because this is the single edit that moves MRR. Awaited,
+            // but it cannot throw — see logActivity's contract.
+            await logActivity("retainer.set",
+              `${was.name || d.orgSave}: retainer ${formatINR(was.retainer || 0)} ${was.retainerStatus || "none"} → ${formatINR(retainer)} ${retainerStatus}`,
+              { orgId: d.orgSave, target: was.name || d.orgSave, amount: retainer });
             closeOverlay();
             return refresh();
           }
@@ -1633,6 +1739,9 @@
               ? "Archive this client? They stay in the database and stop counting towards MRR."
               : "Restore this client to active?")) return;
             await updateOrg(d.orgArchive, { status: to });
+            await logActivity(to === "archived" ? "client.archive" : "client.restore",
+              `${o?.name || d.orgArchive} ${to === "archived" ? "archived — stops counting towards MRR" : "restored to active"}`,
+              { orgId: d.orgArchive, target: o?.name || d.orgArchive });
             closeOverlay();
             return refresh();
           }
@@ -1641,15 +1750,30 @@
           if (d.invPay) {
             if (!confirm("Mark this invoice paid? Do this only for cash or a bank transfer you have actually received — for online payments use Sync payments instead.")) return;
             btn.disabled = true;
-            await updateInvoice(d.invPay, { status: "paid" }); return refresh();
+            const inv = S.invoices.find((x) => x.id === d.invPay) || {};
+            await updateInvoice(d.invPay, { status: "paid" });
+            await logActivity("invoice.paid",
+              `Marked paid BY HAND: ${inv.label || d.invPay} for ${S.orgById[inv.orgId]?.name || inv.orgId} — ${formatINR(inv.amount || 0)}`,
+              { orgId: inv.orgId || null, target: inv.label || d.invPay, amount: Number(inv.amount) || null });
+            return refresh();
           }
           if (d.invUnpay) {
             if (!confirm("Mark this invoice unpaid again?")) return;
-            await updateInvoice(d.invUnpay, { status: "due" }); return refresh();
+            const uinv = S.invoices.find((x) => x.id === d.invUnpay) || {};
+            await updateInvoice(d.invUnpay, { status: "due" });
+            await logActivity("invoice.unpaid",
+              `Reverted to unpaid: ${uinv.label || d.invUnpay} — ${formatINR(uinv.amount || 0)}`,
+              { orgId: uinv.orgId || null, target: uinv.label || d.invUnpay, amount: Number(uinv.amount) || null });
+            return refresh();
           }
           if (d.invDel) {
             if (!confirm("Delete this invoice? The client stops seeing it.")) return;
-            await deleteInvoice(d.invDel); return refresh();
+            const dinv = S.invoices.find((x) => x.id === d.invDel) || {};
+            await deleteInvoice(d.invDel);
+            await logActivity("invoice.delete",
+              `Deleted invoice: ${dinv.label || d.invDel} — ${formatINR(dinv.amount || 0)}. The client stops seeing it.`,
+              { orgId: dinv.orgId || null, target: dinv.label || d.invDel, amount: Number(dinv.amount) || null });
+            return refresh();
           }
 
           /* --- project subcollections --- */
@@ -1664,7 +1788,12 @@
           }
           if (d.scopeAdvance) {
             btn.disabled = true;
+            const sp = S.projects.find((x) => x.id === d.pid);
+            const line = (S.detail[d.pid]?.scope || []).find((l) => l.id === d.scopeAdvance);
             await setScopeLineStatus(d.pid, d.scopeAdvance, d.next);
+            await logActivity("scope.advance",
+              `${sp?.name || d.pid}: "${line?.label || d.scopeAdvance}" → ${d.next}`,
+              { orgId: sp?.orgId || null, target: sp?.name || d.pid });
             await loadAll(); renderChrome(); renderView(S.view, { animate: false });
             return openProject(d.pid);
           }
@@ -1722,7 +1851,11 @@
           }
           if (d.delProject) {
             if (!confirm("Delete this project? Its milestones, requests, deliverables and agreed scope are not deleted with it and would be orphaned. This cannot be undone.")) return;
+            const dp = S.projects.find((x) => x.id === d.delProject) || {};
             await deleteProject(d.delProject);
+            await logActivity("project.delete",
+              `Deleted project "${dp.name || d.delProject}" (${S.orgById[dp.orgId]?.name || dp.orgId}). Subcollections orphaned.`,
+              { orgId: dp.orgId || null, target: dp.name || d.delProject });
             closeOverlay(); return refresh();
           }
         } catch (err) {
@@ -1817,6 +1950,14 @@
           if (r.truncated) lines.push("\nWARNING: this sync was INCOMPLETE — too many orders in the window.");
           lines.push(`\n${r.note}`);
           alert(lines.join("\n"));
+          /* One entry per invoice, not one per sync. The log is read to answer
+             "when did this specific invoice get settled, and by what route" —
+             a single "synced 3" line cannot answer that. */
+          for (const u of r.updated) {
+            await logActivity("invoice.paid.sync",
+              `Reconciled from Razorpay: ${u.invoiceId} — ${formatINR(u.amount)} (${u.method || "method not reported"})`,
+              { target: u.invoiceId, amount: Number(u.amount) || null });
+          }
           if (r.updated.length) await refresh();
         } catch (err) {
           alert("Sync failed: " + paymentError(err));
@@ -1836,7 +1977,10 @@
         )) return;
         const btn = $("bm-seed");
         btn.disabled = true;
-        try { await seedDatabase(); } catch (err) { alert("Seeding failed: " + (err?.message || err)); }
+        try {
+          await seedDatabase();
+          await logActivity("db.seed", "Seed dataset written — seeded documents reset to their seed values.");
+        } catch (err) { alert("Seeding failed: " + (err?.message || err)); }
         finally { btn.disabled = false; await refresh(); }
       });
 

@@ -413,3 +413,80 @@ test("the admin is not held to the client's pins — they may correct a record",
     })
   );
 });
+
+/* ── the audit log (§9 item 4) ─────────────────────────────────────
+   The claim this collection makes is not "the admin can write it" — that is
+   true of nearly everything here. The claim is that NOBODY can rewrite it
+   afterwards, and that an entry cannot lie about who did it or when.
+
+   Those are the only properties that make a log worth reading, so those are
+   what is proven. The pins are the same ones the intake/deliverable rules
+   needed, for the same reason: `onlyTouches` constrains which fields may
+   change, never what goes into them — and a create has no prior document to
+   diff against at all, so pinning the values is the only control there is. */
+
+const goodEntry = (over = {}) => ({
+  at: serverTimestamp(),
+  actor: "admin-uid",
+  actorEmail: ADMIN_EMAIL,
+  action: "invoice.paid",
+  summary: "Marked paid by hand: 50% advance — Rs 80,000",
+  orgId: "greenbasket",
+  target: "50% advance",
+  amount: 80000,
+  ...over,
+});
+
+test("activity: the admin may append an honest entry", async () => {
+  await assertSucceeds(setDoc(doc(admin(), "activity/e1"), goodEntry()));
+});
+
+test("activity: NOBODY may edit an entry — not even the admin who wrote it", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), "activity/e1"), goodEntry());
+  });
+  // This is the whole point of the collection. If this ever passes, the log is
+  // decorative: the one actor who can change business data could also change
+  // the record of having changed it.
+  await assertFails(updateDoc(doc(admin(), "activity/e1"), { summary: "nothing happened" }));
+  await assertFails(deleteDoc(doc(admin(), "activity/e1")));
+});
+
+test("activity: an entry cannot be backdated", async () => {
+  // serverTimestamp() is the only thing that satisfies `at == request.time`,
+  // so a chosen date — the natural way to forge a timeline — is refused.
+  await assertFails(setDoc(doc(admin(), "activity/e2"), goodEntry({ at: new Date("2019-06-01") })));
+  await assertFails(setDoc(doc(admin(), "activity/e3"), goodEntry({ at: null })));
+});
+
+test("activity: an entry cannot be attributed to someone else", async () => {
+  await assertFails(setDoc(doc(admin(), "activity/e4"), goodEntry({ actor: "gb-uid" })));
+  await assertFails(setDoc(doc(admin(), "activity/e5"), goodEntry({ actorEmail: "greenbasket@brandmintstudios.in" })));
+});
+
+test("activity: the required fields really are required", async () => {
+  await assertFails(setDoc(doc(admin(), "activity/e6"), goodEntry({ action: "" })));
+  await assertFails(setDoc(doc(admin(), "activity/e7"), goodEntry({ action: 42 })));
+  await assertFails(setDoc(doc(admin(), "activity/e8"), goodEntry({ summary: 42 })));
+  // Capped so a runaway loop cannot write a megabyte per click.
+  await assertFails(setDoc(doc(admin(), "activity/e9"), goodEntry({ summary: "x".repeat(301) })));
+  await assertFails(setDoc(doc(admin(), "activity/e10"), goodEntry({ action: "x".repeat(65) })));
+});
+
+test("activity: a client can neither read nor write it", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), "activity/e1"), goodEntry());
+  });
+  await assertFails(getDoc(doc(client(), "activity/e1")));
+  await assertFails(getDocs(collection(client(), "activity")));
+  await assertFails(setDoc(doc(client(), "activity/forged"), goodEntry({ actor: "gb-uid", actorEmail: "greenbasket@brandmintstudios.in" })));
+});
+
+test("activity: a signed-out visitor gets nothing", async () => {
+  await assertFails(getDocs(collection(anon(), "activity")));
+  await assertFails(setDoc(doc(anon(), "activity/x"), goodEntry()));
+});
+
+test("activity: the admin may read the log", async () => {
+  await assertSucceeds(getDocs(collection(admin(), "activity")));
+});

@@ -20,6 +20,8 @@ import {
   collection,
   query,
   where,
+  orderBy,
+  limit,
   getDocs,
   writeBatch,
   runTransaction,
@@ -198,6 +200,67 @@ export async function getAllInvoices() {
 
 export async function getAllLeads() {
   const snap = await getDocs(collection(db, "leads"));
+  return snap.docs.map(withId);
+}
+
+// --- The audit log (§9 item 4) ---------------------------------------------
+
+/**
+ * Append one entry. **This function never throws, and never rejects.**
+ *
+ * That is the whole contract, and it is deliberate rather than lazy. Logging
+ * is a side effect of an action that has ALREADY SUCCEEDED — the invoice is
+ * already paid, the retainer is already signed. If this threw, the caller's
+ * error handler would report a failure that did not happen and, worse, would
+ * likely re-run the action. A failed log must never turn into a wrong story
+ * about the thing it was logging.
+ *
+ * It also makes the deployment order safe in both directions. CLAUDE.md §2
+ * says publish rules BEFORE code, because new code against old rules gets
+ * denied — but if this ships first anyway, every entry is simply denied and
+ * discarded, and the CRM behaves exactly as it did before the log existed.
+ * The Activity view is what tells you the difference, by distinguishing
+ * "denied" from "empty" rather than rendering both as a reassuring blank.
+ *
+ * Returns true if the entry landed, false if it did not. Callers may ignore it.
+ */
+export async function logActivity(action, summary, extra = {}) {
+  try {
+    const user = auth.currentUser;
+    if (!user) return false;
+    await addDoc(collection(db, "activity"), {
+      // Pinned by the rules to request.time / the caller's own identity — an
+      // entry cannot be backdated or attributed to someone else. Sent here in
+      // the only form that satisfies them.
+      at: serverTimestamp(),
+      actor: user.uid,
+      actorEmail: user.email,
+      action: String(action).slice(0, 64),
+      summary: String(summary).slice(0, 300),
+      // Free-form context. Never trusted for identity or ordering.
+      orgId: extra.orgId ?? null,
+      target: extra.target ?? null,
+      amount: extra.amount ?? null,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The log, newest first. Unlike logActivity this DOES throw — the Activity
+ * view has to be able to tell a permission-denied (rules not published yet)
+ * apart from a genuinely empty collection, and swallowing the error here
+ * would make an unpublished ruleset look identical to a quiet week.
+ *
+ * Ordered on a single field, so Firestore's automatic single-field index
+ * covers it and no composite index has to be created by hand.
+ */
+export async function getActivity(max = 200) {
+  const snap = await getDocs(
+    query(collection(db, "activity"), orderBy("at", "desc"), limit(max))
+  );
   return snap.docs.map(withId);
 }
 

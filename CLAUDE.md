@@ -271,7 +271,22 @@ projects/{projectId}    { orgId, name, type, dueAt, progress, billable }
                           status: agreed|building|delivered|accepted }
 invoices/{invoiceId}    { orgId, label, amount, status: paid|due, dueAt }
 leads/{leadId}          { name, source, stage, createdAt, firstResponseAt, lossReason }
+activity/{id}           { at, actor, actorEmail, action, summary, orgId, target, amount }
 ```
+
+`activity` is the audit log (§9 item 4) and it is **append-only for everyone,
+including the admin** — the rules deny `update` and `delete` outright. That is
+the only property that makes it worth reading: the admin is the sole actor who
+can change business data, so the admin is exactly the actor it exists to
+record. `at`, `actor` and `actorEmail` are pinned by the rules to the server
+clock and the caller's own token, so an entry cannot be backdated or blamed on
+someone else.
+
+Write it with `logActivity()`, which **never throws**. Logging is a side effect
+of an action that has already succeeded; if it threw, the caller would report a
+failure that did not happen and would probably retry the action. `getActivity()`
+does throw, on purpose — the Activity view has to tell a denied read apart from
+an empty collection, or an unpublished ruleset looks exactly like a quiet week.
 
 `project.type` uses the service-catalog vocabulary in `SERVICE_TYPES`
 (`site | tool | brand | media | seo | ai | internal`) so milestone templates
@@ -350,6 +365,14 @@ when. A record the interested party can forge answers nothing.
 Everything the admin UI does is already covered by `isAdmin()`. Adding admin
 features has so far required **no rules changes** — if a change seems to need
 one, stop and think about whether it is really admin-only.
+
+The one exception is `activity` (§6), and it is an exception in the other
+direction: it needed rules not to *permit* something but to **forbid** it. The
+admin can already write anything; what the log required was `update` and
+`delete` denied to everybody, so the record cannot be revised by the person it
+records. `tests/rules.test.mjs` proves that against the emulator rather than
+inferring it — including that an entry cannot be backdated or attributed to
+another account.
 
 ---
 
@@ -460,8 +483,19 @@ date**, so no schedule is ever invented.
    and no service account — see `docs/PAYMENTS.md`.
 3. **Notifications** — blocker raised, deliverable ready, invoice due. Nothing
    exists.
-4. **Audit log** — an append-only `activity` collection. Build this *before*
-   any agent gets write access to anything.
+4. ~~**Audit log** — an append-only `activity` collection.~~ **Done.** The
+   `activity` collection exists, the rules make it append-only for everyone
+   including the admin, and `/studio` has an Activity view. Every action that
+   moves money, grants access or changes delivery status writes an entry:
+   retainer set, client archived/restored, invoice paid by hand, invoice
+   reconciled from Razorpay, invoice deleted, scope line advanced, project
+   deleted, portal login granted, database seeded.
+
+   This unblocks the gate in §9a — but read that gate carefully before
+   assuming it is lifted. It says the audit log must exist *before an agent is
+   given write access to business data*. It exists now; **no agent has been
+   given that access, and the tool grant still excludes Bash and every
+   `mcp__*`.** Building the log was the prerequisite, not the decision.
 5. **Multi-tenancy debt** — de-hardcode the admin email and `brandmint` orgId
    (see §1) before this is sold to a second studio.
 
@@ -505,10 +539,15 @@ Read, Grep, Glob, Edit, Write, WebSearch, WebFetch
 No Bash. No `mcp__*`. `tests/agents.test.mjs` asserts it — an agent added
 without a grant fails the suite instead of quietly acquiring the keys.
 
-This is how §9 item 4 is satisfied without building the audit log first: that
-rule gates writes to **the database**, and no agent can reach it. Repo edits
-land in git, get reviewed in a commit, and revert. **The moment an agent is
-asked to write business data, the audit log becomes mandatory.**
+This is how §9 item 4 was satisfied before the audit log existed: that rule
+gates writes to **the database**, and no agent can reach it. Repo edits land in
+git, get reviewed in a commit, and revert.
+
+The audit log now exists (§9 item 4 is done), so the stated prerequisite is
+met — but **that is not the same as the gate being open.** No agent has been
+given database access, the grant above still excludes Bash and every `mcp__*`,
+and `tests/agents.test.mjs` still fails the suite if one is added without a
+grant. Building the log removed the blocker; it did not make the decision.
 
 `.claude/agents-quarantined/` holds six files that are vendored but not loaded
 — prompts instructing the agent to act without approval, or demanding API keys
