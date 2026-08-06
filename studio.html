@@ -13,406 +13,217 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/assets/bm-app.css" />
+    <link rel="stylesheet" href="/assets/bm-crm.css" />
     <script>
       // Before first paint — a module script is deferred and would flash.
       try { var t = localStorage.getItem("bm-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
     </script>
   </head>
   <body class="bm-body">
-    <div class="bm-shell">
-      <header class="bm-topbar">
-        <a class="bm-brand" href="/studio">
-          <span class="bm-brand-mark" aria-hidden="true"></span>
-          <span>Brand Mint <span class="bm-brand-sub">Studio</span></span>
+    <!--
+      THE STUDIO CRM
+      ==============
+      This screen replaced a single page that rendered fifteen panels and every
+      project, expanded, at once. The report was "very complex, I'm unable to
+      understand anything" and it was accurate: the page showed everything it
+      knew, all the time, and left the reader to work out what mattered.
+
+      The fix is the ordinary CRM shape and nothing cleverer: a list of records,
+      and a detail view for the one you picked. Six sections down the left. One
+      of them on screen at a time.
+
+      WHAT IT DELIBERATELY DOES NOT DO
+      --------------------------------
+      No new Firestore collections and no new fields. Everything here is
+      assembled from the six collections in CLAUDE.md §6, all of which
+      `isAdmin()` already covers — so this ships with ZERO changes to
+      firestore.rules. That is not a shortcut, it is the safe order: rules are
+      published by hand from the Firebase Console (§2), so any UI that needed
+      new rules would go live denied.
+
+      §10's out-of-scope list still holds. There is no ticketing, no time
+      tracking, no per-project profitability, no chat and no settings page here,
+      because a CRM for one person that needs daily tending will rot inside a
+      fortnight (§1).
+    -->
+    <!--
+      FAIL CLOSED.
+      The whole shell starts hidden and is only revealed once requireAdminAuth()
+      has returned a real admin. Not a security boundary — firestore.rules is
+      the only one of those — but the property tests/e2e.mjs asserts is that
+      NOTHING renders to a signed-out visitor even when the guard cannot run at
+      all (Firebase unreachable, script blocked). An earlier version of this
+      rebuild hid only <main>, so the sidebar and topbar painted before the
+      redirect. e2e caught it.
+    -->
+    <p id="bm-loading" class="bm-loading">Loading the studio…</p>
+
+    <div class="bm-crm" id="bm-shell" hidden>
+
+      <!-- ── sidebar ───────────────────────────────────────────── -->
+      <aside class="bm-crm-side">
+        <a class="bm-crm-logo" href="/studio">
+          <span class="bm-crm-logo-mark" aria-hidden="true">B</span>
+          <span>Brand Mint<span class="bm-crm-logo-sub">Studio CRM</span></span>
         </a>
-        <div class="bm-topbar-right">
-          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/services">Services</a>
-          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/quote">Scope &amp; quote</a>
-          <a class="bm-btn bm-btn--ghost bm-btn--sm" href="/tenancy-check">Tenancy check</a>
-          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">Onboarding playbook</button>
-          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-sync-payments">Sync payments</button>
-          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-runbook="ops-payments-setup" data-runbook-label="Switch on invoice payments">Payments playbook</button>
-          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-seed">Seed the database</button>
-          <button class="bm-btn bm-btn--ghost bm-btn--sm" id="bm-signout">Sign out</button>
+
+        <p class="bm-crm-navlabel">Workspace</p>
+        <nav class="bm-crm-nav" id="bm-nav" aria-label="Sections">
+          <button type="button" data-view="today" aria-current="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg>
+            Today
+          </button>
+          <button type="button" data-view="pipeline">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+            Pipeline<span class="bm-crm-count" id="bm-n-pipeline" hidden></span>
+          </button>
+          <button type="button" data-view="clients">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 11.2A3 3 0 0 0 16 5.4M17.5 19a5 5 0 0 0-2-4"/></svg>
+            Clients<span class="bm-crm-count" id="bm-n-clients" hidden></span>
+          </button>
+          <button type="button" data-view="delivery">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2.2"/></svg>
+            Delivery<span class="bm-crm-count" id="bm-n-delivery" hidden></span>
+          </button>
+          <button type="button" data-view="money">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.4"/></svg>
+            Money<span class="bm-crm-count" id="bm-n-money" hidden></span>
+          </button>
+          <button type="button" data-view="access">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.5" width="16" height="9.5" rx="2.2"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/></svg>
+            Access
+          </button>
+        </nav>
+
+        <p class="bm-crm-navlabel">Tools</p>
+        <nav class="bm-crm-nav" aria-label="Tools">
+          <button type="button" onclick="location.href='/quote'">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h4"/></svg>
+            Scope &amp; quote
+          </button>
+          <button type="button" onclick="location.href='/services'">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>
+            Service catalog
+          </button>
+          <button type="button" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg>
+            Playbooks
+          </button>
+          <button type="button" id="bm-sync-payments">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14-4M4 13a8 8 0 0 0 14 4"/><path d="M20 4v5h-5M4 20v-5h5"/></svg>
+            Sync payments
+          </button>
+          <button type="button" onclick="location.href='/tenancy-check'">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 5 6.5v5c0 4.3 2.9 8.1 7 9.2 4.1-1.1 7-4.9 7-9.2v-5Z"/><path d="m9.3 12 2 2 3.5-3.7"/></svg>
+            Tenancy check
+          </button>
+          <button type="button" id="bm-seed">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg>
+            Seed the database
+          </button>
+        </nav>
+
+        <div class="bm-crm-side-foot">
+          <p class="bm-crm-who" id="bm-who">—</p>
+          <nav class="bm-crm-nav" aria-label="Account">
+            <button type="button" id="bm-signout">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h9"/><path d="m18 15 3-3-3-3M21 12h-9"/></svg>
+              Sign out
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- ── topbar ────────────────────────────────────────────── -->
+      <header class="bm-crm-top">
+        <div class="bm-crm-crumb">
+          <h1 id="bm-crumb">Today</h1>
+          <p id="bm-crumb-sub"></p>
+        </div>
+        <div class="bm-crm-top-right">
+          <button type="button" class="bm-crm-search" id="bm-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-3.7-3.7"/></svg>
+            <span>Search everything</span>
+            <kbd>/</kbd>
+          </button>
+          <button type="button" class="bm-btn bm-btn--sm" id="bm-new">New</button>
         </div>
       </header>
 
-      <div id="bm-loading" class="bm-loading">Loading the studio dashboard…</div>
-      <main id="bm-main" hidden>
-        <nav class="bm-tabs" id="bm-tabs" aria-label="Dashboard sections">
-          <button type="button" data-tab="today" aria-current="page">Today</button>
-          <button type="button" data-tab="money">Money</button>
-          <button type="button" data-tab="delivery">Delivery</button>
-          <button type="button" data-tab="clients">Clients</button>
-          <button type="button" data-tab="sales">Sales</button>
-        </nav>
-        <!-- What needs you today.
-             The dashboard used to open on nine stacked panels and leave you to
-             work out which mattered. This says it. Every line is computed from
-             real data and links to the thing that fixes it; when there is
-             nothing to do it says that rather than showing an empty box. -->
-        <!-- The admin landing. One question, answered, with the thing to click
-             attached to each answer. Everything else stays a tab away.
-
-             It replaces a panel that looked identical to the ten below it. The
-             report was "I am unable to understand anything, and I don't see any
-             click or any light button", and that was fair. -->
-        <section class="bm-hero" data-sect="today">
-          <div class="bm-hero-head">
-            <div class="bm-hero-intro">
-              <p class="bm-hero-hi" id="bm-greet">Good morning</p>
-              <h1 class="bm-hero-q">What needs you today</h1>
-              <p class="bm-hero-sub">
-                Worked out from your own data. Nothing here is a suggestion — every
-                line is something that is currently true.
-              </p>
-            </div>
-            <div class="bm-gauge" id="bm-gauge" hidden>
-              <span class="bm-gauge-label">Short of break-even</span>
-              <span class="bm-gauge-value" id="bm-gauge-value">—</span>
-              <div class="bm-gauge-bar"><span id="bm-gauge-fill"></span></div>
-              <span class="bm-gauge-foot" id="bm-gauge-foot"></span>
-            </div>
-          </div>
-          <div id="bm-today" class="bm-today"></div>
-        </section>
-        <div class="bm-stats" data-sect="money">
-          <div class="bm-stat">
-            <p class="bm-stat-label">Signed MRR</p>
-            <p class="bm-stat-value" id="bm-mrr">—</p>
-            <p class="bm-stat-sub" id="bm-mrr-sub"></p>
-          </div>
-          <div class="bm-stat">
-            <p class="bm-stat-label">Open leads</p>
-            <p class="bm-stat-value" id="bm-leads-open">—</p>
-            <p class="bm-stat-sub" id="bm-leads-sub">—</p>
-          </div>
-          <div class="bm-stat">
-            <p class="bm-stat-label">Median first response</p>
-            <p class="bm-stat-value" id="bm-first-response">—</p>
-            <p class="bm-stat-sub" id="bm-first-response-sub">—</p>
-          </div>
-        </div>
-
-
-
-        <section class="bm-card" data-sect="money">
-          <p class="bm-eyebrow">Revenue breakdown</p>
-          <h2 class="bm-card-title" style="margin-bottom:16px;">Retainers</h2>
-          <div id="bm-retainer-list"></div>
-        </section>
-
-        <!-- Leads: capture + first response -->
-        <section class="bm-card" data-sect="sales">
-          <p class="bm-eyebrow">Pipeline</p>
-          <h2 class="bm-card-title" style="margin-bottom:6px;">Leads</h2>
-          <p class="bm-card-note" style="margin-bottom:16px;">
-            Log the first reply the moment you send it. Market median is ~42h;
-            replying inside 5 minutes makes qualification roughly 21× more likely.
-          </p>
-          <div id="bm-leads-list"></div>
-          <div class="bm-manage-group" style="margin-top:20px;">
-            <p class="bm-manage-group-title">Add a lead</p>
-            <div class="bm-manage-row" id="bm-add-lead">
-              <input class="bm-mn-title" data-new="name" placeholder="Name or company" />
-              <select data-new="source" id="bm-new-lead-source"></select>
-              <select data-new="stage" id="bm-new-lead-stage"></select>
-              <button type="button" class="bm-btn bm-btn--sm" id="bm-add-lead-btn">Add lead</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Plan targets vs actuals -->
-        <section class="bm-card" data-sect="sales">
-          <p class="bm-eyebrow">Plan vs actual</p>
-          <h2 class="bm-card-title" style="margin-bottom:6px;">Funnel &amp; mix against the playbook</h2>
-          <p class="bm-card-note" style="margin-bottom:20px;">
-            Targets come from the sales playbook. Actuals are computed from the
-            leads above — where there is no data, this says so rather than
-            printing a zero.
-          </p>
-          <div class="bm-manage-group">
-            <p class="bm-manage-group-title">Stage conversion</p>
-            <div id="bm-kpi-funnel"></div>
-          </div>
-          <div class="bm-manage-group">
-            <p class="bm-manage-group-title">Source mix</p>
-            <div id="bm-kpi-sources"></div>
-          </div>
-          <div class="bm-manage-group">
-            <p class="bm-manage-group-title">Loss reasons</p>
-            <div id="bm-kpi-losses"></div>
-          </div>
-        </section>
-
-        <!-- Client access -->
-        <section class="bm-card" data-sect="clients">
-          <p class="bm-eyebrow">Client access</p>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-            <h2 class="bm-card-title" style="margin:0;">Give a client a login</h2>
-            <button type="button" class="bm-help" data-runbook="ops-client-login" data-runbook-label="Create a client login" aria-label="Playbook: Create a client login">Playbook</button>
-          </div>
-          <ol style="margin:0 0 20px; padding-left:20px; font-size:13px; color:var(--bm-muted); display:flex; flex-direction:column; gap:6px;">
-            <li>Firebase Console → Authentication → Users → Add user. Use the synthetic email shown below as the email, and set a password <strong>there</strong> — never in this app.</li>
-            <li>Copy the UID from the new row in the console.</li>
-            <li>Paste that UID below, pick the organisation, fill in the display name and username, and save.</li>
-          </ol>
-          <form id="bm-access-form">
-            <div class="bm-field">
-              <label for="bm-access-username">Username</label>
-              <input id="bm-access-username" autocapitalize="none" spellcheck="false" placeholder="greenbasket" required />
-              <span class="bm-row-sub" id="bm-access-email-preview">Signs in as —</span>
-            </div>
-            <div class="bm-field">
-              <label for="bm-access-name">Display name</label>
-              <input id="bm-access-name" placeholder="Green Basket" required />
-            </div>
-            <div class="bm-field">
-              <label for="bm-access-org">Organisation</label>
-              <select id="bm-access-org" required></select>
-            </div>
-            <div class="bm-field">
-              <label for="bm-access-uid">Firebase Auth UID</label>
-              <input id="bm-access-uid" placeholder="paste the UID from the console" required />
-            </div>
-            <button type="submit" class="bm-btn bm-btn--sm">Save</button>
-            <p class="bm-status" id="bm-access-status" hidden></p>
-          </form>
-        </section>
-
-        <section class="bm-card" data-sect="delivery">
-          <p class="bm-eyebrow">Delivery health</p>
-          <h2 class="bm-card-title" style="margin-bottom:16px;">Per-project status</h2>
-          <div class="bm-table-wrap">
-            <table class="bm-table">
-              <thead>
-                <tr><th>Project</th><th>Next milestone</th><th>Waiting on</th><th>Oldest blocker</th></tr>
-              </thead>
-              <tbody id="bm-delivery-body"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="bm-card" data-sect="delivery">
-          <p class="bm-eyebrow">Manage projects</p>
-          <h2 class="bm-card-title" style="margin-bottom:16px;">Project details, milestones, intake &amp; deliverables</h2>
-          <div id="bm-manage-projects"></div>
-        </section>
-
-        <section class="bm-card" data-sect="clients">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
-            <p class="bm-eyebrow" style="margin:0;">Where each client is</p>
-            <button type="button" class="bm-help" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">Playbook</button>
-          </div>
-          <h2 class="bm-card-title" style="margin-bottom:6px;">Onboarding checklist</h2>
-          <p class="bm-row-sub" style="margin-bottom:14px;">
-            Six steps from signed to running. Each client shows exactly which one is next,
-            so finishing a step never leaves you wondering what follows it.
-          </p>
-          <div id="bm-onboarding"></div>
-        </section>
-
-        <section class="bm-card" data-sect="clients">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
-            <p class="bm-eyebrow" style="margin:0;">Onboarding</p>
-            <button type="button" class="bm-help" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">Playbook</button>
-          </div>
-          <h2 class="bm-card-title" style="margin-bottom:6px;">Add a client</h2>
-          <p class="bm-row-sub" style="margin-bottom:14px;">
-            Creates the organisation. A retainer starts as <strong>proposed</strong> and is not
-            counted as revenue until you mark it signed — a number that flatters you is worse
-            than no number.
-          </p>
-          <form id="bm-new-org" class="bm-form">
-            <div class="bm-field">
-              <label for="bm-org-name">Business name</label>
-              <input id="bm-org-name" placeholder="Green Basket" required />
-            </div>
-            <div class="bm-field">
-              <label for="bm-org-kind">Kind</label>
-              <select id="bm-org-kind">
-                <option value="client">Client</option>
-                <option value="internal">Internal</option>
-              </select>
-            </div>
-            <div class="bm-field">
-              <label for="bm-org-retainer">Monthly retainer (Rs, 0 if none)</label>
-              <input id="bm-org-retainer" type="number" min="0" step="500" value="0" />
-            </div>
-            <button type="submit" class="bm-btn bm-btn--sm">Add client</button>
-            <p class="bm-status" id="bm-new-org-status" hidden></p>
-          </form>
-        </section>
-
-        <section class="bm-card" data-sect="delivery">
-          <p class="bm-eyebrow">Onboarding</p>
-          <h2 class="bm-card-title" style="margin-bottom:6px;">Add a project</h2>
-          <p class="bm-row-sub" style="margin-bottom:14px;">
-            Progress stays unrecorded until there is something real to record. A zero draws an
-            empty bar that reads as started-and-stalled.
-          </p>
-          <form id="bm-new-project" class="bm-form">
-            <div class="bm-field">
-              <label for="bm-proj-org">Client</label>
-              <select id="bm-proj-org" required></select>
-            </div>
-            <div class="bm-field">
-              <label for="bm-proj-name">Project name</label>
-              <input id="bm-proj-name" placeholder="Green Basket store" required />
-            </div>
-            <div class="bm-field">
-              <label for="bm-proj-type">Type</label>
-              <select id="bm-proj-type"></select>
-            </div>
-            <div class="bm-field">
-              <label for="bm-proj-due">Due date (optional)</label>
-              <input id="bm-proj-due" type="date" />
-            </div>
-            <button type="submit" class="bm-btn bm-btn--sm">Add project</button>
-            <p class="bm-status" id="bm-new-project-status" hidden></p>
-          </form>
-        </section>
-
-        <section class="bm-card" data-sect="money">
-          <p class="bm-eyebrow">Billing</p>
-          <h2 class="bm-card-title" style="margin-bottom:6px;">Raise an invoice</h2>
-          <p class="bm-row-sub" style="margin-bottom:14px;">
-            Appears on the client's portal immediately, with a Pay button if online payment is
-            switched on. Always created unpaid — money is counted when it arrives.
-          </p>
-          <form id="bm-new-invoice" class="bm-form">
-            <div class="bm-field">
-              <label for="bm-inv-org">Client</label>
-              <select id="bm-inv-org" required></select>
-            </div>
-            <div class="bm-field">
-              <label for="bm-inv-label">What it is for</label>
-              <input id="bm-inv-label" placeholder="50% advance" required />
-            </div>
-            <div class="bm-field">
-              <label for="bm-inv-amount">Amount (Rs)</label>
-              <input id="bm-inv-amount" type="number" min="1" step="100" required />
-            </div>
-            <div class="bm-field">
-              <label for="bm-inv-due">Due date (optional)</label>
-              <input id="bm-inv-due" type="date" />
-            </div>
-            <button type="submit" class="bm-btn bm-btn--sm">Raise invoice</button>
-            <p class="bm-status" id="bm-new-invoice-status" hidden></p>
-          </form>
-        </section>
-
-        <section class="bm-card" data-sect="clients">
-          <p class="bm-eyebrow">Active clients</p>
-          <div class="bm-table-wrap">
-            <table class="bm-table">
-              <thead><tr><th>Name</th><th>Retainer</th><th>Status</th><th>Note</th></tr></thead>
-              <tbody id="bm-active-body"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="bm-card" data-sect="clients">
-          <p class="bm-eyebrow">Internal</p>
-          <div class="bm-table-wrap">
-            <table class="bm-table">
-              <thead><tr><th>Name</th><th>Note</th></tr></thead>
-              <tbody id="bm-internal-body"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="bm-card" data-sect="clients">
-          <p class="bm-eyebrow">Archived</p>
-          <div class="bm-table-wrap">
-            <table class="bm-table">
-              <thead><tr><th>Name</th><th>Note</th></tr></thead>
-              <tbody id="bm-archived-body"></tbody>
-            </table>
-          </div>
-        </section>
+      <!-- ── workspace ─────────────────────────────────────────── -->
+      <main class="bm-crm-main" id="bm-main" hidden>
+        <section class="bm-view" id="view-today" hidden></section>
+        <section class="bm-view" id="view-pipeline" hidden></section>
+        <section class="bm-view" id="view-clients" hidden></section>
+        <section class="bm-view" id="view-delivery" hidden></section>
+        <section class="bm-view" id="view-money" hidden></section>
+        <section class="bm-view" id="view-access" hidden></section>
       </main>
     </div>
+
+    <!-- Overlay hosts. Empty until something opens; nothing is hidden in CSS
+         waiting to be revealed. -->
+    <div id="bm-overlay"></div>
 
     <script type="module">
       import {
         requireAdminAuth,
-        getAllOrgs,
-        getAllProjects,
-        getAllInvoices,
-        getAllLeads,
-        getMilestones,
-        getIntake,
-        getDeliverables,
-        seedDatabase,
-        setClientUser,
-        addMilestone,
-        updateMilestone,
-        deleteMilestone,
-        addIntakeItem,
-        updateIntakeItem,
-        deleteIntakeItem,
-        addDeliverable,
-        updateDeliverable,
-        deleteDeliverable,
-        addLead,
-        updateLead,
-        deleteLead,
-        markLeadFirstResponse,
-        updateProject,
-        applyMilestoneTemplate,
-        resolveUsernameToEmail,
-        logout,
-        daysSince,
-        formatDate,
-        formatINR,
-        formatDuration,
-        minutesBetween,
-        minutesSince,
-        escapeHtml,
-        BREAK_EVEN_MONTHLY,
-        SERVICE_TYPES,
-        MILESTONE_TEMPLATES,
-        LEAD_STAGES,
-        OPEN_LEAD_STAGES,
-        FUNNEL_TARGETS,
-        LEAD_SOURCES,
-        LOSS_REASONS,
-        FAST_RESPONSE_MINUTES,
-        MARKET_MEDIAN_RESPONSE_HOURS,
-        mountThemeToggle,
-        syncPayments,
-        paymentError,
-        dedupeIntake,
-        createOrg,
-        createProject,
-        createInvoice,
-        getAllUsers,
-        getScope,
-        setScopeLineStatus,
-        scopeProgress,
-        scopeValue,
-        SCOPE_STATUS,
-        SCOPE_STATUS_IDS,
+        getAllOrgs, getAllProjects, getAllInvoices, getAllLeads, getAllUsers,
+        getMilestones, getIntake, getDeliverables, getScope,
+        seedDatabase, setClientUser,
+        addMilestone, updateMilestone, deleteMilestone,
+        addIntakeItem, updateIntakeItem, deleteIntakeItem,
+        addDeliverable, updateDeliverable, deleteDeliverable,
+        addLead, updateLead, deleteLead, markLeadFirstResponse,
+        createOrg, updateOrg, createProject, updateProject, deleteProject,
+        createInvoice, updateInvoice, deleteInvoice,
+        applyMilestoneTemplate, setScopeLineStatus, scopeProgress, scopeValue,
+        dedupeIntake, resolveUsernameToEmail, logout,
+        daysSince, formatDate, formatINR, formatDuration, minutesBetween, minutesSince,
+        escapeHtml, safeUrl,
+        BREAK_EVEN_MONTHLY, SERVICE_TYPES, MILESTONE_TEMPLATES,
+        LEAD_STAGES, OPEN_LEAD_STAGES, FUNNEL_TARGETS, LEAD_SOURCES, LOSS_REASONS,
+        FAST_RESPONSE_MINUTES, MARKET_MEDIAN_RESPONSE_HOURS,
+        SCOPE_STATUS, SCOPE_STATUS_IDS,
+        mountThemeToggle, syncPayments, paymentError,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
-      // Theme toggle, mounted before anything async so it works even if
-      // the data below fails to load.
-      mountThemeToggle(document.querySelector(".bm-topbar-right") || document.querySelector(".bm-auth-head"));
+      /* ── motion, optional by construction ────────────────────────
+         Every call site goes through `mo`, which starts as a no-op object and
+         is only replaced if the module actually loads. Someone who asked their
+         OS for reduced motion never downloads it at all — that is a stronger
+         answer than loading it and then animating less. */
+      const NOOP = { view(){}, rows(){}, drawerIn(){}, drawerOut(){ return Promise.resolve(); },
+                     popIn(){}, bar(){}, count(el, to, f){ if (el) el.textContent = f ? f(to) : String(to); }, tap(){} };
+      let mo = NOOP;
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        import("/assets/bm-crm-motion.js").then((m) => { mo = m; }).catch(() => { /* stays NOOP */ });
+      }
 
+      mountThemeToggle(document.querySelector(".bm-crm-top-right"));
+
+      /* ── state ───────────────────────────────────────────────────
+         Loaded once per refresh and rendered from memory. The old page fetched
+         every project's subcollections twice on every render — once for
+         delivery health and again for the manage list. */
+      const S = {
+        user: null, orgs: [], projects: [], invoices: [], leads: [], users: [],
+        orgById: {}, detail: {}, view: "today",
+      };
 
       const GROUP_LABEL = { assets: "Assets", content: "Content", access: "Access", decisions: "Decisions" };
       const STAGE_LABEL = Object.fromEntries(LEAD_STAGES.map((s) => [s.id, s.label]));
       const SOURCE_LABEL = Object.fromEntries(LEAD_SOURCES.map((s) => [s.id, s.label]));
+      const TYPE_LABEL = Object.fromEntries(SERVICE_TYPES.map((t) => [t.id, t.label]));
 
-      document.getElementById("bm-signout").addEventListener("click", async () => {
-        await logout();
-        window.location.href = "/login";
-      });
+      const $ = (id) => document.getElementById(id);
+      const inr = (n) => "Rs " + Math.round(n).toLocaleString("en-IN");
+      const pct = (n) => `${Math.round(n * 100)}%`;
+      const initials = (s) => String(s || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0] || "").join("");
 
-      function ageClass(days) {
-        if (days === null) return "bm-pill--muted";
+      function ageTone(days) {
+        if (days === null || days === undefined) return "bm-pill--muted";
         if (days <= 0) return "bm-pill--green";
         if (days <= 3) return "bm-pill--amber";
         return "bm-pill--red";
@@ -421,1300 +232,1630 @@
       function dateInputValue(ts) {
         if (!ts) return "";
         const d = typeof ts.toDate === "function" ? ts.toDate() : new Date(ts);
-        if (Number.isNaN(d.getTime())) return "";
-        return d.toISOString().slice(0, 10);
+        return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
       }
 
-      function pct(n) {
-        return `${Math.round(n * 100)}%`;
+      const chev = `<svg class="bm-listrow-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
+
+      /* ── loading ─────────────────────────────────────────────── */
+
+      async function loadAll() {
+        const [orgs, projects, invoices, leads, users] = await Promise.all([
+          getAllOrgs(), getAllProjects(), getAllInvoices(), getAllLeads(), getAllUsers(),
+        ]);
+        S.orgs = orgs; S.projects = projects; S.invoices = invoices; S.leads = leads; S.users = users;
+        S.orgById = Object.fromEntries(orgs.map((o) => [o.id, o]));
+
+        // Every project's subcollections, once. Everything downstream — the
+        // Today list, delivery health, the onboarding checklist, the project
+        // drawer — reads from this.
+        const detail = await Promise.all(projects.map(async (p) => {
+          const [milestones, intake, deliverables, scope] = await Promise.all([
+            getMilestones(p.id), getIntake(p.id), getDeliverables(p.id), getScope(p.id),
+          ]);
+          const open = intake.filter((i) => !i.done);
+          const ages = open.map((i) => daysSince(i.raisedAt)).filter((d) => d !== null).sort((a, b) => b - a);
+          const counts = new Map();
+          intake.forEach((i) => {
+            const k = String(i.label || "").trim().toLowerCase();
+            counts.set(k, (counts.get(k) || 0) + 1);
+          });
+          const pending = milestones.filter((m) => m.status !== "done")
+            .sort((a, b) => (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0));
+          return [p.id, {
+            milestones, intake, deliverables, scope,
+            openIntake: open.length,
+            oldestOpenDays: ages.length ? ages[0] : null,
+            duplicateIntake: [...counts.values()].filter((n) => n > 1).length,
+            next: pending[0] || null,
+            awaitingApproval: deliverables.filter((d) => d.status === "in_review").length,
+          }];
+        }));
+        S.detail = Object.fromEntries(detail);
       }
 
-      /* Sync payments.
-         Razorpay is asked what it was actually paid; this browser — signed in
-         as the admin, which firestore.rules already trusts to write invoices —
-         does the writing. That is why no service account exists anywhere in
-         this deployment: the only thing that marks an invoice paid is a human
-         admin's own session.
-
-         The report is deliberately verbose about what it did NOT do. A sync
-         that silently changed nothing is indistinguishable from one that had
-         nothing to change, and the difference matters when you are chasing a
-         payment a client says they made. */
-      document.getElementById("bm-sync-payments").addEventListener("click", async (event) => {
-        const btn = event.currentTarget;
-        if (btn.disabled) return;
-        btn.disabled = true;
-        const label = btn.textContent;
-        btn.textContent = "Syncing…";
-
-        try {
-          const r = await syncPayments(60);
-          const lines = [];
-
-          lines.push(
-            r.updated.length
-              ? `Marked ${r.updated.length} invoice${r.updated.length === 1 ? "" : "s"} paid:\n` +
-                r.updated.map((u) => `  ${u.invoiceId} — ${formatINR(u.amount)} (${u.method || "?"})`).join("\n")
-              : "No new payments to apply."
-          );
-
-          if (r.skipped.length) {
-            lines.push(
-              `\nSkipped ${r.skipped.length}:\n` +
-                r.skipped.map((sk) => `  ${sk.invoiceId} — ${sk.why}`).join("\n")
-            );
-          }
-          if (r.unsettled.length) {
-            lines.push(
-              `\n${r.unsettled.length} order${r.unsettled.length === 1 ? " was" : "s were"} started but never paid. ` +
-                "Those are abandoned checkouts, not missing money."
-            );
-          }
-          if (r.truncated) lines.push("\nWARNING: this sync was INCOMPLETE — too many orders in the window.");
-          lines.push(`\n${r.note}`);
-
-          alert(lines.join("\n"));
-          btn.textContent = r.updated.length ? `Synced ${r.updated.length} ✓` : "Nothing new";
-          if (r.updated.length) render();
-        } catch (err) {
-          alert("Sync failed: " + paymentError(err));
-          btn.textContent = label;
-        } finally {
-          btn.disabled = false;
-          setTimeout(() => { btn.textContent = label; }, 6000);
-        }
-      });
-
-      // --- Seed ---
-
-      document.getElementById("bm-seed").addEventListener("click", async () => {
-        const ok = confirm(
-          "This writes the fixed seed dataset — orgs, projects, invoices, the " +
-            "two confirmed Green Basket deliverables, and your own admin user " +
-            "doc — with deterministic IDs. Safe to re-run, but it will " +
-            "overwrite those specific documents with the seed values (so if " +
-            "a client has already approved one of the two seeded " +
-            "deliverables, re-seeding resets it to in_review, and any project " +
-            "type/dueAt/progress you have edited is reset). Leads and " +
-            "milestones you have entered are never touched. Continue?"
-        );
-        if (!ok) return;
-        const btn = document.getElementById("bm-seed");
-        btn.disabled = true;
-        btn.textContent = "Seeding…";
-        try {
-          await seedDatabase();
-          btn.textContent = "Seeded ✓";
-        } catch (err) {
-          btn.textContent = "Seed the database";
-          alert("Seeding failed: " + (err?.message || err));
-        } finally {
-          btn.disabled = false;
-          load();
-        }
-      });
-
-      // --- Client access form ---
-
-      const accessForm = document.getElementById("bm-access-form");
-      const accessUsername = document.getElementById("bm-access-username");
-      const accessEmailPreview = document.getElementById("bm-access-email-preview");
-      const accessOrgSelect = document.getElementById("bm-access-org");
-      const accessStatus = document.getElementById("bm-access-status");
-
-      function updateEmailPreview() {
-        const email = resolveUsernameToEmail(accessUsername.value || "username");
-        accessEmailPreview.textContent = `Signs in as ${email}`;
+      async function refresh() {
+        await loadAll();
+        renderChrome();
+        renderView(S.view, { animate: false });
       }
-      accessUsername.addEventListener("input", updateEmailPreview);
-      updateEmailPreview();
 
-      accessForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        accessStatus.hidden = true;
+      /* ── derived money facts ─────────────────────────────────────
+         Signed retainers only. A proposal is not revenue (CLAUDE.md §4) and is
+         never added into this figure anywhere on the page. */
+      function money() {
+        const signed = S.orgs.filter((o) => o.kind === "client" && o.status === "active" && o.retainerStatus === "signed");
+        const mrr = signed.reduce((s, o) => s + (Number(o.retainer) || 0), 0);
+        const inKind = signed.reduce((s, o) => s + (Number(o.retainerInKind) || 0), 0);
+        const unpaid = S.invoices.filter((i) => i.status !== "paid");
+        return {
+          mrr, inKind, gap: BREAK_EVEN_MONTHLY - mrr,
+          unpaid, unpaidTotal: unpaid.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+          paidTotal: S.invoices.filter((i) => i.status === "paid").reduce((s, i) => s + (Number(i.amount) || 0), 0),
+        };
+      }
 
-        const uid = document.getElementById("bm-access-uid").value.trim();
-        const name = document.getElementById("bm-access-name").value.trim();
-        const orgId = accessOrgSelect.value;
-        const email = resolveUsernameToEmail(accessUsername.value);
-        const username = email.split("@")[0];
+      /* ── chrome ──────────────────────────────────────────────── */
 
-        if (!uid || !name || !orgId || !username) {
-          accessStatus.hidden = false;
-          accessStatus.className = "bm-status bm-status--error";
-          accessStatus.textContent = "Fill in every field.";
-          return;
+      const VIEW_META = {
+        today:    { title: "Today", sub: "What needs you, computed from your own data" },
+        pipeline: { title: "Pipeline", sub: "Leads, first response, and the plan they are measured against" },
+        clients:  { title: "Clients", sub: "Every organisation, and where each one stands" },
+        delivery: { title: "Delivery", sub: "Projects, scope, blockers and approvals" },
+        money:    { title: "Money", sub: "Retainers and the invoice ledger" },
+        access:   { title: "Access", sub: "Who can sign in to a client portal" },
+      };
+
+      function renderChrome() {
+        const m = money();
+        const openLeads = S.leads.filter((l) => OPEN_LEAD_STAGES.includes(l.stage));
+        const activeProjects = S.projects.filter((p) => S.orgById[p.orgId]?.status === "active");
+        const counts = {
+          "bm-n-pipeline": openLeads.length,
+          "bm-n-clients": S.orgs.filter((o) => o.kind === "client" && o.status === "active").length,
+          "bm-n-delivery": activeProjects.length,
+          "bm-n-money": m.unpaid.length,
+        };
+        for (const [id, n] of Object.entries(counts)) {
+          const el = $(id);
+          if (!el) continue;
+          el.textContent = String(n);
+          el.hidden = n === 0;
         }
+        $("bm-who").textContent = S.user?.email || "";
+      }
 
-        const submitBtn = accessForm.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        try {
-          await setClientUser(uid, { orgId, role: "client", name, username });
-          accessStatus.hidden = false;
-          accessStatus.className = "bm-status bm-status--ok";
-          accessStatus.textContent = `Saved. ${username} signs in with ${email} and whatever password you set in the Firebase Console.`;
-          accessForm.reset();
-          updateEmailPreview();
-        } catch (err) {
-          accessStatus.hidden = false;
-          accessStatus.className = "bm-status bm-status--error";
-          accessStatus.textContent = "Couldn't save: " + (err?.message || err);
-        } finally {
-          submitBtn.disabled = false;
+      /* ── view switching ──────────────────────────────────────── */
+
+      const RENDER = {};
+
+      function renderView(name, { animate = true } = {}) {
+        const view = VIEW_META[name] ? name : "today";
+        S.view = view;
+
+        for (const key of Object.keys(VIEW_META)) {
+          const el = $(`view-${key}`);
+          if (el) el.hidden = key !== view;
         }
+        document.querySelectorAll("#bm-nav button").forEach((b) => {
+          b.setAttribute("aria-current", b.dataset.view === view ? "page" : "false");
+        });
+
+        $("bm-crumb").textContent = VIEW_META[view].title;
+        $("bm-crumb-sub").textContent = VIEW_META[view].sub;
+
+        RENDER[view]?.();
+
+        if (location.hash.slice(1) !== view) history.replaceState(null, "", `#${view}`);
+        if (animate) mo.view($(`view-${view}`));
+      }
+
+      $("bm-nav").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-view]");
+        if (!b) return;
+        mo.tap(b);
+        renderView(b.dataset.view);
+        $("bm-main").scrollIntoView({ block: "start", behavior: "instant" });
       });
 
-      // --- Leads ---
+      /* ══════════════════════════════════════════════════════════
+         TODAY
+         ══════════════════════════════════════════════════════════ */
 
-      document.getElementById("bm-new-lead-source").innerHTML = LEAD_SOURCES.map(
-        (s) => `<option value="${s.id}">${escapeHtml(s.label)}</option>`
-      ).join("");
-      document.getElementById("bm-new-lead-stage").innerHTML = LEAD_STAGES.map(
-        (s) => `<option value="${s.id}" ${s.id === "inbound" ? "selected" : ""}>${escapeHtml(s.label)}</option>`
-      ).join("");
+      RENDER.today = () => {
+        const m = money();
+        const openLeads = S.leads.filter((l) => OPEN_LEAD_STAGES.includes(l.stage));
+        const awaiting = openLeads.filter((l) => !l.firstResponseAt);
+        const activeProjects = S.projects.filter((p) => S.orgById[p.orgId]?.status === "active");
+        const facts = activeProjects.map((p) => ({
+          id: p.id,
+          name: p.name || S.orgById[p.orgId]?.name || p.orgId,
+          ...S.detail[p.id],
+        }));
 
-      document.getElementById("bm-add-lead-btn").addEventListener("click", async () => {
-        const row = document.getElementById("bm-add-lead");
-        const name = row.querySelector('[data-new="name"]').value.trim();
-        if (!name) return;
-        const source = row.querySelector('[data-new="source"]').value;
-        const stage = row.querySelector('[data-new="stage"]').value;
-        await addLead({ name, source, stage });
-        row.querySelector('[data-new="name"]').value = "";
-        load();
-      });
+        const hour = new Date().getHours();
+        const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
-      function leadRowHtml(l) {
+        // Response median — "not recorded" is not the same as fast.
+        const times = S.leads.map((l) => minutesBetween(l.createdAt, l.firstResponseAt))
+          .filter((x) => x !== null).sort((a, b) => a - b);
+        let responseText, responseTone, responseSub;
+        if (!times.length) {
+          responseText = S.leads.length ? "Not recorded" : "No leads yet";
+          responseTone = "bm-tile-value--red";
+          responseSub = S.leads.length ? `${awaiting.length} awaiting a first response`
+                                       : `Market median is ~${MARKET_MEDIAN_RESPONSE_HOURS}h`;
+        } else {
+          const mid = Math.floor(times.length / 2);
+          const median = times.length % 2 ? times[mid] : (times[mid - 1] + times[mid]) / 2;
+          responseText = formatDuration(median);
+          responseTone = median <= FAST_RESPONSE_MINUTES ? "bm-tile-value--green" : "bm-tile-value--red";
+          responseSub = `${times.length} recorded · market median ~${MARKET_MEDIAN_RESPONSE_HOURS}h`;
+        }
+
+        const gaugePct = Math.max(0, Math.min(100, Math.round((m.mrr / BREAK_EVEN_MONTHLY) * 100)));
+        const isEmpty = !activeProjects.length && !openLeads.length && !m.mrr;
+
+        $("view-today").innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>${greet}</h2>
+              <p>Every line below is something that is currently true, worked out from your
+                 own data. Nothing here is a suggestion, and nothing is a placeholder.</p>
+            </div>
+          </div>
+
+          <div class="bm-tiles">
+            <div class="bm-tile">
+              <p class="bm-tile-label">Signed MRR</p>
+              <p class="bm-tile-value ${m.mrr >= BREAK_EVEN_MONTHLY ? "bm-tile-value--green" : "bm-tile-value--red"}" id="bm-t-mrr">${escapeHtml(inr(m.mrr))}</p>
+              <p class="bm-tile-sub">${m.gap > 0
+                ? `${escapeHtml(inr(m.gap))} short of break-even`
+                : `${escapeHtml(inr(-m.gap))} over break-even`}${m.inKind ? ` · plus ${escapeHtml(formatINR(m.inKind))}/mo in kind, not counted` : ""}</p>
+            </div>
+            <div class="bm-tile">
+              <p class="bm-tile-label">Open leads</p>
+              <p class="bm-tile-value ${openLeads.length === 0 ? "bm-tile-value--red" : ""}" id="bm-t-leads">${openLeads.length}</p>
+              <p class="bm-tile-sub">${S.leads.length === 0
+                ? "Zero leads — that is the number that decides the month."
+                : `${openLeads.length} open of ${S.leads.length} total`}</p>
+            </div>
+            <div class="bm-tile">
+              <p class="bm-tile-label">Median first response</p>
+              <p class="bm-tile-value ${responseTone}" style="font-size:22px;">${escapeHtml(responseText)}</p>
+              <p class="bm-tile-sub">${escapeHtml(responseSub)}</p>
+            </div>
+            <div class="bm-tile">
+              <p class="bm-tile-label">Unpaid invoices</p>
+              <p class="bm-tile-value ${m.unpaid.length ? "bm-tile-value--red" : ""}" id="bm-t-unpaid">${escapeHtml(inr(m.unpaidTotal))}</p>
+              <p class="bm-tile-sub">${S.invoices.length === 0
+                ? "No invoices raised yet — this is empty, not settled."
+                : `${m.unpaid.length} outstanding of ${S.invoices.length} raised`}</p>
+            </div>
+          </div>
+
+          ${isEmpty ? "" : `
+          <div class="bm-panel">
+            <div class="bm-panel-head">
+              <div>
+                <h3>${m.gap > 0 ? "Short of break-even" : "Break-even cleared"}</h3>
+                <p>Signed cash retainers only. A proposal is not revenue, and counting one
+                   here would make the number that decides the month flatter you.</p>
+              </div>
+              <div class="bm-panel-tools">
+                <span class="bm-pill ${m.gap > 0 ? "bm-pill--amber" : "bm-pill--green"}">${gaugePct}%</span>
+              </div>
+            </div>
+            <div class="bm-bar"><span id="bm-gaugebar" style="width:${gaugePct}%"></span></div>
+            <p class="bm-hint" style="margin-top:10px;">
+              ${escapeHtml(inr(m.mrr))} signed of ${escapeHtml(inr(BREAK_EVEN_MONTHLY))} monthly break-even${m.gap > 0 ? ` · ${escapeHtml(inr(m.gap))} to go` : ""}.
+            </p>
+          </div>`}
+
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-panel-head"><div><h3>What needs you</h3></div></div>
+            <div class="bm-list" id="bm-today-list"></div>
+          </div>`;
+
+        // The action list.
+        const items = [];
+        if (awaiting.length) items.push({
+          tone: "bad", goto: "pipeline",
+          what: `${awaiting.length} lead${awaiting.length === 1 ? " has" : "s have"} had no first response`,
+          why: "Market median is around 42 hours; replying inside five minutes makes qualification roughly 21× more likely. This is the cheapest thing on the page to fix.",
+        });
+
+        const blocked = facts.filter((d) => d.openIntake > 0);
+        if (blocked.length) {
+          const worst = [...blocked].sort((a, b) => (b.oldestOpenDays || 0) - (a.oldestOpenDays || 0))[0];
+          items.push({
+            tone: (worst.oldestOpenDays || 0) >= 7 ? "bad" : "warn", goto: "delivery",
+            what: `${blocked.length} project${blocked.length === 1 ? " is" : "s are"} waiting on the client`,
+            why: `Oldest is ${worst.name} at ${worst.oldestOpenDays ?? 0} day${worst.oldestOpenDays === 1 ? "" : "s"}. The portal is already showing them, dated — you do not need to send a chasing message.`,
+          });
+        }
+
+        const approvals = facts.filter((d) => d.awaitingApproval > 0);
+        if (approvals.length) items.push({
+          tone: "warn", goto: "delivery",
+          what: `${approvals.reduce((s, d) => s + d.awaitingApproval, 0)} deliverable${approvals.reduce((s, d) => s + d.awaitingApproval, 0) === 1 ? " is" : "s are"} sitting in review`,
+          why: "The client has them and has not decided. One click on their portal clears each one.",
+        });
+
+        const dupes = facts.filter((d) => d.duplicateIntake > 0);
+        if (dupes.length) items.push({
+          tone: "bad", goto: "delivery",
+          what: `${dupes.length} project${dupes.length === 1 ? " has" : "s have"} duplicate requests on the client's list`,
+          why: "The same request several times reads as broken, and a client who decides the list is broken ignores all of it. Open the project and use Remove duplicates.",
+        });
+
+        const unscheduled = facts.filter((d) => d.milestones.length === 0);
+        if (unscheduled.length) items.push({
+          tone: "warn", goto: "delivery",
+          what: `${unscheduled.length} project${unscheduled.length === 1 ? " has" : "s have"} no milestones`,
+          why: "The client cannot see where the project is going, and delivery health cannot tell you whether it is late. Apply a template with a real start date.",
+        });
+
+        if (m.unpaid.length) {
+          const overdue = m.unpaid.filter((i) => { const d = daysSince(i.dueAt); return d !== null && d > 0; });
+          items.push({
+            tone: overdue.length ? "bad" : "warn", goto: "money",
+            what: `${escapeHtml(inr(m.unpaidTotal))} is unpaid across ${m.unpaid.length} invoice${m.unpaid.length === 1 ? "" : "s"}`,
+            why: overdue.length
+              ? `${overdue.length} ${overdue.length === 1 ? "is" : "are"} past the due date. Sync payments first — it may already be settled at Razorpay and not yet reconciled here.`
+              : "None are past due yet. Sync payments to reconcile anything already settled at Razorpay.",
+          });
+        }
+
+        const list = $("bm-today-list");
+
+        // An empty system is not a clear day. Saying "nothing needs you" to
+        // someone who has simply not set anything up yet is the exact failure
+        // CLAUDE.md §4 names — empty is not the same as done.
+        if (isEmpty) {
+          list.innerHTML = `<button type="button" class="bm-listrow" data-goto="clients">
+            <span class="bm-listrow-main">
+              <span class="bm-listrow-title">Nothing is set up yet</span>
+              <span class="bm-listrow-sub">No active projects, no leads and no signed retainer.
+                That is an empty system, not a clear day. Add a client to begin.</span>
+            </span>
+            <span class="bm-listrow-right"><span class="bm-pill bm-pill--amber">Start here</span>${chev}</span>
+          </button>`;
+        } else if (!items.length) {
+          list.innerHTML = `<div class="bm-listrow" style="cursor:default;">
+            <span class="bm-listrow-main">
+              <span class="bm-listrow-title">Nothing is waiting on you</span>
+              <span class="bm-listrow-sub">No unanswered lead, no client sitting on a request,
+                nothing in review, every project scheduled and every invoice settled.
+                Computed from your data, not assumed.</span>
+            </span>
+            <span class="bm-listrow-right"><span class="bm-pill bm-pill--green">Clear</span></span>
+          </div>`;
+        } else {
+          const tone = { bad: "bm-pill--red", warn: "bm-pill--amber", ok: "bm-pill--green" };
+          list.innerHTML = items.map((i) => `
+            <button type="button" class="bm-listrow" data-goto="${i.goto}">
+              <span class="bm-listrow-main">
+                <span class="bm-listrow-title">${i.what}</span>
+                <span class="bm-listrow-sub">${escapeHtml(i.why)}</span>
+              </span>
+              <span class="bm-listrow-right">
+                <span class="bm-pill ${tone[i.tone]}">${escapeHtml(VIEW_META[i.goto].title)}</span>${chev}
+              </span>
+            </button>`).join("");
+        }
+
+        mo.rows(list.children);
+        mo.bar($("bm-gaugebar"));
+      };
+
+      /* ══════════════════════════════════════════════════════════
+         PIPELINE
+         ══════════════════════════════════════════════════════════ */
+
+      RENDER.pipeline = () => {
+        const stages = LEAD_STAGES.filter((s) => s.id !== "lost");
+        const lost = S.leads.filter((l) => l.stage === "lost");
+
+        $("view-pipeline").innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>Pipeline</h2>
+              <p>Move a lead with the arrows. The first-response time is stamped once and
+                 never moves again — if it could be edited it would stop meaning anything.</p>
+            </div>
+            <div class="bm-view-actions">
+              <button type="button" class="bm-btn bm-btn--sm" data-new="lead">Add lead</button>
+            </div>
+          </div>
+
+          <div class="bm-kan" id="bm-kan">
+            ${stages.map((st) => {
+              const inStage = S.leads.filter((l) => l.stage === st.id);
+              return `<div class="bm-kan-col">
+                <div class="bm-kan-head">
+                  <h4>${escapeHtml(st.label)}</h4>
+                  <span class="bm-kan-n">${inStage.length}</span>
+                </div>
+                <div class="bm-kan-body">
+                  ${inStage.length ? inStage.map(leadCard).join("")
+                    : `<p class="bm-hint" style="padding:6px 4px;">Empty.</p>`}
+                </div>
+              </div>`;
+            }).join("")}
+          </div>
+
+          ${lost.length ? `
+          <div class="bm-panel bm-panel--flush" style="margin-top:18px;">
+            <div class="bm-panel-head"><div><h3>Lost — ${lost.length}</h3></div></div>
+            <div class="bm-list">
+              ${lost.map((l) => `<div class="bm-listrow" style="cursor:default;">
+                <span class="bm-listrow-main">
+                  <span class="bm-listrow-title">${escapeHtml(l.name || "Unnamed")}</span>
+                  <span class="bm-listrow-sub">${escapeHtml(SOURCE_LABEL[l.source] || l.source || "source not set")} · created ${escapeHtml(formatDate(l.createdAt))}</span>
+                </span>
+                <span class="bm-listrow-right">
+                  <select data-lossreason="${escapeHtml(l.id)}" aria-label="Loss reason">
+                    <option value="">Why lost?</option>
+                    ${LOSS_REASONS.map((r) => `<option value="${escapeHtml(r.id)}" ${l.lossReason === r.id ? "selected" : ""}>${escapeHtml(r.label)}</option>`).join("")}
+                  </select>
+                  <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-lead-reopen="${escapeHtml(l.id)}">Reopen</button>
+                  <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-lead-del="${escapeHtml(l.id)}">Delete</button>
+                </span>
+              </div>`).join("")}
+            </div>
+          </div>` : ""}
+
+          <div class="bm-split" style="margin-top:18px;">
+            <div class="bm-panel">
+              <div class="bm-panel-head"><div><h3>Stage conversion</h3>
+                <p>Targets come from the sales playbook. Where there is no data this says so
+                   rather than printing a zero.</p></div></div>
+              <div id="bm-kpi-funnel"></div>
+            </div>
+            <div class="bm-panel">
+              <div class="bm-panel-head"><div><h3>Source mix</h3>
+                <p>Any single channel above 50% makes the pipeline fragile.</p></div></div>
+              <div id="bm-kpi-sources"></div>
+            </div>
+            <div class="bm-panel">
+              <div class="bm-panel-head"><div><h3>Loss reasons</h3></div></div>
+              <div id="bm-kpi-losses"></div>
+            </div>
+          </div>`;
+
+        renderKpis();
+        mo.rows($("bm-kan").querySelectorAll(".bm-lead"), { step: 18 });
+      };
+
+      function leadCard(l) {
         const responded = !!l.firstResponseAt;
         const responseMins = responded ? minutesBetween(l.createdAt, l.firstResponseAt) : null;
-        const waitingMins = !responded ? minutesSince(l.createdAt) : null;
+        const waitingMins = responded ? null : minutesSince(l.createdAt);
+        const idx = LEAD_STAGES.findIndex((s) => s.id === l.stage);
+        const order = LEAD_STAGES.filter((s) => s.id !== "lost");
+        const oi = order.findIndex((s) => s.id === l.stage);
 
-        let responseCell;
-        if (responded) {
-          const fast = responseMins !== null && responseMins <= FAST_RESPONSE_MINUTES;
-          responseCell = `<span class="bm-pill ${fast ? "bm-pill--green" : "bm-pill--muted"}">${formatDuration(responseMins)}</span>`;
-        } else {
-          const urgent = waitingMins !== null && waitingMins > FAST_RESPONSE_MINUTES;
-          responseCell = `<button type="button" class="bm-btn bm-btn--sm" data-action="respond" data-id="${l.id}">Log first response</button>
-            <span class="bm-pill ${urgent ? "bm-pill--red" : "bm-pill--amber"}">waiting ${formatDuration(waitingMins)}</span>`;
-        }
+        const responseBit = responded
+          ? `<span class="bm-pill ${responseMins !== null && responseMins <= FAST_RESPONSE_MINUTES ? "bm-pill--green" : "bm-pill--muted"}">replied in ${escapeHtml(formatDuration(responseMins))}</span>`
+          : `<span class="bm-pill ${waitingMins !== null && waitingMins > FAST_RESPONSE_MINUTES ? "bm-pill--red" : "bm-pill--amber"}">waiting ${escapeHtml(formatDuration(waitingMins))}</span>`;
 
-        const isLost = l.stage === "lost";
-        return `<div class="bm-manage-row" data-lead="${l.id}">
-          <input class="bm-mn-title" data-lfield="name" value="${escapeHtml(l.name || "")}" placeholder="Name" />
-          <select data-lfield="source">
-            ${LEAD_SOURCES.map((s) => `<option value="${s.id}" ${l.source === s.id ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("")}
-          </select>
-          <select data-lfield="stage">
-            ${LEAD_STAGES.map((s) => `<option value="${s.id}" ${l.stage === s.id ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("")}
-          </select>
-          ${
-            isLost
-              ? `<select data-lfield="lossReason">
-                  <option value="">Why lost?</option>
-                  ${LOSS_REASONS.map((r) => `<option value="${r.id}" ${l.lossReason === r.id ? "selected" : ""}>${escapeHtml(r.label)}</option>`).join("")}
-                </select>`
-              : ""
-          }
-          <span class="bm-row-sub">Created ${formatDate(l.createdAt)}</span>
-          ${responseCell}
-          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="delete-lead" data-id="${l.id}">Delete</button>
-        </div>`;
+        return `<article class="bm-lead" data-lead="${escapeHtml(l.id)}">
+          <p class="bm-lead-name">${escapeHtml(l.name || "Unnamed")}</p>
+          <div class="bm-lead-meta">
+            <span>${escapeHtml(SOURCE_LABEL[l.source] || l.source || "source not set")}</span>
+            <span>·</span>
+            <span>${escapeHtml(formatDate(l.createdAt))}</span>
+          </div>
+          <div class="bm-lead-meta">${responseBit}</div>
+          <div class="bm-lead-actions">
+            <button type="button" class="bm-lead-move" data-lead-move="${escapeHtml(l.id)}" data-dir="-1"
+              ${oi <= 0 ? "disabled" : ""} aria-label="Move back a stage">←</button>
+            <button type="button" class="bm-lead-move" data-lead-move="${escapeHtml(l.id)}" data-dir="1"
+              ${oi < 0 || oi >= order.length - 1 ? "disabled" : ""} aria-label="Move forward a stage">→</button>
+            ${responded ? "" : `<button type="button" class="bm-lead-move" data-lead-respond="${escapeHtml(l.id)}">Log first response</button>`}
+            <button type="button" class="bm-lead-move" data-lead-lose="${escapeHtml(l.id)}">Lost</button>
+          </div>
+        </article>`;
       }
 
-      document.getElementById("bm-leads-list").addEventListener("click", async (e) => {
-        const btn = e.target.closest("[data-action]");
-        if (!btn) return;
-        if (btn.dataset.action === "respond") {
-          btn.disabled = true;
-          const r = await markLeadFirstResponse(btn.dataset.id);
-          // Say when nothing happened. Silently doing nothing looks identical
-          // to it working, and the whole point is that this date never moves.
-          if (r && r.stamped === false) {
-            alert("This lead already has a first response recorded. That date never moves — it is the number the whole funnel is measured against.");
-          }
-          return load();
-        }
-        if (btn.dataset.action === "delete-lead") {
-          if (!confirm("Delete this lead?")) return;
-          await deleteLead(btn.dataset.id);
-          return load();
-        }
-      });
-
-      document.getElementById("bm-leads-list").addEventListener("change", async (e) => {
-        const row = e.target.closest("[data-lead]");
-        if (!row) return;
-        const patch = {};
-        for (const el of row.querySelectorAll("[data-lfield]")) {
-          patch[el.dataset.lfield] = el.value;
-        }
-        // Clearing the lost stage clears the reason with it.
-        if (patch.stage !== "lost") patch.lossReason = null;
-        await updateLead(row.dataset.lead, patch);
-        load();
-      });
-
-      // --- Plan vs actual ---
-      // Every one of these must distinguish "no data" from a real zero.
-
-      function renderKpis(leads) {
-        const funnelEl = document.getElementById("bm-kpi-funnel");
-        const sourcesEl = document.getElementById("bm-kpi-sources");
-        const lossesEl = document.getElementById("bm-kpi-losses");
+      function renderKpis() {
+        const leads = S.leads;
+        const f = $("bm-kpi-funnel"), so = $("bm-kpi-sources"), lo = $("bm-kpi-losses");
+        if (!f) return;
 
         if (!leads.length) {
           const msg = '<p class="bm-empty">No leads recorded yet — nothing to measure against the plan.</p>';
-          funnelEl.innerHTML = msg;
-          sourcesEl.innerHTML = msg;
-          lossesEl.innerHTML = msg;
+          f.innerHTML = msg; so.innerHTML = msg; lo.innerHTML = msg;
           return;
         }
 
-        // Stage conversion. A lead's current stage implies it passed every
-        // earlier stage. Lost leads are excluded because we do not record how
-        // far they got — that is stated rather than silently assumed.
         const order = LEAD_STAGES.map((s) => s.id).filter((id) => id !== "lost");
         const live = leads.filter((l) => l.stage !== "lost");
-        const reached = (stageId) => {
-          const idx = order.indexOf(stageId);
-          return live.filter((l) => order.indexOf(l.stage) >= idx).length;
-        };
-
+        const reached = (id) => live.filter((l) => order.indexOf(l.stage) >= order.indexOf(id)).length;
         const lostCount = leads.length - live.length;
-        funnelEl.innerHTML =
-          FUNNEL_TARGETS.map((t) => {
-            const from = reached(t.from);
-            const to = reached(t.to);
-            const actual = from > 0 ? to / from : null;
-            const meets = actual !== null && actual >= t.target;
-            return `<div class="bm-row">
-              <div class="bm-row-main">
-                <span class="bm-row-title">${escapeHtml(STAGE_LABEL[t.from])} → ${escapeHtml(STAGE_LABEL[t.to])}</span>
-                <span class="bm-row-sub">${from} reached ${escapeHtml(STAGE_LABEL[t.from])}${from > 0 ? `, ${to} reached ${escapeHtml(STAGE_LABEL[t.to])}` : ""}</span>
-              </div>
-              <div style="display:flex; align-items:center; gap:10px;">
-                <span class="bm-row-sub">target ${pct(t.target)}</span>
-                ${
-                  actual === null
-                    ? `<span class="bm-pill bm-pill--muted">no data</span>`
-                    : `<span class="bm-pill ${meets ? "bm-pill--green" : "bm-pill--amber"}">${pct(actual)}</span>`
-                }
-              </div>
-            </div>`;
-          }).join("") +
-          (lostCount
-            ? `<p class="bm-card-note" style="margin-top:10px;">${lostCount} lost ${lostCount === 1 ? "lead is" : "leads are"} excluded — the stage they were lost at is not recorded.</p>`
-            : "");
 
-        // Source mix.
-        sourcesEl.innerHTML = LEAD_SOURCES.map((s) => {
+        f.innerHTML = FUNNEL_TARGETS.map((t) => {
+          const from = reached(t.from), to = reached(t.to);
+          const actual = from > 0 ? to / from : null;
+          const meets = actual !== null && actual >= t.target;
+          return `<div class="bm-row">
+            <div class="bm-row-main">
+              <span class="bm-row-title">${escapeHtml(STAGE_LABEL[t.from])} → ${escapeHtml(STAGE_LABEL[t.to])}</span>
+              <span class="bm-row-sub">${from} reached ${escapeHtml(STAGE_LABEL[t.from])}${from > 0 ? `, ${to} reached ${escapeHtml(STAGE_LABEL[t.to])}` : ""}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="bm-row-sub">target ${pct(t.target)}</span>
+              ${actual === null ? `<span class="bm-pill bm-pill--muted">no data</span>`
+                : `<span class="bm-pill ${meets ? "bm-pill--green" : "bm-pill--amber"}">${pct(actual)}</span>`}
+            </div>
+          </div>`;
+        }).join("") + (lostCount
+          ? `<p class="bm-hint" style="margin-top:10px;">${lostCount} lost ${lostCount === 1 ? "lead is" : "leads are"} excluded — the stage they were lost at is not recorded.</p>` : "");
+
+        so.innerHTML = LEAD_SOURCES.map((s) => {
           const count = leads.filter((l) => l.source === s.id).length;
           const share = count / leads.length;
-          const over = share > 0.5;
           return `<div class="bm-row">
             <div class="bm-row-main">
               <span class="bm-row-title">${escapeHtml(s.label)}</span>
               <span class="bm-row-sub">${count} of ${leads.length}</span>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
               <span class="bm-row-sub">target ${pct(s.targetShare)}</span>
-              <span class="bm-pill ${over ? "bm-pill--red" : "bm-pill--muted"}">${pct(share)}</span>
+              <span class="bm-pill ${share > 0.5 ? "bm-pill--red" : "bm-pill--muted"}">${pct(share)}</span>
             </div>
           </div>`;
-        }).join("") +
-          `<p class="bm-card-note" style="margin-top:10px;">Any single channel above 50% makes the pipeline fragile.</p>`;
+        }).join("");
 
-        // Loss reasons.
         const lost = leads.filter((l) => l.stage === "lost");
-        if (!lost.length) {
-          lossesEl.innerHTML = '<p class="bm-empty">No lost deals recorded yet.</p>';
-          return;
-        }
+        if (!lost.length) { lo.innerHTML = '<p class="bm-empty">No lost deals recorded yet.</p>'; return; }
         const unattributed = lost.filter((l) => !l.lossReason).length;
-        lossesEl.innerHTML =
-          LOSS_REASONS.map((r) => {
-            const count = lost.filter((l) => l.lossReason === r.id).length;
-            const share = count / lost.length;
-            const alert = r.alertAbove !== null && share > r.alertAbove;
-            return `<div class="bm-row">
-              <div class="bm-row-main">
-                <span class="bm-row-title">${escapeHtml(r.label)}</span>
-                ${alert ? `<span class="bm-row-sub">Above ${pct(r.alertAbove)} — ${escapeHtml(r.then)}.</span>` : ""}
-              </div>
-              <div style="display:flex; align-items:center; gap:10px;">
-                <span class="bm-row-sub">${count} of ${lost.length}</span>
-                <span class="bm-pill ${alert ? "bm-pill--red" : "bm-pill--muted"}">${pct(share)}</span>
-              </div>
-            </div>`;
-          }).join("") +
-          (unattributed
-            ? `<p class="bm-card-note" style="margin-top:10px;">${unattributed} lost ${unattributed === 1 ? "deal has" : "deals have"} no reason set — these shares are incomplete.</p>`
-            : "");
-      }
-
-      // --- Manage projects ---
-
-      function readRow(row, fields) {
-        const out = {};
-        for (const f of fields) {
-          const el = row.querySelector(`[data-field="${f}"]`);
-          if (!el) continue;
-          out[f] = el.type === "checkbox" ? el.checked : el.value;
-        }
-        return out;
-      }
-
-      function projectFieldsHtml(p) {
-        return `<div class="bm-manage-row" data-project-fields="${p.id}">
-          <input class="bm-mn-title" data-pfield="name" value="${escapeHtml(p.name || "")}" placeholder="Project name" />
-          <select data-pfield="type">
-            <option value="">Type not set</option>
-            ${SERVICE_TYPES.map((t) => `<option value="${t.id}" ${p.type === t.id ? "selected" : ""}>${escapeHtml(t.label)}</option>`).join("")}
-          </select>
-          <input class="bm-mn-narrow" type="date" data-pfield="dueAt" value="${dateInputValue(p.dueAt)}" title="Due date" />
-          <input class="bm-mn-narrow" type="number" min="0" max="100" data-pfield="progress" value="${p.progress === null || p.progress === undefined ? "" : escapeHtml(p.progress)}" placeholder="% done" title="Progress — leave blank if not set" />
-          <label class="bm-mn-check"><input type="checkbox" data-pfield="billable" ${p.billable ? "checked" : ""} /> Billable</label>
-        </div>`;
-      }
-
-      function templateRowHtml(p) {
-        const has = p.type && MILESTONE_TEMPLATES[p.type];
-        return `<div class="bm-manage-row" data-template="${p.id}">
-          ${
-            has
-              ? `<span class="bm-row-sub">Stamp the ${escapeHtml(SERVICE_TYPES.find((t) => t.id === p.type)?.label || p.type)} template (${MILESTONE_TEMPLATES[p.type].length} milestones) from a start date:</span>
-                 <input class="bm-mn-narrow" type="date" data-tpl="start" />
-                 <button type="button" class="bm-btn bm-btn--sm" data-action="apply-template" data-pid="${p.id}" data-type="${p.type}">Apply template</button>`
-              : `<span class="bm-row-sub">Set a project type above to stamp a milestone template.</span>`
-          }
-        </div>`;
-      }
-
-      function milestoneRowHtml(pid, m) {
-        return `<div class="bm-manage-row" data-milestone="${m.id}">
-          <input class="bm-mn-title" data-field="title" value="${escapeHtml(m.title || "")}" placeholder="Title" />
-          <select data-field="owner">
-            <option value="us" ${m.owner === "us" ? "selected" : ""}>Us</option>
-            <option value="client" ${m.owner === "client" ? "selected" : ""}>Client</option>
-          </select>
-          <select data-field="status">
-            <option value="todo" ${m.status === "todo" ? "selected" : ""}>To do</option>
-            <option value="in_progress" ${m.status === "in_progress" ? "selected" : ""}>In progress</option>
-            <option value="done" ${m.status === "done" ? "selected" : ""}>Done</option>
-          </select>
-          <input class="bm-mn-narrow" type="date" data-field="dueAt" value="${dateInputValue(m.dueAt)}" />
-          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="delete-milestone" data-pid="${pid}" data-id="${m.id}">Delete</button>
-        </div>`;
-      }
-
-      function intakeRowHtml(pid, i) {
-        return `<div class="bm-manage-row" data-intake="${i.id}">
-          <input class="bm-mn-title" data-field="label" value="${escapeHtml(i.label || "")}" placeholder="Label" />
-          <select data-field="group">
-            ${Object.entries(GROUP_LABEL).map(([k, v]) => `<option value="${k}" ${i.group === k ? "selected" : ""}>${v}</option>`).join("")}
-          </select>
-          <label class="bm-mn-check"><input type="checkbox" data-field="done" ${i.done ? "checked" : ""} /> Done</label>
-          <span class="bm-row-sub">Raised ${formatDate(i.raisedAt)}</span>
-          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="delete-intake" data-pid="${pid}" data-id="${i.id}">Delete</button>
-        </div>`;
-      }
-
-      function deliverableRowHtml(pid, d) {
-        return `<div class="bm-manage-row" data-deliverable="${d.id}">
-          <input class="bm-mn-title" data-field="title" value="${escapeHtml(d.title || "")}" placeholder="Title" />
-          <input class="bm-mn-narrow" data-field="version" value="${escapeHtml(d.version ?? "")}" placeholder="Version" />
-          <input class="bm-mn-url" data-field="url" value="${escapeHtml(d.url || "")}" placeholder="https://…" />
-          <select data-field="status">
-            <option value="in_review" ${d.status === "in_review" ? "selected" : ""}>In review</option>
-            <option value="approved" ${d.status === "approved" ? "selected" : ""}>Approved</option>
-            <option value="changes_requested" ${d.status === "changes_requested" ? "selected" : ""}>Changes requested</option>
-          </select>
-          <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="delete-deliverable" data-pid="${pid}" data-id="${d.id}">Delete</button>
-        </div>`;
-      }
-
-      function addFormHtml(pid) {
-        return `
-          <div class="bm-manage-row" data-add-milestone="${pid}">
-            <input class="bm-mn-title" data-new="title" placeholder="New milestone title" />
-            <select data-new="owner"><option value="us">Us</option><option value="client">Client</option></select>
-            <select data-new="status"><option value="todo" selected>To do</option><option value="in_progress">In progress</option><option value="done">Done</option></select>
-            <input class="bm-mn-narrow" type="date" data-new="dueAt" />
-            <button type="button" class="bm-btn bm-btn--sm" data-action="add-milestone" data-pid="${pid}">Add milestone</button>
-          </div>
-          <div class="bm-manage-row" data-add-intake="${pid}">
-            <input class="bm-mn-title" data-new="label" placeholder="New intake item" />
-            <select data-new="group">
-              ${Object.entries(GROUP_LABEL).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}
-            </select>
-            <button type="button" class="bm-btn bm-btn--sm" data-action="add-intake" data-pid="${pid}">Add intake item</button>
-            <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-action="dedupe-intake" data-pid="${pid}">Remove duplicates</button>
-          </div>
-          <div class="bm-manage-row" data-add-deliverable="${pid}">
-            <input class="bm-mn-title" data-new="title" placeholder="New deliverable title" />
-            <input class="bm-mn-narrow" data-new="version" placeholder="Version" />
-            <input class="bm-mn-url" data-new="url" placeholder="https://…" />
-            <button type="button" class="bm-btn bm-btn--sm" data-action="add-deliverable" data-pid="${pid}">Add deliverable</button>
-          </div>`;
-      }
-
-      /* The agreed scope, clickable.
-         Each line advances one step when you click it: agreed -> building ->
-         delivered -> accepted. Progress is computed from these and weighted by
-         build days, so a half-day line cannot report the same share of the job
-         as a ten-day one. Nobody types a percentage — a typed percentage is a
-         guess wearing a number's clothes. */
-      function scopeBlockHtml(pid, scope) {
-        if (!scope.length) {
-          return `<p class="bm-empty">
-            No agreed scope recorded. Build it on <a href="/quote">Scope &amp; quote</a>
-            and save it to this project — then progress is measured instead of estimated.
-          </p>`;
-        }
-        const pct = scopeProgress(scope);
-        const value = scopeValue(scope);
-        const nextOf = (st) => SCOPE_STATUS_IDS[Math.min(SCOPE_STATUS_IDS.indexOf(st) + 1, SCOPE_STATUS_IDS.length - 1)];
-        const tone = { agreed: "bm-pill--muted", building: "bm-pill--amber", delivered: "bm-pill--green", accepted: "bm-pill--green" };
-
-        return `
-          <div class="bm-scope-head">
-            <div>
-              <strong>${pct}% delivered</strong>
-              <span class="bm-row-sub"> · weighted by build days, computed from the lines below</span>
+        lo.innerHTML = LOSS_REASONS.map((r) => {
+          const count = lost.filter((l) => l.lossReason === r.id).length;
+          const share = count / lost.length;
+          const alert = r.alertAbove !== null && share > r.alertAbove;
+          return `<div class="bm-row">
+            <div class="bm-row-main">
+              <span class="bm-row-title">${escapeHtml(r.label)}</span>
+              ${alert ? `<span class="bm-row-sub">Above ${pct(r.alertAbove)} — ${escapeHtml(r.then)}.</span>` : ""}
             </div>
-            <div class="bm-row-sub">${formatINR(value.accepted)} accepted of ${formatINR(value.agreed)}</div>
-          </div>
-          <div class="bm-scope-bar"><span style="width:${pct}%"></span></div>
-          ${scope.map((l) => {
-            const isLast = l.status === "accepted";
-            const label = SCOPE_STATUS.find((x) => x.id === l.status)?.label || l.status;
-            return `<div class="bm-scope-row" data-scope-line="${escapeHtml(l.id)}">
-              <span class="bm-scope-label">${escapeHtml(l.label)}</span>
-              <span class="bm-row-sub">${l.days}d · ${formatINR(l.amount)}</span>
-              <button type="button"
-                class="bm-pill ${tone[l.status] || "bm-pill--muted"}"
-                ${isLast ? "disabled" : ""}
-                data-action="advance-scope"
-                data-pid="${pid}"
-                data-line="${escapeHtml(l.id)}"
-                data-next="${nextOf(l.status)}"
-                title="${isLast ? "Accepted — the last state" : `Click to mark ${nextOf(l.status)}`}">
-                ${escapeHtml(label)}${isLast ? "" : " →"}
-              </button>
-            </div>`;
-          }).join("")}`;
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="bm-row-sub">${count} of ${lost.length}</span>
+              <span class="bm-pill ${alert ? "bm-pill--red" : "bm-pill--muted"}">${pct(share)}</span>
+            </div>
+          </div>`;
+        }).join("") + (unattributed
+          ? `<p class="bm-hint" style="margin-top:10px;">${unattributed} lost ${unattributed === 1 ? "deal has" : "deals have"} no reason set — these shares are incomplete.</p>` : "");
       }
 
-      async function renderManageProjects(projects, orgById) {
-        const container = document.getElementById("bm-manage-projects");
-        const sorted = [...projects].sort((a, b) =>
-          (orgById[a.orgId]?.name || "").localeCompare(orgById[b.orgId]?.name || "")
-        );
-
-        if (!sorted.length) {
-          container.innerHTML = '<p class="bm-empty">No projects yet.</p>';
-          return;
-        }
-
-        const cards = await Promise.all(
-          sorted.map(async (p) => {
-            const [milestones, intake, deliverables, scope] = await Promise.all([
-              getMilestones(p.id),
-              getIntake(p.id),
-              getDeliverables(p.id),
-              getScope(p.id),
-            ]);
-            const orgName = orgById[p.orgId]?.name || p.orgId;
-            return `<div class="bm-manage-card" data-project="${p.id}">
-              <h3 class="bm-manage-card-title">${escapeHtml(orgName)}</h3>
-
-              <div class="bm-manage-group">
-                <p class="bm-manage-group-title">Project</p>
-                ${projectFieldsHtml(p)}
-                ${templateRowHtml(p)}
-              </div>
-              <div class="bm-manage-group">
-                <p class="bm-manage-group-title">Agreed scope — what was sold, and how much is done</p>
-                ${scopeBlockHtml(p.id, scope)}
-              </div>
-              <div class="bm-manage-group">
-                <p class="bm-manage-group-title">Milestones</p>
-                ${milestones.length ? milestones.map((m) => milestoneRowHtml(p.id, m)).join("") : '<p class="bm-empty">No milestones yet.</p>'}
-              </div>
-              <div class="bm-manage-group">
-                <p class="bm-manage-group-title">Intake</p>
-                ${intake.length ? intake.map((i) => intakeRowHtml(p.id, i)).join("") : '<p class="bm-empty">No intake items yet.</p>'}
-              </div>
-              <div class="bm-manage-group">
-                <p class="bm-manage-group-title">Deliverables</p>
-                ${deliverables.length ? deliverables.map((d) => deliverableRowHtml(p.id, d)).join("") : '<p class="bm-empty">No deliverables yet.</p>'}
-              </div>
-              <div class="bm-manage-group">
-                <p class="bm-manage-group-title">Add new</p>
-                ${addFormHtml(p.id)}
-              </div>
-            </div>`;
-          })
-        );
-
-        container.innerHTML = cards.join("");
-      }
-
-      document.getElementById("bm-manage-projects").addEventListener("click", async (e) => {
-        const btn = e.target.closest("[data-action]");
-        if (!btn) return;
-        const action = btn.dataset.action;
-        const pid = btn.dataset.pid;
-
-        if (action === "apply-template") {
-          const row = btn.closest("[data-template]");
-          const start = row.querySelector('[data-tpl="start"]').value;
-          if (!start) {
-            alert("Pick a start date first — the template dates are counted from it.");
-            return;
-          }
-          btn.disabled = true;
-          const n = await applyMilestoneTemplate(pid, btn.dataset.type, start);
-          alert(`Added ${n} milestones. Edit or delete any that do not apply.`);
-          return load();
-        }
-        if (action === "delete-milestone") {
-          if (!confirm("Delete this milestone?")) return;
-          await deleteMilestone(pid, btn.dataset.id);
-          return load();
-        }
-        if (action === "delete-intake") {
-          if (!confirm("Delete this intake item?")) return;
-          await deleteIntakeItem(pid, btn.dataset.id);
-          return load();
-        }
-        if (action === "delete-deliverable") {
-          if (!confirm("Delete this deliverable?")) return;
-          await deleteDeliverable(pid, btn.dataset.id);
-          return load();
-        }
-        if (action === "add-milestone") {
-          const row = btn.closest("[data-add-milestone]");
-          const title = row.querySelector('[data-new="title"]').value.trim();
-          if (!title) return;
-          const owner = row.querySelector('[data-new="owner"]').value;
-          const status = row.querySelector('[data-new="status"]').value;
-          const dueVal = row.querySelector('[data-new="dueAt"]').value;
-          await addMilestone(pid, { title, owner, status, dueAt: dueVal ? new Date(dueVal) : null });
-          return load();
-        }
-        if (action === "add-intake") {
-          const row = btn.closest("[data-add-intake]");
-          const label = row.querySelector('[data-new="label"]').value.trim();
-          if (!label) return;
-          const group = row.querySelector('[data-new="group"]').value;
-          await addIntakeItem(pid, { label, group });
-          return load();
-        }
-        if (action === "advance-scope") {
-          // One click, one step forward. The project's progress figure follows
-          // automatically, so the dashboard and the client's portal both move
-          // without anything being typed twice.
-          btn.disabled = true;
-          try {
-            await setScopeLineStatus(pid, btn.dataset.line, btn.dataset.next);
-          } catch (err) {
-            alert("Could not update that line: " + (err?.message || err));
-          }
-          return load();
-        }
-        if (action === "dedupe-intake") {
-          /* Cleans up the duplicate sets left by the old non-idempotent push.
-             Keeps the oldest of each label so the blocker's true age survives,
-             and a ticked item always beats an unticked one — losing a client's
-             tick would make them do the work twice. */
-          btn.disabled = true;
-          try {
-            const { removed, kept } = await dedupeIntake(pid);
-            alert(
-              removed
-                ? `Removed ${removed} duplicate intake item${removed === 1 ? "" : "s"}. ` +
-                  `${kept} remain, each with its original date.`
-                : `No duplicates — all ${kept} intake items are already unique.`
-            );
-          } catch (err) {
-            alert("Could not remove duplicates: " + (err?.message || err));
-          } finally {
-            btn.disabled = false;
-          }
-          return load();
-        }
-        if (action === "add-deliverable") {
-          const row = btn.closest("[data-add-deliverable]");
-          const title = row.querySelector('[data-new="title"]').value.trim();
-          if (!title) return;
-          const version = row.querySelector('[data-new="version"]').value.trim();
-          const url = row.querySelector('[data-new="url"]').value.trim();
-          await addDeliverable(pid, { title, version, url: url || null, status: "in_review" });
-          return load();
-        }
-      });
-
-      document.getElementById("bm-manage-projects").addEventListener("change", async (e) => {
-        const card = e.target.closest("[data-project]");
-        if (!card) return;
-        const pid = card.dataset.project;
-
-        const projectRow = e.target.closest("[data-project-fields]");
-        const milestoneRow = e.target.closest("[data-milestone]");
-        const intakeRow = e.target.closest("[data-intake]");
-        const deliverableRow = e.target.closest("[data-deliverable]");
-
-        if (projectRow) {
-          const name = projectRow.querySelector('[data-pfield="name"]').value.trim();
-          const type = projectRow.querySelector('[data-pfield="type"]').value;
-          const dueVal = projectRow.querySelector('[data-pfield="dueAt"]').value;
-          const progressVal = projectRow.querySelector('[data-pfield="progress"]').value;
-          const billable = projectRow.querySelector('[data-pfield="billable"]').checked;
-          await updateProject(pid, {
-            name,
-            type: type || null,
-            dueAt: dueVal ? new Date(dueVal) : null,
-            // Blank means "not set", which the portal renders as such — it is
-            // never coerced to a reassuring 0%.
-            progress: progressVal === "" ? null : Number(progressVal),
-            billable,
-          });
-        } else if (milestoneRow) {
-          const { title, owner, status, dueAt } = readRow(milestoneRow, ["title", "owner", "status", "dueAt"]);
-          await updateMilestone(pid, milestoneRow.dataset.milestone, {
-            title,
-            owner,
-            status,
-            dueAt: dueAt ? new Date(dueAt) : null,
-          });
-        } else if (intakeRow) {
-          const { label, group, done } = readRow(intakeRow, ["label", "group", "done"]);
-          await updateIntakeItem(pid, intakeRow.dataset.intake, {
-            label,
-            group,
-            done,
-            clearedAt: done ? new Date() : null,
-          });
-        } else if (deliverableRow) {
-          const { title, version, url, status } = readRow(deliverableRow, ["title", "version", "url", "status"]);
-          await updateDeliverable(pid, deliverableRow.dataset.deliverable, { title, version, url: url || null, status });
-        } else {
-          return;
-        }
-
-        load();
-      });
-
-      // --- Main load ---
-
-      async function load() {
-        const user = await requireAdminAuth();
-        if (!user) return;
-
-        const [orgs, projects, invoices, leads, allUsers] = await Promise.all([
-          getAllOrgs(),
-          getAllProjects(),
-          getAllInvoices(),
-          getAllLeads(),
-          getAllUsers(),
-        ]);
-
-        document.getElementById("bm-loading").hidden = true;
-        document.getElementById("bm-main").hidden = false;
-
-        const orgById = Object.fromEntries(orgs.map((o) => [o.id, o]));
-
-        accessOrgSelect.innerHTML = orgs
-          .map((o) => `<option value="${o.id}">${escapeHtml(o.name)}${o.status === "archived" ? " (archived)" : ""}</option>`)
-          .join("");
-
-        // --- MRR ---
-        const signedClients = orgs.filter(
-          (o) => o.kind === "client" && o.status === "active" && o.retainerStatus === "signed"
-        );
-        // Cash only. Compensation in kind (a subscription, a swap) is real
-        // value but it cannot pay a bill, and this gauge answers "can I cover
-        // this month". Counting it here would flatter the number that decides
-        // whether the studio survives.
-        const mrr = signedClients.reduce((sum, o) => sum + (Number(o.retainer) || 0), 0);
-        const inKind = signedClients.reduce((sum, o) => sum + (Number(o.retainerInKind) || 0), 0);
-        const mrrEl = document.getElementById("bm-mrr");
-        mrrEl.textContent = formatINR(mrr);
-        mrrEl.classList.toggle("bm-stat-value--green", mrr >= BREAK_EVEN_MONTHLY);
-        mrrEl.classList.toggle("bm-stat-value--red", mrr < BREAK_EVEN_MONTHLY);
-        const gap =
-          mrr >= BREAK_EVEN_MONTHLY
-            ? `Rs ${(mrr - BREAK_EVEN_MONTHLY).toLocaleString("en-IN")} over break-even (Rs ${BREAK_EVEN_MONTHLY.toLocaleString("en-IN")}/month)`
-            : `Rs ${(BREAK_EVEN_MONTHLY - mrr).toLocaleString("en-IN")} short of break-even (Rs ${BREAK_EVEN_MONTHLY.toLocaleString("en-IN")}/month)`;
-        document.getElementById("bm-mrr-sub").textContent =
-          inKind > 0 ? `${gap} · plus ${formatINR(inKind)}/mo in kind, not counted` : gap;
-
-        // Retainer breakdown — proposals render faded and are never summed.
-        const retainerList = document.getElementById("bm-retainer-list");
-        const clientOrgs = orgs.filter((o) => o.kind === "client" && o.status === "active");
-        retainerList.innerHTML = clientOrgs.length
-          ? clientOrgs
-              .map((o) => {
-                const faded = o.retainerStatus !== "signed";
-                const pillClass =
-                  o.retainerStatus === "signed" ? "bm-pill--green" : o.retainerStatus === "proposed" ? "bm-pill--amber" : "bm-pill--muted";
-                return `<div class="bm-row" style="${faded ? "opacity:.55" : ""}">
-                  <div class="bm-row-main">
-                    <span class="bm-row-title">${escapeHtml(o.name)}</span>
-                    ${o.note ? `<span class="bm-row-sub">${escapeHtml(o.note)}</span>` : ""}
-                  </div>
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <span>${formatINR(o.retainer)}${
-                      o.retainerInKind
-                        ? ` <span class="bm-row-sub">+ ${formatINR(o.retainerInKind)} in kind</span>`
-                        : ""
-                    }</span>
-                    <span class="bm-pill ${pillClass}">${escapeHtml(o.retainerStatus || "none")}</span>
-                  </div>
-                </div>`;
-              })
-              .join("")
-          : '<p class="bm-empty">No client orgs yet.</p>';
-
-        // --- Leads ---
-        const openLeads = leads.filter((l) => OPEN_LEAD_STAGES.includes(l.stage));
-        const leadsOpenEl = document.getElementById("bm-leads-open");
-        leadsOpenEl.textContent = String(openLeads.length);
-        leadsOpenEl.classList.toggle("bm-stat-value--red", openLeads.length === 0);
-        document.getElementById("bm-leads-sub").textContent =
-          leads.length === 0
-            ? "Zero leads — that's the number that decides the month."
-            : `${openLeads.length} open of ${leads.length} total`;
-
-        const responseTimes = leads
-          .map((l) => minutesBetween(l.createdAt, l.firstResponseAt))
-          .filter((m) => m !== null)
-          .sort((a, b) => a - b);
-        const responseEl = document.getElementById("bm-first-response");
-        const responseSubEl = document.getElementById("bm-first-response-sub");
-        const awaiting = leads.filter((l) => !l.firstResponseAt && OPEN_LEAD_STAGES.includes(l.stage)).length;
-        if (!responseTimes.length) {
-          responseEl.textContent = leads.length ? "Not recorded" : "No leads yet";
-          responseEl.classList.add("bm-stat-value--red");
-          responseSubEl.textContent = leads.length
-            ? `${awaiting} awaiting a first response`
-            : `Market median is ~${MARKET_MEDIAN_RESPONSE_HOURS}h`;
-        } else {
-          const mid = Math.floor(responseTimes.length / 2);
-          const median =
-            responseTimes.length % 2 ? responseTimes[mid] : (responseTimes[mid - 1] + responseTimes[mid]) / 2;
-          responseEl.textContent = formatDuration(median);
-          const good = median <= FAST_RESPONSE_MINUTES;
-          responseEl.classList.toggle("bm-stat-value--red", !good);
-          responseEl.classList.toggle("bm-stat-value--green", good);
-          responseSubEl.textContent = `${responseTimes.length} recorded · market median ~${MARKET_MEDIAN_RESPONSE_HOURS}h${awaiting ? ` · ${awaiting} still awaiting` : ""}`;
-        }
-
-        const leadsList = document.getElementById("bm-leads-list");
-        const sortedLeads = [...leads].sort(
-          (a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
-        );
-        leadsList.innerHTML = sortedLeads.length
-          ? sortedLeads.map(leadRowHtml).join("")
-          : '<p class="bm-empty">No leads yet. Zero open leads is the true state — and the number that decides the month.</p>';
-
-        renderKpis(leads);
-
-        // --- Delivery health ---
-        // An empty milestones/intake subcollection means "nobody has set this
-        // project up yet" — it must never render the same as "done" or
-        // "on track".
-        const deliveryBody = document.getElementById("bm-delivery-body");
-        const activeProjects = projects.filter((p) => orgById[p.orgId]?.status === "active");
-        // Declared out here on purpose: the Today panel is rendered after this
-        // block and needs these facts in BOTH branches. Declaring it inside the
-        // else meant Today crashed when there were projects, and never rendered
-        // at all when there were none — so an empty system showed an empty
-        // panel instead of saying it was empty.
-        const deliveryFacts = [];
-        if (!activeProjects.length) {
-          deliveryBody.innerHTML = '<tr><td colspan="4" class="bm-empty">No active projects yet.</td></tr>';
-        } else {
-          const rows = await Promise.all(
-            activeProjects.map(async (p) => {
-              const [milestones, intake, scope] = await Promise.all([
-                getMilestones(p.id), getIntake(p.id), getScope(p.id),
-              ]);
-              // Gathered here because this is the one place milestones and
-              // intake are already loaded; re-fetching for the Today panel
-              // would double every read on this page.
-              const openNow = intake.filter((i) => !i.done);
-              const oldestOpen = openNow
-                .map((i) => daysSince(i.raisedAt))
-                .filter((d) => d !== null)
-                .sort((a, b) => b - a)[0];
-              const labelCounts = new Map();
-              intake.forEach((i) => {
-                const k = String(i.label || "").trim().toLowerCase();
-                labelCounts.set(k, (labelCounts.get(k) || 0) + 1);
-              });
-              deliveryFacts.push({
-                id: p.id,
-                intakeTotal: intake.length,
-                name: p.name || orgById[p.orgId]?.name || p.orgId,
-                milestones: milestones.length,
-                openIntake: openNow.length,
-                oldestOpenDays: oldestOpen === undefined ? null : oldestOpen,
-                duplicateIntake: [...labelCounts.values()].filter((n) => n > 1).length,
-                scopeLines: scope.length,
-              });
-              const pending = milestones
-                .filter((m) => m.status !== "done")
-                .sort((a, b) => (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0));
-              const next = pending[0];
-
-              // Open intake is a real answer to "who are we waiting on", and
-              // often the only one. A project with no milestones but thirty
-              // unanswered requests was showing "—", which reads as nobody is
-              // holding anything up — the exact opposite of the truth, on the
-              // one screen that exists to say who is holding things up.
-              const openIntake = intake.filter((i) => !i.done).length;
-
-              let milestoneCell;
-              let waitingCell;
-              if (!milestones.length) {
-                milestoneCell = `<span class="bm-pill bm-pill--muted">No milestones yet</span>`;
-                waitingCell = openIntake
-                  ? `Client<br><span class="bm-row-sub">${openIntake} open request${openIntake === 1 ? "" : "s"}</span>`
-                  : "—";
-              } else if (!next) {
-                milestoneCell = `<span class="bm-pill bm-pill--green">All complete</span>`;
-                waitingCell = openIntake
-                  ? `Client<br><span class="bm-row-sub">${openIntake} still open</span>`
-                  : "—";
-              } else {
-                milestoneCell = `${escapeHtml(next.title)}<br><span class="bm-row-sub">Due ${formatDate(next.dueAt)}</span>`;
-                waitingCell = next.owner === "client" ? "Client" : "Brand Mint";
-                if (next.owner !== "client" && openIntake) {
-                  // Both can be true: we owe the next milestone AND they still
-                  // owe us assets. Saying only one hides half the problem.
-                  waitingCell += `<br><span class="bm-row-sub">${openIntake} open with the client</span>`;
-                }
-              }
-
-              let blockerCell;
-              if (!intake.length) {
-                blockerCell = `<span class="bm-pill bm-pill--muted">Not set up</span>`;
-              } else {
-                const openBlockers = intake.filter((i) => !i.done);
-                const oldest = openBlockers
-                  .map((i) => daysSince(i.raisedAt))
-                  .filter((d) => d !== null)
-                  .sort((a, b) => b - a)[0];
-                const days = oldest === undefined ? 0 : oldest;
-                blockerCell = `<span class="bm-pill ${ageClass(days)}">${days}d</span>`;
-              }
-
-              const orgName = orgById[p.orgId]?.name || p.orgId;
-              return `<tr>
-                <td><strong>${escapeHtml(p.name || orgName)}</strong></td>
-                <td>${milestoneCell}</td>
-                <td>${waitingCell}</td>
-                <td>${blockerCell}</td>
-              </tr>`;
-            })
-          );
-          deliveryBody.innerHTML = rows.join("");
-        }
-
-        const factsByProject = Object.fromEntries(deliveryFacts.map((f) => [f.id, f]));
-        renderOnboarding({ orgs, projects, users: allUsers, factsByProject });
-
-        renderToday({
-          mrr,
-          openLeads,
-          leadsAwaitingResponse: openLeads.filter((l) => !l.firstResponseAt),
-          delivery: deliveryFacts,
-          activeProjectCount: activeProjects.length,
-        });
-
-        fillOrgSelects(orgs);
-        await renderManageProjects(projects, orgById);
-
-        // --- Org tables ---
-        const activeClients = orgs.filter((o) => o.kind === "client" && o.status === "active");
-        const internalOrgs = orgs.filter((o) => o.kind === "internal" && o.status !== "archived");
-        const archivedOrgs = orgs.filter((o) => o.status === "archived");
-
-        document.getElementById("bm-active-body").innerHTML = activeClients.length
-          ? activeClients
-              .map(
-                (o) => `<tr>
-                  <td>${escapeHtml(o.name)}</td>
-                  <td>${formatINR(o.retainer)}</td>
-                  <td><span class="bm-pill ${o.retainerStatus === "signed" ? "bm-pill--green" : "bm-pill--muted"}">${escapeHtml(o.retainerStatus || "none")}</span></td>
-                  <td class="bm-row-sub">${escapeHtml(o.note || "—")}</td>
-                </tr>`
-              )
-              .join("")
-          : '<tr><td colspan="4" class="bm-empty">None yet.</td></tr>';
-
-        document.getElementById("bm-internal-body").innerHTML = internalOrgs.length
-          ? internalOrgs
-              .map((o) => `<tr><td>${escapeHtml(o.name)}</td><td class="bm-row-sub">${escapeHtml(o.note || "—")}</td></tr>`)
-              .join("")
-          : '<tr><td colspan="2" class="bm-empty">None yet.</td></tr>';
-
-        document.getElementById("bm-archived-body").innerHTML = archivedOrgs.length
-          ? archivedOrgs
-              .map((o) => `<tr><td>${escapeHtml(o.name)}</td><td class="bm-row-sub">${escapeHtml(o.note || "—")}</td></tr>`)
-              .join("")
-          : '<tr><td colspan="2" class="bm-empty">None yet.</td></tr>';
-      }
-
-      load();
-
-      /* Playbooks. Capturing, so a Playbook button inside a clickable row
-         opens the drawer without also triggering the row. */
-      /* Onboarding forms.
-         These are new because the product had no way to create a client, a
-         project or an invoice — only a seed button that writes fixed demo
-         data. Onboarding a real client meant editing Firestore by hand, which
-         is not a workflow, it is a workaround. */
-
-      function fillOrgSelects(orgs) {
-        const options = orgs
-          .filter((o) => o.status === "active")
-          .map((o) => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.name)}</option>`)
-          .join("");
-        for (const id of ["bm-proj-org", "bm-inv-org"]) {
-          const el = document.getElementById(id);
-          if (!el) continue;
-          const keep = el.value;
-          el.innerHTML = options || `<option value="">Add a client first</option>`;
-          if (keep) el.value = keep;
-        }
-        const typeSel = document.getElementById("bm-proj-type");
-        if (typeSel && !typeSel.options.length) {
-          typeSel.innerHTML =
-            `<option value="">Not set</option>` +
-            SERVICE_TYPES.map((t) => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.label)}</option>`).join("");
-        }
-      }
-
-      function say(id, message, ok = true) {
-        const el = document.getElementById(id);
-        el.hidden = false;
-        el.className = `bm-status bm-status--${ok ? "ok" : "error"}`;
-        el.textContent = message;
-      }
-
-      document.getElementById("bm-new-org").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const name = document.getElementById("bm-org-name").value.trim();
-        if (!name) return;
-        try {
-          await createOrg({
-            name,
-            kind: document.getElementById("bm-org-kind").value,
-            status: "active",
-            retainer: Number(document.getElementById("bm-org-retainer").value) || 0,
-            retainerStatus: "proposed",
-          });
-          say("bm-new-org-status", `${name} added. The retainer is proposed — mark it signed once it actually is.`);
-          e.target.reset();
-          await load();
-        } catch (err) {
-          say("bm-new-org-status", "Could not add: " + (err?.message || err), false);
-        }
-      });
-
-      document.getElementById("bm-new-project").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const orgId = document.getElementById("bm-proj-org").value;
-        const name = document.getElementById("bm-proj-name").value.trim();
-        if (!orgId || !name) {
-          say("bm-new-project-status", "Pick a client and give the project a name.", false);
-          return;
-        }
-        try {
-          await createProject({
-            orgId,
-            name,
-            type: document.getElementById("bm-proj-type").value || null,
-            dueAt: document.getElementById("bm-proj-due").value || null,
-            billable: true,
-          });
-          say("bm-new-project-status", `${name} created. Apply a milestone template next so the client can see where it is going.`);
-          e.target.reset();
-          await load();
-        } catch (err) {
-          say("bm-new-project-status", "Could not add: " + (err?.message || err), false);
-        }
-      });
-
-      document.getElementById("bm-new-invoice").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const orgId = document.getElementById("bm-inv-org").value;
-        const label = document.getElementById("bm-inv-label").value.trim();
-        const amount = Number(document.getElementById("bm-inv-amount").value);
-        if (!orgId || !label || !(amount > 0)) {
-          say("bm-new-invoice-status", "Pick a client, say what it is for, and give an amount above zero.", false);
-          return;
-        }
-        try {
-          await createInvoice({ orgId, label, amount, dueAt: document.getElementById("bm-inv-due").value || null });
-          say("bm-new-invoice-status", `${label} for ${formatINR(amount)} raised. The client can see it now.`);
-          e.target.reset();
-          await load();
-        } catch (err) {
-          say("bm-new-invoice-status", "Could not raise it: " + (err?.message || err), false);
-        }
-      });
-
-      /* The onboarding checklist.
-         "I got stuck after adding another project" is a product failure, not a
-         user failure: the dashboard showed nine panels and left you to work out
-         which one was next. These are the steps, in order, with the state of
-         each computed from real data and the next one named. The count is read
-         off this list rather than written in prose, so adding a step here
-         cannot leave a stale "4/6" on the screen. */
+      /* ══════════════════════════════════════════════════════════
+         CLIENTS
+         ══════════════════════════════════════════════════════════ */
 
       const ONBOARDING_STEPS = [
         { id: "org", label: "Client created", hint: "The organisation exists." },
         { id: "signed", label: "Retainer signed", hint: "Until it is signed it is not revenue and does not count towards break-even." },
         { id: "project", label: "Project created", hint: "Add a project so there is something to schedule and show." },
-        { id: "login", label: "Login given", hint: "Firebase Console creates the account, Client Access writes the users document. Both halves, or they sign in to a blank portal." },
-        { id: "scope", label: "Agreed scope recorded", hint: "Build it on Scope & quote and save it to this project. Until then, progress is a number you type from memory rather than one the system can derive." },
-        { id: "intake", label: "Requirements raised", hint: "Until you raise them, the portal has nothing to chase the client for." },
+        { id: "login", label: "Login given", hint: "Firebase Console creates the account, Access writes the users document. Both halves, or they sign in to a blank portal." },
+        { id: "scope", label: "Agreed scope recorded", hint: "Build it on Scope & quote and save it to this project. Until then progress is a number typed from memory rather than one the system can derive." },
+        { id: "intake", label: "Requirements raised", hint: "Until you raise them the portal has nothing to chase the client for." },
         { id: "milestones", label: "Schedule applied", hint: "Apply a milestone template with a real start date so the client can see where the project is going." },
       ];
 
-      function renderOnboarding({ orgs, projects, users, factsByProject }) {
-        const el = document.getElementById("bm-onboarding");
-        const clients = orgs.filter((o) => o.kind === "client" && o.status === "active");
+      function onboardingState(org) {
+        const theirs = S.projects.filter((p) => p.orgId === org.id);
+        const facts = theirs.map((p) => S.detail[p.id]).filter(Boolean);
+        return {
+          org: true,
+          signed: org.retainerStatus === "signed",
+          project: theirs.length > 0,
+          login: S.users.some((u) => u.orgId === org.id && u.role === "client"),
+          scope: facts.some((f) => f.scope.length > 0),
+          intake: facts.some((f) => f.intake.length > 0),
+          milestones: facts.some((f) => f.milestones.length > 0),
+        };
+      }
 
-        if (!clients.length) {
-          el.innerHTML = `<p class="bm-empty">No clients yet. Add one above — that is step one.</p>`;
-          return;
-        }
+      RENDER.clients = () => {
+        const active = S.orgs.filter((o) => o.kind === "client" && o.status === "active");
+        const internal = S.orgs.filter((o) => o.kind === "internal" && o.status !== "archived");
+        const archived = S.orgs.filter((o) => o.status === "archived");
 
-        el.innerHTML = clients.map((org) => {
-          const theirs = projects.filter((p) => p.orgId === org.id);
-          const facts = theirs.map((p) => factsByProject[p.id]).filter(Boolean);
-          const hasLogin = users.some((u) => u.orgId === org.id && u.role === "client");
+        const row = (o) => {
+          const done = onboardingState(o);
+          const completed = ONBOARDING_STEPS.filter((s) => done[s.id]).length;
+          const next = ONBOARDING_STEPS.find((s) => !done[s.id]);
+          const theirs = S.projects.filter((p) => p.orgId === o.id);
+          const unpaid = S.invoices.filter((i) => i.orgId === o.id && i.status !== "paid");
+          const tone = o.retainerStatus === "signed" ? "bm-pill--green"
+                     : o.retainerStatus === "proposed" ? "bm-pill--amber" : "bm-pill--muted";
+          return `<button type="button" class="bm-listrow bm-listrow--withmono" data-org="${escapeHtml(o.id)}">
+            <span class="bm-mono" aria-hidden="true">${escapeHtml(initials(o.name))}</span>
+            <span class="bm-listrow-main">
+              <span class="bm-listrow-title">${escapeHtml(o.name || "Unnamed")}</span>
+              <span class="bm-listrow-sub">${theirs.length} project${theirs.length === 1 ? "" : "s"}${
+                unpaid.length ? ` · ${unpaid.length} unpaid invoice${unpaid.length === 1 ? "" : "s"}` : ""
+              }${next ? ` · next: ${escapeHtml(next.label.toLowerCase())}` : " · fully onboarded"}</span>
+            </span>
+            <span class="bm-listrow-right">
+              <span class="bm-pill ${tone}">${escapeHtml(o.retainerStatus || "none")}${
+                o.retainerStatus === "signed" ? ` ${escapeHtml(formatINR(o.retainer))}` : ""}</span>
+              <span class="bm-pill ${next ? "bm-pill--muted" : "bm-pill--green"}">${completed}/${ONBOARDING_STEPS.length}</span>
+              ${chev}
+            </span>
+          </button>`;
+        };
 
-          const done = {
-            org: true,
-            signed: org.retainerStatus === "signed",
-            project: theirs.length > 0,
-            login: hasLogin,
-            scope: facts.some((f) => f.scopeLines > 0),
-            intake: facts.some((f) => f.intakeTotal > 0),
-            milestones: facts.some((f) => f.milestones > 0),
-          };
-
-          const next = ONBOARDING_STEPS.find((st) => !done[st.id]);
-          const completed = ONBOARDING_STEPS.filter((st) => done[st.id]).length;
-
-          return `<div class="bm-onb">
-            <div class="bm-onb-head">
-              <strong>${escapeHtml(org.name)}</strong>
-              <span class="bm-pill ${next ? "bm-pill--amber" : "bm-pill--green"}">${completed}/${ONBOARDING_STEPS.length}</span>
+        $("view-clients").innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>Clients</h2>
+              <p>Open a client to see everything about them in one place — retainer, projects,
+                 invoices, portal login and exactly which onboarding step is next.</p>
             </div>
-            <ol class="bm-onb-steps">
-              ${ONBOARDING_STEPS.map((st) => `
-                <li class="${done[st.id] ? "is-done" : next && st.id === next.id ? "is-next" : ""}">
+            <div class="bm-view-actions">
+              <button type="button" class="bm-btn bm-btn--sm" data-new="org">Add client</button>
+            </div>
+          </div>
+
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-panel-head"><div><h3>Active clients</h3></div>
+              <div class="bm-panel-tools"><span class="bm-pill bm-pill--muted">${active.length}</span></div></div>
+            <div class="bm-list" id="bm-client-list">
+              ${active.length ? active.map(row).join("")
+                : `<p class="bm-empty" style="padding:0 22px 22px;">No clients yet. Adding one is step one — nothing else on this screen can be true until then.</p>`}
+            </div>
+          </div>
+
+          ${internal.length ? `
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-panel-head"><div><h3>Internal</h3></div></div>
+            <div class="bm-list">${internal.map(row).join("")}</div>
+          </div>` : ""}
+
+          ${archived.length ? `
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-panel-head"><div><h3>Archived</h3></div></div>
+            <div class="bm-list">${archived.map(row).join("")}</div>
+          </div>` : ""}`;
+
+        mo.rows($("bm-client-list").children);
+      };
+
+      function openClient(orgId) {
+        const o = S.orgById[orgId];
+        if (!o) return;
+        const done = onboardingState(o);
+        const next = ONBOARDING_STEPS.find((s) => !done[s.id]);
+        const theirs = S.projects.filter((p) => p.orgId === o.id);
+        const invs = S.invoices.filter((i) => i.orgId === o.id);
+        const logins = S.users.filter((u) => u.orgId === o.id && u.role === "client");
+
+        drawer({
+          title: o.name || "Unnamed",
+          sub: `${escapeHtml(o.kind || "client")} · ${escapeHtml(o.status || "active")}`,
+          body: `
+            <div class="bm-drawer-sec">
+              <h4>Retainer</h4>
+              <dl class="bm-facts">
+                <dt>Monthly</dt><dd>${escapeHtml(formatINR(o.retainer))}${o.retainerInKind ? ` <span class="bm-row-sub">+ ${escapeHtml(formatINR(o.retainerInKind))} in kind, never counted as revenue</span>` : ""}</dd>
+                <dt>Status</dt><dd><span class="bm-pill ${o.retainerStatus === "signed" ? "bm-pill--green" : o.retainerStatus === "proposed" ? "bm-pill--amber" : "bm-pill--muted"}">${escapeHtml(o.retainerStatus || "none")}</span></dd>
+                ${o.note ? `<dt>Note</dt><dd>${escapeHtml(o.note)}</dd>` : ""}
+              </dl>
+              <p class="bm-hint" style="margin-top:12px;">
+                Only <strong>signed</strong> counts towards break-even. Marking a proposal signed
+                changes the number the month is judged on — do it when it is actually signed.
+              </p>
+              <div class="bm-inline-form" style="margin-top:12px;">
+                <input type="number" min="0" step="500" id="bm-d-retainer" value="${Number(o.retainer) || 0}" class="bm-mn-narrow" aria-label="Monthly retainer" />
+                <select id="bm-d-rstatus" aria-label="Retainer status">
+                  ${["signed", "proposed", "none"].map((s) => `<option value="${s}" ${(o.retainerStatus || "none") === s ? "selected" : ""}>${s}</option>`).join("")}
+                </select>
+                <button type="button" class="bm-btn bm-btn--sm" data-org-save="${escapeHtml(o.id)}">Save retainer</button>
+                <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-org-archive="${escapeHtml(o.id)}">
+                  ${o.status === "archived" ? "Restore" : "Archive"}
+                </button>
+              </div>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Onboarding — ${ONBOARDING_STEPS.filter((s) => done[s.id]).length} of ${ONBOARDING_STEPS.length}</h4>
+              <ol class="bm-onb-steps">
+                ${ONBOARDING_STEPS.map((st) => `<li class="${done[st.id] ? "is-done" : next && st.id === next.id ? "is-next" : ""}">
                   <span class="bm-onb-mark">${done[st.id] ? "✓" : next && st.id === next.id ? "→" : "○"}</span>
                   <span>${escapeHtml(st.label)}</span>
                 </li>`).join("")}
-            </ol>
-            ${
-              next
-                ? `<p class="bm-onb-next"><strong>Next: ${escapeHtml(next.label)}.</strong> ${escapeHtml(next.hint)}</p>`
-                : `<p class="bm-onb-next">All ${ONBOARDING_STEPS.length} done. From here it is delivery: tick blockers as they clear, put deliverables up for approval, raise invoices.</p>`
+              </ol>
+              <p class="bm-hint" style="margin-top:10px;">${next
+                ? `<strong>Next: ${escapeHtml(next.label)}.</strong> ${escapeHtml(next.hint)}`
+                : `All ${ONBOARDING_STEPS.length} done. From here it is delivery.`}</p>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Projects</h4>
+              ${theirs.length ? `<div class="bm-list">${theirs.map((p) => {
+                const d = S.detail[p.id] || { openIntake: 0, scope: [], milestones: [] };
+                const prog = scopeProgress(d.scope);
+                return `<button type="button" class="bm-listrow" data-project="${escapeHtml(p.id)}" style="padding-left:0;padding-right:0;">
+                  <span class="bm-listrow-main">
+                    <span class="bm-listrow-title">${escapeHtml(p.name || "Untitled")}</span>
+                    <span class="bm-listrow-sub">${escapeHtml(TYPE_LABEL[p.type] || "type not set")} · ${
+                      prog === null ? "no agreed scope" : `${prog}% delivered`}${
+                      d.openIntake ? ` · ${d.openIntake} open with the client` : ""}</span>
+                  </span>
+                  <span class="bm-listrow-right">${chev}</span>
+                </button>`;
+              }).join("")}</div>`
+                : `<p class="bm-empty">No projects yet.</p>`}
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Invoices</h4>
+              ${invs.length ? `<div class="bm-list">${invs.map(invoiceRow).join("")}</div>`
+                : `<p class="bm-empty">No invoices raised. That is empty, not settled.</p>`}
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Portal login</h4>
+              ${logins.length
+                ? `<dl class="bm-facts">${logins.map((u) => `<dt>${escapeHtml(u.name || "—")}</dt><dd>${escapeHtml(u.username || "—")}</dd>`).join("")}</dl>`
+                : `<p class="bm-empty">No login yet — they cannot see anything. Create one under Access.</p>`}
+            </div>`,
+        });
+      }
+
+      /* ══════════════════════════════════════════════════════════
+         DELIVERY
+         ══════════════════════════════════════════════════════════ */
+
+      RENDER.delivery = () => {
+        const projects = [...S.projects].sort((a, b) =>
+          (S.orgById[a.orgId]?.name || "").localeCompare(S.orgById[b.orgId]?.name || ""));
+
+        const row = (p) => {
+          const d = S.detail[p.id];
+          if (!d) return "";
+          const orgName = S.orgById[p.orgId]?.name || p.orgId;
+          const prog = scopeProgress(d.scope);
+
+          // Empty is not on-track. A project with no milestones and no scope
+          // must never render like one that is finished.
+          let health, tone;
+          if (!d.milestones.length && !d.scope.length) { health = "Not set up"; tone = "bm-pill--muted"; }
+          else if (d.openIntake) { health = `${d.oldestOpenDays ?? 0}d blocked`; tone = ageTone(d.oldestOpenDays); }
+          else if (!d.next) { health = "Milestones complete"; tone = "bm-pill--green"; }
+          else { health = d.next.owner === "client" ? "Waiting on client" : "With us"; tone = d.next.owner === "client" ? "bm-pill--amber" : "bm-pill--muted"; }
+
+          return `<button type="button" class="bm-listrow bm-listrow--withmono" data-project="${escapeHtml(p.id)}">
+            <span class="bm-mono" aria-hidden="true">${escapeHtml(initials(orgName))}</span>
+            <span class="bm-listrow-main">
+              <span class="bm-listrow-title">${escapeHtml(p.name || orgName)}</span>
+              <span class="bm-listrow-sub">${escapeHtml(orgName)} · ${escapeHtml(TYPE_LABEL[p.type] || "type not set")} · ${
+                d.next ? `next: ${escapeHtml(d.next.title || "untitled")} ${escapeHtml(formatDate(d.next.dueAt))}` : "no milestone pending"}</span>
+            </span>
+            <span class="bm-listrow-right">
+              ${d.awaitingApproval ? `<span class="bm-pill bm-pill--amber">${d.awaitingApproval} in review</span>` : ""}
+              <span class="bm-pill bm-pill--muted">${prog === null ? "no scope" : `${prog}%`}</span>
+              <span class="bm-pill ${tone}">${escapeHtml(health)}</span>
+              ${chev}
+            </span>
+          </button>`;
+        };
+
+        $("view-delivery").innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>Delivery</h2>
+              <p>One row per project. Open one to work on it — scope, milestones, what you are
+                 waiting on the client for, and what they have to approve.</p>
+            </div>
+            <div class="bm-view-actions">
+              <button type="button" class="bm-btn bm-btn--sm" data-new="project">Add project</button>
+            </div>
+          </div>
+
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-panel-head"><div><h3>Projects</h3></div>
+              <div class="bm-panel-tools"><span class="bm-pill bm-pill--muted">${projects.length}</span></div></div>
+            <div class="bm-list" id="bm-project-list">
+              ${projects.length ? projects.map(row).join("")
+                : `<p class="bm-empty" style="padding:0 22px 22px;">No projects yet.</p>`}
+            </div>
+          </div>`;
+
+        mo.rows($("bm-project-list").children);
+      };
+
+      function openProject(pid) {
+        const p = S.projects.find((x) => x.id === pid);
+        const d = S.detail[pid];
+        if (!p || !d) return;
+        const orgName = S.orgById[p.orgId]?.name || p.orgId;
+        const hasTemplate = p.type && MILESTONE_TEMPLATES[p.type];
+
+        drawer({
+          title: p.name || "Untitled project",
+          sub: escapeHtml(orgName),
+          body: `
+            <div class="bm-drawer-sec">
+              <h4>Project</h4>
+              <div class="bm-manage-row" data-pfields="${escapeHtml(p.id)}">
+                <input class="bm-mn-title" data-pfield="name" value="${escapeHtml(p.name || "")}" placeholder="Project name" />
+                <select data-pfield="type">
+                  <option value="">Type not set</option>
+                  ${SERVICE_TYPES.map((t) => `<option value="${escapeHtml(t.id)}" ${p.type === t.id ? "selected" : ""}>${escapeHtml(t.label)}</option>`).join("")}
+                </select>
+                <input class="bm-mn-narrow" type="date" data-pfield="dueAt" value="${dateInputValue(p.dueAt)}" title="Due date" />
+                <label class="bm-mn-check"><input type="checkbox" data-pfield="billable" ${p.billable ? "checked" : ""} /> Billable</label>
+              </div>
+              <p class="bm-hint" style="margin-top:10px;">
+                There is no percentage field. Progress is derived from the agreed scope below,
+                weighted by build days — a typed percentage is a guess wearing a number's clothes.
+              </p>
+              <div class="bm-inline-form" style="margin-top:12px;">
+                ${hasTemplate
+                  ? `<span class="bm-row-sub">Stamp the ${escapeHtml(TYPE_LABEL[p.type])} template (${MILESTONE_TEMPLATES[p.type].length} milestones) from:</span>
+                     <input class="bm-mn-narrow" type="date" id="bm-tpl-start" />
+                     <button type="button" class="bm-btn bm-btn--sm" data-apply-template="${escapeHtml(p.id)}" data-type="${escapeHtml(p.type)}">Apply template</button>`
+                  : `<span class="bm-row-sub">Set a project type to stamp a milestone template.</span>`}
+              </div>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Agreed scope — what was sold, and how much is done</h4>
+              ${scopeBlock(p.id, d.scope)}
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Milestones</h4>
+              ${d.milestones.length ? d.milestones.map((m) => `
+                <div class="bm-manage-row" data-milestone="${escapeHtml(m.id)}" data-pid="${escapeHtml(p.id)}">
+                  <input class="bm-mn-title" data-field="title" value="${escapeHtml(m.title || "")}" placeholder="Title" />
+                  <select data-field="owner">
+                    <option value="us" ${m.owner === "us" ? "selected" : ""}>Us</option>
+                    <option value="client" ${m.owner === "client" ? "selected" : ""}>Client</option>
+                  </select>
+                  <select data-field="status">
+                    <option value="todo" ${m.status === "todo" ? "selected" : ""}>To do</option>
+                    <option value="in_progress" ${m.status === "in_progress" ? "selected" : ""}>In progress</option>
+                    <option value="done" ${m.status === "done" ? "selected" : ""}>Done</option>
+                  </select>
+                  <input class="bm-mn-narrow" type="date" data-field="dueAt" value="${dateInputValue(m.dueAt)}" />
+                  <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-del-milestone="${escapeHtml(m.id)}" data-pid="${escapeHtml(p.id)}">Delete</button>
+                </div>`).join("")
+                : `<p class="bm-empty">No milestones yet — the client cannot see where this is going.</p>`}
+              <div class="bm-manage-row" data-add="milestone" data-pid="${escapeHtml(p.id)}">
+                <input class="bm-mn-title" data-new="title" placeholder="New milestone" />
+                <select data-new="owner"><option value="us">Us</option><option value="client">Client</option></select>
+                <input class="bm-mn-narrow" type="date" data-new="dueAt" />
+                <button type="button" class="bm-btn bm-btn--sm" data-add-milestone="${escapeHtml(p.id)}">Add</button>
+              </div>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>What we need from the client${d.openIntake ? ` — ${d.openIntake} open` : ""}</h4>
+              ${d.intake.length ? d.intake.map((i) => {
+                const age = daysSince(i.raisedAt);
+                return `<div class="bm-manage-row" data-intake="${escapeHtml(i.id)}" data-pid="${escapeHtml(p.id)}">
+                  <input class="bm-mn-title" data-field="label" value="${escapeHtml(i.label || "")}" placeholder="Label" />
+                  <select data-field="group">
+                    ${Object.entries(GROUP_LABEL).map(([k, v]) => `<option value="${k}" ${i.group === k ? "selected" : ""}>${v}</option>`).join("")}
+                  </select>
+                  <label class="bm-mn-check"><input type="checkbox" data-field="done" ${i.done ? "checked" : ""} /> Done</label>
+                  <span class="bm-pill ${i.done ? "bm-pill--green" : ageTone(age)}">${i.done ? "cleared" : `${age ?? 0}d`}</span>
+                  <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-del-intake="${escapeHtml(i.id)}" data-pid="${escapeHtml(p.id)}">Delete</button>
+                </div>`;
+              }).join("")
+                : `<p class="bm-empty">Nothing raised. The portal has nothing to chase them for — that is not the same as them being clear.</p>`}
+              <div class="bm-manage-row" data-add="intake" data-pid="${escapeHtml(p.id)}">
+                <input class="bm-mn-title" data-new="label" placeholder="New request" />
+                <select data-new="group">${Object.entries(GROUP_LABEL).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select>
+                <button type="button" class="bm-btn bm-btn--sm" data-add-intake="${escapeHtml(p.id)}">Add</button>
+                ${d.duplicateIntake ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-dedupe="${escapeHtml(p.id)}">Remove ${d.duplicateIntake} duplicate set${d.duplicateIntake === 1 ? "" : "s"}</button>` : ""}
+              </div>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Deliverables${d.awaitingApproval ? ` — ${d.awaitingApproval} awaiting them` : ""}</h4>
+              ${d.deliverables.length ? d.deliverables.map((x) => `
+                <div class="bm-manage-row" data-deliverable="${escapeHtml(x.id)}" data-pid="${escapeHtml(p.id)}">
+                  <input class="bm-mn-title" data-field="title" value="${escapeHtml(x.title || "")}" placeholder="Title" />
+                  <input class="bm-mn-narrow" data-field="version" value="${escapeHtml(x.version ?? "")}" placeholder="Version" />
+                  <input class="bm-mn-url" data-field="url" value="${escapeHtml(x.url || "")}" placeholder="https://…" />
+                  <select data-field="status">
+                    <option value="in_review" ${x.status === "in_review" ? "selected" : ""}>In review</option>
+                    <option value="approved" ${x.status === "approved" ? "selected" : ""}>Approved</option>
+                    <option value="changes_requested" ${x.status === "changes_requested" ? "selected" : ""}>Changes requested</option>
+                  </select>
+                  <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-del-deliverable="${escapeHtml(x.id)}" data-pid="${escapeHtml(p.id)}">Delete</button>
+                </div>`).join("")
+                : `<p class="bm-empty">Nothing up for approval yet.</p>`}
+              <div class="bm-manage-row" data-add="deliverable" data-pid="${escapeHtml(p.id)}">
+                <input class="bm-mn-title" data-new="title" placeholder="New deliverable" />
+                <input class="bm-mn-narrow" data-new="version" placeholder="Version" />
+                <input class="bm-mn-url" data-new="url" placeholder="https://…" />
+                <button type="button" class="bm-btn bm-btn--sm" data-add-deliverable="${escapeHtml(p.id)}">Add</button>
+              </div>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Danger</h4>
+              <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-del-project="${escapeHtml(p.id)}">Delete this project</button>
+            </div>`,
+        });
+      }
+
+      function scopeBlock(pid, scope) {
+        if (!scope.length) {
+          return `<p class="bm-empty">No agreed scope recorded. Build it on
+            <a href="/quote">Scope &amp; quote</a> and save it to this project — then progress
+            is measured instead of estimated.</p>`;
+        }
+        const p = scopeProgress(scope);
+        const v = scopeValue(scope);
+        const nextOf = (st) => SCOPE_STATUS_IDS[Math.min(SCOPE_STATUS_IDS.indexOf(st) + 1, SCOPE_STATUS_IDS.length - 1)];
+        const tone = { agreed: "bm-pill--muted", building: "bm-pill--amber", delivered: "bm-pill--green", accepted: "bm-pill--green" };
+        return `
+          <div class="bm-scope-head">
+            <div><strong>${p}% delivered</strong><span class="bm-row-sub"> · weighted by build days</span></div>
+            <div class="bm-row-sub">${escapeHtml(formatINR(v.accepted))} accepted of ${escapeHtml(formatINR(v.agreed))}</div>
+          </div>
+          <div class="bm-bar" style="margin-bottom:12px;"><span style="width:${p}%"></span></div>
+          ${scope.map((l) => {
+            const last = l.status === "accepted";
+            const label = SCOPE_STATUS.find((x) => x.id === l.status)?.label || l.status;
+            return `<div class="bm-scope-row">
+              <span class="bm-scope-label">${escapeHtml(l.label)}</span>
+              <span class="bm-row-sub">${l.days}d · ${escapeHtml(formatINR(l.amount))}</span>
+              <button type="button" class="bm-pill ${tone[l.status] || "bm-pill--muted"}"
+                ${last ? "disabled" : ""} data-scope-advance="${escapeHtml(l.id)}"
+                data-pid="${escapeHtml(pid)}" data-next="${nextOf(l.status)}"
+                title="${last ? "Accepted — the last state" : `Click to mark ${nextOf(l.status)}`}">
+                ${escapeHtml(label)}${last ? "" : " →"}
+              </button>
+            </div>`;
+          }).join("")}
+          <p class="bm-hint" style="margin-top:10px;">
+            A line counts as money only at <strong>accepted</strong>. Delivered is handed over,
+            not confirmed — counting effort as revenue is the same mistake as counting a proposal.
+          </p>`;
+      }
+
+      /* ══════════════════════════════════════════════════════════
+         MONEY
+         ══════════════════════════════════════════════════════════ */
+
+      function invoiceRow(i) {
+        const org = S.orgById[i.orgId];
+        const overdueDays = i.status !== "paid" ? daysSince(i.dueAt) : null;
+        const overdue = overdueDays !== null && overdueDays > 0;
+        return `<div class="bm-listrow" style="cursor:default;">
+          <span class="bm-listrow-main">
+            <span class="bm-listrow-title">${escapeHtml(i.label || "Invoice")} — ${escapeHtml(formatINR(i.amount))}</span>
+            <span class="bm-listrow-sub">${escapeHtml(org?.name || i.orgId)}${
+              i.dueAt ? ` · due ${escapeHtml(formatDate(i.dueAt))}` : " · no due date"}</span>
+          </span>
+          <span class="bm-listrow-right">
+            <span class="bm-pill ${i.status === "paid" ? "bm-pill--green" : overdue ? "bm-pill--red" : "bm-pill--amber"}">${
+              i.status === "paid" ? "paid" : overdue ? `${overdueDays}d overdue` : "due"}</span>
+            ${i.status === "paid"
+              ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-inv-unpay="${escapeHtml(i.id)}">Mark unpaid</button>`
+              : `<button type="button" class="bm-btn bm-btn--sm" data-inv-pay="${escapeHtml(i.id)}">Mark paid</button>`}
+            <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-inv-del="${escapeHtml(i.id)}">Delete</button>
+          </span>
+        </div>`;
+      }
+
+      RENDER.money = () => {
+        const m = money();
+        const clients = S.orgs.filter((o) => o.kind === "client" && o.status === "active");
+        const sorted = [...S.invoices].sort((a, b) => {
+          const rank = (x) => (x.status === "paid" ? 1 : 0);
+          if (rank(a) !== rank(b)) return rank(a) - rank(b);
+          return (a.dueAt?.toMillis?.() || 0) - (b.dueAt?.toMillis?.() || 0);
+        });
+
+        $("view-money").innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>Money</h2>
+              <p>Signed retainers and every invoice ever raised. Nothing on this screen counts a
+                 proposal, and nothing counts an invoice until it is actually paid.</p>
+            </div>
+            <div class="bm-view-actions">
+              <button type="button" class="bm-btn bm-btn--sm" data-new="invoice">Raise invoice</button>
+            </div>
+          </div>
+
+          <div class="bm-tiles">
+            <div class="bm-tile">
+              <p class="bm-tile-label">Signed MRR</p>
+              <p class="bm-tile-value ${m.mrr >= BREAK_EVEN_MONTHLY ? "bm-tile-value--green" : "bm-tile-value--red"}" id="bm-mrr">${escapeHtml(inr(m.mrr))}</p>
+              <p class="bm-tile-sub">Break-even is ${escapeHtml(inr(BREAK_EVEN_MONTHLY))}/month</p>
+            </div>
+            <div class="bm-tile">
+              <p class="bm-tile-label">Outstanding</p>
+              <p class="bm-tile-value ${m.unpaid.length ? "bm-tile-value--red" : ""}">${escapeHtml(inr(m.unpaidTotal))}</p>
+              <p class="bm-tile-sub">${S.invoices.length === 0
+                ? "No invoices raised yet — empty, not settled."
+                : `${m.unpaid.length} unpaid of ${S.invoices.length}`}</p>
+            </div>
+            <div class="bm-tile">
+              <p class="bm-tile-label">Collected</p>
+              <p class="bm-tile-value">${escapeHtml(inr(m.paidTotal))}</p>
+              <p class="bm-tile-sub">${S.invoices.length === 0 ? "Nothing raised yet" : "Across all invoices ever raised"}</p>
+            </div>
+          </div>
+
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-panel-head">
+              <div><h3>Invoice ledger</h3>
+                <p>Marking one paid by hand is for cash and bank transfers. For anything paid
+                   online use Sync payments — it asks Razorpay what it was actually paid.</p></div>
+            </div>
+            <div class="bm-list" id="bm-inv-list">
+              ${sorted.length ? sorted.map(invoiceRow).join("")
+                : `<p class="bm-empty" style="padding:0 22px 22px;">No invoices raised yet.</p>`}
+            </div>
+          </div>
+
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-panel-head"><div><h3>Retainers</h3>
+              <p>Proposals are shown faded and are never summed into MRR.</p></div></div>
+            <div class="bm-list">
+              ${clients.length ? clients.map((o) => {
+                const signed = o.retainerStatus === "signed";
+                return `<button type="button" class="bm-listrow" data-org="${escapeHtml(o.id)}" style="${signed ? "" : "opacity:.62"}">
+                  <span class="bm-listrow-main">
+                    <span class="bm-listrow-title">${escapeHtml(o.name)}</span>
+                    ${o.note ? `<span class="bm-listrow-sub">${escapeHtml(o.note)}</span>` : ""}
+                  </span>
+                  <span class="bm-listrow-right">
+                    <span>${escapeHtml(formatINR(o.retainer))}</span>
+                    <span class="bm-pill ${signed ? "bm-pill--green" : o.retainerStatus === "proposed" ? "bm-pill--amber" : "bm-pill--muted"}">${escapeHtml(o.retainerStatus || "none")}</span>
+                    ${chev}
+                  </span>
+                </button>`;
+              }).join("")
+                : `<p class="bm-empty" style="padding:0 22px 22px;">No client organisations yet.</p>`}
+            </div>
+          </div>`;
+
+        mo.rows($("bm-inv-list").children);
+      };
+
+      /* ══════════════════════════════════════════════════════════
+         ACCESS
+         ══════════════════════════════════════════════════════════ */
+
+      RENDER.access = () => {
+        const clientUsers = S.users.filter((u) => u.role === "client");
+
+        $("view-access").innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>Access</h2>
+              <p>Who can sign in to a client portal. This form never asks for a password —
+                 the password is set in the Firebase Console and exists nowhere else.</p>
+            </div>
+          </div>
+
+          <div class="bm-split">
+            <div class="bm-panel">
+              <div class="bm-panel-head"><div><h3>Give a client a login</h3></div>
+                <div class="bm-panel-tools">
+                  <button type="button" class="bm-help" data-runbook="ops-client-login" data-runbook-label="Create a client login">Playbook</button>
+                </div>
+              </div>
+              <ol style="margin:0 0 18px;padding-left:20px;font-size:13px;color:var(--bm-muted);display:flex;flex-direction:column;gap:7px;line-height:1.55;">
+                <li>Firebase Console → Authentication → Users → Add user. Use the synthetic email shown below, and set the password <strong>there</strong> — never in this app.</li>
+                <li>Copy the UID from the new row.</li>
+                <li>Paste it below with the organisation, display name and username.</li>
+              </ol>
+              <form id="bm-access-form">
+                <div class="bm-field">
+                  <label for="bm-a-username">Username</label>
+                  <input id="bm-a-username" autocapitalize="none" spellcheck="false" placeholder="greenbasket" required />
+                  <span class="bm-row-sub" id="bm-a-preview">Signs in as —</span>
+                </div>
+                <div class="bm-field">
+                  <label for="bm-a-name">Display name</label>
+                  <input id="bm-a-name" placeholder="Green Basket" required />
+                </div>
+                <div class="bm-field">
+                  <label for="bm-a-org">Organisation</label>
+                  <select id="bm-a-org" required>
+                    ${S.orgs.map((o) => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.name)}${o.status === "archived" ? " (archived)" : ""}</option>`).join("")}
+                  </select>
+                </div>
+                <div class="bm-field">
+                  <label for="bm-a-uid">Firebase Auth UID</label>
+                  <input id="bm-a-uid" placeholder="paste the UID from the console" required />
+                </div>
+                <button type="submit" class="bm-btn bm-btn--sm">Save</button>
+                <p class="bm-status" id="bm-a-status" hidden></p>
+              </form>
+            </div>
+
+            <div class="bm-panel bm-panel--flush">
+              <div class="bm-panel-head"><div><h3>Existing logins</h3>
+                <p>A client with no <code>users</code> document cannot read anything at all —
+                   not even their own organisation.</p></div></div>
+              <div class="bm-list">
+                ${clientUsers.length ? clientUsers.map((u) => `
+                  <div class="bm-listrow" style="cursor:default;">
+                    <span class="bm-listrow-main">
+                      <span class="bm-listrow-title">${escapeHtml(u.name || u.username || u.id)}</span>
+                      <span class="bm-listrow-sub">${escapeHtml(u.username || "—")} · ${escapeHtml(S.orgById[u.orgId]?.name || u.orgId || "no org")}</span>
+                    </span>
+                    <span class="bm-listrow-right">
+                      <span class="bm-pill ${S.orgById[u.orgId] ? "bm-pill--green" : "bm-pill--red"}">${S.orgById[u.orgId] ? "linked" : "orphaned"}</span>
+                    </span>
+                  </div>`).join("")
+                  : `<p class="bm-empty" style="padding:0 22px 22px;">No client logins yet.</p>`}
+              </div>
+            </div>
+          </div>`;
+
+        const uname = $("bm-a-username");
+        const preview = () => { $("bm-a-preview").textContent = `Signs in as ${resolveUsernameToEmail(uname.value || "username")}`; };
+        uname.addEventListener("input", preview);
+        preview();
+
+        $("bm-access-form").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const st = $("bm-a-status");
+          const uid = $("bm-a-uid").value.trim();
+          const name = $("bm-a-name").value.trim();
+          const orgId = $("bm-a-org").value;
+          const email = resolveUsernameToEmail(uname.value);
+          const username = email.split("@")[0];
+          if (!uid || !name || !orgId || !username) {
+            st.hidden = false; st.className = "bm-status bm-status--error";
+            st.textContent = "Fill in every field."; return;
+          }
+          try {
+            await setClientUser(uid, { orgId, role: "client", name, username });
+            st.hidden = false; st.className = "bm-status bm-status--ok";
+            st.textContent = `Saved. ${username} signs in with ${email} and the password you set in the Console.`;
+            await refresh();
+          } catch (err) {
+            st.hidden = false; st.className = "bm-status bm-status--error";
+            st.textContent = "Couldn't save: " + (err?.message || err);
+          }
+        });
+      };
+
+      /* ══════════════════════════════════════════════════════════
+         OVERLAYS — drawer, modal, command palette
+         ══════════════════════════════════════════════════════════ */
+
+      let lastFocus = null;
+
+      function closeOverlay() {
+        const host = $("bm-overlay");
+        const panel = host.querySelector(".bm-drawer, .bm-modal, .bm-cmd");
+        const scrim = host.querySelector(".bm-drawer-scrim, .bm-modal-scrim, .bm-cmd-scrim");
+        if (!panel && !scrim) return;
+        const isDrawer = !!host.querySelector(".bm-drawer");
+        const finish = () => { host.innerHTML = ""; lastFocus?.focus?.(); lastFocus = null; };
+        if (isDrawer) mo.drawerOut(panel, scrim).then(finish);
+        else finish();
+      }
+
+      function drawer({ title, sub, body }) {
+        lastFocus = document.activeElement;
+        $("bm-overlay").innerHTML = `
+          <div class="bm-drawer-scrim" data-close></div>
+          <aside class="bm-drawer" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}">
+            <div class="bm-drawer-head">
+              <div>
+                <h3>${escapeHtml(title)}</h3>
+                <p>${sub}</p>
+              </div>
+              <button type="button" class="bm-drawer-close" data-close aria-label="Close">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+            <div class="bm-drawer-body">${body}</div>
+          </aside>`;
+        mo.drawerIn($("bm-overlay").querySelector(".bm-drawer"), $("bm-overlay").querySelector(".bm-drawer-scrim"));
+        $("bm-overlay").querySelector(".bm-drawer-close")?.focus();
+      }
+
+      function modal({ title, note, body, submitLabel = "Save", onSubmit }) {
+        lastFocus = document.activeElement;
+        $("bm-overlay").innerHTML = `
+          <div class="bm-modal-scrim" data-close-outside>
+            <form class="bm-modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}">
+              <h3>${escapeHtml(title)}</h3>
+              <p class="bm-modal-note">${note}</p>
+              ${body}
+              <p class="bm-status" id="bm-modal-status" hidden></p>
+              <div class="bm-modal-foot">
+                <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-close>Cancel</button>
+                <button type="submit" class="bm-btn bm-btn--sm">${escapeHtml(submitLabel)}</button>
+              </div>
+            </form>
+          </div>`;
+        const form = $("bm-overlay").querySelector("form");
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const st = $("bm-modal-status");
+          const btn = form.querySelector('button[type="submit"]');
+          btn.disabled = true;
+          try {
+            await onSubmit(form);
+            closeOverlay();
+            await refresh();
+          } catch (err) {
+            st.hidden = false;
+            st.className = "bm-status bm-status--error";
+            st.textContent = err?.message || String(err);
+            btn.disabled = false;
+          }
+        });
+        mo.popIn(form, $("bm-overlay").querySelector(".bm-modal-scrim"));
+        form.querySelector("input, select")?.focus();
+      }
+
+      /* The "New" menu and the create forms. Each one states the rule it is
+         about to apply rather than applying it silently. */
+      const NEW_FORMS = {
+        org: () => modal({
+          title: "Add a client",
+          note: "Creates the organisation. The retainer starts as <strong>proposed</strong> and is not counted as revenue until you mark it signed — a number that flatters you is worse than no number.",
+          submitLabel: "Add client",
+          body: `
+            <div class="bm-field"><label for="f-org-name">Business name</label>
+              <input id="f-org-name" placeholder="Green Basket" required /></div>
+            <div class="bm-field"><label for="f-org-kind">Kind</label>
+              <select id="f-org-kind"><option value="client">Client</option><option value="internal">Internal</option></select></div>
+            <div class="bm-field"><label for="f-org-retainer">Monthly retainer (Rs, 0 if none)</label>
+              <input id="f-org-retainer" type="number" min="0" step="500" value="0" /></div>`,
+          onSubmit: async () => {
+            const name = $("f-org-name").value.trim();
+            if (!name) throw new Error("Give the client a name.");
+            await createOrg({
+              name, kind: $("f-org-kind").value, status: "active",
+              retainer: Number($("f-org-retainer").value) || 0, retainerStatus: "proposed",
+            });
+          },
+        }),
+
+        project: () => modal({
+          title: "Add a project",
+          note: "Progress stays unrecorded until there is an agreed scope to derive it from. A zero would draw an empty bar that reads as started-and-stalled.",
+          submitLabel: "Add project",
+          body: `
+            <div class="bm-field"><label for="f-p-org">Client</label>
+              <select id="f-p-org" required>${S.orgs.filter((o) => o.status === "active")
+                .map((o) => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.name)}</option>`).join("")
+                || `<option value="">Add a client first</option>`}</select></div>
+            <div class="bm-field"><label for="f-p-name">Project name</label>
+              <input id="f-p-name" placeholder="Green Basket store" required /></div>
+            <div class="bm-field"><label for="f-p-type">Type</label>
+              <select id="f-p-type"><option value="">Not set</option>${SERVICE_TYPES
+                .map((t) => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.label)}</option>`).join("")}</select></div>
+            <div class="bm-field"><label for="f-p-due">Due date (optional)</label>
+              <input id="f-p-due" type="date" /></div>`,
+          onSubmit: async () => {
+            const orgId = $("f-p-org").value, name = $("f-p-name").value.trim();
+            if (!orgId || !name) throw new Error("Pick a client and give the project a name.");
+            await createProject({ orgId, name, type: $("f-p-type").value || null, dueAt: $("f-p-due").value || null, billable: true });
+          },
+        }),
+
+        invoice: () => modal({
+          title: "Raise an invoice",
+          note: "Appears on the client's portal immediately, with a Pay button if online payment is switched on. Always created unpaid — money is counted when it arrives.",
+          submitLabel: "Raise invoice",
+          body: `
+            <div class="bm-field"><label for="f-i-org">Client</label>
+              <select id="f-i-org" required>${S.orgs.filter((o) => o.status === "active")
+                .map((o) => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.name)}</option>`).join("")
+                || `<option value="">Add a client first</option>`}</select></div>
+            <div class="bm-field"><label for="f-i-label">What it is for</label>
+              <input id="f-i-label" placeholder="50% advance" required /></div>
+            <div class="bm-field"><label for="f-i-amount">Amount (Rs)</label>
+              <input id="f-i-amount" type="number" min="1" step="100" required /></div>
+            <div class="bm-field"><label for="f-i-due">Due date (optional)</label>
+              <input id="f-i-due" type="date" /></div>`,
+          onSubmit: async () => {
+            const orgId = $("f-i-org").value, label = $("f-i-label").value.trim();
+            const amount = Number($("f-i-amount").value);
+            if (!orgId || !label || !(amount > 0)) throw new Error("Pick a client, say what it is for, and give an amount above zero.");
+            await createInvoice({ orgId, label, amount, dueAt: $("f-i-due").value || null });
+          },
+        }),
+
+        lead: () => modal({
+          title: "Add a lead",
+          note: "The clock starts now. Log the first response the moment you send it — that timestamp is stamped once and never moves.",
+          submitLabel: "Add lead",
+          body: `
+            <div class="bm-field"><label for="f-l-name">Name or company</label>
+              <input id="f-l-name" required /></div>
+            <div class="bm-field"><label for="f-l-source">Source</label>
+              <select id="f-l-source">${LEAD_SOURCES.map((s) => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.label)}</option>`).join("")}</select></div>
+            <div class="bm-field"><label for="f-l-stage">Stage</label>
+              <select id="f-l-stage">${LEAD_STAGES.map((s) => `<option value="${escapeHtml(s.id)}" ${s.id === "inbound" ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("")}</select></div>`,
+          onSubmit: async () => {
+            const name = $("f-l-name").value.trim();
+            if (!name) throw new Error("Give the lead a name.");
+            await addLead({ name, source: $("f-l-source").value, stage: $("f-l-stage").value });
+          },
+        }),
+      };
+
+      $("bm-new").addEventListener("click", () => {
+        const map = { clients: "org", delivery: "project", money: "invoice", pipeline: "lead" };
+        (NEW_FORMS[map[S.view]] || NEW_FORMS.org)();
+      });
+
+      /* ── command palette ─────────────────────────────────────────
+         Everything the CRM knows, in one list. On a screen with six sections
+         the fastest route to a record is typing its name. */
+
+      function commandPalette() {
+        lastFocus = document.activeElement;
+        $("bm-overlay").innerHTML = `
+          <div class="bm-cmd-scrim" data-close-outside>
+            <div class="bm-cmd" role="dialog" aria-modal="true" aria-label="Search">
+              <input id="bm-cmd-input" placeholder="Search clients, projects, leads, invoices…" autocomplete="off" />
+              <div class="bm-cmd-results" id="bm-cmd-results"></div>
+            </div>
+          </div>`;
+
+        const items = [
+          ...Object.entries(VIEW_META).map(([id, v]) => ({ kind: "Go to", label: v.title, run: () => renderView(id) })),
+          ...S.orgs.map((o) => ({ kind: "Client", label: o.name || o.id, run: () => { renderView("clients"); openClient(o.id); } })),
+          ...S.projects.map((p) => ({ kind: "Project", label: `${p.name || "Untitled"} — ${S.orgById[p.orgId]?.name || p.orgId}`, run: () => { renderView("delivery"); openProject(p.id); } })),
+          ...S.leads.map((l) => ({ kind: "Lead", label: `${l.name || "Unnamed"} — ${STAGE_LABEL[l.stage] || l.stage}`, run: () => renderView("pipeline") })),
+          ...S.invoices.map((i) => ({ kind: "Invoice", label: `${i.label || "Invoice"} — ${S.orgById[i.orgId]?.name || i.orgId} — ${formatINR(i.amount)}`, run: () => renderView("money") })),
+        ];
+
+        const input = $("bm-cmd-input");
+        const results = $("bm-cmd-results");
+        let cursor = 0, shown = [];
+
+        function draw() {
+          const q = input.value.trim().toLowerCase();
+          shown = (q ? items.filter((i) => i.label.toLowerCase().includes(q) || i.kind.toLowerCase().includes(q)) : items).slice(0, 40);
+          cursor = Math.min(cursor, Math.max(0, shown.length - 1));
+          results.innerHTML = shown.length
+            ? shown.map((i, n) => `<button type="button" class="bm-cmd-item" data-n="${n}" aria-selected="${n === cursor}">
+                <span>${escapeHtml(i.label)}</span><span class="bm-cmd-kind">${escapeHtml(i.kind)}</span></button>`).join("")
+            : `<p class="bm-cmd-empty">Nothing matches “${escapeHtml(input.value)}”.</p>`;
+        }
+
+        const pick = (n) => { const it = shown[n]; if (!it) return; closeOverlay(); it.run(); };
+
+        input.addEventListener("input", draw);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowDown") { e.preventDefault(); cursor = Math.min(cursor + 1, shown.length - 1); draw(); }
+          else if (e.key === "ArrowUp") { e.preventDefault(); cursor = Math.max(cursor - 1, 0); draw(); }
+          else if (e.key === "Enter") { e.preventDefault(); pick(cursor); }
+        });
+        results.addEventListener("click", (e) => {
+          const b = e.target.closest("[data-n]");
+          if (b) pick(Number(b.dataset.n));
+        });
+
+        draw();
+        mo.popIn($("bm-overlay").querySelector(".bm-cmd"), $("bm-overlay").querySelector(".bm-cmd-scrim"));
+        input.focus();
+      }
+
+      $("bm-search").addEventListener("click", commandPalette);
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") return closeOverlay();
+        const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) || e.target.isContentEditable;
+        if (typing) return;
+        if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) {
+          e.preventDefault();
+          commandPalette();
+        }
+      });
+
+      /* ══════════════════════════════════════════════════════════
+         ONE DELEGATED HANDLER
+         Every action on this page routes through here. A page that attaches
+         listeners to freshly rendered rows leaks one per render; this attaches
+         two, once, for the whole CRM.
+         ══════════════════════════════════════════════════════════ */
+
+      document.addEventListener("click", async (e) => {
+        const t = e.target;
+
+        if (t.closest("[data-close]")) return closeOverlay();
+        const outside = t.closest("[data-close-outside]");
+        if (outside && t === outside) return closeOverlay();
+
+        const goto = t.closest("[data-goto]");
+        if (goto) { renderView(goto.dataset.goto); return; }
+
+        const newBtn = t.closest("[data-new]");
+        if (newBtn && NEW_FORMS[newBtn.dataset.new]) return NEW_FORMS[newBtn.dataset.new]();
+
+        const org = t.closest("[data-org]");
+        if (org && !t.closest("[data-org-save],[data-org-archive]")) return openClient(org.dataset.org);
+
+        const proj = t.closest("[data-project]");
+        if (proj) return openProject(proj.dataset.project);
+
+        const btn = t.closest("button");
+        if (!btn) return;
+        const d = btn.dataset;
+
+        try {
+          /* --- leads --- */
+          if (d.leadMove) {
+            const l = S.leads.find((x) => x.id === d.leadMove);
+            const order = LEAD_STAGES.filter((s) => s.id !== "lost");
+            const i = order.findIndex((s) => s.id === l?.stage);
+            const to = order[i + Number(d.dir)];
+            if (!to) return;
+            btn.disabled = true;
+            await updateLead(d.leadMove, { stage: to.id, lossReason: null });
+            return refresh();
+          }
+          if (d.leadRespond) {
+            btn.disabled = true;
+            const r = await markLeadFirstResponse(d.leadRespond);
+            if (r && r.stamped === false) {
+              alert("This lead already has a first response recorded. That date never moves — it is the number the whole funnel is measured against.");
             }
-          </div>`;
-        }).join("");
-      }
+            return refresh();
+          }
+          if (d.leadLose) { btn.disabled = true; await updateLead(d.leadLose, { stage: "lost" }); return refresh(); }
+          if (d.leadReopen) { btn.disabled = true; await updateLead(d.leadReopen, { stage: "inbound", lossReason: null }); return refresh(); }
+          if (d.leadDel) {
+            if (!confirm("Delete this lead? Its first-response time goes with it.")) return;
+            await deleteLead(d.leadDel); return refresh();
+          }
 
-      /* The Today panel.
-         Every line is a fact computed from the data on this page, written as a
-         sentence rather than a metric, with the button that fixes it attached.
-         Ordered by what costs most to ignore: money owed to you, then leads
-         going cold, then clients you are blocked on.
+          /* --- organisations --- */
+          if (d.orgSave) {
+            const retainer = Number($("bm-d-retainer").value) || 0;
+            const retainerStatus = $("bm-d-rstatus").value;
+            btn.disabled = true;
+            await updateOrg(d.orgSave, { retainer, retainerStatus });
+            closeOverlay();
+            return refresh();
+          }
+          if (d.orgArchive) {
+            const o = S.orgById[d.orgArchive];
+            const to = o?.status === "archived" ? "active" : "archived";
+            if (!confirm(to === "archived"
+              ? "Archive this client? They stay in the database and stop counting towards MRR."
+              : "Restore this client to active?")) return;
+            await updateOrg(d.orgArchive, { status: to });
+            closeOverlay();
+            return refresh();
+          }
 
-         When there is genuinely nothing to do it says so plainly. It never
-         prints a reassuring zero and never shows a green all-clear over an
-         empty database — an empty system and a finished one look identical on
-         a dashboard and mean opposite things. */
-      function renderToday(f) {
-        const items = [];
-        const inr = (n) => "Rs " + Math.round(n).toLocaleString("en-IN");
+          /* --- invoices --- */
+          if (d.invPay) {
+            if (!confirm("Mark this invoice paid? Do this only for cash or a bank transfer you have actually received — for online payments use Sync payments instead.")) return;
+            btn.disabled = true;
+            await updateInvoice(d.invPay, { status: "paid" }); return refresh();
+          }
+          if (d.invUnpay) {
+            if (!confirm("Mark this invoice unpaid again?")) return;
+            await updateInvoice(d.invUnpay, { status: "due" }); return refresh();
+          }
+          if (d.invDel) {
+            if (!confirm("Delete this invoice? The client stops seeing it.")) return;
+            await deleteInvoice(d.invDel); return refresh();
+          }
 
-        // 1. Leads with no first response. The single most valuable number in
-        //    the business, so it goes first when it is non-zero.
-        if (f.leadsAwaitingResponse.length) {
-          items.push({
-            tone: "bad",
-            what: `${f.leadsAwaitingResponse.length} lead${f.leadsAwaitingResponse.length === 1 ? " has" : "s have"} had no first response`,
-            why: "Median in this market is around 42 hours. Replying inside five minutes makes qualification far more likely. This is the cheapest thing on the page to fix.",
-            action: { label: "Go to Sales", goto: "sales" },
-          });
+          /* --- project subcollections --- */
+          const pid = d.pid;
+          if (d.applyTemplate) {
+            const start = $("bm-tpl-start")?.value;
+            if (!start) return alert("Pick a start date first — the template dates are counted from it.");
+            btn.disabled = true;
+            const n = await applyMilestoneTemplate(d.applyTemplate, d.type, start);
+            alert(`Added ${n} milestones. Edit or delete any that do not apply.`);
+            closeOverlay(); return refresh();
+          }
+          if (d.scopeAdvance) {
+            btn.disabled = true;
+            await setScopeLineStatus(d.pid, d.scopeAdvance, d.next);
+            await loadAll(); renderChrome(); renderView(S.view, { animate: false });
+            return openProject(d.pid);
+          }
+          if (d.addMilestone) {
+            const row = btn.closest('[data-add="milestone"]');
+            const title = row.querySelector('[data-new="title"]').value.trim();
+            if (!title) return;
+            const dueVal = row.querySelector('[data-new="dueAt"]').value;
+            await addMilestone(d.addMilestone, {
+              title, owner: row.querySelector('[data-new="owner"]').value,
+              status: "todo", dueAt: dueVal ? new Date(dueVal) : null,
+            });
+            await loadAll(); renderChrome(); return openProject(d.addMilestone);
+          }
+          if (d.addIntake) {
+            const row = btn.closest('[data-add="intake"]');
+            const label = row.querySelector('[data-new="label"]').value.trim();
+            if (!label) return;
+            await addIntakeItem(d.addIntake, { label, group: row.querySelector('[data-new="group"]').value });
+            await loadAll(); renderChrome(); return openProject(d.addIntake);
+          }
+          if (d.addDeliverable) {
+            const row = btn.closest('[data-add="deliverable"]');
+            const title = row.querySelector('[data-new="title"]').value.trim();
+            if (!title) return;
+            const url = row.querySelector('[data-new="url"]').value.trim();
+            await addDeliverable(d.addDeliverable, {
+              title, version: row.querySelector('[data-new="version"]').value.trim(),
+              url: safeUrl(url), status: "in_review",
+            });
+            await loadAll(); renderChrome(); return openProject(d.addDeliverable);
+          }
+          if (d.delMilestone) {
+            if (!confirm("Delete this milestone?")) return;
+            await deleteMilestone(pid, d.delMilestone);
+            await loadAll(); renderChrome(); return openProject(pid);
+          }
+          if (d.delIntake) {
+            if (!confirm("Delete this request? Its age — how long the client has been sitting on it — goes with it.")) return;
+            await deleteIntakeItem(pid, d.delIntake);
+            await loadAll(); renderChrome(); return openProject(pid);
+          }
+          if (d.delDeliverable) {
+            if (!confirm("Delete this deliverable?")) return;
+            await deleteDeliverable(pid, d.delDeliverable);
+            await loadAll(); renderChrome(); return openProject(pid);
+          }
+          if (d.dedupe) {
+            btn.disabled = true;
+            const { removed, kept } = await dedupeIntake(d.dedupe);
+            alert(removed
+              ? `Removed ${removed} duplicate request${removed === 1 ? "" : "s"}. ${kept} remain, each with its original date.`
+              : `No duplicates — all ${kept} are already unique.`);
+            await loadAll(); renderChrome(); return openProject(d.dedupe);
+          }
+          if (d.delProject) {
+            if (!confirm("Delete this project? Its milestones, requests, deliverables and agreed scope are not deleted with it and would be orphaned. This cannot be undone.")) return;
+            await deleteProject(d.delProject);
+            closeOverlay(); return refresh();
+          }
+        } catch (err) {
+          alert("That did not work: " + (err?.message || err));
+          await refresh();
         }
-
-        // 2. Clients sitting on requests.
-        const blocked = f.delivery.filter((d) => d.openIntake > 0);
-        if (blocked.length) {
-          const worst = blocked.slice().sort((a, b) => (b.oldestOpenDays || 0) - (a.oldestOpenDays || 0))[0];
-          items.push({
-            tone: worst.oldestOpenDays >= 7 ? "bad" : "warn",
-            what: `${blocked.length} project${blocked.length === 1 ? " is" : "s are"} waiting on the client`,
-            why: `Oldest is ${worst.name} at ${worst.oldestOpenDays ?? 0} day${worst.oldestOpenDays === 1 ? "" : "s"}. The portal is already showing them, dated — you do not need to send a chasing message.`,
-            action: { label: "Go to Delivery", goto: "delivery" },
-          });
-        }
-
-        // 3. Duplicate intake, because it makes the client's list unreadable.
-        const dupes = f.delivery.filter((d) => d.duplicateIntake > 0);
-        if (dupes.length) {
-          items.push({
-            tone: "bad",
-            what: `${dupes.length} project${dupes.length === 1 ? " has" : "s have"} duplicate requests on the client's list`,
-            why: "The same request appearing several times reads as broken, and a client who decides the list is broken ignores all of it. Use Remove duplicates on the project.",
-            action: { label: "Go to Delivery", goto: "delivery" },
-          });
-        }
-
-        // 4. Projects with no schedule.
-        const unscheduled = f.delivery.filter((d) => d.milestones === 0);
-        if (unscheduled.length) {
-          items.push({
-            tone: "warn",
-            what: `${unscheduled.length} project${unscheduled.length === 1 ? " has" : "s have"} no milestones`,
-            why: "The client cannot see where the project is, and delivery health cannot tell you whether it is late. Apply a template and give it a start date.",
-            action: { label: "Go to Delivery", goto: "delivery" },
-          });
-        }
-
-        // 5. Money, last — it is context, not a task.
-        const gap = BREAK_EVEN_MONTHLY - f.mrr;
-        items.push({
-          tone: gap > 0 ? "warn" : "ok",
-          what: gap > 0
-            ? `Signed MRR is ${inr(f.mrr)} — ${inr(gap)} short of break-even`
-            : `Signed MRR is ${inr(f.mrr)}, above break-even`,
-          why: gap > 0
-            ? `Only signed retainers count here. Four Growth retainers at ${inr(25000)} would clear ${inr(BREAK_EVEN_MONTHLY)}.`
-            : "Cash only — proposals are not counted.",
-          action: { label: "Go to Money", goto: "money" },
-        });
-
-        const el = document.getElementById("bm-today");
-        const gaugeEl = document.getElementById("bm-gauge");
-
-        const hour = new Date().getHours();
-        document.getElementById("bm-greet").textContent =
-          hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-
-        // The gauge. One number decides whether the month works, so it is the
-        // only number given this much room. Signed cash only — counting a
-        // proposal here is the dashboard flattering its owner (section 4).
-        if (f.activeProjectCount || f.openLeads.length || f.mrr) {
-          const pct = Math.max(0, Math.min(100, Math.round((f.mrr / BREAK_EVEN_MONTHLY) * 100)));
-          gaugeEl.hidden = false;
-          gaugeEl.classList.toggle("is-clear", gap <= 0);
-          gaugeEl.querySelector(".bm-gauge-label").textContent =
-            gap > 0 ? "Short of break-even" : "Break-even";
-          document.getElementById("bm-gauge-value").textContent = gap > 0 ? inr(gap) : "Cleared";
-          document.getElementById("bm-gauge-fill").style.width = pct + "%";
-          document.getElementById("bm-gauge-foot").textContent =
-            gap > 0
-              ? inr(f.mrr) + " signed of " + inr(BREAK_EVEN_MONTHLY) + " · " + pct + "%"
-              : inr(f.mrr) + " signed — above break-even";
-        } else {
-          gaugeEl.hidden = true;
-        }
-
-        // An empty system is not a clear day. Telling someone "nothing needs
-        // you" when they have simply not set anything up yet is the exact
-        // failure section 4 names — empty is not the same as done.
-        if (!f.activeProjectCount && !f.openLeads.length) {
-          el.innerHTML = `<a class="bm-act bm-act--empty" href="#clients" data-goto="clients">
-            <span class="bm-act-body">
-              <span class="bm-act-what">Nothing is set up yet</span>
-              <span class="bm-act-why">No active projects and no leads. That is an empty system,
-                not a clear day. Add a client and a project to begin.</span>
-            </span>
-            <span class="bm-act-go">Add a client<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-          </a>`;
-          return;
-        }
-
-        // Money is context, not a task — it is in the gauge above, so it only
-        // stays in the list when there is genuinely nothing else to do.
-        const tasks = items.filter((i) => i.action.goto !== "money" || items.length === 1);
-
-        if (!tasks.length) {
-          el.innerHTML = `<div class="bm-act bm-act--clear">
-            <span class="bm-act-body">
-              <span class="bm-act-what">Nothing is waiting on you</span>
-              <span class="bm-act-why">No unanswered lead, no client sitting on a request,
-                every project scheduled. Computed from your data, not assumed.</span>
-            </span>
-          </div>`;
-          return;
-        }
-
-        el.innerHTML = tasks
-          .map(
-            (i, n) => `<a class="bm-act bm-act--${i.tone}" href="#${i.action.goto}" data-goto="${i.action.goto}">
-              <span class="bm-act-n" aria-hidden="true">${n + 1}</span>
-              <span class="bm-act-body">
-                <span class="bm-act-what">${escapeHtml(i.what)}</span>
-                <span class="bm-act-why">${escapeHtml(i.why)}</span>
-              </span>
-              <span class="bm-act-go">${escapeHtml(i.action.label.replace(/^Go to /, ""))}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-            </a>`
-          )
-          .join("");
-      }
-
-      /* One section at a time.
-         Nine panels stacked on one page meant every visit started with a scroll
-         and a guess about which one mattered. The dashboard now opens on Today
-         and everything else is a tab away. State lives in the URL hash so a
-         reload keeps you where you were. */
-      const TAB_LABELS = { today: "Today", money: "Money", delivery: "Delivery", clients: "Clients", sales: "Sales" };
-
-      function showTab(tab) {
-        const wanted = TAB_LABELS[tab] ? tab : "today";
-        document.querySelectorAll("[data-sect]").forEach((el) => {
-          el.hidden = el.getAttribute("data-sect") !== wanted;
-        });
-        document.querySelectorAll("#bm-tabs button").forEach((b) => {
-          const on = b.getAttribute("data-tab") === wanted;
-          b.setAttribute("aria-current", on ? "page" : "false");
-        });
-        if (location.hash.slice(1) !== wanted) history.replaceState(null, "", `#${wanted}`);
-      }
-
-      document.getElementById("bm-tabs").addEventListener("click", (e) => {
-        const b = e.target.closest("[data-tab]");
-        if (!b) return;
-        showTab(b.getAttribute("data-tab"));
-        window.scrollTo({ top: 0, behavior: "instant" });
       });
 
-      // Deep links from the Today panel.
-      document.addEventListener("click", (e) => {
-        const jump = e.target.closest("[data-goto]");
-        if (!jump) return;
-        e.preventDefault();
-        showTab(jump.getAttribute("data-goto"));
-        window.scrollTo({ top: 0, behavior: "instant" });
+      /* Field edits. Same delegation, on change rather than click. */
+      document.addEventListener("change", async (e) => {
+        const t = e.target;
+        try {
+          const lossSel = t.closest("[data-lossreason]");
+          if (lossSel) { await updateLead(lossSel.dataset.lossreason, { lossReason: t.value || null }); return refresh(); }
+
+          const pf = t.closest("[data-pfields]");
+          if (pf) {
+            const dueVal = pf.querySelector('[data-pfield="dueAt"]').value;
+            await updateProject(pf.dataset.pfields, {
+              name: pf.querySelector('[data-pfield="name"]').value.trim(),
+              type: pf.querySelector('[data-pfield="type"]').value || null,
+              dueAt: dueVal ? new Date(dueVal) : null,
+              billable: pf.querySelector('[data-pfield="billable"]').checked,
+            });
+            await loadAll(); renderChrome(); renderView(S.view, { animate: false });
+            return openProject(pf.dataset.pfields);
+          }
+
+          const read = (row, fields) => Object.fromEntries(fields.map((f) => {
+            const el = row.querySelector(`[data-field="${f}"]`);
+            return [f, !el ? undefined : el.type === "checkbox" ? el.checked : el.value];
+          }));
+
+          const ms = t.closest("[data-milestone]");
+          if (ms) {
+            const v = read(ms, ["title", "owner", "status", "dueAt"]);
+            await updateMilestone(ms.dataset.pid, ms.dataset.milestone, { ...v, dueAt: v.dueAt ? new Date(v.dueAt) : null });
+            await loadAll(); renderChrome(); return openProject(ms.dataset.pid);
+          }
+
+          const ik = t.closest("[data-intake]");
+          if (ik) {
+            const v = read(ik, ["label", "group", "done"]);
+            await updateIntakeItem(ik.dataset.pid, ik.dataset.intake, { ...v, clearedAt: v.done ? new Date() : null });
+            await loadAll(); renderChrome(); return openProject(ik.dataset.pid);
+          }
+
+          const dv = t.closest("[data-deliverable]");
+          if (dv) {
+            const v = read(dv, ["title", "version", "url", "status"]);
+            await updateDeliverable(dv.dataset.pid, dv.dataset.deliverable, { ...v, url: safeUrl(v.url) });
+            await loadAll(); renderChrome(); return openProject(dv.dataset.pid);
+          }
+        } catch (err) {
+          alert("That did not save: " + (err?.message || err));
+          await refresh();
+        }
       });
 
-      showTab(location.hash.slice(1) || "today");
+      /* ══════════════════════════════════════════════════════════
+         TOOLS
+         ══════════════════════════════════════════════════════════ */
 
-      bindRunbookButtons();
+      $("bm-signout").addEventListener("click", async () => {
+        await logout();
+        window.location.href = "/login";
+      });
+
+      /* Razorpay is asked what it was actually paid; this browser — signed in
+         as the admin, which firestore.rules already trusts to write invoices —
+         does the writing. That is why no service account exists anywhere in
+         this deployment.
+
+         The report is deliberately verbose about what it did NOT do: a sync
+         that silently changed nothing is indistinguishable from one that had
+         nothing to change, and the difference matters when you are chasing a
+         payment a client says they made. */
+      $("bm-sync-payments").addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        if (btn.disabled) return;
+        btn.disabled = true;
+        try {
+          const r = await syncPayments(60);
+          const lines = [
+            r.updated.length
+              ? `Marked ${r.updated.length} invoice${r.updated.length === 1 ? "" : "s"} paid:\n` +
+                r.updated.map((u) => `  ${u.invoiceId} — ${formatINR(u.amount)} (${u.method || "?"})`).join("\n")
+              : "No new payments to apply.",
+          ];
+          if (r.skipped.length) lines.push(`\nSkipped ${r.skipped.length}:\n` + r.skipped.map((s) => `  ${s.invoiceId} — ${s.why}`).join("\n"));
+          if (r.unsettled.length) lines.push(`\n${r.unsettled.length} order${r.unsettled.length === 1 ? " was" : "s were"} started but never paid. Those are abandoned checkouts, not missing money.`);
+          if (r.truncated) lines.push("\nWARNING: this sync was INCOMPLETE — too many orders in the window.");
+          lines.push(`\n${r.note}`);
+          alert(lines.join("\n"));
+          if (r.updated.length) await refresh();
+        } catch (err) {
+          alert("Sync failed: " + paymentError(err));
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      $("bm-seed").addEventListener("click", async () => {
+        if (!confirm(
+          "This writes the fixed seed dataset — orgs, projects, invoices, the two confirmed " +
+          "Green Basket deliverables, and your own admin user doc — with deterministic IDs. " +
+          "Safe to re-run, but it overwrites those specific documents with the seed values " +
+          "(so a client's approval on a seeded deliverable is reset to in_review, and any " +
+          "project type/dueAt/progress you edited is reset). Leads and milestones you have " +
+          "entered are never touched. Continue?"
+        )) return;
+        const btn = $("bm-seed");
+        btn.disabled = true;
+        try { await seedDatabase(); } catch (err) { alert("Seeding failed: " + (err?.message || err)); }
+        finally { btn.disabled = false; await refresh(); }
+      });
+
+      /* ── boot ────────────────────────────────────────────────── */
+
+      (async function boot() {
+        const user = await requireAdminAuth();
+        if (!user) return;
+        S.user = user;
+        await loadAll();
+        // Reveal only now: shell first, then main. See the fail-closed note
+        // at the top of the body.
+        $("bm-loading").hidden = true;
+        $("bm-shell").hidden = false;
+        $("bm-main").hidden = false;
+        renderChrome();
+        renderView(location.hash.slice(1) || "today");
+        bindRunbookButtons();
+      })();
     </script>
   </body>
 </html>

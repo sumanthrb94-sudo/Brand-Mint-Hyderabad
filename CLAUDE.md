@@ -104,14 +104,22 @@ Every check in the UI is a convenience. If the rules allow it, a client can do
 it with a console open.
 
 - No framework, no build step, no `package.json`.
-- **One vendored runtime dependency, and only on `/home-v2`:**
+- **One vendored runtime dependency, on `/home-v2` and `/studio`:**
   `assets/vendor/anime.esm.min.js` (anime.js v4.5.0, MIT, zero deps of its
   own). §11 says not to add one without saying why and getting a yes; the yes
   was explicit — smoother motion on the home screen. ~40 KB gzipped, vendored
   rather than fetched from a CDN for the same reason Firebase comes from
-  Google's own servers, and **deferred**: `/home-v2` renders and is readable
-  before it arrives. Nothing else in the repo imports it, and no other page
-  loads it. See `assets/vendor/README.md`.
+  Google's own servers, and **deferred** on both pages: each renders and is
+  readable before it arrives. No third page loads it. See
+  `assets/vendor/README.md`.
+
+  It is imported by exactly two files, `assets/home-v2-motion.js` and
+  `assets/bm-crm-motion.js`, and **both are optional by construction**. Neither
+  page hides anything in CSS; each motion module sets its own starting state at
+  runtime immediately before animating. `tests/motion.mjs` blocks the script
+  and anime.js and asserts `/home-v2` stays readable; `tests/admin-ui.mjs`
+  blocks both and asserts `/studio` stays readable **and still clickable**.
+  Adding a third consumer means adding that test too.
 - Firebase v10.14.1 as ES modules from
   `https://www.gstatic.com/firebasejs/10.14.1/`. Google's own CDN — not
   esm.sh, so auth does not depend on a third party's uptime.
@@ -227,6 +235,8 @@ studio.html         -> /studio          admin dashboard, client access, CRUD
 tenancy-check.html  -> /tenancy-check   proves isolation from a client session
 assets/bm-app.js                        Firebase init and every read and write
 assets/bm-app.css                       shared styles, all classes prefixed bm-
+assets/bm-crm.css                       /studio ONLY — the CRM shell. No colour tokens of its own.
+assets/bm-crm-motion.js                 /studio ONLY — optional motion. Hides nothing in CSS.
 assets/bm-runbooks.js                   playbook drawer + lazy loader
 assets/runbooks/*.js                    the playbooks themselves, as data
 api/payments/*.js                       Razorpay, serverless. No service account.
@@ -359,16 +369,50 @@ one, stop and think about whether it is really admin-only.
 Every additional panel is somewhere a client gets confused and sends a
 message, which is the exact cost this portal exists to remove.
 
-### `/studio` — admin only
+### `/studio` — admin only, and it is a CRM
 
-Signed MRR against break-even · leads with first-response capture · plan vs
-actual · Client Access · delivery health · per-project CRUD including the
-agreed scope · three org tables · seed button.
+Six sections down the left, **one on screen at a time**: Today · Pipeline ·
+Clients · Delivery · Money · Access. The section lives in the URL hash, so a
+reload keeps you where you were.
 
-The scope's status pills on *Delivery → Manage projects* are **buttons**: one
-click moves a line one step along `agreed → building → delivered → accepted`.
-That is the whole daily loop — mark the line, and the percentage, the client's
-portal and delivery health all follow without anything being typed twice.
+It replaced a single page that rendered fifteen panels and every project,
+expanded, simultaneously. The report was *"very complex, I'm unable to
+understand anything"* and it was accurate — the page showed everything it knew,
+all the time. The shape now is the ordinary CRM one and nothing cleverer: **a
+list of records, and a detail drawer for the one you picked.**
+
+| Section | What it is |
+|---|---|
+| Today | break-even gauge, four tiles, and the action list — every line a fact with the thing that fixes it attached |
+| Pipeline | leads as a kanban by stage, moved with two buttons; funnel/source/loss against the playbook below |
+| Clients | one row per organisation → drawer: retainer, onboarding, projects, invoices, login |
+| Delivery | one row per project → drawer: agreed scope, milestones, intake, deliverables |
+| Money | **the invoice ledger** plus retainers |
+| Access | client logins, and the existing ones listed |
+
+`/` or `⌘K` opens a command palette over every client, project, lead and
+invoice. **New** creates whatever the current section creates.
+
+**It added no Firestore collections and no fields, so it needed no rules
+change.** That is the safe order, not a shortcut: rules are published by hand
+from the Console (§2), so a UI needing new rules would go live denied.
+
+Two things it added that did not exist before and should not be removed:
+
+- **The invoice ledger.** `getAllInvoices()` was loaded on every render and
+  never displayed. There was no screen anywhere that listed what was owed.
+- **Marking a retainer signed.** The onboarding checklist had "Retainer
+  signed" as step 2 with no control anywhere that could do it, so the step was
+  unreachable from the UI.
+
+The scope status pills in the **project drawer** are **buttons**: one click
+moves a line one step along `agreed → building → delivered → accepted`. That is
+the whole daily loop — mark the line, and the percentage, the client's portal
+and delivery health all follow without anything being typed twice.
+
+The delivery *list* still shows the derived percentage without opening
+anything. A list that made you open every row to find the stalled project would
+be the old wall of panels wearing a nicer coat.
 
 **Break-even is ₹1,00,000/month**, exported once as `BREAK_EVEN_MONTHLY` from
 `bm-app.js`. Do not scatter copies.

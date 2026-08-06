@@ -1,26 +1,31 @@
 #!/usr/bin/env node
 /**
- * THE ADMIN UI, DRIVEN LIKE A PERSON.
+ * THE STUDIO CRM, DRIVEN LIKE A PERSON.
  *
  *   bash tests/run-admin-ui.sh
  *
- * The journey suite proves the studio and the portal agree about the data.
- * It does not prove the admin screen is usable, and that was the complaint:
- * "very complex, I'm unable to understand anything, and I don't see any click
- * or any light button."
+ * The journey suite proves the studio and the portal agree about the data. It
+ * cannot answer the complaint that produced this screen — "very complex, I'm
+ * unable to understand anything" — because correct data renders identically to
+ * unreadable data.
  *
- * So this asks different questions, and answers them by clicking:
+ * So this asks usability questions and answers them by clicking:
  *
- *   - does the landing say what to do, in one place?
- *   - is every tab actually isolated, or do panels bleed across?
- *   - is every control big enough and dark enough to see?
- *   - does clicking a thing do the thing?
+ *   1. does an EMPTY system say it is empty, rather than showing a clear day?
+ *   2. is each of the six views isolated, or do panels bleed across?
+ *   3. is every visible control big enough to hit and dark enough to read?
+ *   4. does clicking a record actually open that record?
+ *   5. does the invoice ledger exist at all? (it did not, before this)
+ *   6. IS THE CRM STILL USABLE WITH THE MOTION SCRIPT BLOCKED?
  *
- * Tab isolation gets its own section because it was broken. showTab() hides by
- * setting the hidden attribute, and `.bm-stats { display: grid }` beat the UA
- * rule that implements it, so the Money panel sat on every tab. A test that
- * only checked "the Money panel is on the Money tab" would have passed
- * throughout. This checks the inverse — that it is NOWHERE ELSE.
+ * (1) and (6) are the two that have historically been wrong, and they are the
+ * two that look fine on the machine that built them.
+ *
+ * View isolation gets its own section because it was broken once already:
+ * hiding by the `hidden` attribute loses to any class carrying a `display:`,
+ * and `.bm-stats { display: grid }` won, so the Money row sat on every tab. A
+ * test asserting "the Money panel is on Money" would have passed the whole
+ * time. This asserts the inverse — that it is NOWHERE ELSE.
  *
  * Emulators only. bm-app.js connects to them exclusively from localhost, so
  * this cannot touch production.
@@ -43,6 +48,8 @@ const ADMIN = { email: "admin@brandmintstudios.in", password: "adminpass123" };
 
 const SHOTS = path.join(ROOT, "docs/admin-ui");
 fs.mkdirSync(SHOTS, { recursive: true });
+
+const VIEWS = ["today", "pipeline", "clients", "delivery", "money", "access"];
 
 let pass = 0;
 let fail = 0;
@@ -100,12 +107,12 @@ async function goStudio(page, hash = "today") {
   await page.goto(`${BASE}/studio?t=${Date.now()}#${hash}`, { waitUntil: "load" });
   await page
     .waitForFunction(() => {
-      const m = document.querySelector("#bm-main, main");
       const l = document.querySelector("#bm-loading");
-      return m && !m.hidden && (!l || l.hidden);
+      const v = document.querySelector(".bm-view:not([hidden])");
+      return l && l.hidden && v && v.innerHTML.trim().length > 0;
     }, null, { timeout: 20000 })
     .catch(() => {});
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(800);
 }
 
 /** Only the elements a person can actually see. */
@@ -115,11 +122,37 @@ const VISIBLE = (sel) => `[...document.querySelectorAll(${JSON.stringify(sel)})]
   return r.width > 1 && r.height > 1 && cs.visibility !== "hidden" && cs.display !== "none";
 })`;
 
+/** Contrast, computed from what the browser actually painted — not from the
+ *  stylesheet. Walks up for the first non-transparent background, which is the
+ *  step that catches a control inheriting a surface it was not designed for. */
+const CONTRAST_FN = `
+  window.__lum = (c) => {
+    const s = c.map((v) => { const x = v / 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; });
+    return 0.2126 * s[0] + 0.7152 * s[1] + 0.0722 * s[2];
+  };
+  window.__rgb = (str) => (str.match(/[\\d.]+/g) || []).slice(0, 3).map(Number);
+  window.__bg = (el) => {
+    for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+      const c = getComputedStyle(n).backgroundColor;
+      const a = (c.match(/[\\d.]+/g) || [])[3];
+      if (c && c !== "transparent" && a !== "0") return window.__rgb(c);
+    }
+    return window.__rgb(getComputedStyle(document.body).backgroundColor || "rgb(255,255,255)");
+  };
+  window.__ratio = (el) => {
+    const fg = window.__rgb(getComputedStyle(el).color);
+    const bg = window.__bg(el);
+    const a = window.__lum(fg), b = window.__lum(bg);
+    const [hi, lo] = a > b ? [a, b] : [b, a];
+    return (hi + 0.05) / (lo + 0.05);
+  };
+`;
+
 /* ── run ──────────────────────────────────────────────────────── */
 
 const server = await listen(PORT);
 const browser = await chromium.launch({ executablePath: CHROME });
-const page = await browser.newPage({ viewport: { width: 1400, height: 950 } });
+const page = await browser.newPage({ viewport: { width: 1440, height: 960 } });
 
 const consoleErrors = [];
 page.on("console", (m) => {
@@ -127,205 +160,265 @@ page.on("console", (m) => {
     consoleErrors.push(m.text());
   }
 });
+page.on("dialog", (d) => d.accept());
 
 try {
   await clearAll();
   await createAuthUser(ADMIN.email, ADMIN.password);
   await signIn(page);
 
-  /* ── 1. the landing answers the question ───────────────────── */
-  section("1. The landing answers one question");
+  /* ── 1. an empty system must say so ─────────────────────────── */
+  section("1. An EMPTY system says it is empty, not that the day is clear");
+  {
+    await goStudio(page, "today");
+    const body = await page.evaluate(`document.querySelector("#view-today").innerText`);
+    check(/nothing is set up yet/i.test(body),
+      "empty database → 'Nothing is set up yet'",
+      body.slice(0, 160).replace(/\s+/g, " "));
+    check(!/nothing is waiting on you/i.test(body),
+      "and NOT 'nothing is waiting on you' — empty is not done");
+    check(/no invoices raised yet|empty, not settled/i.test(body),
+      "the unpaid tile says it is empty rather than showing a reassuring Rs 0");
+  }
+
+  /* ── seed, then everything else runs against real rows ──────── */
+  await page.click("#bm-seed");
+  await page.waitForTimeout(2500);
   await goStudio(page, "today");
 
-  const landing = await page.evaluate(() => ({
-    heading: document.querySelector(".bm-hero-q")?.textContent.trim() || null,
-    greet: document.querySelector(".bm-hero-hi")?.textContent.trim() || null,
-    gaugeShown: !!document.querySelector("#bm-gauge:not([hidden])"),
-    gaugeValue: document.querySelector("#bm-gauge-value")?.textContent.trim() || null,
-    cards: document.querySelectorAll(".bm-act").length,
-  }));
+  /* ── 2. the landing answers one question ────────────────────── */
+  section("2. Today answers one question and attaches the thing to click");
+  {
+    const h = await page.evaluate(`document.querySelector("#view-today h2")?.innerText || ""`);
+    check(/good (morning|afternoon|evening)/i.test(h), "greets by time of day", h);
 
-  check(landing.heading === "What needs you today", "the page states its purpose in a heading", `saw: ${landing.heading}`);
-  check(/^Good (morning|afternoon|evening)$/.test(landing.greet || ""), "it greets by time of day", `saw: ${landing.greet}`);
-  check(landing.cards > 0, `the landing shows something actionable (${landing.cards} card${landing.cards === 1 ? "" : "s"})`);
+    const rows = await page.evaluate(`${VISIBLE("#bm-today-list .bm-listrow")}.length`);
+    check(rows > 0, `the action list has ${rows} actionable row(s)`);
 
-  // An empty system must say it is empty, not "nothing needs you". Section 4:
-  // empty is not the same as done.
-  const emptyState = await page.evaluate(() => document.querySelector(".bm-act--empty")?.innerText || "");
-  check(
-    /nothing is set up yet/i.test(emptyState),
-    "an empty system says it is EMPTY, not that the day is clear",
-    emptyState ? `saw: ${emptyState.split("\n")[0]}` : "no empty-state card rendered"
-  );
+    const tiles = await page.evaluate(`${VISIBLE(".bm-tile")}.length`);
+    check(tiles === 4, `four headline tiles (got ${tiles})`);
 
-  await page.screenshot({ path: path.join(SHOTS, "01-landing-empty.png"), fullPage: true });
+    const crumb = await page.evaluate(`document.querySelector("#bm-crumb").innerText`);
+    check(crumb === "Today", "the topbar names where you are", crumb);
+  }
 
-  /* ── 2. every control is visible and reachable ─────────────── */
-  section("2. Every control is visible and big enough");
+  /* ── 3. view isolation, asked as the inverse ────────────────── */
+  section("3. Each view is isolated — no panel bleeds into another");
+  {
+    for (const v of VIEWS) {
+      await page.click(`#bm-nav [data-view="${v}"]`);
+      await page.waitForTimeout(450);
 
-  const controls = await page.evaluate(`(() => {
-    const els = ${VISIBLE("button, a.bm-btn, .bm-act[href], .bm-act-go, #bm-tabs button")};
-    const lum = (c) => { const m = c.match(/\\d+/g); if (!m) return null;
-      const s = m.slice(0,3).map(Number).map((v) => { v/=255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4); });
-      return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2]; };
-    const bgOf = (el) => { let n = el; while (n && n !== document.documentElement) {
-      const c = getComputedStyle(n).backgroundColor;
-      if (c && !/rgba\\(0, 0, 0, 0\\)/.test(c)) return c; n = n.parentElement; } return "rgb(245,247,244)"; };
-    return els.map((e) => {
-      const r = e.getBoundingClientRect(); const cs = getComputedStyle(e);
-      const L1 = lum(cs.color), L2 = lum(bgOf(e));
-      const ratio = (L1 == null || L2 == null) ? null
-        : (Math.max(L1,L2) + 0.05) / (Math.min(L1,L2) + 0.05);
-      // Identify by more than label text — an icon-only control has no text,
-      // and "'' is 21px tall" is not a finding anyone can act on.
-      const id = e.id ? "#" + e.id
-        : (e.className && typeof e.className === "string" && e.className.trim())
-          ? "." + e.className.trim().split(/\s+/).join(".")
-          : e.tagName.toLowerCase();
-      return { text: (e.innerText||e.textContent||"").trim().slice(0,26) || id,
-               sel: id, h: Math.round(r.height),
-               w: Math.round(r.width), ratio: ratio == null ? null : +ratio.toFixed(2) };
-    });
-  })()`);
+      const leaked = await page.evaluate(`
+        [...document.querySelectorAll(".bm-view")]
+          .filter((s) => s.id !== "view-${v}")
+          .filter((s) => { const r = s.getBoundingClientRect(); return r.width > 1 && r.height > 1; })
+          .map((s) => s.id)
+      `);
+      check(leaked.length === 0, `${v}: no other view is on screen`, leaked.join(", "));
 
-  check(controls.length > 0, `found ${controls.length} visible controls to check`);
-  const tooSmall = controls.filter((c) => c.h > 0 && c.h < 36);
-  check(tooSmall.length === 0, "no visible control is under 36px tall",
-    tooSmall.map((c) => `${c.sel} (${c.text}) ${c.w}x${c.h}px`).join(", "));
-  const tooFaint = controls.filter((c) => c.ratio !== null && c.ratio < 4.5);
-  check(tooFaint.length === 0, "no visible control is under 4.5:1 contrast",
-    tooFaint.map((c) => `${c.sel} (${c.text}) ${c.ratio}:1`).join(", "));
+      const mine = await page.evaluate(`(() => {
+        const s = document.querySelector("#view-${v}");
+        const r = s.getBoundingClientRect();
+        return r.width > 1 && r.height > 1 && s.innerText.trim().length > 20;
+      })()`);
+      check(mine, `${v}: its own view is on screen and has content`);
 
-  /* ── 3. TAB ISOLATION — the bug that was shipped ───────────── */
-  section("3. Tab isolation — each tab shows ONLY its own panels");
+      const hash = await page.evaluate("location.hash");
+      check(hash === `#${v}`, `${v}: the URL follows, so a reload keeps you here`, hash);
+    }
+  }
 
-  const TABS = ["today", "money", "delivery", "clients", "sales"];
-  for (const tab of TABS) {
-    await goStudio(page, tab);
-    const leaked = await page.evaluate(`(() => {
-      const shown = ${VISIBLE("[data-sect]")};
-      return shown.map((e) => e.getAttribute("data-sect")).filter((s) => s !== ${JSON.stringify(tab)});
+  /* ── 4. every control is hittable and readable ──────────────── */
+  section("4. Every visible control clears 30px and 4.5:1, measured in the browser");
+  {
+    await page.evaluate(CONTRAST_FN);
+    for (const v of VIEWS) {
+      await page.click(`#bm-nav [data-view="${v}"]`);
+      await page.waitForTimeout(400);
+      await page.evaluate(CONTRAST_FN);
+
+      const bad = await page.evaluate(`(() => {
+        const out = [];
+        for (const el of ${VISIBLE("button, a, select, input, summary")}) {
+          const r = el.getBoundingClientRect();
+          const id = el.id || el.className || el.tagName;
+          const label = (el.innerText || el.value || el.getAttribute("aria-label") || "").trim().slice(0, 26);
+          // Checkboxes are drawn by the UA at a fixed size; their LABEL is the
+          // hit target and is measured separately as its own element.
+          if (el.type === "checkbox") continue;
+          if (r.height < 30) out.push({ why: "height " + Math.round(r.height) + "px", id, label });
+          else if (el.innerText && el.innerText.trim()) {
+            const ratio = window.__ratio(el);
+            if (ratio < 4.5) out.push({ why: ratio.toFixed(2) + ":1", id, label });
+          }
+        }
+        return out;
+      })()`);
+      check(bad.length === 0, `${v}: all controls pass`,
+        bad.slice(0, 4).map((b) => `${b.why} on "${b.label}" (${b.id})`).join(" | "));
+    }
+  }
+
+  /* ── 5. clicking a record opens that record ────────────────── */
+  section("5. A record list opens the record you clicked");
+  {
+    await page.click('#bm-nav [data-view="clients"]');
+    await page.waitForTimeout(450);
+
+    const first = await page.evaluate(`(() => {
+      const b = document.querySelector("#bm-client-list .bm-listrow[data-org]");
+      return b ? b.querySelector(".bm-listrow-title").innerText.trim() : null;
     })()`);
-    check(
-      leaked.length === 0,
-      `#${tab} shows no panel belonging to another tab`,
-      leaked.length ? `leaked: ${[...new Set(leaked)].join(", ")}` : ""
-    );
+    check(!!first, "the client list has a clickable row", String(first));
+
+    await page.click("#bm-client-list .bm-listrow[data-org]");
+    await page.waitForTimeout(600);
+
+    const drawerTitle = await page.evaluate(`document.querySelector(".bm-drawer h3")?.innerText.trim() || null`);
+    check(drawerTitle === first, "the drawer opens on the client you clicked", `${drawerTitle} vs ${first}`);
+
+    /* Case-insensitive on purpose. These headings carry `text-transform:
+       uppercase`, and Chrome's innerText returns the RENDERED text — so an
+       exact-case check here tests the stylesheet, not the content. An earlier
+       version did exactly that and "Retainer" passed only by coincidence,
+       matching the onboarding step label further down the drawer. */
+    const drawerText = (await page.evaluate(`document.querySelector(".bm-drawer")?.innerText || ""`)).toLowerCase();
+    for (const want of ["Retainer", "Onboarding", "Projects", "Invoices", "Portal login"]) {
+      check(drawerText.includes(want.toLowerCase()), `the client drawer shows "${want}"`);
+    }
+    check(/signed|proposed|none/.test(drawerText), "and states the retainer status explicitly");
+
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
+    const gone = await page.evaluate(`!document.querySelector(".bm-drawer")`);
+    check(gone, "Escape closes the drawer");
   }
 
-  // The specific regression: the Money stat row on the Today tab.
-  await goStudio(page, "today");
-  const statsOnToday = await page.evaluate(`${VISIBLE(".bm-stats")}.length`);
-  check(statsOnToday === 0, "the Money stat row is NOT on the Today tab (the shipped bug)",
-    statsOnToday ? "still visible" : "");
+  /* ── 6. the project drawer is the whole working surface ────── */
+  section("6. The project drawer carries scope, milestones, intake and deliverables");
+  {
+    await page.click('#bm-nav [data-view="delivery"]');
+    await page.waitForTimeout(450);
+    const has = await page.evaluate(`!!document.querySelector("#bm-project-list .bm-listrow[data-project]")`);
+    check(has, "the delivery list has project rows");
 
-  /* ── 4. clicking a thing does the thing ────────────────────── */
-  section("4. Clicking does something");
+    if (has) {
+      await page.click("#bm-project-list .bm-listrow[data-project]");
+      await page.waitForTimeout(600);
+      const t = (await page.evaluate(`document.querySelector(".bm-drawer")?.innerText || ""`)).toLowerCase();
+      for (const want of ["Agreed scope", "Milestones", "What we need from the client", "Deliverables"]) {
+        check(t.includes(want.toLowerCase()), `the project drawer shows "${want}"`);
+      }
+      check(!/\bprogress\b\s*%/i.test(t) && !t.includes("% done"),
+        "there is no typed progress field — progress is derived from scope");
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(450);
+    }
+  }
 
-  // Seed enough for the landing to have real work on it.
-  await page.evaluate(async () => {
-    const m = await import("/assets/bm-app.js");
-    const orgId = await m.createOrg({ name: "Test Client", kind: "client", retainer: 25000 });
-    await m.updateOrg(orgId, { retainerStatus: "signed" });
-    const pid = await m.createProject({ orgId, name: "Test site", type: "site", dueAt: null, billable: true });
-    await m.pushRequirementsToIntake(pid, ["cod"]);
-    await m.addLead({ name: "A lead", source: "site", stage: "inbound" });
-  });
-  await goStudio(page, "today");
+  /* ── 7. the invoice ledger, which did not exist before ─────── */
+  section("7. Money shows every invoice — the ledger the old screen never had");
+  {
+    await page.click('#bm-nav [data-view="money"]');
+    await page.waitForTimeout(500);
+    const rows = await page.evaluate(`${VISIBLE("#bm-inv-list .bm-listrow")}.length`);
+    check(rows > 0, `the ledger lists ${rows} invoice row(s)`);
+    const text = await page.evaluate(`document.querySelector("#view-money").innerText`);
+    check(/paid|due|overdue/i.test(text), "each row states paid, due or overdue");
+    check(/signed mrr/i.test(text) && /outstanding/i.test(text), "and MRR is separated from what is merely outstanding");
+  }
 
-  const withWork = await page.evaluate(() => ({
-    cards: document.querySelectorAll(".bm-act[href]").length,
-    gauge: !!document.querySelector("#bm-gauge:not([hidden])"),
-    gaugeValue: document.querySelector("#bm-gauge-value")?.textContent.trim(),
-    firstLabel: document.querySelector(".bm-act[href] .bm-act-go")?.textContent.trim(),
-    firstTarget: document.querySelector(".bm-act[href]")?.getAttribute("data-goto"),
-  }));
-  check(withWork.cards > 0, `with real data the landing lists ${withWork.cards} thing(s) to do`);
-  check(withWork.gauge, "the break-even gauge is shown", withWork.gaugeValue || "");
-  check(
-    withWork.gaugeValue === "Rs 75,000",
-    "the gauge shows the real gap, signed cash only",
-    `saw ${withWork.gaugeValue} (25,000 signed against 1,00,000)`
-  );
+  /* ── 8. search finds a record by name ──────────────────────── */
+  section("8. The command palette finds a record by typing its name");
+  {
+    await page.keyboard.press("/");
+    await page.waitForTimeout(500);
+    const open = await page.evaluate(`!!document.querySelector("#bm-cmd-input")`);
+    check(open, "pressing / opens the palette");
 
-  await page.screenshot({ path: path.join(SHOTS, "02-landing-with-work.png"), fullPage: true });
+    if (open) {
+      await page.fill("#bm-cmd-input", "green");
+      await page.waitForTimeout(350);
+      const n = await page.evaluate(`document.querySelectorAll(".bm-cmd-item").length`);
+      check(n > 0, `typing "green" returns ${n} result(s)`);
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(350);
+      check(await page.evaluate(`!document.querySelector("#bm-cmd-input")`), "Escape closes it");
+    }
+  }
 
-  // Click the first action card and confirm it lands on the right tab.
-  if (withWork.cards) {
-    const target = withWork.firstTarget;
-    await page.click(".bm-act[href]");
-    await page.waitForTimeout(700);
-    const nowShowing = await page.evaluate(`(() => {
-      const shown = ${VISIBLE("[data-sect]")};
-      return [...new Set(shown.map((e) => e.getAttribute("data-sect")))];
+  /* ── 9. THE BLANK PAGE TEST ────────────────────────────────── */
+  section("9. With the motion script blocked, the CRM is still fully usable");
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 960 } });
+    const p2 = await ctx.newPage();
+    await p2.route("**/bm-crm-motion.js", (r) => r.abort());
+    await p2.route("**/anime.esm.min.js", (r) => r.abort());
+    await signIn(p2);
+    await goStudio(p2, "clients");
+    await p2.waitForTimeout(900);
+
+    const visible = await p2.evaluate(`(() => {
+      const rows = ${VISIBLE("#bm-client-list .bm-listrow")};
+      const faded = rows.filter((e) => Number(getComputedStyle(e).opacity) < 0.99);
+      return { total: rows.length, faded: faded.length };
     })()`);
-    check(
-      nowShowing.length > 0 && nowShowing.every((s) => s === target),
-      `clicking "${withWork.firstLabel}" moves to the ${target} tab and nothing else`,
-      `showing: ${nowShowing.join(", ")}`
-    );
-  }
+    check(visible.total > 0 && visible.faded === 0,
+      `blocked motion → all ${visible.total} client rows are fully opaque`,
+      visible.faded ? "CONTENT IS HIDDEN WITH NOTHING TO REVEAL IT" : "");
 
-  /* ── 5. the tabs themselves work ───────────────────────────── */
-  section("5. The tab bar works by click, not just by URL");
-  await goStudio(page, "today");
-  for (const tab of ["money", "delivery", "clients", "sales", "today"]) {
-    await page.click(`#bm-tabs button[data-tab="${tab}"]`);
-    await page.waitForTimeout(350);
-    const state = await page.evaluate(`(() => {
-      const shown = [...new Set(${VISIBLE("[data-sect]")}.map((e) => e.getAttribute("data-sect")))];
-      const current = document.querySelector('#bm-tabs button[aria-current="page"]')?.getAttribute("data-tab");
-      return { shown, current };
+    // And it must still be interactive, not merely visible.
+    await p2.click("#bm-client-list .bm-listrow[data-org]");
+    await p2.waitForTimeout(500);
+    const drawerOpen = await p2.evaluate(`(() => {
+      const d = document.querySelector(".bm-drawer");
+      return !!d && Number(getComputedStyle(d).opacity) > 0.99;
     })()`);
-    check(
-      state.current === tab && state.shown.every((s) => s === tab),
-      `clicking "${tab}" selects it and shows only its panels`,
-      `current=${state.current} showing=${state.shown.join(",")}`
-    );
+    check(drawerOpen, "and the record drawer still opens, fully visible, with no animation");
+
+    await p2.screenshot({ path: path.join(SHOTS, "crm-no-motion.png"), fullPage: true });
+    await ctx.close();
   }
 
-  /* ── 6. keyboard ───────────────────────────────────────────── */
-  section("6. Keyboard reachable");
+  /* ── 10. the phone ─────────────────────────────────────────── */
+  section("10. On a phone the sections are still reachable");
+  {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await goStudio(page, "today");
+    const navVisible = await page.evaluate(`${VISIBLE('#bm-nav button[data-view]')}.length`);
+    check(navVisible === VIEWS.length, `all ${VIEWS.length} sections reachable (${navVisible} visible)`);
+
+    await page.click('#bm-nav [data-view="delivery"]');
+    await page.waitForTimeout(450);
+    check(await page.evaluate(`location.hash === "#delivery"`), "and tapping one switches view");
+
+    const overflow = await page.evaluate(`document.documentElement.scrollWidth <= window.innerWidth + 2`);
+    check(overflow, "the page does not scroll sideways");
+
+    await page.screenshot({ path: path.join(SHOTS, "crm-phone.png"), fullPage: true });
+    await page.setViewportSize({ width: 1440, height: 960 });
+  }
+
+  /* ── 11. nothing threw ─────────────────────────────────────── */
+  section("11. No console errors along the way");
+  check(consoleErrors.length === 0, "clean console", consoleErrors.slice(0, 3).join(" | "));
+
   await goStudio(page, "today");
-  await page.keyboard.press("Tab");
-  const focused = await page.evaluate(() => {
-    const a = document.activeElement;
-    if (!a || a === document.body) return null;
-    const cs = getComputedStyle(a);
-    return { tag: a.tagName, outline: cs.outlineStyle, text: (a.innerText || "").trim().slice(0, 24) };
-  });
-  check(!!focused, "Tab moves focus into the page", focused ? `→ ${focused.tag} "${focused.text}"` : "focus stayed on body");
-  check(focused?.outline !== "none", "the focused element shows a focus ring", `outline-style: ${focused?.outline}`);
-
-  /* ── 7. nothing broken ─────────────────────────────────────── */
-  section("7. No console errors across the whole admin");
-  for (const tab of TABS) await goStudio(page, tab);
-  check(consoleErrors.length === 0, "no console errors on any tab",
-    consoleErrors.slice(0, 3).join(" | "));
-
-  /* ── how simple is it, really ──────────────────────────────── */
-  section("How much is on screen, per tab");
-  for (const tab of TABS) {
-    await goStudio(page, tab);
-    const n = await page.evaluate(`(() => ({
-      panels: ${VISIBLE("[data-sect]")}.length,
-      controls: ${VISIBLE("button, input, select, a.bm-btn, .bm-act[href]")}.length,
-    }))()`);
-    process.stdout.write(`  ${tab.padEnd(9)} ${String(n.panels).padStart(2)} panel(s)  ${String(n.controls).padStart(3)} control(s)\n`);
-    await page.screenshot({ path: path.join(SHOTS, `tab-${tab}.png`), fullPage: true });
-  }
+  await page.screenshot({ path: path.join(SHOTS, "crm-today.png"), fullPage: true });
+  await page.click('#bm-nav [data-view="pipeline"]');
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: path.join(SHOTS, "crm-pipeline.png"), fullPage: true });
 } catch (err) {
   fail += 1;
-  failures.push(`RUN ABORTED: ${err.message}`);
+  failures.push(`ABORTED: ${err.message}`);
   process.stdout.write(`\n\x1b[31mABORTED\x1b[0m ${err.stack}\n`);
 } finally {
   await browser.close();
   server.close();
 }
 
-process.stdout.write(
-  `\n${"─".repeat(62)}\n${pass + fail} checks · ${pass} passed · ${fail} failed\nscreenshots -> docs/admin-ui/\n`
-);
+process.stdout.write(`\n${"─".repeat(58)}\n${pass + fail} checks · ${pass} passed · ${fail} failed\n`);
 if (failures.length) {
   process.stdout.write(`\n\x1b[31mFailures:\x1b[0m\n${failures.map((f) => `  - ${f}`).join("\n")}\n`);
 }

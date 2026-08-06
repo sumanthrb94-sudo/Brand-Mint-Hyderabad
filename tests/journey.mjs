@@ -218,7 +218,11 @@ try {
 
   await signIn(admin, "admin", ADMIN.password);
   const empty = await reload(admin, "/studio");
-  check("admin", has(empty, "what needs you today"), "the dashboard opens on What needs you today");
+  /* The CRM greets by time of day and heads the action list "What needs you".
+     Asserted as two parts rather than one literal sentence, so a wording tweak
+     does not read as the landing page having disappeared. */
+  check("admin", has(empty, "what needs you") && /good (morning|afternoon|evening)/i.test(empty),
+    "the dashboard opens on a greeting and What needs you");
   check("admin", has(empty, "nothing is set up yet") || has(empty, "no active projects"),
     "it says the system is empty rather than showing a clear day");
   const allClear = empty.match(/[^.]{0,60}all (clear|complete|fulfilled)[^.]{0,40}/i);
@@ -231,13 +235,13 @@ try {
   stage(2, "A lead arrives and gets a first response",
     "firstResponseAt is stamped once and must never move — if it can be edited it stops meaning anything.");
 
-  await admin.goto(`${BASE}/studio#sales`, { waitUntil: "load" });
+  await admin.goto(`${BASE}/studio#pipeline`, { waitUntil: "load" });
   await admin.waitForTimeout(1000);
   await admin.evaluate(async () => {
     const m = await import("/assets/bm-app.js");
     await m.addLead({ name: "Green Basket", source: "referral", stage: "inbound" });
   });
-  let s = await reload(admin, "/studio#sales");
+  let s = await reload(admin, "/studio#pipeline");
   // Read the leads panel itself. innerText of <body> skips hidden sections, so
   // on a tabbed page a check written against the whole body silently depends
   // on which tab happens to be open.
@@ -247,7 +251,7 @@ try {
      while the lead was on screen the whole time. */
   const leadPanel = await until(async () => {
     const t = await admin
-      .$eval("#bm-leads-list", (el) =>
+      .$eval("#bm-kan", (el) =>
         [el.innerText, ...[...el.querySelectorAll("input,select")].map((i) => i.value)].join(" ")
       )
       .catch(() => "");
@@ -256,11 +260,11 @@ try {
   const leadDiag = await admin.evaluate(async () => {
     const m = await import("/assets/bm-app.js");
     const all = await m.getAllLeads();
-    const el = document.getElementById("bm-leads-list");
+    const el = document.getElementById("bm-kan");
     return {
       count: all.length,
       names: all.map((l) => l.name),
-      panelHidden: el ? el.closest("[data-sect]")?.hidden : "no element",
+      panelHidden: el ? el.closest(".bm-view")?.hidden : "no element",
       panelHtmlLen: el ? el.innerHTML.length : 0,
     };
   });
@@ -447,12 +451,23 @@ try {
   check("client", clientCanWriteScope === false,
     "but cannot move a line themselves — delivery status is the studio's assertion, enforced by rules");
 
-  // Land the screenshot on the tab that actually shows the scope, so the
-  // reviewer sees the clickable status pills rather than whichever panel the
-  // previous stage happened to leave open.
+  /* Delivery is a LIST of projects now, and the scope lines live in the record
+     drawer — that is the redesign, not a regression. So this opens the record
+     the way a person would, then reads it.
+
+     The list itself still has to carry the derived number, because a list that
+     made you open every row to find out which project had stalled would be the
+     old wall of panels wearing a nicer coat. */
   s = await reload(admin, "/studio#delivery");
-  check("admin", has(s, "cash on delivery") && has(s, "36% delivered"),
-    "the same lines, and the same derived number, on the studio's own delivery tab");
+  check("admin", has(s, "36%"),
+    "the delivery list shows the derived percentage without opening anything");
+
+  await admin.click("#bm-project-list .bm-listrow[data-project]");
+  await admin.waitForSelector(".bm-drawer", { timeout: 8000 }).catch(() => {});
+  await admin.waitForTimeout(700);
+  const scopeDrawer = await admin.innerText(".bm-drawer").catch(() => "");
+  check("admin", has(scopeDrawer, "cash on delivery") && has(scopeDrawer, "36% delivered"),
+    "and the project drawer shows the same lines and the same derived number");
 
   await shot(admin, "admin");
   await shot(client, "client");
@@ -597,7 +612,7 @@ try {
 
   s = await reload(admin, "/studio#today");
   check("admin", has(s, "25,000"), "MRR includes the signed retainer");
-  const todayText = await admin.textContent("#bm-today").catch(() => "");
+  const todayText = await admin.textContent("#bm-today-list").catch(() => "");
   const msWarn = todayText.match(/[^.]{0,50}no milestones[^.]{0,40}/i);
   check("admin", !msWarn, `the unscheduled-project warning is gone${msWarn ? ` — Today still says: "${msWarn[0].trim()}"` : ""}`);
   const dupWarn = todayText.match(/[^.]{0,50}duplicate[^.]{0,40}/i);

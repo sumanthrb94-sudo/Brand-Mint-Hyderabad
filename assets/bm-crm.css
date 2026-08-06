@@ -1,0 +1,950 @@
+/* Brand Mint — the studio CRM shell.
+   Loaded ONLY by /studio, on top of bm-app.css.
+
+   WHY A SECOND STYLESHEET
+   -----------------------
+   bm-app.css is shared by /login, /portal, /onboarding and /tenancy-check.
+   The CRM needed a persistent sidebar, a slide-over record drawer and a
+   kanban board — none of which any other page wants, and all of which would
+   have meant editing selectors those pages depend on. A separate file means
+   a mistake here cannot reach the client's portal.
+
+   COLOUR
+   ------
+   Not one new colour token. Every value below comes from the palette already
+   declared in bm-app.css and already measured by tests/contrast.test.mjs.
+   A new token here would ship unmeasured, which is precisely how the two
+   invisible buttons happened (CLAUDE.md §4). Where a surface needed to sit
+   between --bg and --bm-white, it is built from an existing token at a stated
+   alpha over a known backdrop, not invented.
+
+   MOTION
+   ------
+   Nothing in this file hides anything. There is no `opacity: 0` waiting for
+   JavaScript to undo it. Entrance animation is applied at runtime by
+   assets/bm-crm-motion.js, which sets the starting state itself immediately
+   before animating — so if that file 404s the CRM is still entirely usable,
+   just without the movement. CLAUDE.md §4, and tests/admin-ui.mjs asserts it.
+*/
+
+/* ── layout shell ─────────────────────────────────────────────── */
+
+.bm-crm {
+  --side: 252px;
+  --top: 64px;
+  --gut: 28px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: var(--side) minmax(0, 1fr);
+  grid-template-rows: var(--top) minmax(0, 1fr);
+  grid-template-areas:
+    "side top"
+    "side main";
+  background: var(--bg);
+}
+
+/* ── sidebar ──────────────────────────────────────────────────── */
+
+.bm-crm-side {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 14px 14px;
+  background: var(--bm-white);
+  border-right: 1px solid var(--bm-line);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+}
+
+.bm-crm-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px 18px;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.bm-crm-logo-mark {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--bm-btn-bg);
+  color: var(--bm-btn-fg);
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.bm-crm-logo-sub {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--bm-muted);
+}
+
+.bm-crm-navlabel {
+  padding: 14px 12px 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bm-muted);
+}
+
+/* Nav items are buttons, so they carry the interactive contrast floor.
+   Inactive uses --ink (not --bm-muted) for exactly that reason. */
+.bm-crm-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bm-crm-nav button {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.bm-crm-nav button svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+.bm-crm-nav button:hover { background: var(--bm-line); }
+
+.bm-crm-nav button[aria-current="page"] {
+  background: var(--bm-btn-bg);
+  color: var(--bm-btn-fg);
+}
+.bm-crm-nav button[aria-current="page"] svg { opacity: 1; }
+
+/* The count badge on a nav row. Sits on the row, so it must clear contrast
+   against BOTH the resting row and the active (dark) row — which is why it
+   inherits colour rather than declaring its own. */
+.bm-crm-nav .bm-crm-count {
+  margin-left: auto;
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--bm-line);
+  color: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.bm-crm-side-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--bm-line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bm-crm-who {
+  padding: 2px 12px 8px;
+  font-size: 12px;
+  color: var(--bm-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ── topbar ───────────────────────────────────────────────────── */
+
+.bm-crm-top {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 var(--gut);
+  background: var(--bm-white);
+  border-bottom: 1px solid var(--bm-line);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.bm-crm-crumb {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+}
+
+.bm-crm-crumb h1 {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.bm-crm-crumb p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--bm-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bm-crm-top-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Search opens the command palette. A real input rather than a button so it
+   reads as searchable and takes a typed query straight through. */
+.bm-crm-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  min-width: 210px;
+  border: 1px solid var(--bm-line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--bm-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 160ms ease;
+}
+.bm-crm-search:hover { border-color: var(--bm-muted); }
+.bm-crm-search svg {
+  width: 15px; height: 15px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round;
+}
+.bm-crm-search kbd {
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--bm-line);
+  border-radius: 5px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10.5px;
+  color: var(--bm-muted);
+}
+
+/* ── main workspace ───────────────────────────────────────────── */
+
+.bm-crm-main {
+  grid-area: main;
+  min-width: 0;
+  padding: var(--gut);
+  padding-bottom: 72px;
+}
+
+.bm-view { max-width: 1220px; }
+
+.bm-view-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.bm-view-head h2 {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 750;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+
+.bm-view-head p {
+  margin: 5px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--bm-muted);
+  max-width: 62ch;
+}
+
+.bm-view-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── panels ───────────────────────────────────────────────────── */
+
+.bm-panel {
+  background: var(--bm-white);
+  border: 1px solid var(--bm-line);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.bm-panel--flush { padding: 0; overflow: hidden; }
+
+.bm-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.bm-panel-head h3 {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.bm-panel-head p {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--bm-muted);
+  max-width: 68ch;
+}
+
+.bm-panel-head .bm-panel-tools { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.bm-panel--flush .bm-panel-head { padding: 20px 22px 0; margin-bottom: 12px; }
+
+/* ── stat tiles ───────────────────────────────────────────────── */
+
+.bm-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.bm-tile {
+  background: var(--bm-white);
+  border: 1px solid var(--bm-line);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.bm-tile-label {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  color: var(--bm-muted);
+}
+
+.bm-tile-value {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-size: 27px;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.bm-tile-value--green { color: var(--bm-green); }
+.bm-tile-value--red { color: var(--bm-red); }
+
+.bm-tile-sub {
+  margin: 7px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--bm-muted);
+}
+
+/* ── list rows: the CRM's main object ─────────────────────────── */
+
+.bm-list { display: flex; flex-direction: column; }
+
+.bm-listrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 22px;
+  border: 0;
+  border-top: 1px solid var(--bm-line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 140ms ease;
+}
+
+.bm-list > .bm-listrow:first-child { border-top: 0; }
+.bm-listrow:hover { background: var(--bg); }
+
+.bm-listrow-main { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+
+.bm-listrow-title {
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.008em;
+  color: var(--ink);
+}
+
+.bm-listrow-sub {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--bm-muted);
+}
+
+.bm-listrow-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.bm-listrow-chev {
+  width: 16px; height: 16px; flex: none;
+  fill: none; stroke: var(--bm-muted); stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* A monogram, so a list of clients is scannable by shape not just by text. */
+.bm-mono {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--bm-line);
+  color: var(--ink);
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.bm-listrow--withmono { grid-template-columns: auto minmax(0, 1fr) auto; }
+
+/* ── segmented control ────────────────────────────────────────── */
+
+.bm-seg {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--bm-line);
+  border-radius: 11px;
+  background: var(--bg);
+}
+
+.bm-seg button {
+  appearance: none;
+  min-height: 34px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.bm-seg button[aria-pressed="true"] {
+  background: var(--bm-btn-bg);
+  color: var(--bm-btn-fg);
+}
+
+/* ── kanban pipeline ──────────────────────────────────────────── */
+
+/* 200px, not 258. There are five open stages, and at 258 they totalled more
+   than the workspace is wide on a 1440px screen — so the board arrived with
+   its last column already sliced in half. It still scrolls horizontally when
+   the window is genuinely narrow, which is what a kanban should do; it just no
+   longer does it on the default desktop view. */
+.bm-kan {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(200px, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+}
+
+.bm-kan-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.bm-kan-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px 2px;
+}
+
+.bm-kan-head h4 {
+  margin: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  color: var(--bm-muted);
+}
+
+.bm-kan-n {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--bm-line);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.bm-kan-body {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-height: 76px;
+  padding: 9px;
+  border: 1px solid var(--bm-line);
+  border-radius: 13px;
+  background: var(--bm-white);
+  flex: 1;
+}
+
+.bm-lead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--bm-line);
+  border-radius: 11px;
+  background: var(--bg);
+}
+
+.bm-lead-name {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.bm-lead-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--bm-muted);
+}
+
+.bm-lead-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Moving a lead is two buttons, not drag-and-drop. Drag needs a mouse, a
+   steady hand and a second attempt when it misses; on a phone it fights the
+   scroll. Two 44px buttons work everywhere and are keyboard-reachable. */
+.bm-lead-move {
+  appearance: none;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--bm-line);
+  border-radius: 8px;
+  background: var(--bm-white);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.bm-lead-move:hover:not(:disabled) { border-color: var(--bm-muted); }
+.bm-lead-move:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── the record drawer ────────────────────────────────────────── */
+
+.bm-drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(11, 31, 26, 0.42);
+  backdrop-filter: blur(2px);
+}
+
+.bm-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 61;
+  width: min(620px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--bm-white);
+  border-left: 1px solid var(--bm-line);
+  box-shadow: var(--bm-shadow);
+}
+
+.bm-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--bm-line);
+}
+
+.bm-drawer-head h3 {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.bm-drawer-head p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--bm-muted);
+}
+
+.bm-drawer-close {
+  appearance: none;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--bm-line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.bm-drawer-close:hover { background: var(--bg); }
+.bm-drawer-close svg {
+  width: 17px; height: 17px;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round;
+}
+
+.bm-drawer-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 22px 40px;
+}
+
+.bm-drawer-sec { margin-bottom: 26px; }
+.bm-drawer-sec:last-child { margin-bottom: 0; }
+
+.bm-drawer-sec > h4 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  color: var(--bm-muted);
+}
+
+/* A definition grid — the fastest way to read a record. */
+.bm-facts {
+  display: grid;
+  grid-template-columns: minmax(120px, auto) minmax(0, 1fr);
+  gap: 9px 16px;
+  margin: 0;
+  font-size: 13.5px;
+}
+.bm-facts dt { color: var(--bm-muted); }
+.bm-facts dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+
+/* ── modal (create forms) ─────────────────────────────────────── */
+
+.bm-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: start center;
+  padding: 6vh 16px 16px;
+  overflow-y: auto;
+  background: rgba(11, 31, 26, 0.42);
+  backdrop-filter: blur(2px);
+}
+
+.bm-modal {
+  width: min(520px, 100%);
+  background: var(--bm-white);
+  border: 1px solid var(--bm-line);
+  border-radius: 16px;
+  box-shadow: var(--bm-shadow);
+  padding: 22px;
+}
+
+.bm-modal h3 {
+  margin: 0 0 4px;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.018em;
+  color: var(--ink);
+}
+
+.bm-modal-note {
+  margin: 0 0 18px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--bm-muted);
+}
+
+.bm-modal-foot {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+/* ── command palette ──────────────────────────────────────────── */
+
+.bm-cmd-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: start center;
+  padding: 10vh 16px 16px;
+  background: rgba(11, 31, 26, 0.42);
+  backdrop-filter: blur(2px);
+}
+
+.bm-cmd {
+  width: min(600px, 100%);
+  max-height: 68vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bm-white);
+  border: 1px solid var(--bm-line);
+  border-radius: 16px;
+  box-shadow: var(--bm-shadow);
+  overflow: hidden;
+}
+
+.bm-cmd input {
+  width: 100%;
+  height: 54px;
+  padding: 0 18px;
+  border: 0;
+  border-bottom: 1px solid var(--bm-line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+}
+.bm-cmd input::placeholder { color: var(--bm-muted); }
+.bm-cmd input:focus { outline: none; }
+
+.bm-cmd-results { overflow-y: auto; padding: 7px; }
+
+.bm-cmd-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.bm-cmd-item:hover,
+.bm-cmd-item[aria-selected="true"] { background: var(--bg); }
+
+.bm-cmd-kind {
+  margin-left: auto;
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bm-muted);
+}
+
+.bm-cmd-empty { padding: 26px 18px; text-align: center; font-size: 13px; color: var(--bm-muted); }
+
+/* ── misc ─────────────────────────────────────────────────────── */
+
+.bm-bar {
+  height: 7px;
+  border-radius: 999px;
+  background: var(--bm-line);
+  overflow: hidden;
+}
+.bm-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--bm-green);
+}
+
+.bm-split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.bm-hint {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--bm-muted);
+}
+
+.bm-inline-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* bm-app.css styles `.bm-field input` and never styled `.bm-field select`, so
+   a select in a form rendered at the UA default — 19px tall on this platform,
+   against a 44px sibling. Caught by tests/admin-ui.mjs measuring every visible
+   control rather than by looking at it, which is the whole point: at a glance
+   the Access form looked fine.
+
+   Scoped inside .bm-crm so /portal and /login are untouched. */
+.bm-crm .bm-field select,
+.bm-crm .bm-modal select,
+.bm-crm .bm-modal input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--bm-line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+/* Same measurement, same fix: the Playbook chip is a button and was 25px. */
+.bm-crm .bm-help {
+  min-height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Inline row controls inside a drawer. Denser than a form field on purpose —
+   these sit in repeating rows — but still above the hit-target floor. */
+.bm-crm .bm-manage-row select,
+.bm-crm .bm-manage-row input:not([type="checkbox"]) {
+  min-height: 36px;
+}
+
+/* ── responsive ───────────────────────────────────────────────────
+   Below 1000px the sidebar stops being a column and becomes a scrolling
+   row above the content. Same buttons, same handlers, same aria-current —
+   only the axis changes, so nothing has a phone-only code path to rot. */
+
+@media (max-width: 999px) {
+  .bm-crm {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "top" "side" "main";
+    --gut: 16px;
+  }
+
+  .bm-crm-side {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--bm-line);
+  }
+
+  .bm-crm-logo,
+  .bm-crm-navlabel,
+  .bm-crm-who,
+  .bm-crm-side-foot { display: none; }
+
+  .bm-crm-nav { flex-direction: row; gap: 6px; }
+  .bm-crm-nav button { white-space: nowrap; padding: 0 14px; }
+
+  .bm-crm-top { padding: 10px 16px; height: auto; min-height: var(--top); }
+  .bm-crm-search { min-width: 0; width: 44px; padding: 0; justify-content: center; }
+  .bm-crm-search span, .bm-crm-search kbd { display: none; }
+
+  .bm-drawer { width: 100%; }
+  .bm-view-head h2 { font-size: 21px; }
+}
+
+@media (max-width: 620px) {
+  .bm-crm-crumb p { display: none; }
+  .bm-panel { padding: 16px; border-radius: 14px; }
+  .bm-listrow { padding: 13px 16px; }
+  .bm-panel--flush .bm-panel-head { padding: 16px 16px 0; }
+  .bm-tile-value { font-size: 23px; }
+}
+
+/* Motion is opt-out at the OS level, and it is honoured by declining to run
+   rather than by running something smaller. */
+@media (prefers-reduced-motion: reduce) {
+  .bm-crm *,
+  .bm-drawer,
+  .bm-modal { transition: none !important; animation: none !important; }
+}

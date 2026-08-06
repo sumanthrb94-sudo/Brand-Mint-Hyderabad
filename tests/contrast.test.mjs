@@ -25,10 +25,16 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-const CSS = fs.readFileSync(
-  path.join(path.resolve(import.meta.dirname, ".."), "assets/bm-app.css"),
-  "utf8"
-);
+const ROOT = path.resolve(import.meta.dirname, "..");
+const CSS = fs.readFileSync(path.join(ROOT, "assets/bm-app.css"), "utf8");
+
+/* The CRM shell is a second stylesheet, loaded only by /studio on top of the
+   one above. It declares no colour tokens of its own on purpose — every value
+   in it resolves to the palette here — but it is still full of interactive
+   controls, so the pill sweep and the [hidden] rule have to see it too. A file
+   that escaped this test would be exactly the blind spot the test exists for. */
+const CRM = fs.readFileSync(path.join(ROOT, "assets/bm-crm.css"), "utf8");
+const ALL = CSS + "\n" + CRM;
 
 /* ── read the palettes out of the stylesheet ──────────────────── */
 
@@ -117,6 +123,16 @@ const PAIRS = [
   { name: "body text on a card", fg: "--ink", bg: "--bm-white", on: null },
   { name: "secondary text (bm-row-sub) on a card", fg: "--bm-muted", bg: "--bm-white", on: null },
   { name: "secondary text on the page background", fg: "--bm-muted", bg: "--bg", on: null },
+
+  /* The CRM shell. --bm-line is translucent, so the monogram and the two count
+     badges are --ink composited over it composited over the card — the same
+     two-step the muted pill was hiding a 4.00:1 behind. */
+  { name: "CRM: client monogram (.bm-mono)", fg: "--ink", bg: "--bm-line", on: "--bm-white" },
+  { name: "CRM: kanban column count (.bm-kan-n)", fg: "--ink", bg: "--bm-line", on: "--bm-white" },
+  { name: "CRM: sidebar nav item, resting", fg: "--ink", bg: "--bm-white", on: null },
+  { name: "CRM: sidebar nav item, active", fg: "--bm-btn-fg", bg: "--bm-btn-bg", on: null },
+  { name: "CRM: lead card on its column", fg: "--ink", bg: "--bg", on: null },
+  { name: "CRM: search placeholder in the topbar", fg: "--bm-muted", bg: "--bg", on: null },
 ];
 
 const FLOOR = 4.5;
@@ -170,7 +186,7 @@ test("the two dark palettes stay identical, or half the screen goes dark", () =>
 test("every interactive pill tone is covered by a pair above", () => {
   // A new .bm-pill--x with no entry in PAIRS would ship unmeasured, which is
   // exactly how the muted pill sat at 4.00:1 without anyone noticing.
-  const tones = [...CSS.matchAll(/\.bm-pill--(\w+)\s*\{/g)].map((m) => m[1]);
+  const tones = [...ALL.matchAll(/\.bm-pill--(\w+)\s*\{/g)].map((m) => m[1]);
   const covered = new Set(
     PAIRS.flatMap((p) => [p.fg, p.bg]).map((t) => t.replace("--bm-", "").replace("-bg", "").replace("-fg", ""))
   );
@@ -200,7 +216,7 @@ test("the stylesheet forces [hidden] to win over any display rule", () => {
 test("every class used as a tab panel is still covered by that rule", () => {
   // Belt and braces: if someone removes the !important above, this names the
   // classes that would start leaking across tabs.
-  const withDisplay = [...CSS.matchAll(/\.(bm-[\w-]+)\s*\{[^}]*display:\s*(grid|flex|block|inline-flex)/g)]
+  const withDisplay = [...ALL.matchAll(/\.(bm-[\w-]+)\s*\{[^}]*display:\s*(grid|flex|block|inline-flex)/g)]
     .map((m) => m[1]);
   assert.ok(withDisplay.length > 0, "expected some bm- classes to set display");
   assert.match(CSS, /\[hidden\]\s*\{\s*display:\s*none\s*!important/,
