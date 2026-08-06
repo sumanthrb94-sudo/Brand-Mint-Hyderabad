@@ -20,9 +20,13 @@
  *   C. ONE-TIME ONLY. The same 50/50 build, and then the engagement simply
  *      ends. No retainer is coming and none was ever proposed.
  *
- * These two are the whole business, and they stress the dashboard in opposite
- * directions — so this loads both at once, at different stages, and reads back
- * what every view actually says.
+ * These three are the whole business, and they stress the dashboard in
+ * opposite directions — so this loads all of them at once, at different stages,
+ * and reads back what every view actually says.
+ *
+ * (C) is the shape the dashboard was worst at: `retainerStatus: none` on a
+ * one-time deal is a DECISION, and it used to be indistinguishable from
+ * "we forgot to ask".
  *
  * NOTHING HERE GOES NEAR PRODUCTION. Emulators only, seeded through the app's
  * own admin session, so every write passes the real security rules. CLAUDE.md
@@ -54,7 +58,8 @@ const head = (s) => say(`\n\x1b[1m${s}\x1b[0m`);
 
 /* ── the simulated studio ─────────────────────────────────────────
    Every number is arbitrary and clearly labelled as such. The SHAPE is what
-   matters: two income models, at four different stages between them. */
+   matters: three income models across five organisations, at every stage
+   between "quoted, not signed" and "built, accepted, now on a retainer". */
 
 const DAY = 86400000;
 const now = Date.now();
@@ -340,9 +345,10 @@ try {
     say(text.split("\n").filter(Boolean).map((l) => "    " + l).join("\n"));
   }
 
-  /* Open the two records that represent the two income models, because the
-     drawer is where the working day actually happens. */
-  head("The two income models, opened as records");
+  /* Open the records at the two extremes of the model — a build mid-flight
+     and a retainer with no build at all — because the drawer is where the
+     working day actually happens, and those two must not look alike. */
+  head("The extremes of the model, opened as records");
   await goStudio(page, "delivery");
   for (const [pid, label] of [["nalanda-build", "PROJECT -> RETAINER, mid-build"], ["kaveri-care", "RETAINER ONLY"]]) {
     await page.evaluate((id) => document.querySelector(`[data-project="${id}"]`)?.click(), pid);

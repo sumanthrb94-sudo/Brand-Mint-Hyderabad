@@ -288,7 +288,7 @@ What each view actually says
     Reload
     No entries yet. The log only records what happens from the moment its rules go live — it cannot reconstruct anything that happened before that, and it is not claiming nothing did.
 
-The two income models, opened as records
+The extremes of the model, opened as records
 
   ── PROJECT -> RETAINER, mid-build — nalanda-build ──
     Nalanda site + booking tool
