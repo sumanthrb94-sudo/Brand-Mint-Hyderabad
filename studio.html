@@ -517,6 +517,35 @@
           why: "The same request several times reads as broken, and a client who decides the list is broken ignores all of it. Open the project and use Remove duplicates.",
         });
 
+        /* Nothing raised means the portal has NOTHING to chase the client with.
+           That is this product's first job (§1), quietly switched off — and it
+           is the state every freshly created engagement starts in, so it is
+           the single most likely thing to be true and unnoticed. Distinct from
+           "waiting on the client": that one means requests exist and are open.
+
+           Retainer engagements are included. A care retainer with nothing
+           asked for is just as stalled as a build with nothing asked for. */
+        const noIntake = facts.filter((d) => d.intake.length === 0);
+        if (noIntake.length) items.push({
+          tone: "warn", goto: "delivery",
+          what: `${noIntake.length} project${noIntake.length === 1 ? " has" : "s have"} nothing raised with the client`,
+          why: `The portal is the thing that chases them, dated, so you do not have to — and with no requests on it there is nothing to chase. ${noIntake.length === 1 ? "It is" : "They are"} ${noIntake.map((d) => d.name).slice(0, 3).join(", ")}${noIntake.length > 3 ? ` and ${noIntake.length - 3} more` : ""}.`,
+        });
+
+        /* A retainer that was agreed and never marked signed is money the
+           studio believes it has and the dashboard correctly refuses to count.
+           Both halves of that are right; nobody was telling you about the gap. */
+        const proposed = S.orgs.filter((o) =>
+          o.kind === "client" && o.status === "active" && o.retainerStatus === "proposed" && Number(o.retainer) > 0);
+        if (proposed.length) {
+          const worth = proposed.reduce((n, o) => n + Number(o.retainer), 0);
+          items.push({
+            tone: "warn", goto: "clients",
+            what: `${proposed.length} retainer${proposed.length === 1 ? " is" : "s are"} proposed but not signed — ${inr(worth)}/month`,
+            why: `Not counted anywhere, and it should not be until it is signed. If ${proposed.length === 1 ? "it" : "any of them"} actually is, open the client and mark it signed — that is the number this month is judged on. ${proposed.map((o) => o.name).slice(0, 3).join(", ")}${proposed.length > 3 ? ` and ${proposed.length - 3} more` : ""}.`,
+          });
+        }
+
         /* A retainer engagement has no milestones BY DESIGN. Nagging about it
            every day is how an action list stops being read at all — so the
            nag is scoped to builds. */
@@ -1421,9 +1450,27 @@
             await logActivity("access.grant",
               `Portal login granted: ${username} → ${S.orgById[orgId]?.name || orgId}`,
               { orgId, target: username });
-            st.hidden = false; st.className = "bm-status bm-status--ok";
-            st.textContent = `Saved. ${username} signs in with ${email} and the password you set in the Console.`;
+
+            /* Say it AFTER the refresh, not before.
+               refresh() re-renders this whole view, which replaces #bm-a-status
+               with a brand new node — so a message written first was destroyed
+               a few hundred milliseconds later and the screen went silent. The
+               write had worked; there was simply no way to tell. Found by
+               onboarding six clients through the real form and checking what
+               the screen said afterwards, which is the only way this shows up:
+               every database assertion passed the whole time.
+
+               The element below is deliberately re-queried rather than reusing
+               `st`, because `st` now refers to a node that is no longer in the
+               document. */
             await refresh();
+            const fresh = $("bm-a-status");
+            if (fresh) {
+              fresh.hidden = false;
+              fresh.className = "bm-status bm-status--ok";
+              fresh.textContent =
+                `Saved. ${username} signs in with ${email} and the password you set in the Console.`;
+            }
           } catch (err) {
             st.hidden = false; st.className = "bm-status bm-status--error";
             st.textContent = "Couldn't save: " + (err?.message || err);

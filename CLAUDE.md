@@ -485,7 +485,7 @@ list of records, and a detail drawer for the one you picked.**
 
 | Section | What it is |
 |---|---|
-| Today | break-even gauge, four tiles, and the action list — every line a fact with the thing that fixes it attached. The headline is **this month** (retainers + live builds, split), not signed MRR alone |
+| Today | break-even gauge, four tiles, and the action list — every line a fact with the thing that fixes it attached. The headline is **this month** (retainers + live builds, split), not signed MRR alone. Two of its lines exist because `tests/onboarding.mjs` found them missing: projects with **nothing raised with the client** (the portal's whole job, switched off) and retainers **proposed but not signed** |
 | Pipeline | leads as a kanban by stage, moved with two buttons; funnel/source/loss against the playbook below |
 | Clients | one row per organisation → drawer: retainer, onboarding, projects, invoices, login. **New engagement** creates all of it in one screen |
 | Delivery | one row per project → drawer: agreed scope, milestones, intake, deliverables |
@@ -523,6 +523,29 @@ be the old wall of panels wearing a nicer coat.
 > **Y1 plan for a three-person studio that has not been hired**. It is a
 > target, not this month's bar. Using it as the gauge would make every real
 > month look like a catastrophic miss. Keep them separate.
+
+### Onboarding is tested from BOTH sides at once
+
+`tests/onboarding.mjs` opens six engagements through the real UI — all three
+deal shapes — grants each a portal login, then signs in **as that client** and
+reads their portal. 119 checks.
+
+It exists because a studio can believe a client is onboarded while the client
+sees a blank page: the Auth account and the `users` document are separate
+writes, and one without the other is a login that can read nothing at all.
+Creating the Auth account is done against the emulator's REST API on purpose,
+because in real life that happens in the Firebase Console, outside this
+product — the app never sees a password (§4).
+
+It has already found two things no admin-side test could:
+
+- **The save confirmation was destroyed by its own refresh.** `RENDER.access()`
+  rebuilds the whole view, replacing `#bm-a-status` a moment after the message
+  was written to it. Every database assertion passed; the screen just went
+  silent, so you could not tell whether the login had been created.
+- **The action list was empty after six perfect onboardings** — no mention of
+  the projects with nothing raised, or of ₹60,500/month of agreed retainers
+  sitting unsigned.
 
 ### Business docs → structure, not data
 
