@@ -987,6 +987,205 @@ export async function markLeadFirstResponse(id) {
 // client sees the same list: what they are paying for, and what is done.
 
 /** Four states, in order. A line only ever moves forward through them. */
+// --- The three deal shapes, and what a month is actually worth --------------
+
+/**
+ * Brand Mint sells three ways. They are not variations on one thing — they
+ * behave differently enough that a dashboard which knows only about retainers
+ * describes the business wrongly.
+ *
+ *   oneoff    a build, 50/50, and then it ends. No retainer, by agreement.
+ *   then      the same build, and a retainer that starts AT LAUNCH.
+ *   retainer  no build at all. A monthly fee, no fixed scope, no end date.
+ *
+ * `retainer: false` on `oneoff` is the important one: "no retainer" there is a
+ * DECISION, not a gap, and nothing should nag about it.
+ */
+export const DEAL_TYPES = [
+  { id: "oneoff", label: "One-time project", build: true, retainer: false,
+    blurb: "A build, 50% up front and 50% at launch. Nothing after." },
+  { id: "then", label: "Project, then retainer", build: true, retainer: true,
+    blurb: "The build, then a monthly retainer starting at launch." },
+  { id: "retainer", label: "Retainer only", build: false, retainer: true,
+    blurb: "No build. A monthly fee for continuing work." },
+];
+
+/** Working days in an average month. Used to turn "price and weeks" into a
+ *  monthly run rate, and nowhere else. */
+export const WORKING_DAYS_PER_MONTH = 21.7;
+
+/**
+ * Is this project a build, or a retainer engagement?
+ *
+ * `mode` is written by createEngagement() and is authoritative when present.
+ * It is absent on every project created before that existed, so this falls
+ * back rather than forcing a migration: scope means a build; no scope plus a
+ * client who pays a retainer means a retainer.
+ */
+export function projectMode(project, org, scope) {
+  if (project?.mode === "retainer" || project?.mode === "build") return project.mode;
+  if (scope && scope.length) return "build";
+  if (org && Number(org.retainer) > 0 && (org.retainerStatus === "signed" || org.retainerStatus === "proposed")) {
+    return "retainer";
+  }
+  return "build";
+}
+
+/** Is there earning left in this build? Fully accepted means the work is done
+ *  and the money is in the invoice ledger, where it is already counted. */
+export function isLiveBuild(scope) {
+  return !!scope && scope.length > 0 && !scope.every((l) => l.status === "accepted");
+}
+
+/**
+ * What one build would earn per month IF IT WERE THE ONLY THING RUNNING.
+ *
+ * Useful on a single record. Deliberately NOT summed across projects to get a
+ * studio total — see monthlyIncome for why.
+ */
+export function projectRunRate(scope) {
+  if (!isLiveBuild(scope)) return 0;
+  const agreed = scope.reduce((n, l) => n + (Number(l.amount) || 0), 0);
+  const days = scope.reduce((n, l) => n + (Number(l.days) || 0), 0);
+  if (!agreed || !days) return 0;
+  return Math.round(agreed / Math.max(1, days / WORKING_DAYS_PER_MONTH));
+}
+
+/**
+ * What this month is worth, split by where it comes from.
+ *
+ * A ten-week, six-lakh build is not zero income just because it is not a
+ * retainer — it is real money arriving, and a dashboard showing ₹0 for it says
+ * the studio is failing during its best quarter. That is the same failure as
+ * counting a proposal as revenue, pointed the other way: one flatters, one
+ * frightens, and both are lies.
+ *
+ * BUT THE BUILDS ARE BLENDED, NOT ADDED.
+ *
+ * Summing each build's own run rate was the first attempt and it was worse
+ * than the bug it fixed: two concurrent builds reported ₹6.4 L/month, which
+ * assumed one person delivering sixty-eight working days of work inside a
+ * calendar month. A number that cannot physically happen is not a number.
+ *
+ * So every live build is pooled — total agreed value over total agreed days —
+ * and multiplied by a month of working days. That is the studio's blended day
+ * rate at its actual capacity, and it behaves correctly: taking on a second
+ * build does not double the income, it lengthens the schedule.
+ *
+ * The two halves are returned SEPARATELY and must be displayed separately.
+ * Merging them hides the only distinction that matters when deciding whether
+ * to sell: retainer income arrives again next month, build income stops the
+ * day the build lands. Signed retainers only — a proposal is still counted as
+ * nothing (§4).
+ */
+export function monthlyIncome({ orgs, projects, scopeByProject, orgById }) {
+  const byId = orgById || Object.fromEntries((orgs || []).map((o) => [o.id, o]));
+
+  const retainer = (orgs || [])
+    .filter((o) => o.kind === "client" && o.status === "active" && o.retainerStatus === "signed")
+    .reduce((n, o) => n + (Number(o.retainer) || 0), 0);
+
+  let value = 0;
+  let days = 0;
+  let liveBuilds = 0;
+  for (const p of projects || []) {
+    if (p.billable === false) continue;
+    const org = byId[p.orgId];
+    if (org?.status !== "active") continue;
+    const scope = (scopeByProject || {})[p.id] || [];
+    if (projectMode(p, org, scope) === "retainer") continue;
+    if (!isLiveBuild(scope)) continue;
+    value += scope.reduce((n, l) => n + (Number(l.amount) || 0), 0);
+    days += scope.reduce((n, l) => n + (Number(l.days) || 0), 0);
+    liveBuilds += 1;
+  }
+
+  const project = days > 0 ? Math.round(value / Math.max(1, days / WORKING_DAYS_PER_MONTH)) : 0;
+  return { retainer, project, total: retainer + project, liveBuilds, liveBuildValue: value, liveBuildDays: days };
+}
+
+/**
+ * Start an engagement in ONE step.
+ *
+ * This exists because onboarding a client was seven steps across three
+ * screens: add the client, add the project, go to /quote, build the scope,
+ * save it to the project, come back, apply a milestone template. Every one of
+ * those was a place to stop halfway, and people did.
+ *
+ * A name, a deal type, a price and a number of weeks is genuinely all the
+ * information required — everything else here is derived from those four
+ * answers, using rules the studio already follows:
+ *
+ *   - the scope becomes ONE agreed line. Not an invented four-phase
+ *     breakdown: a breakdown nobody agreed to would be fiction with a
+ *     progress bar attached. Refine it on /quote when there is a real one.
+ *   - invoicing is 50/50 — advance now, balance at the end date — because
+ *     that is what every Brand Mint contract says.
+ *   - the retainer starts PROPOSED unless explicitly marked signed, so no
+ *     path through this form can quietly inflate MRR.
+ *
+ * Returns the ids it created so the caller can open the record.
+ */
+export async function createEngagement({
+  name, deal, price, weeks, retainer, retainerSigned, type, startAt,
+}) {
+  const shape = DEAL_TYPES.find((d) => d.id === deal);
+  if (!shape) throw new Error("Pick a deal type.");
+  const clientName = String(name || "").trim();
+  if (!clientName) throw new Error("Give the client a name.");
+
+  const money = Number(price) || 0;
+  const wk = Number(weeks) || 0;
+  if (shape.build && !(money > 0)) throw new Error("A project needs a price above zero.");
+  if (shape.build && !(wk > 0)) throw new Error("A project needs a length in weeks.");
+  const monthly = Number(retainer) || 0;
+  if (shape.retainer && !(monthly > 0)) throw new Error("A retainer needs a monthly amount above zero.");
+
+  const orgId = await createOrg({
+    name: clientName,
+    kind: "client",
+    status: "active",
+    retainer: shape.retainer ? monthly : 0,
+    // Never `signed` unless the caller ticked the box. §4 is not negotiable
+    // just because this form is faster.
+    retainerStatus: shape.retainer ? (retainerSigned ? "signed" : "proposed") : "none",
+    note: shape.blurb,
+  });
+
+  const start = startAt ? new Date(startAt) : new Date();
+  const end = new Date(start.getTime() + wk * 7 * 86400000);
+
+  const projectId = await createProject({
+    orgId,
+    name: shape.build ? `${clientName} build` : `${clientName} retainer`,
+    type: type || null,
+    dueAt: shape.build ? end : null,
+    billable: true,
+  });
+
+  // `mode` separates a build from a retainer engagement. Without it a
+  // retainer-only project looks exactly like a build nobody has set up yet,
+  // and the dashboard nags about its missing milestones forever — which is how
+  // an action list stops being believed.
+  await updateProject(projectId, { mode: shape.build ? "build" : "retainer" });
+
+  if (shape.build) {
+    await saveScope(projectId, [{
+      featureId: "agreed-build",
+      label: "Agreed build",
+      amount: money,
+      days: Math.round(wk * 5),
+    }]);
+    await createInvoice({ orgId, label: "50% advance", amount: Math.round(money / 2), dueAt: start });
+    await createInvoice({ orgId, label: "50% on launch", amount: money - Math.round(money / 2), dueAt: end });
+    if (type && MILESTONE_TEMPLATES[type]) {
+      await applyMilestoneTemplate(projectId, type, start.toISOString().slice(0, 10));
+    }
+  }
+
+  return { orgId, projectId };
+}
+
 export const SCOPE_STATUS = [
   { id: "agreed", label: "Agreed", hint: "Signed for, not started." },
   { id: "building", label: "Building", hint: "In progress now." },

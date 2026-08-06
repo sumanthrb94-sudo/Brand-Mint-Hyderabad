@@ -948,3 +948,13 @@
   .bm-drawer,
   .bm-modal { transition: none !important; animation: none !important; }
 }
+
+/* The deal-type picker in the New engagement form. Three options that must not
+   overflow a phone, so the segmented control wraps rather than scrolls — a
+   control you have to scroll sideways to discover is a control people miss. */
+.bm-seg--wrap {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.bm-seg--wrap button { flex: 1 1 auto; min-height: 40px; }

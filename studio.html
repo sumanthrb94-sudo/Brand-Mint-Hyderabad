@@ -192,6 +192,7 @@
         SCOPE_STATUS, SCOPE_STATUS_IDS,
         mountThemeToggle, syncPayments, paymentError,
         logActivity, getActivity,
+        DEAL_TYPES, createEngagement, monthlyIncome, projectRunRate, projectMode,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
@@ -294,8 +295,16 @@
         const mrr = signed.reduce((s, o) => s + (Number(o.retainer) || 0), 0);
         const inKind = signed.reduce((s, o) => s + (Number(o.retainerInKind) || 0), 0);
         const unpaid = S.invoices.filter((i) => i.status !== "paid");
+        /* Retainers AND live build income. A ten-week six-lakh build is not
+           zero just because it is not recurring, and a gauge that showed zero
+           for it would say the studio is failing during its best quarter. The
+           two are kept apart everywhere they are shown. */
+        const income = monthlyIncome({
+          orgs: S.orgs, projects: S.projects, orgById: S.orgById,
+          scopeByProject: Object.fromEntries(Object.entries(S.detail).map(([k, v]) => [k, v.scope])),
+        });
         return {
-          mrr, inKind, gap: BREAK_EVEN_MONTHLY - mrr,
+          income, mrr, inKind, gap: BREAK_EVEN_MONTHLY - income.total,
           unpaid, unpaidTotal: unpaid.reduce((s, i) => s + (Number(i.amount) || 0), 0),
           paidTotal: S.invoices.filter((i) => i.status === "paid").reduce((s, i) => s + (Number(i.amount) || 0), 0),
         };
@@ -377,6 +386,7 @@
         const facts = activeProjects.map((p) => ({
           id: p.id,
           name: p.name || S.orgById[p.orgId]?.name || p.orgId,
+          mode: projectMode(p, S.orgById[p.orgId], S.detail[p.id]?.scope || []),
           ...S.detail[p.id],
         }));
 
@@ -400,8 +410,9 @@
           responseSub = `${times.length} recorded · market median ~${MARKET_MEDIAN_RESPONSE_HOURS}h`;
         }
 
-        const gaugePct = Math.max(0, Math.min(100, Math.round((m.mrr / BREAK_EVEN_MONTHLY) * 100)));
-        const isEmpty = !activeProjects.length && !openLeads.length && !m.mrr;
+        const gaugePct = Math.max(0, Math.min(100, Math.round((m.income.total / BREAK_EVEN_MONTHLY) * 100)));
+        const liveBuilds = m.income.liveBuilds;
+        const isEmpty = !activeProjects.length && !openLeads.length && !m.income.total;
 
         $("view-today").innerHTML = `
           <div class="bm-view-head">
@@ -414,11 +425,11 @@
 
           <div class="bm-tiles">
             <div class="bm-tile">
-              <p class="bm-tile-label">Signed MRR</p>
-              <p class="bm-tile-value ${m.mrr >= BREAK_EVEN_MONTHLY ? "bm-tile-value--green" : "bm-tile-value--red"}" id="bm-t-mrr">${escapeHtml(inr(m.mrr))}</p>
-              <p class="bm-tile-sub">${m.gap > 0
-                ? `${escapeHtml(inr(m.gap))} short of break-even`
-                : `${escapeHtml(inr(-m.gap))} over break-even`}${m.inKind ? ` · plus ${escapeHtml(formatINR(m.inKind))}/mo in kind, not counted` : ""}</p>
+              <p class="bm-tile-label">This month</p>
+              <p class="bm-tile-value ${m.income.total >= BREAK_EVEN_MONTHLY ? "bm-tile-value--green" : "bm-tile-value--red"}" id="bm-t-mrr">${escapeHtml(inr(m.income.total))}</p>
+              <p class="bm-tile-sub">
+                ${escapeHtml(inr(m.income.retainer))} retainers + ${escapeHtml(inr(m.income.project))} live builds${m.inKind ? ` · plus ${escapeHtml(formatINR(m.inKind))}/mo in kind, not counted` : ""}
+              </p>
             </div>
             <div class="bm-tile">
               <p class="bm-tile-label">Open leads</p>
@@ -446,8 +457,10 @@
             <div class="bm-panel-head">
               <div>
                 <h3>${m.gap > 0 ? "Short of break-even" : "Break-even cleared"}</h3>
-                <p>Signed cash retainers only. A proposal is not revenue, and counting one
-                   here would make the number that decides the month flatter you.</p>
+                <p>Signed retainers plus what live builds are earning per month, kept apart
+                   so you can always see which is which — retainer income arrives again next
+                   month, build income stops the day it launches. A proposal is still counted
+                   as nothing.</p>
               </div>
               <div class="bm-panel-tools">
                 <span class="bm-pill ${m.gap > 0 ? "bm-pill--amber" : "bm-pill--green"}">${gaugePct}%</span>
@@ -455,7 +468,9 @@
             </div>
             <div class="bm-bar"><span id="bm-gaugebar" style="width:${gaugePct}%"></span></div>
             <p class="bm-hint" style="margin-top:10px;">
-              ${escapeHtml(inr(m.mrr))} signed of ${escapeHtml(inr(BREAK_EVEN_MONTHLY))} monthly break-even${m.gap > 0 ? ` · ${escapeHtml(inr(m.gap))} to go` : ""}.
+              ${escapeHtml(inr(m.income.retainer))} signed retainers + ${escapeHtml(inr(m.income.project))} from
+              ${liveBuilds} live build${liveBuilds === 1 ? "" : "s"}
+              = <strong>${escapeHtml(inr(m.income.total))}</strong> against ${escapeHtml(inr(BREAK_EVEN_MONTHLY))} break-even${m.gap > 0 ? ` · ${escapeHtml(inr(m.gap))} to go` : ""}.
             </p>
           </div>`}
 
@@ -496,7 +511,10 @@
           why: "The same request several times reads as broken, and a client who decides the list is broken ignores all of it. Open the project and use Remove duplicates.",
         });
 
-        const unscheduled = facts.filter((d) => d.milestones.length === 0);
+        /* A retainer engagement has no milestones BY DESIGN. Nagging about it
+           every day is how an action list stops being read at all — so the
+           nag is scoped to builds. */
+        const unscheduled = facts.filter((d) => d.milestones.length === 0 && d.mode !== "retainer");
         if (unscheduled.length) items.push({
           tone: "warn", goto: "delivery",
           what: `${unscheduled.length} project${unscheduled.length === 1 ? " has" : "s have"} no milestones`,
@@ -554,6 +572,9 @@
 
         mo.rows(list.children);
         mo.bar($("bm-gaugebar"));
+        // Only the headline. Counting every figure on a dense CRM screen means
+        // nothing is readable while it runs.
+        mo.count($("bm-t-mrr"), m.income.total, (v) => inr(v));
       };
 
       /* ══════════════════════════════════════════════════════════
@@ -802,7 +823,7 @@
                  invoices, portal login and exactly which onboarding step is next.</p>
             </div>
             <div class="bm-view-actions">
-              <button type="button" class="bm-btn bm-btn--sm" data-new="org">Add client</button>
+              <button type="button" class="bm-btn bm-btn--sm" data-new="engagement">New engagement</button>
             </div>
           </div>
 
@@ -811,7 +832,7 @@
               <div class="bm-panel-tools"><span class="bm-pill bm-pill--muted">${active.length}</span></div></div>
             <div class="bm-list" id="bm-client-list">
               ${active.length ? active.map(row).join("")
-                : `<p class="bm-empty" style="padding:0 22px 22px;">No clients yet. Adding one is step one — nothing else on this screen can be true until then.</p>`}
+                : `<p class="bm-empty" style="padding:0 22px 22px;">No clients yet. <strong>New engagement</strong> creates the client, the project, the 50/50 invoices and the schedule in one step.</p>`}
             </div>
           </div>
 
@@ -881,6 +902,9 @@
 
             <div class="bm-drawer-sec">
               <h4>Projects</h4>
+              <div class="bm-inline-form" style="margin-bottom:10px;">
+                <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-new="project">Add another project</button>
+              </div>
               ${theirs.length ? `<div class="bm-list">${theirs.map((p) => {
                 const d = S.detail[p.id] || { openIntake: 0, scope: [], milestones: [] };
                 const prog = scopeProgress(d.scope);
@@ -929,7 +953,12 @@
           // Empty is not on-track. A project with no milestones and no scope
           // must never render like one that is finished.
           let health, tone;
-          if (!d.milestones.length && !d.scope.length) { health = "Not set up"; tone = "bm-pill--muted"; }
+          const isRetainer = projectMode(p, S.orgById[p.orgId], d.scope) === "retainer";
+          if (isRetainer) {
+            health = d.openIntake ? `${d.oldestOpenDays ?? 0}d blocked` : "Ongoing";
+            tone = d.openIntake ? ageTone(d.oldestOpenDays) : "bm-pill--green";
+          }
+          else if (!d.milestones.length && !d.scope.length) { health = "Not set up"; tone = "bm-pill--muted"; }
           else if (d.openIntake) { health = `${d.oldestOpenDays ?? 0}d blocked`; tone = ageTone(d.oldestOpenDays); }
           else if (!d.next) { health = "Milestones complete"; tone = "bm-pill--green"; }
           else { health = d.next.owner === "client" ? "Waiting on client" : "With us"; tone = d.next.owner === "client" ? "bm-pill--amber" : "bm-pill--muted"; }
@@ -938,12 +967,15 @@
             <span class="bm-mono" aria-hidden="true">${escapeHtml(initials(orgName))}</span>
             <span class="bm-listrow-main">
               <span class="bm-listrow-title">${escapeHtml(p.name || orgName)}</span>
-              <span class="bm-listrow-sub">${escapeHtml(orgName)} · ${escapeHtml(TYPE_LABEL[p.type] || "type not set")} · ${
-                d.next ? `next: ${escapeHtml(d.next.title || "untitled")} ${escapeHtml(formatDate(d.next.dueAt))}` : "no milestone pending"}</span>
+              <span class="bm-listrow-sub">${escapeHtml(orgName)} · ${
+                isRetainer ? `${escapeHtml(formatINR(S.orgById[p.orgId]?.retainer || 0))}/mo retainer`
+                           : escapeHtml(TYPE_LABEL[p.type] || "type not set")} · ${
+                d.next ? `next: ${escapeHtml(d.next.title || "untitled")} ${escapeHtml(formatDate(d.next.dueAt))}`
+                       : isRetainer ? "no end date, by design" : "no milestone pending"}</span>
             </span>
             <span class="bm-listrow-right">
               ${d.awaitingApproval ? `<span class="bm-pill bm-pill--amber">${d.awaitingApproval} in review</span>` : ""}
-              <span class="bm-pill bm-pill--muted">${prog === null ? "no scope" : `${prog}%`}</span>
+              <span class="bm-pill bm-pill--muted">${isRetainer ? "retainer" : prog === null ? "no scope" : `${prog}%`}</span>
               <span class="bm-pill ${tone}">${escapeHtml(health)}</span>
               ${chev}
             </span>
@@ -958,7 +990,7 @@
                  waiting on the client for, and what they have to approve.</p>
             </div>
             <div class="bm-view-actions">
-              <button type="button" class="bm-btn bm-btn--sm" data-new="project">Add project</button>
+              <button type="button" class="bm-btn bm-btn--sm" data-new="engagement">New engagement</button>
             </div>
           </div>
 
@@ -1464,7 +1496,7 @@
         $("bm-overlay").querySelector(".bm-drawer-close")?.focus();
       }
 
-      function modal({ title, note, body, submitLabel = "Save", onSubmit }) {
+      function modal({ title, note, body, submitLabel = "Save", onSubmit, onReady }) {
         lastFocus = document.activeElement;
         $("bm-overlay").innerHTML = `
           <div class="bm-modal-scrim" data-close-outside>
@@ -1496,6 +1528,7 @@
             btn.disabled = false;
           }
         });
+        onReady?.(form);
         mo.popIn(form, $("bm-overlay").querySelector(".bm-modal-scrim"));
         form.querySelector("input, select")?.focus();
       }
@@ -1503,26 +1536,133 @@
       /* The "New" menu and the create forms. Each one states the rule it is
          about to apply rather than applying it silently. */
       const NEW_FORMS = {
-        org: () => modal({
-          title: "Add a client",
-          note: "Creates the organisation. The retainer starts as <strong>proposed</strong> and is not counted as revenue until you mark it signed — a number that flatters you is worse than no number.",
-          submitLabel: "Add client",
-          body: `
-            <div class="bm-field"><label for="f-org-name">Business name</label>
-              <input id="f-org-name" placeholder="Green Basket" required /></div>
-            <div class="bm-field"><label for="f-org-kind">Kind</label>
-              <select id="f-org-kind"><option value="client">Client</option><option value="internal">Internal</option></select></div>
-            <div class="bm-field"><label for="f-org-retainer">Monthly retainer (Rs, 0 if none)</label>
-              <input id="f-org-retainer" type="number" min="0" step="500" value="0" /></div>`,
-          onSubmit: async () => {
-            const name = $("f-org-name").value.trim();
-            if (!name) throw new Error("Give the client a name.");
-            await createOrg({
-              name, kind: $("f-org-kind").value, status: "active",
-              retainer: Number($("f-org-retainer").value) || 0, retainerStatus: "proposed",
-            });
-          },
-        }),
+        /* ONE SCREEN TO START AN ENGAGEMENT.
+           This replaced seven steps across three screens — add client, add
+           project, go to /quote, build the scope, save it back, return, stamp
+           a schedule — every one of which was somewhere to stop halfway.
+
+           Four answers: who, which deal, how much, how long. Everything else
+           is derived by createEngagement() from rules the studio already
+           follows, and the live preview at the bottom states exactly what is
+           about to be created before anything is. */
+        engagement: () => {
+          let deal = "then";
+          const money = (v) => "Rs " + (Number(v) || 0).toLocaleString("en-IN");
+
+          modal({
+            title: "New engagement",
+            note: "Four answers. The client, the projects, the 50/50 invoices and the schedule are all created from them.",
+            submitLabel: "Create engagement",
+            body: `
+              <div class="bm-field">
+                <label for="f-e-name">Client</label>
+                <input id="f-e-name" placeholder="Nalanda Interiors" required />
+              </div>
+
+              <div class="bm-field">
+                <label>Deal</label>
+                <div class="bm-seg bm-seg--wrap" id="f-e-deal" role="group" aria-label="Deal type">
+                  ${DEAL_TYPES.map((d) => `<button type="button" data-deal="${escapeHtml(d.id)}"
+                     aria-pressed="${d.id === "then"}">${escapeHtml(d.label)}</button>`).join("")}
+                </div>
+                <span class="bm-row-sub" id="f-e-blurb"></span>
+              </div>
+
+              <div id="f-e-build">
+                <div class="bm-field">
+                  <label for="f-e-price">Project price (Rs, before GST)</label>
+                  <input id="f-e-price" type="number" min="0" step="5000" placeholder="600000" />
+                </div>
+                <div class="bm-field">
+                  <label for="f-e-weeks">Length (weeks)</label>
+                  <input id="f-e-weeks" type="number" min="1" max="52" value="10" />
+                </div>
+                <div class="bm-field">
+                  <label for="f-e-type">Kind of work (optional — stamps a schedule)</label>
+                  <select id="f-e-type">
+                    <option value="">Not set</option>
+                    ${SERVICE_TYPES.map((t) => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.label)}</option>`).join("")}
+                  </select>
+                </div>
+              </div>
+
+              <div id="f-e-ret">
+                <div class="bm-field">
+                  <label for="f-e-retainer">Monthly retainer (Rs)</label>
+                  <input id="f-e-retainer" type="number" min="0" step="500" placeholder="25000" />
+                </div>
+                <label class="bm-mn-check" style="margin-bottom:6px;">
+                  <input type="checkbox" id="f-e-signed" /> Already signed
+                </label>
+                <p class="bm-hint">Unticked it is recorded as <strong>proposed</strong> and counts as nothing.
+                   Nothing on this form can quietly raise your MRR.</p>
+              </div>
+
+              <p class="bm-hint" id="f-e-preview" style="margin-top:14px;padding:12px;border:1px solid var(--bm-line);border-radius:10px;"></p>`,
+
+            onReady: (form) => {
+              const shape = () => DEAL_TYPES.find((d) => d.id === deal);
+              const preview = () => {
+                const sh = shape();
+                const name = form.querySelector("#f-e-name").value.trim() || "This client";
+                const price = Number(form.querySelector("#f-e-price").value) || 0;
+                const wk = Number(form.querySelector("#f-e-weeks").value) || 0;
+                const ret = Number(form.querySelector("#f-e-retainer").value) || 0;
+                const signed = form.querySelector("#f-e-signed").checked;
+                const end = new Date(Date.now() + wk * 7 * 86400000);
+                const bits = [];
+                if (sh.build && price > 0 && wk > 0) {
+                  bits.push(`a <strong>${escapeHtml(money(price))}</strong> build over <strong>${wk} weeks</strong>`);
+                  bits.push(`invoices ${escapeHtml(money(Math.round(price / 2)))} now and ${escapeHtml(money(price - Math.round(price / 2)))} due ${escapeHtml(end.toLocaleDateString("en-IN", { day: "numeric", month: "short" }))}`);
+                  bits.push(`about <strong>${escapeHtml(money(Math.round(price / Math.max(1, (wk * 5) / 21.7))))}/month</strong> while it runs`);
+                }
+                if (sh.retainer && ret > 0) {
+                  bits.push(`a ${escapeHtml(money(ret))}/month retainer, <strong>${signed ? "signed" : "proposed"}</strong>${signed ? "" : " — not counted yet"}`);
+                }
+                form.querySelector("#f-e-preview").innerHTML = bits.length
+                  ? `Creates <strong>${escapeHtml(name)}</strong> with ${bits.join(", ")}.`
+                  : "Fill in the amounts and this will say exactly what it is about to create.";
+              };
+
+              const sync = () => {
+                const sh = shape();
+                form.querySelector("#f-e-build").hidden = !sh.build;
+                form.querySelector("#f-e-ret").hidden = !sh.retainer;
+                form.querySelector("#f-e-blurb").textContent = sh.blurb;
+                form.querySelectorAll("#f-e-deal button").forEach((b) => {
+                  b.setAttribute("aria-pressed", String(b.dataset.deal === deal));
+                });
+                preview();
+              };
+
+              form.querySelector("#f-e-deal").addEventListener("click", (e) => {
+                const b = e.target.closest("[data-deal]");
+                if (!b) return;
+                deal = b.dataset.deal;
+                mo.tap(b);
+                sync();
+              });
+              form.addEventListener("input", preview);
+              form.addEventListener("change", preview);
+              sync();
+            },
+
+            onSubmit: async () => {
+              const r = await createEngagement({
+                name: $("f-e-name").value,
+                deal,
+                price: $("f-e-price").value,
+                weeks: $("f-e-weeks").value,
+                retainer: $("f-e-retainer").value,
+                retainerSigned: $("f-e-signed").checked,
+                type: $("f-e-type").value || null,
+              });
+              await logActivity("engagement.create",
+                `New ${DEAL_TYPES.find((d) => d.id === deal).label.toLowerCase()}: ${$("f-e-name").value.trim()}`,
+                { orgId: r.orgId, target: $("f-e-name").value.trim() });
+            },
+          });
+        },
 
         project: () => modal({
           title: "Add a project",
@@ -1590,8 +1730,8 @@
       };
 
       $("bm-new").addEventListener("click", () => {
-        const map = { clients: "org", delivery: "project", money: "invoice", pipeline: "lead" };
-        (NEW_FORMS[map[S.view]] || NEW_FORMS.org)();
+        const map = { clients: "engagement", delivery: "engagement", money: "invoice", pipeline: "lead" };
+        (NEW_FORMS[map[S.view]] || NEW_FORMS.engagement)();
       });
 
       /* ── command palette ─────────────────────────────────────────

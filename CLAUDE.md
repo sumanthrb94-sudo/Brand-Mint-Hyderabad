@@ -262,7 +262,7 @@ not have.
 organisations/{orgId}   { name, kind: studio|client|internal, status: active|archived,
                           retainer, retainerStatus: signed|proposed|none, note }
 users/{uid}             { orgId, role: admin|client, name, username }   uid = Auth uid
-projects/{projectId}    { orgId, name, type, dueAt, progress, billable }
+projects/{projectId}    { orgId, name, type, dueAt, progress, billable, mode: build|retainer }
   ../milestones/{id}    { title, owner: us|client, status, dueAt }
   ../intake/{id}        { label, group: assets|content|access|decisions, raisedAt, done, clearedAt }
   ../deliverables/{id}  { title, version, url, status: in_review|approved|changes_requested,
@@ -319,6 +319,60 @@ could equally reopen a finished one.
 Nothing automatically decides a line is done. That judgement is the studio's,
 and a job that guessed would produce a progress bar that is confidently wrong —
 which is the failure this replaces, not a variant of it.
+
+### Three deal shapes, and what a month is actually worth
+
+The studio sells three ways and they behave nothing alike — `DEAL_TYPES` in
+`bm-app.js`:
+
+| | build | retainer |
+|---|---|---|
+| `oneoff` | yes, 50/50 | **no, by agreement** |
+| `then` | yes, 50/50 | starts at launch |
+| `retainer` | no | the whole engagement |
+
+`project.mode` (`build | retainer`) records which. It is written by
+`createEngagement()` and is **absent on every project made before it existed**,
+so `projectMode()` falls back rather than forcing a migration: scope means a
+build; no scope plus a paying retainer client means a retainer. Without it a
+retainer engagement looks exactly like a build nobody has set up, and Today
+nags about its missing milestones forever — which is how an action list stops
+being read.
+
+**`monthlyIncome()` counts retainers AND live builds, and keeps them apart.**
+Counting only retainers reported ₹37,500 against a ₹1,00,000 break-even while
+two builds worth ₹10,00,000 were in flight. A number that frightens is exactly
+as false as one that flatters.
+
+**The builds are blended, not added.** The first fix summed each build's own
+run rate and reported ₹6,43,846/month — one person delivering sixty-eight
+working days of work inside a calendar month. Every live build is pooled
+instead: total agreed value over total agreed days, times
+`WORKING_DAYS_PER_MONTH`. Taking on a third build therefore lengthens the
+schedule rather than raising the month, which is the property that makes the
+number worth trusting. `tests/income.test.mjs` asserts it.
+
+The two halves are returned separately and **must be displayed separately** —
+retainer income arrives again next month, build income stops the day it
+launches, and one merged figure cannot answer "should I be selling". A
+proposal is still counted as nothing.
+
+### Starting an engagement is one screen
+
+`createEngagement()` takes a name, a deal type, a price and a number of weeks,
+and creates the organisation, the project, the single agreed scope line, the
+50/50 invoices and the milestone schedule in one submit.
+
+It replaced seven steps across three screens — add client, add project, go to
+`/quote`, build the scope, save it back, return, stamp a schedule — every one
+of which was somewhere to stop halfway, and people did. The report was *"too
+complex to onboard and add the price and time"*.
+
+The scope becomes **one** line, not an invented four-phase breakdown: a
+breakdown nobody agreed to would be fiction with a progress bar attached.
+Refine it on `/quote` when a real one exists. The retainer is created
+`proposed` unless the box is ticked — no path through that form can quietly
+raise MRR.
 
 ### The three fields that carry the most weight
 
@@ -406,9 +460,9 @@ list of records, and a detail drawer for the one you picked.**
 
 | Section | What it is |
 |---|---|
-| Today | break-even gauge, four tiles, and the action list — every line a fact with the thing that fixes it attached |
+| Today | break-even gauge, four tiles, and the action list — every line a fact with the thing that fixes it attached. The headline is **this month** (retainers + live builds, split), not signed MRR alone |
 | Pipeline | leads as a kanban by stage, moved with two buttons; funnel/source/loss against the playbook below |
-| Clients | one row per organisation → drawer: retainer, onboarding, projects, invoices, login |
+| Clients | one row per organisation → drawer: retainer, onboarding, projects, invoices, login. **New engagement** creates all of it in one screen |
 | Delivery | one row per project → drawer: agreed scope, milestones, intake, deliverables |
 | Money | **the invoice ledger** plus retainers |
 | Access | client logins, and the existing ones listed |

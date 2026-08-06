@@ -1,0 +1,378 @@
+
+Loading a simulated month into the emulator (as admin, through the real rules)
+  wrote 44 documents
+
+Ground truth of the simulated studio
+  signed retainers (MRR)        Rs 37,500
+  proposed retainers            Rs 50,000  (must never be counted)
+  contracted project value      Rs 12,70,000
+  ... of which live right now   Rs 6,00,000  (Nalanda, ~10 weeks)
+  cash collected                Rs 6,35,000
+  cash outstanding              Rs 5,12,500
+  => a ~10-week build at Rs 6,00,000 is roughly
+     Rs 2,60,870/month of real income while it runs.
+
+What each view actually says
+
+  ── today ──
+    Good afternoon
+    Every line below is something that is currently true, worked out from your own data. Nothing here is a suggestion, and nothing is a placeholder.
+    THIS MONTH
+    Rs 3,56,618
+    Rs 37,500 retainers + Rs 3,19,118 live builds
+    OPEN LEADS
+    3
+    3 open of 3 total
+    MEDIAN FIRST RESPONSE
+    4m
+    2 recorded · market median ~42h
+    UNPAID INVOICES
+    Rs 5,12,500
+    3 outstanding of 6 raised
+    Break-even cleared
+    Signed retainers plus what live builds are earning per month, kept apart so you can always see which is which — retainer income arrives again next month, build income stops the day it launches. A proposal is still counted as nothing.
+    100%
+    Rs 37,500 signed retainers + Rs 3,19,118 from 2 live builds = Rs 3,56,618 against Rs 1,00,000 break-even.
+    What needs you
+    1 lead has had no first response
+    Market median is around 42 hours; replying inside five minutes makes qualification roughly 21× more likely. This is the cheapest thing on the page to fix.
+    Pipeline
+    3 projects are waiting on the client
+    Oldest is Sarojini Exports — export catalogue site at 19 days. The portal is already showing them, dated — you do not need to send a chasing message.
+    Delivery
+    1 deliverable is sitting in review
+    The client has them and has not decided. One click on their portal clears each one.
+    Delivery
+    Rs 5,12,500 is unpaid across 3 invoices
+    1 is past the due date. Sync payments first — it may already be settled at Razorpay and not yet reconciled here.
+    Money
+
+  ── pipeline ──
+    Pipeline
+    Move a lead with the arrows. The first-response time is stamped once and never moves again — if it could be edited it would stop meaning anything.
+    Add lead
+    INBOUND
+    1
+    Sarath City Mall F&B
+    inbound
+    ·
+    3 Aug 2026
+    waiting 3d
+    ←
+    →
+    Log first response
+    Lost
+    DISCOVERY CALL
+    1
+    Charminar Textiles
+    inbound
+    ·
+    3 Aug 2026
+    replied in 4m
+    ←
+    →
+    Lost
+    MINT WORKSHOP
+    0
+    Empty.
+    PROPOSAL
+    1
+    Deccan Dental Group
+    Partner / referral
+    ·
+    3 Aug 2026
+    replied in 4m
+    ←
+    →
+    Lost
+    SIGNED
+    0
+    Empty.
+    Stage conversion
+    Targets come from the sales playbook. Where there is no data this says so rather than printing a zero.
+    Inbound → Discovery call
+    3 reached Inbound, 2 reached Discovery call
+    target 40%
+    67%
+    Discovery call → Mint workshop
+    2 reached Discovery call, 1 reached Mint workshop
+    target 50%
+    50%
+    Mint workshop → Proposal
+    1 reached Mint workshop, 1 reached Proposal
+    target 80%
+    100%
+    Proposal → Signed
+    1 reached Proposal, 0 reached Signed
+    target 60%
+    0%
+    Source mix
+    Any single channel above 50% makes the pipeline fragile.
+    Site inbound
+    0 of 3
+    target 35%
+    0%
+    Founder warm intro
+    0 of 3
+    target 25%
+    0%
+    LinkedIn outbound
+    0 of 3
+    target 15%
+    0%
+    Partner / referral
+    1 of 3
+    target 15%
+    33%
+    Speaking / writing
+    0 of 3
+    target 10%
+    0%
+    Loss reasons
+    No lost deals recorded yet.
+
+  ── clients ──
+    Clients
+    Open a client to see everything about them in one place — retainer, projects, invoices, portal login and exactly which onboarding step is next.
+    New engagement
+    Active clients
+    5
+    GB
+    Green Basket
+    1 project · next: login given
+    signed Rs 25,000
+    5/7
+    KC
+    Kaveri Clinic
+    1 project · 1 unpaid invoice · next: login given
+    signed Rs 12,500
+    4/7
+    NI
+    Nalanda Interiors
+    1 project · 1 unpaid invoice · next: retainer signed
+    proposed
+    5/7
+    HR
+    Hyderabad Roasters
+    0 projects · next: retainer signed
+    proposed
+    1/7
+    SE
+    Sarojini Exports
+    1 project · 1 unpaid invoice · next: retainer signed
+    none
+    5/7
+
+  ── delivery ──
+    Delivery
+    One row per project. Open one to work on it — scope, milestones, what you are waiting on the client for, and what they have to approve.
+    New engagement
+    Projects
+    4
+    GB
+    Green Basket store
+    Green Basket · Custom internal tool · no milestone pending
+    100%
+    Milestones complete
+    KC
+    Kaveri Clinic — care retainer
+    Kaveri Clinic · Rs 12,500/mo retainer · no end date, by design
+    retainer
+    6d blocked
+    NI
+    Nalanda site + booking tool
+    Nalanda Interiors · Custom website · next: Booking tool build 18 Aug 2026
+    1 in review
+    67%
+    11d blocked
+    SE
+    Sarojini Exports — export catalogue site
+    Sarojini Exports · Custom website · next: Build complete 20 Aug 2026
+    60%
+    19d blocked
+
+  ── money ──
+    Money
+    Signed retainers and every invoice ever raised. Nothing on this screen counts a proposal, and nothing counts an invoice until it is actually paid.
+    Raise invoice
+    SIGNED MRR
+    Rs 37,500
+    Break-even is Rs 1,00,000/month
+    OUTSTANDING
+    Rs 5,12,500
+    3 unpaid of 6
+    COLLECTED
+    Rs 6,35,000
+    Across all invoices ever raised
+    Invoice ledger
+    Marking one paid by hand is for cash and bank transfers. For anything paid online use Sync payments — it asks Razorpay what it was actually paid.
+    March care retainer — Rs 12,500
+    Kaveri Clinic · due 3 Aug 2026
+    3d overdue
+    Mark paid
+    Delete
+    50% on launch — Rs 2,00,000
+    Sarojini Exports · due 27 Aug 2026
+    due
+    Mark paid
+    Delete
+    50% on launch — Rs 3,00,000
+    Nalanda Interiors · due 10 Sept 2026
+    due
+    Mark paid
+    Delete
+    50% advance — Rs 3,00,000
+    Nalanda Interiors · due 29 Jun 2026
+    paid
+    Mark unpaid
+    Delete
+    Final 50% — Rs 1,35,000
+    Green Basket · due 9 Jul 2026
+    paid
+    Mark unpaid
+    Delete
+    50% advance — Rs 2,00,000
+    Sarojini Exports · due 12 Jul 2026
+    paid
+    Mark unpaid
+    Delete
+    Retainers
+    Proposals are shown faded and are never summed into MRR.
+    Green Basket
+    Build accepted Feb. Growth retainer.
+    Rs 25,000
+    signed
+    Kaveri Clinic
+    Care retainer only — no build.
+    Rs 12,500
+    signed
+    Nalanda Interiors
+    Retainer starts at launch — proposed until then.
+    Rs 25,000
+    proposed
+    Hyderabad Roasters
+    Quoted, not signed.
+    Rs 25,000
+    proposed
+    Sarojini Exports
+    One-time build. No retainer — by agreement.
+    Rs 0
+    none
+
+  ── access ──
+    Access
+    Who can sign in to a client portal. This form never asks for a password — the password is set in the Firebase Console and exists nowhere else.
+    Give a client a login
+    Playbook
+    Firebase Console → Authentication → Users → Add user. Use the synthetic email shown below, and set the password there — never in this app.
+    Copy the UID from the new row.
+    Paste it below with the organisation, display name and username.
+    Username
+    Signs in as username@brandmintstudios.in
+    Display name
+    Organisation
+    Green Basket
+    Kaveri Clinic
+    Nalanda Interiors
+    Hyderabad Roasters
+    Sarojini Exports
+    Firebase Auth UID
+    Save
+    Existing logins
+    A client with no users document cannot read anything at all — not even their own organisation.
+    No client logins yet.
+
+  ── activity ──
+    Activity
+    Every action that changes money, access or delivery status, as it happened. Append-only — entries cannot be edited or deleted by anyone, including you. That is what makes it worth reading.
+    Reload
+    No entries yet. The log only records what happens from the moment its rules go live — it cannot reconstruct anything that happened before that, and it is not claiming nothing did.
+
+The two income models, opened as records
+
+  ── PROJECT -> RETAINER, mid-build — nalanda-build ──
+    Nalanda site + booking tool
+    Nalanda Interiors
+    PROJECT
+    Type not set
+    Custom website
+    Custom internal tool
+    Brand system
+    Performance media
+    SEO & content engine
+    AI integration
+    Internal build
+    Billable
+    There is no percentage field. Progress is derived from the agreed scope below, weighted by build days — a typed percentage is a guess wearing a number's clothes.
+    Stamp the Custom website template (6 milestones) from:
+    Apply template
+    AGREED SCOPE — WHAT WAS SOLD, AND HOW MUCH IS DONE
+    67% delivered · weighted by build days
+    Rs 2,00,000 accepted of Rs 6,00,000
+    Discovery & information architecture
+    4d · Rs 60,000
+    Accepted
+    Design system + key screens
+    10d · Rs 1,40,000
+    Accepted
+    Marketing site build
+    9d · Rs 1,20,000
+    Delivered →
+    Booking tool — availability + slots
+    12d · Rs 1,60,000
+    Building →
+    Payments + confirmation email
+    5d · Rs 80,000
+    Agreed →
+    Launch, handover, 30-day warranty
+    2d · Rs 40,000
+    Agreed →
+    A line counts as money only at accepted. Delivered is handed over, not confirmed — counting effort as revenue is the same mistake as counting a proposal.
+    MILESTONES
+    Us
+    Client
+
+  ── RETAINER ONLY — kaveri-care ──
+    Kaveri Clinic — care retainer
+    Kaveri Clinic
+    PROJECT
+    Type not set
+    Custom website
+    Custom internal tool
+    Brand system
+    Performance media
+    SEO & content engine
+    AI integration
+    Internal build
+    Billable
+    There is no percentage field. Progress is derived from the agreed scope below, weighted by build days — a typed percentage is a guess wearing a number's clothes.
+    Stamp the Internal build template (3 milestones) from:
+    Apply template
+    AGREED SCOPE — WHAT WAS SOLD, AND HOW MUCH IS DONE
+    No agreed scope recorded. Build it on Scope & quote and save it to this project — then progress is measured instead of estimated.
+    MILESTONES
+    No milestones yet — the client cannot see where this is going.
+    Us
+    Client
+    Add
+    WHAT WE NEED FROM THE CLIENT — 1 OPEN
+    Assets
+    Content
+    Access
+    Decisions
+    Done
+    6d
+    Delete
+    Assets
+    Content
+    Access
+    Decisions
+    Add
+    DELIVERABLES
+    Nothing up for approval yet.
+    Add
+    DANGER
+    Delete this project
+
+Console
+  clean
