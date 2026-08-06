@@ -340,7 +340,8 @@ try {
     check(rows > 0, `the ledger lists ${rows} invoice row(s)`);
     const text = await page.evaluate(`document.querySelector("#view-money").innerText`);
     check(/paid|due|overdue/i.test(text), "each row states paid, due or overdue");
-    check(/signed mrr/i.test(text) && /outstanding/i.test(text), "and MRR is separated from what is merely outstanding");
+    check(/signed mrr/i.test(text) && /still owed/i.test(text) && /collected/i.test(text),
+      "MRR, what is still owed and what has actually been collected are three separate figures");
   }
 
   /* ── 8. the audit log ──────────────────────────────────────── */
@@ -356,18 +357,40 @@ try {
     // Now do something worth logging: mark an invoice paid by hand.
     await page.click('#bm-nav [data-view="money"]');
     await page.waitForTimeout(500);
-    const hadUnpaid = await page.evaluate(`!!document.querySelector("[data-inv-pay]")`);
-    check(hadUnpaid, "there is an unpaid invoice to settle");
+    const hadUnpaid = await page.evaluate(`!!document.querySelector("[data-inv-record]")`);
+    check(hadUnpaid, "there is an invoice to record a payment against");
 
     if (hadUnpaid) {
-      await page.click("[data-inv-pay]");
+      /* Record a PART payment first — half of whatever the invoice is for —
+         so the three-state ledger is exercised, not just all-or-nothing. */
+      await page.click("[data-inv-record]");
+      await page.waitForSelector("#f-pay-amount", { timeout: 8000 });
+      const full = Number(await page.inputValue("#f-pay-amount"));
+      await page.fill("#f-pay-amount", String(Math.round(full / 2)));
+      await page.waitForTimeout(300);
+      const partPreview = await page.evaluate(`document.querySelector("#f-pay-preview").innerText`);
+      check(/outstanding/i.test(partPreview), "a part payment says what will be left", partPreview);
+      await page.click('.bm-modal button[type="submit"]');
+      await page.waitForTimeout(2200);
+
+      const ledger = await page.evaluate(`document.querySelector("#bm-inv-list").innerText`);
+      check(/left/i.test(ledger), "the ledger shows the remaining balance, not 'paid'",
+        ledger.slice(0, 140).replace(/\s+/g, " "));
+      check(/received/i.test(ledger), "and states how much has actually arrived");
+
+      // Now settle it in full.
+      await page.click("[data-inv-record]");
+      await page.waitForSelector("#f-pay-amount", { timeout: 8000 });
+      await page.fill("#f-pay-amount", String(full));
+      await page.click('.bm-modal button[type="submit"]');
       await page.waitForTimeout(2200);
 
       await page.click('#bm-nav [data-view="activity"]');
       await page.waitForTimeout(1500);
       const after = await page.evaluate(`document.querySelector("#bm-activity-list").innerText`);
-      check(/invoice\.paid/i.test(after), "the log now carries an invoice.paid entry", after.slice(0, 140).replace(/\s+/g, " "));
+      check(/invoice\.payment/i.test(after), "the log carries an invoice.payment entry", after.slice(0, 140).replace(/\s+/g, " "));
       check(/by hand/i.test(after), "and records that it was settled by hand rather than reconciled");
+      check(/still outstanding/i.test(after), "the part payment was logged with its remaining balance");
       check(/admin@brandmintstudios\.in/i.test(after), "attributed to the account that did it");
       check(!/no entries yet/i.test(after), "and no longer claims to be empty");
     }

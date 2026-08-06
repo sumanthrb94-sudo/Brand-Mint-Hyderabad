@@ -269,7 +269,7 @@ projects/{projectId}    { orgId, name, type, dueAt, progress, billable, mode: bu
                           decidedAt, decidedBy }
   ../scope/{featureId}  { featureId, label, amount, days, order, agreedAt, changedAt,
                           status: agreed|building|delivered|accepted }
-invoices/{invoiceId}    { orgId, label, amount, status: paid|due, dueAt }
+invoices/{invoiceId}    { orgId, label, amount, status: paid|due, dueAt, paidAmount }
 leads/{leadId}          { name, source, stage, createdAt, firstResponseAt, lossReason }
 activity/{id}           { at, actor, actorEmail, action, summary, orgId, target, amount }
 ```
@@ -374,6 +374,31 @@ Refine it on `/quote` when a real one exists. The retainer is created
 `proposed` unless the box is ticked — no path through that form can quietly
 raise MRR.
 
+### Part payments, and the fallback that makes them safe
+
+`paidAmount` is how much has actually ARRIVED against an invoice. `status`
+stays `paid | due` and is kept in step, because the client portal, `/api` and
+every invoice written before this all depend on it.
+
+**Read it with `invoiceReceived()`, never directly.** An invoice with no
+`paidAmount` is read from its status — paid means the full amount arrived,
+which is exactly what it meant before. Reading the missing field as `0` would
+have wiped every rupee already collected off the Money view the moment this
+shipped. `invoiceState()` returns `due | part | paid`; two states could not
+describe a half-paid invoice without lying in one direction or the other.
+
+`recordPayment()` takes the **total received**, not "add this payment". A
+running total is one number that can be checked against a bank statement, and
+submitting the same figure twice cannot double it. `status` is derived inside
+that function so it can never disagree with the amount.
+
+**Online payment stays all-or-nothing.** `api/payments/create-order.js` charges
+`invoice.amount` and `verify.js` requires the payment to match it exactly, so a
+part-paid invoice must not offer *Pay now* — it would charge the whole thing
+again. The portal shows the balance and says it is settled by transfer.
+Changing that means changing the amount check in `verify.js`, which is the
+control that stops underpayment, so do not do it casually.
+
 ### The three fields that carry the most weight
 
 - **`milestone.owner`** (`us | client`) turns "the project is late" into "the
@@ -464,7 +489,7 @@ list of records, and a detail drawer for the one you picked.**
 | Pipeline | leads as a kanban by stage, moved with two buttons; funnel/source/loss against the playbook below |
 | Clients | one row per organisation → drawer: retainer, onboarding, projects, invoices, login. **New engagement** creates all of it in one screen |
 | Delivery | one row per project → drawer: agreed scope, milestones, intake, deliverables |
-| Money | **the invoice ledger** plus retainers |
+| Money | **the invoice ledger** plus retainers. One *Record payment* control per invoice takes the total received, so a part payment is a number rather than a lie in one direction |
 | Access | client logins, and the existing ones listed |
 
 `/` or `⌘K` opens a command palette over every client, project, lead and

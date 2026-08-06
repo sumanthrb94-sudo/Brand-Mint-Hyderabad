@@ -958,3 +958,24 @@
   width: 100%;
 }
 .bm-seg--wrap button { flex: 1 1 auto; min-height: 40px; }
+
+/* A list row on a phone.
+   The row is a two-column grid — content, then actions — and on a 390px screen
+   a row carrying a status pill and two buttons was taking more than half the
+   width for its controls, leaving the invoice title to wrap over four lines
+   against the left edge. Seen on a real handset, not in a simulator.
+
+   Below 620px the row becomes one column: the record on top, its controls
+   underneath on their own line. Same markup, same handlers — only the axis
+   changes, so there is no phone-only code path to rot. */
+@media (max-width: 620px) {
+  .bm-listrow,
+  .bm-listrow--withmono {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 10px;
+  }
+  .bm-listrow--withmono .bm-mono { display: none; }
+  .bm-listrow-right { justify-content: flex-start; flex-wrap: wrap; }
+  .bm-listrow-chev { display: none; }
+  .bm-listrow-title { font-size: 15px; }
+}

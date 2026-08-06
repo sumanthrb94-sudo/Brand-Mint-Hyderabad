@@ -193,6 +193,7 @@
         mountThemeToggle, syncPayments, paymentError,
         logActivity, getActivity,
         DEAL_TYPES, createEngagement, monthlyIncome, projectRunRate, projectMode,
+        invoiceReceived, invoiceOutstanding, invoiceState, recordPayment,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
 
@@ -294,7 +295,8 @@
         const signed = S.orgs.filter((o) => o.kind === "client" && o.status === "active" && o.retainerStatus === "signed");
         const mrr = signed.reduce((s, o) => s + (Number(o.retainer) || 0), 0);
         const inKind = signed.reduce((s, o) => s + (Number(o.retainerInKind) || 0), 0);
-        const unpaid = S.invoices.filter((i) => i.status !== "paid");
+        // Anything not settled in full, including part-paid.
+        const unpaid = S.invoices.filter((i) => invoiceState(i) !== "paid");
         /* Retainers AND live build income. A ten-week six-lakh build is not
            zero just because it is not recurring, and a gauge that showed zero
            for it would say the studio is failing during its best quarter. The
@@ -305,8 +307,12 @@
         });
         return {
           income, mrr, inKind, gap: BREAK_EVEN_MONTHLY - income.total,
-          unpaid, unpaidTotal: unpaid.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-          paidTotal: S.invoices.filter((i) => i.status === "paid").reduce((s, i) => s + (Number(i.amount) || 0), 0),
+          unpaid,
+          // The BALANCE outstanding, not the face value of unsettled invoices.
+          // A ₹3,00,000 invoice with ₹1,50,000 received owes ₹1,50,000, and
+          // reporting the full face value would chase money already banked.
+          unpaidTotal: S.invoices.reduce((s, i) => s + invoiceOutstanding(i), 0),
+          paidTotal: S.invoices.reduce((s, i) => s + invoiceReceived(i), 0),
         };
       }
 
@@ -1167,23 +1173,79 @@
 
       function invoiceRow(i) {
         const org = S.orgById[i.orgId];
-        const overdueDays = i.status !== "paid" ? daysSince(i.dueAt) : null;
+        const state = invoiceState(i);
+        const received = invoiceReceived(i);
+        const owed = invoiceOutstanding(i);
+        const overdueDays = state !== "paid" ? daysSince(i.dueAt) : null;
         const overdue = overdueDays !== null && overdueDays > 0;
+
+        const pill = state === "paid" ? { tone: "bm-pill--green", text: "paid" }
+          : state === "part" ? { tone: "bm-pill--amber", text: `${escapeHtml(formatINR(owed))} left` }
+          : overdue ? { tone: "bm-pill--red", text: `${overdueDays}d overdue` }
+          : { tone: "bm-pill--amber", text: "due" };
+
         return `<div class="bm-listrow" style="cursor:default;">
           <span class="bm-listrow-main">
             <span class="bm-listrow-title">${escapeHtml(i.label || "Invoice")} — ${escapeHtml(formatINR(i.amount))}</span>
             <span class="bm-listrow-sub">${escapeHtml(org?.name || i.orgId)}${
-              i.dueAt ? ` · due ${escapeHtml(formatDate(i.dueAt))}` : " · no due date"}</span>
+              i.dueAt ? ` · due ${escapeHtml(formatDate(i.dueAt))}` : " · no due date"}${
+              state === "part" ? ` · ${escapeHtml(formatINR(received))} received` : ""}</span>
           </span>
           <span class="bm-listrow-right">
-            <span class="bm-pill ${i.status === "paid" ? "bm-pill--green" : overdue ? "bm-pill--red" : "bm-pill--amber"}">${
-              i.status === "paid" ? "paid" : overdue ? `${overdueDays}d overdue` : "due"}</span>
-            ${i.status === "paid"
-              ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-inv-unpay="${escapeHtml(i.id)}">Mark unpaid</button>`
-              : `<button type="button" class="bm-btn bm-btn--sm" data-inv-pay="${escapeHtml(i.id)}">Mark paid</button>`}
+            <span class="bm-pill ${pill.tone}">${pill.text}</span>
+            <button type="button" class="bm-btn bm-btn--sm" data-inv-record="${escapeHtml(i.id)}">Record payment</button>
             <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-inv-del="${escapeHtml(i.id)}">Delete</button>
           </span>
         </div>`;
+      }
+
+      /* ONE control for every payment case. It used to be two buttons that
+         swapped — Mark paid / Mark unpaid — which could only ever express
+         all-or-nothing, and crowded the row on a phone besides. This asks for
+         the total received, pre-filled with the full amount, so settling in
+         full is still one tap and a part payment is a number. */
+      function recordPaymentFor(id) {
+        const inv = S.invoices.find((x) => x.id === id);
+        if (!inv) return;
+        const amount = Number(inv.amount) || 0;
+        const received = invoiceReceived(inv);
+
+        modal({
+          title: "Record payment",
+          note: `<strong>${escapeHtml(inv.label || "Invoice")}</strong> for ${escapeHtml(S.orgById[inv.orgId]?.name || inv.orgId)} — ${escapeHtml(formatINR(amount))}.
+                 By hand is for cash and bank transfers; anything paid online should come through <em>Sync payments</em>, which asks Razorpay what it was actually paid.`,
+          submitLabel: "Record",
+          body: `
+            <div class="bm-field">
+              <label for="f-pay-amount">Total received so far (Rs)</label>
+              <input id="f-pay-amount" type="number" min="0" step="500" max="${amount}" value="${received || amount}" required />
+              <span class="bm-row-sub">
+                The running total, not just today's payment — so typing it twice cannot double it.
+                ${received ? `Currently recorded: ${escapeHtml(formatINR(received))}.` : ""}
+                Enter 0 to put it back to unpaid.
+              </span>
+            </div>
+            <p class="bm-hint" id="f-pay-preview"></p>`,
+          onReady: (form) => {
+            const draw = () => {
+              const v = Number(form.querySelector("#f-pay-amount").value) || 0;
+              const left = Math.max(0, amount - v);
+              form.querySelector("#f-pay-preview").innerHTML =
+                v <= 0 ? "Marks this invoice <strong>unpaid</strong>."
+                : v >= amount ? "Settles this invoice <strong>in full</strong>."
+                : `Leaves <strong>${escapeHtml(formatINR(left))}</strong> outstanding. The client sees the balance, not a paid invoice.`;
+            };
+            form.addEventListener("input", draw);
+            draw();
+          },
+          onSubmit: async () => {
+            const r = await recordPayment(id, Number($("f-pay-amount").value));
+            await logActivity("invoice.payment",
+              `Recorded by hand: ${inv.label || id} for ${S.orgById[inv.orgId]?.name || inv.orgId} — ` +
+              `${formatINR(r.received)} of ${formatINR(r.amount)}${r.outstanding ? `, ${formatINR(r.outstanding)} still outstanding` : ", settled in full"}`,
+              { orgId: inv.orgId || null, target: inv.label || id, amount: r.received });
+          },
+        });
       }
 
       RENDER.money = () => {
@@ -1214,16 +1276,16 @@
               <p class="bm-tile-sub">Break-even is ${escapeHtml(inr(BREAK_EVEN_MONTHLY))}/month</p>
             </div>
             <div class="bm-tile">
-              <p class="bm-tile-label">Outstanding</p>
+              <p class="bm-tile-label">Still owed</p>
               <p class="bm-tile-value ${m.unpaid.length ? "bm-tile-value--red" : ""}">${escapeHtml(inr(m.unpaidTotal))}</p>
               <p class="bm-tile-sub">${S.invoices.length === 0
                 ? "No invoices raised yet — empty, not settled."
-                : `${m.unpaid.length} unpaid of ${S.invoices.length}`}</p>
+                : `${m.unpaid.length} of ${S.invoices.length} not settled in full`}</p>
             </div>
             <div class="bm-tile">
               <p class="bm-tile-label">Collected</p>
               <p class="bm-tile-value">${escapeHtml(inr(m.paidTotal))}</p>
-              <p class="bm-tile-sub">${S.invoices.length === 0 ? "Nothing raised yet" : "Across all invoices ever raised"}</p>
+              <p class="bm-tile-sub">${S.invoices.length === 0 ? "Nothing raised yet" : "Money actually received, part payments included"}</p>
             </div>
           </div>
 
@@ -1887,25 +1949,7 @@
           }
 
           /* --- invoices --- */
-          if (d.invPay) {
-            if (!confirm("Mark this invoice paid? Do this only for cash or a bank transfer you have actually received — for online payments use Sync payments instead.")) return;
-            btn.disabled = true;
-            const inv = S.invoices.find((x) => x.id === d.invPay) || {};
-            await updateInvoice(d.invPay, { status: "paid" });
-            await logActivity("invoice.paid",
-              `Marked paid BY HAND: ${inv.label || d.invPay} for ${S.orgById[inv.orgId]?.name || inv.orgId} — ${formatINR(inv.amount || 0)}`,
-              { orgId: inv.orgId || null, target: inv.label || d.invPay, amount: Number(inv.amount) || null });
-            return refresh();
-          }
-          if (d.invUnpay) {
-            if (!confirm("Mark this invoice unpaid again?")) return;
-            const uinv = S.invoices.find((x) => x.id === d.invUnpay) || {};
-            await updateInvoice(d.invUnpay, { status: "due" });
-            await logActivity("invoice.unpaid",
-              `Reverted to unpaid: ${uinv.label || d.invUnpay} — ${formatINR(uinv.amount || 0)}`,
-              { orgId: uinv.orgId || null, target: uinv.label || d.invUnpay, amount: Number(uinv.amount) || null });
-            return refresh();
-          }
+          if (d.invRecord) return recordPaymentFor(d.invRecord);
           if (d.invDel) {
             if (!confirm("Delete this invoice? The client stops seeing it.")) return;
             const dinv = S.invoices.find((x) => x.id === d.invDel) || {};

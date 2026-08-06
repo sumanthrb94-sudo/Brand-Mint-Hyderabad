@@ -237,3 +237,70 @@ test("scope with amounts but no days cannot divide by zero", () => {
   const got = monthlyIncome({ orgs, projects, scopeByProject: { p1: [line("building", 0, 500000)] } });
   assert.ok(Number.isFinite(got.project), `got ${got.project}`);
 });
+
+/* ── part payments ────────────────────────────────────────────────
+   `status` was binary and a ₹1,50,000 transfer against a ₹3,00,000 invoice had
+   nowhere to go: marking it paid overstates collected cash, leaving it due
+   understates it and tells the client their money vanished.
+
+   The fallback is the property that matters most here. Every invoice written
+   before `paidAmount` existed has no such field, and reading a missing number
+   as 0 would have wiped every rupee already collected off the Money view the
+   moment this shipped — a silent, total loss of the only figure the studio
+   checks against its bank statement. */
+
+const inv = await import(
+  "data:text/javascript," +
+    encodeURIComponent([lift("invoiceReceived"), lift("invoiceOutstanding"), lift("invoiceState")].join("\n"))
+);
+const { invoiceReceived, invoiceOutstanding, invoiceState } = inv;
+
+test("an OLD paid invoice with no paidAmount still reads as fully received", () => {
+  // The migration case. If this ever returns 0, collected revenue vanishes.
+  const old = { amount: 80000, status: "paid" };
+  assert.equal(invoiceReceived(old), 80000);
+  assert.equal(invoiceOutstanding(old), 0);
+  assert.equal(invoiceState(old), "paid");
+});
+
+test("an old due invoice with no paidAmount has received nothing", () => {
+  const old = { amount: 80000, status: "due" };
+  assert.equal(invoiceReceived(old), 0);
+  assert.equal(invoiceOutstanding(old), 80000);
+  assert.equal(invoiceState(old), "due");
+});
+
+test("a part payment is neither due nor paid", () => {
+  const p = { amount: 300000, status: "due", paidAmount: 150000 };
+  assert.equal(invoiceReceived(p), 150000);
+  assert.equal(invoiceOutstanding(p), 150000);
+  assert.equal(invoiceState(p), "part");
+});
+
+test("paidAmount of 0 is respected, not treated as absent", () => {
+  // A deliberate reset back to unpaid. `0` is falsy, so a naive `||` here
+  // would fall through to the status and could report it as paid.
+  assert.equal(invoiceReceived({ amount: 5000, status: "due", paidAmount: 0 }), 0);
+  assert.equal(invoiceState({ amount: 5000, status: "due", paidAmount: 0 }), "due");
+});
+
+test("received can never exceed the invoice, whatever the document says", () => {
+  // Defence against a bad write: the ledger must not report more collected
+  // than was ever billed.
+  const over = { amount: 10000, status: "paid", paidAmount: 999999 };
+  assert.equal(invoiceReceived(over), 10000);
+  assert.equal(invoiceOutstanding(over), 0);
+  assert.equal(invoiceState(over), "paid");
+});
+
+test("a zero-amount invoice cannot be 'paid' by arithmetic accident", () => {
+  assert.equal(invoiceState({ amount: 0, status: "due" }), "due");
+  assert.equal(invoiceOutstanding({ amount: 0, status: "due" }), 0);
+});
+
+test("a missing or malformed invoice is zero, not NaN", () => {
+  assert.equal(invoiceReceived(null), 0);
+  assert.equal(invoiceReceived(undefined), 0);
+  assert.equal(invoiceOutstanding(null), 0);
+  assert.ok(Number.isFinite(invoiceReceived({ amount: "abc", status: "paid" })));
+});

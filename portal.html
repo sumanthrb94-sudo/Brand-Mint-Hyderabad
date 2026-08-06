@@ -114,6 +114,9 @@
         daysSince,
         formatDate,
         formatINR,
+        invoiceState,
+        invoiceReceived,
+        invoiceOutstanding,
         escapeHtml,
         safeUrl,
         SERVICE_TYPES,
@@ -333,17 +336,36 @@
         invBody.innerHTML = invoices.length
           ? invoices
               .map(
-                (inv) => `<tr class="${inv.status === "due" ? "bm-row--highlight" : ""}">
+                (inv) => {
+                  /* Three states, because two cannot describe a part-paid
+                     invoice without lying to the client in one direction or
+                     the other: "due" says their transfer vanished, "paid" says
+                     they owe nothing. */
+                  const state = invoiceState(inv);
+                  const owed = invoiceOutstanding(inv);
+                  const received = invoiceReceived(inv);
+                  return `<tr class="${state === "due" ? "bm-row--highlight" : ""}">
                   <td>${escapeHtml(inv.label)}</td>
-                  <td>${formatINR(inv.amount)}</td>
-                  <td><span class="bm-pill ${inv.status === "due" ? "bm-pill--red" : "bm-pill--green"}">${escapeHtml(inv.status)}</span></td>
+                  <td>${formatINR(inv.amount)}${
+                    state === "part" ? `<br><span class="bm-row-sub">${formatINR(received)} received</span>` : ""}</td>
+                  <td><span class="bm-pill ${
+                    state === "paid" ? "bm-pill--green" : state === "part" ? "bm-pill--amber" : "bm-pill--red"
+                  }">${state === "part" ? `${formatINR(owed)} left` : escapeHtml(state)}</span></td>
                   <td>${formatDate(inv.dueAt)}</td>
                   <td style="text-align:right">${
-                    inv.status === "due" && Number(inv.amount) > 0
+                    /* Online payment is all-or-nothing: /api/payments charges
+                       the invoice's full amount and verify.js requires the
+                       payment to match it exactly. Offering Pay now on a
+                       part-paid invoice would charge the whole thing again, so
+                       the balance is settled the way the first part was. */
+                    state === "due" && Number(inv.amount) > 0
                       ? `<button class="bm-btn bm-btn--sm" data-pay="${escapeHtml(inv.id)}">Pay now</button>`
-                      : ""
+                      : state === "part"
+                        ? `<span class="bm-row-sub">Balance by transfer</span>`
+                        : ""
                   }</td>
-                </tr>`
+                </tr>`;
+                }
               )
               .join("")
           : '<tr><td colspan="5" class="bm-empty">No invoices yet.</td></tr>';

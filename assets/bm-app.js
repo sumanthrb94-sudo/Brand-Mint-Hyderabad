@@ -1347,6 +1347,85 @@ export async function createInvoice({ orgId, label, amount, dueAt }) {
   return ref.id;
 }
 
+/* --- Part payments --------------------------------------------------------
+ *
+ * `status` was binary — paid or due — and a bank transfer of ₹1,50,000 against
+ * a ₹3,00,000 invoice had nowhere to go. Marking it paid overstates collected
+ * cash by ₹1,50,000; leaving it due understates it by the same amount and
+ * tells the client their money vanished. Both are the dashboard lying.
+ *
+ * So invoices gain `paidAmount`: how much has actually ARRIVED. `status` is
+ * kept in step (`paid` once it is settled in full) because the client portal,
+ * /api/payments and every existing invoice already depend on it.
+ */
+
+/**
+ * How much has arrived against this invoice.
+ *
+ * THE FALLBACK IS THE WHOLE POINT. Every invoice written before `paidAmount`
+ * existed has no such field, and reading a missing number as 0 would wipe
+ * every rupee already collected off the Money view the moment this shipped.
+ * So an invoice with no `paidAmount` is read from its status: paid means the
+ * full amount arrived, which is exactly what it meant before.
+ */
+export function invoiceReceived(inv) {
+  if (!inv) return 0;
+  const amount = Number(inv.amount) || 0;
+  if (inv.paidAmount === undefined || inv.paidAmount === null) {
+    return inv.status === "paid" ? amount : 0;
+  }
+  // Never report more received than was invoiced, whatever is in the document.
+  return Math.max(0, Math.min(amount, Number(inv.paidAmount) || 0));
+}
+
+export function invoiceOutstanding(inv) {
+  return Math.max(0, (Number(inv?.amount) || 0) - invoiceReceived(inv));
+}
+
+/** `due` · `part` · `paid`. Three states, because two could not describe a
+ *  half-paid invoice without lying in one direction or the other. */
+export function invoiceState(inv) {
+  const amount = Number(inv?.amount) || 0;
+  const received = invoiceReceived(inv);
+  if (received <= 0) return "due";
+  if (amount > 0 && received >= amount) return "paid";
+  return "part";
+}
+
+/**
+ * Record how much has arrived IN TOTAL against an invoice.
+ *
+ * Total, not "add this payment". A running total is one number a person can
+ * check against their bank statement; an append-only sequence of increments
+ * cannot be corrected without a second concept. Typing the same figure twice
+ * is therefore harmless, which is the property that matters when a form is
+ * submitted twice on a bad connection.
+ *
+ * `status` is derived here rather than passed in, so it can never disagree
+ * with the amount — the disagreement being the only way this could quietly
+ * corrupt the Money view.
+ */
+export async function recordPayment(invoiceId, totalReceived) {
+  const snap = await getDoc(doc(db, "invoices", invoiceId));
+  if (!snap.exists()) throw new Error("That invoice no longer exists.");
+  const amount = Number(snap.data().amount) || 0;
+
+  const received = Number(totalReceived);
+  if (!Number.isFinite(received) || received < 0) throw new Error("Enter an amount of zero or more.");
+  if (received > amount) {
+    throw new Error(
+      `That is more than the invoice. ${formatINR(received)} against a ${formatINR(amount)} invoice — ` +
+      `raise a second invoice for the extra rather than overstating this one.`
+    );
+  }
+
+  await updateDoc(doc(db, "invoices", invoiceId), {
+    paidAmount: received,
+    status: amount > 0 && received >= amount ? "paid" : "due",
+  });
+  return { amount, received, outstanding: Math.max(0, amount - received) };
+}
+
 export async function updateInvoice(invoiceId, data) {
   await updateDoc(doc(db, "invoices", invoiceId), data);
 }
