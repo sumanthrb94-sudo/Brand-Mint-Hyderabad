@@ -75,27 +75,15 @@
           </button>
           <button type="button" data-view="pipeline">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
-            Pipeline<span class="bm-crm-count" id="bm-n-pipeline" hidden></span>
+            Leads<span class="bm-crm-count" id="bm-n-pipeline" hidden></span>
           </button>
           <button type="button" data-view="clients">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 11.2A3 3 0 0 0 16 5.4M17.5 19a5 5 0 0 0-2-4"/></svg>
             Clients<span class="bm-crm-count" id="bm-n-clients" hidden></span>
           </button>
-          <button type="button" data-view="delivery">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2.2"/></svg>
-            Delivery<span class="bm-crm-count" id="bm-n-delivery" hidden></span>
-          </button>
           <button type="button" data-view="money">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.4"/></svg>
             Money<span class="bm-crm-count" id="bm-n-money" hidden></span>
-          </button>
-          <button type="button" data-view="access">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.5" width="16" height="9.5" rx="2.2"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/></svg>
-            Access
-          </button>
-          <button type="button" data-view="activity">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6h5"/></svg>
-            Activity
           </button>
         </nav>
 
@@ -112,6 +100,10 @@
           <button type="button" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg>
             Playbooks
+          </button>
+          <button type="button" data-view="activity">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6h5"/></svg>
+            Activity log
           </button>
           <button type="button" id="bm-sync-payments">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14-4M4 13a8 8 0 0 0 14 4"/><path d="M20 4v5h-5M4 20v-5h5"/></svg>
@@ -159,9 +151,7 @@
         <section class="bm-view" id="view-today" hidden></section>
         <section class="bm-view" id="view-pipeline" hidden></section>
         <section class="bm-view" id="view-clients" hidden></section>
-        <section class="bm-view" id="view-delivery" hidden></section>
         <section class="bm-view" id="view-money" hidden></section>
-        <section class="bm-view" id="view-access" hidden></section>
         <section class="bm-view" id="view-activity" hidden></section>
       </main>
     </div>
@@ -194,8 +184,10 @@
         logActivity, getActivity,
         DEAL_TYPES, createEngagement, monthlyIncome, projectRunRate, projectMode,
         invoiceReceived, invoiceOutstanding, invoiceState, recordPayment,
+        deleteClient, setClientUser as grantLogin, invoiceRef, updateScopeLine,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
+      import { openInvoice } from "/assets/bm-invoice.js";
 
       /* ── motion, optional by construction ────────────────────────
          Every call site goes through `mo`, which starts as a no-op object and
@@ -320,11 +312,9 @@
 
       const VIEW_META = {
         today:    { title: "Today", sub: "What needs you, computed from your own data" },
-        pipeline: { title: "Pipeline", sub: "Leads, first response, and the plan they are measured against" },
-        clients:  { title: "Clients", sub: "Every organisation, and where each one stands" },
-        delivery: { title: "Delivery", sub: "Projects, scope, blockers and approvals" },
+        pipeline: { title: "Leads", sub: "First response, and the plan they are measured against" },
+        clients:  { title: "Clients", sub: "Everything about a client in one place" },
         money:    { title: "Money", sub: "Retainers and the invoice ledger" },
-        access:   { title: "Access", sub: "Who can sign in to a client portal" },
         activity: { title: "Activity", sub: "Append-only. Nobody can edit or delete an entry, including you." },
       };
 
@@ -335,7 +325,6 @@
         const counts = {
           "bm-n-pipeline": openLeads.length,
           "bm-n-clients": S.orgs.filter((o) => o.kind === "client" && o.status === "active").length,
-          "bm-n-delivery": activeProjects.length,
           "bm-n-money": m.unpaid.length,
         };
         for (const [id, n] of Object.entries(counts)) {
@@ -359,7 +348,7 @@
           const el = $(`view-${key}`);
           if (el) el.hidden = key !== view;
         }
-        document.querySelectorAll("#bm-nav button").forEach((b) => {
+        document.querySelectorAll("[data-view]").forEach((b) => {
           b.setAttribute("aria-current", b.dataset.view === view ? "page" : "false");
         });
 
@@ -372,7 +361,11 @@
         if (animate) mo.view($(`view-${view}`));
       }
 
-      $("bm-nav").addEventListener("click", (e) => {
+      /* Delegated on the whole sidebar, not on #bm-nav.
+         Activity moved down into Tools when the sections were cut from seven to
+         four, which put it outside #bm-nav — and a listener bound to that one
+         element meant the button rendered, looked live, and did nothing. */
+      document.querySelector(".bm-crm-side").addEventListener("click", (e) => {
         const b = e.target.closest("[data-view]");
         if (!b) return;
         mo.tap(b);
@@ -497,7 +490,7 @@
         if (blocked.length) {
           const worst = [...blocked].sort((a, b) => (b.oldestOpenDays || 0) - (a.oldestOpenDays || 0))[0];
           items.push({
-            tone: (worst.oldestOpenDays || 0) >= 7 ? "bad" : "warn", goto: "delivery",
+            tone: (worst.oldestOpenDays || 0) >= 7 ? "bad" : "warn", goto: "clients",
             what: `${blocked.length} project${blocked.length === 1 ? " is" : "s are"} waiting on the client`,
             why: `Oldest is ${worst.name} at ${worst.oldestOpenDays ?? 0} day${worst.oldestOpenDays === 1 ? "" : "s"}. The portal is already showing them, dated — you do not need to send a chasing message.`,
           });
@@ -505,14 +498,14 @@
 
         const approvals = facts.filter((d) => d.awaitingApproval > 0);
         if (approvals.length) items.push({
-          tone: "warn", goto: "delivery",
+          tone: "warn", goto: "clients",
           what: `${approvals.reduce((s, d) => s + d.awaitingApproval, 0)} deliverable${approvals.reduce((s, d) => s + d.awaitingApproval, 0) === 1 ? " is" : "s are"} sitting in review`,
           why: "The client has them and has not decided. One click on their portal clears each one.",
         });
 
         const dupes = facts.filter((d) => d.duplicateIntake > 0);
         if (dupes.length) items.push({
-          tone: "bad", goto: "delivery",
+          tone: "bad", goto: "clients",
           what: `${dupes.length} project${dupes.length === 1 ? " has" : "s have"} duplicate requests on the client's list`,
           why: "The same request several times reads as broken, and a client who decides the list is broken ignores all of it. Open the project and use Remove duplicates.",
         });
@@ -527,7 +520,7 @@
            asked for is just as stalled as a build with nothing asked for. */
         const noIntake = facts.filter((d) => d.intake.length === 0);
         if (noIntake.length) items.push({
-          tone: "warn", goto: "delivery",
+          tone: "warn", goto: "clients",
           what: `${noIntake.length} project${noIntake.length === 1 ? " has" : "s have"} nothing raised with the client`,
           why: `The portal is the thing that chases them, dated, so you do not have to — and with no requests on it there is nothing to chase. ${noIntake.length === 1 ? "It is" : "They are"} ${noIntake.map((d) => d.name).slice(0, 3).join(", ")}${noIntake.length > 3 ? ` and ${noIntake.length - 3} more` : ""}.`,
         });
@@ -551,7 +544,7 @@
            nag is scoped to builds. */
         const unscheduled = facts.filter((d) => d.milestones.length === 0 && d.mode !== "retainer");
         if (unscheduled.length) items.push({
-          tone: "warn", goto: "delivery",
+          tone: "warn", goto: "clients",
           what: `${unscheduled.length} project${unscheduled.length === 1 ? " has" : "s have"} no milestones`,
           why: "The client cannot see where the project is going, and delivery health cannot tell you whether it is late. Apply a template with a real start date.",
         });
@@ -830,7 +823,13 @@
           const completed = ONBOARDING_STEPS.filter((s) => done[s.id]).length;
           const next = ONBOARDING_STEPS.find((s) => !done[s.id]);
           const theirs = S.projects.filter((p) => p.orgId === o.id);
-          const unpaid = S.invoices.filter((i) => i.orgId === o.id && i.status !== "paid");
+          const unpaid = S.invoices.filter((i) => i.orgId === o.id && invoiceState(i) !== "paid");
+          const owed = S.invoices.filter((i) => i.orgId === o.id).reduce((n, i) => n + invoiceOutstanding(i), 0);
+          // Delivery is no longer its own section, so the oldest blocker shows here.
+          const blocked = theirs
+            .map((p) => S.detail[p.id]?.openIntake ? (S.detail[p.id]?.oldestOpenDays ?? 0) : null)
+            .filter((x) => x !== null)
+            .sort((a, b) => b - a)[0] || 0;
           const tone = o.retainerStatus === "signed" ? "bm-pill--green"
                      : o.retainerStatus === "proposed" ? "bm-pill--amber" : "bm-pill--muted";
           return `<button type="button" class="bm-listrow bm-listrow--withmono" data-org="${escapeHtml(o.id)}">
@@ -838,7 +837,8 @@
             <span class="bm-listrow-main">
               <span class="bm-listrow-title">${escapeHtml(o.name || "Unnamed")}</span>
               <span class="bm-listrow-sub">${theirs.length} project${theirs.length === 1 ? "" : "s"}${
-                unpaid.length ? ` · ${unpaid.length} unpaid invoice${unpaid.length === 1 ? "" : "s"}` : ""
+                blocked ? ` · <strong>${blocked}d waiting on them</strong>` : ""
+              }${unpaid.length ? ` · ${escapeHtml(formatINR(owed))} owed` : ""
               }${next ? ` · next: ${escapeHtml(next.label.toLowerCase())}` : " · fully onboarded"}</span>
             </span>
             <span class="bm-listrow-right">
@@ -958,6 +958,9 @@
 
             <div class="bm-drawer-sec">
               <h4>Invoices</h4>
+              <div class="bm-inline-form" style="margin-bottom:10px;">
+                <button type="button" class="bm-btn bm-btn--sm" data-new="invoice">Raise an invoice</button>
+              </div>
               ${invs.length ? `<div class="bm-list">${invs.map(invoiceRow).join("")}</div>`
                 : `<p class="bm-empty">No invoices raised. That is empty, not settled.</p>`}
             </div>
@@ -965,8 +968,56 @@
             <div class="bm-drawer-sec">
               <h4>Portal login</h4>
               ${logins.length
-                ? `<dl class="bm-facts">${logins.map((u) => `<dt>${escapeHtml(u.name || "—")}</dt><dd>${escapeHtml(u.username || "—")}</dd>`).join("")}</dl>`
-                : `<p class="bm-empty">No login yet — they cannot see anything. Create one under Access.</p>`}
+                ? `<dl class="bm-facts">${logins.map((u) => `
+                    <dt>${escapeHtml(u.name || "—")}</dt>
+                    <dd>${escapeHtml(u.username || "—")}@brandmintstudios.in</dd>`).join("")}</dl>
+                   <p class="bm-hint" style="margin-top:10px;">
+                     They can sign in and see this client's work, and nothing else.</p>
+                   <!-- The confirmation lands here after the drawer re-renders.
+                        Granting a login flips this section from the FORM branch to
+                        this one, so a status element that only existed on the form
+                        left the message with nowhere to go and the screen went
+                        silent — the same failure as before, one layer further in. -->
+                   <p class="bm-status" id="bm-a-status" hidden></p>`
+                : `<p class="bm-empty" style="margin-bottom:12px;">
+                     No login yet — they can see nothing at all.</p>
+                   <ol style="margin:0 0 14px;padding-left:20px;font-size:13px;color:var(--bm-muted);line-height:1.55;">
+                     <li>Firebase Console → Authentication → Users → Add user, with the email below. Set the password there.</li>
+                     <li>Copy the UID and paste it here.</li>
+                   </ol>
+                   <div class="bm-field">
+                     <label for="bm-a-username">Username</label>
+                     <input id="bm-a-username" autocapitalize="none" spellcheck="false"
+                       value="${escapeHtml(String(o.name || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 20))}" />
+                     <span class="bm-row-sub" id="bm-a-preview">Signs in as —</span>
+                   </div>
+                   <div class="bm-field">
+                     <label for="bm-a-name">Display name</label>
+                     <input id="bm-a-name" value="${escapeHtml(o.name || "")}" />
+                   </div>
+                   <div class="bm-field">
+                     <label for="bm-a-uid">Firebase Auth UID</label>
+                     <input id="bm-a-uid" placeholder="paste the UID from the console" />
+                   </div>
+                   <button type="button" class="bm-btn bm-btn--sm" data-grant-login="${escapeHtml(o.id)}">Give them access</button>
+                   <p class="bm-status" id="bm-a-status" hidden></p>
+                   <p class="bm-hint" style="margin-top:10px;">
+                     This form never asks for a password and never will. The password exists
+                     only in the Firebase Console.</p>`}
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Danger</h4>
+              <p class="bm-hint" style="margin-bottom:10px;">
+                <strong>Archive</strong> keeps the history and stops them counting towards anything —
+                use it when an engagement ends. <strong>Delete</strong> removes the client, their
+                ${theirs.length} project${theirs.length === 1 ? "" : "s"},
+                ${invs.length} invoice${invs.length === 1 ? "" : "s"} and every milestone, request
+                and deliverable under them. It cannot be undone.
+              </p>
+              <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-org-delete="${escapeHtml(o.id)}">
+                Delete ${escapeHtml(o.name || "this client")} and everything in it
+              </button>
             </div>`,
         });
       }
@@ -975,71 +1026,6 @@
          DELIVERY
          ══════════════════════════════════════════════════════════ */
 
-      RENDER.delivery = () => {
-        const projects = [...S.projects].sort((a, b) =>
-          (S.orgById[a.orgId]?.name || "").localeCompare(S.orgById[b.orgId]?.name || ""));
-
-        const row = (p) => {
-          const d = S.detail[p.id];
-          if (!d) return "";
-          const orgName = S.orgById[p.orgId]?.name || p.orgId;
-          const prog = scopeProgress(d.scope);
-
-          // Empty is not on-track. A project with no milestones and no scope
-          // must never render like one that is finished.
-          let health, tone;
-          const isRetainer = projectMode(p, S.orgById[p.orgId], d.scope) === "retainer";
-          if (isRetainer) {
-            health = d.openIntake ? `${d.oldestOpenDays ?? 0}d blocked` : "Ongoing";
-            tone = d.openIntake ? ageTone(d.oldestOpenDays) : "bm-pill--green";
-          }
-          else if (!d.milestones.length && !d.scope.length) { health = "Not set up"; tone = "bm-pill--muted"; }
-          else if (d.openIntake) { health = `${d.oldestOpenDays ?? 0}d blocked`; tone = ageTone(d.oldestOpenDays); }
-          else if (!d.next) { health = "Milestones complete"; tone = "bm-pill--green"; }
-          else { health = d.next.owner === "client" ? "Waiting on client" : "With us"; tone = d.next.owner === "client" ? "bm-pill--amber" : "bm-pill--muted"; }
-
-          return `<button type="button" class="bm-listrow bm-listrow--withmono" data-project="${escapeHtml(p.id)}">
-            <span class="bm-mono" aria-hidden="true">${escapeHtml(initials(orgName))}</span>
-            <span class="bm-listrow-main">
-              <span class="bm-listrow-title">${escapeHtml(p.name || orgName)}</span>
-              <span class="bm-listrow-sub">${escapeHtml(orgName)} · ${
-                isRetainer ? `${escapeHtml(formatINR(S.orgById[p.orgId]?.retainer || 0))}/mo retainer`
-                           : escapeHtml(TYPE_LABEL[p.type] || "type not set")} · ${
-                d.next ? `next: ${escapeHtml(d.next.title || "untitled")} ${escapeHtml(formatDate(d.next.dueAt))}`
-                       : isRetainer ? "no end date, by design" : "no milestone pending"}</span>
-            </span>
-            <span class="bm-listrow-right">
-              ${d.awaitingApproval ? `<span class="bm-pill bm-pill--amber">${d.awaitingApproval} in review</span>` : ""}
-              <span class="bm-pill bm-pill--muted">${isRetainer ? "retainer" : prog === null ? "no scope" : `${prog}%`}</span>
-              <span class="bm-pill ${tone}">${escapeHtml(health)}</span>
-              ${chev}
-            </span>
-          </button>`;
-        };
-
-        $("view-delivery").innerHTML = `
-          <div class="bm-view-head">
-            <div>
-              <h2>Delivery</h2>
-              <p>One row per project. Open one to work on it — scope, milestones, what you are
-                 waiting on the client for, and what they have to approve.</p>
-            </div>
-            <div class="bm-view-actions">
-              <button type="button" class="bm-btn bm-btn--sm" data-new="engagement">New engagement</button>
-            </div>
-          </div>
-
-          <div class="bm-panel bm-panel--flush">
-            <div class="bm-panel-head"><div><h3>Projects</h3></div>
-              <div class="bm-panel-tools"><span class="bm-pill bm-pill--muted">${projects.length}</span></div></div>
-            <div class="bm-list" id="bm-project-list">
-              ${projects.length ? projects.map(row).join("")
-                : `<p class="bm-empty" style="padding:0 22px 22px;">No projects yet.</p>`}
-            </div>
-          </div>`;
-
-        mo.rows($("bm-project-list").children);
-      };
 
       function openProject(pid) {
         const p = S.projects.find((x) => x.id === pid);
@@ -1179,9 +1165,14 @@
           ${scope.map((l) => {
             const last = l.status === "accepted";
             const label = SCOPE_STATUS.find((x) => x.id === l.status)?.label || l.status;
-            return `<div class="bm-scope-row">
+            return `<div class="bm-scope-row" data-scope-line="${escapeHtml(l.id)}" data-pid="${escapeHtml(pid)}">
               <span class="bm-scope-label">${escapeHtml(l.label)}</span>
-              <span class="bm-row-sub">${l.days}d · ${escapeHtml(formatINR(l.amount))}</span>
+              <span class="bm-inline-form" style="gap:5px;">
+                <input class="bm-mn-narrow" type="number" min="0" step="1" data-sfield="days"
+                  value="${Number(l.days) || 0}" title="Build days" aria-label="Build days" style="width:66px;" />
+                <input class="bm-mn-narrow" type="number" min="0" step="1000" data-sfield="amount"
+                  value="${Number(l.amount) || 0}" title="Price in rupees" aria-label="Price in rupees" style="width:104px;" />
+              </span>
               <button type="button" class="bm-pill ${tone[l.status] || "bm-pill--muted"}"
                 ${last ? "disabled" : ""} data-scope-advance="${escapeHtml(l.id)}"
                 data-pid="${escapeHtml(pid)}" data-next="${nextOf(l.status)}"
@@ -1191,8 +1182,9 @@
             </div>`;
           }).join("")}
           <p class="bm-hint" style="margin-top:10px;">
-            A line counts as money only at <strong>accepted</strong>. Delivered is handed over,
-            not confirmed — counting effort as revenue is the same mistake as counting a proposal.
+            Days and price are editable — change either and the percentage, the project's
+            value and your monthly run rate all follow. A line counts as money only at
+            <strong>accepted</strong>: delivered is handed over, not confirmed.
           </p>`;
       }
 
@@ -1222,7 +1214,8 @@
           </span>
           <span class="bm-listrow-right">
             <span class="bm-pill ${pill.tone}">${pill.text}</span>
-            <button type="button" class="bm-btn bm-btn--sm" data-inv-record="${escapeHtml(i.id)}">Record payment</button>
+            <button type="button" class="bm-btn bm-btn--sm" data-inv-doc="${escapeHtml(i.id)}">Invoice</button>
+            <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-inv-record="${escapeHtml(i.id)}">Record payment</button>
             <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-inv-del="${escapeHtml(i.id)}">Delete</button>
           </span>
         </div>`;
@@ -1359,124 +1352,6 @@
          ACCESS
          ══════════════════════════════════════════════════════════ */
 
-      RENDER.access = () => {
-        const clientUsers = S.users.filter((u) => u.role === "client");
-
-        $("view-access").innerHTML = `
-          <div class="bm-view-head">
-            <div>
-              <h2>Access</h2>
-              <p>Who can sign in to a client portal. This form never asks for a password —
-                 the password is set in the Firebase Console and exists nowhere else.</p>
-            </div>
-          </div>
-
-          <div class="bm-split">
-            <div class="bm-panel">
-              <div class="bm-panel-head"><div><h3>Give a client a login</h3></div>
-                <div class="bm-panel-tools">
-                  <button type="button" class="bm-help" data-runbook="ops-client-login" data-runbook-label="Create a client login">Playbook</button>
-                </div>
-              </div>
-              <ol style="margin:0 0 18px;padding-left:20px;font-size:13px;color:var(--bm-muted);display:flex;flex-direction:column;gap:7px;line-height:1.55;">
-                <li>Firebase Console → Authentication → Users → Add user. Use the synthetic email shown below, and set the password <strong>there</strong> — never in this app.</li>
-                <li>Copy the UID from the new row.</li>
-                <li>Paste it below with the organisation, display name and username.</li>
-              </ol>
-              <form id="bm-access-form">
-                <div class="bm-field">
-                  <label for="bm-a-username">Username</label>
-                  <input id="bm-a-username" autocapitalize="none" spellcheck="false" placeholder="greenbasket" required />
-                  <span class="bm-row-sub" id="bm-a-preview">Signs in as —</span>
-                </div>
-                <div class="bm-field">
-                  <label for="bm-a-name">Display name</label>
-                  <input id="bm-a-name" placeholder="Green Basket" required />
-                </div>
-                <div class="bm-field">
-                  <label for="bm-a-org">Organisation</label>
-                  <select id="bm-a-org" required>
-                    ${S.orgs.map((o) => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.name)}${o.status === "archived" ? " (archived)" : ""}</option>`).join("")}
-                  </select>
-                </div>
-                <div class="bm-field">
-                  <label for="bm-a-uid">Firebase Auth UID</label>
-                  <input id="bm-a-uid" placeholder="paste the UID from the console" required />
-                </div>
-                <button type="submit" class="bm-btn bm-btn--sm">Save</button>
-                <p class="bm-status" id="bm-a-status" hidden></p>
-              </form>
-            </div>
-
-            <div class="bm-panel bm-panel--flush">
-              <div class="bm-panel-head"><div><h3>Existing logins</h3>
-                <p>A client with no <code>users</code> document cannot read anything at all —
-                   not even their own organisation.</p></div></div>
-              <div class="bm-list">
-                ${clientUsers.length ? clientUsers.map((u) => `
-                  <div class="bm-listrow" style="cursor:default;">
-                    <span class="bm-listrow-main">
-                      <span class="bm-listrow-title">${escapeHtml(u.name || u.username || u.id)}</span>
-                      <span class="bm-listrow-sub">${escapeHtml(u.username || "—")} · ${escapeHtml(S.orgById[u.orgId]?.name || u.orgId || "no org")}</span>
-                    </span>
-                    <span class="bm-listrow-right">
-                      <span class="bm-pill ${S.orgById[u.orgId] ? "bm-pill--green" : "bm-pill--red"}">${S.orgById[u.orgId] ? "linked" : "orphaned"}</span>
-                    </span>
-                  </div>`).join("")
-                  : `<p class="bm-empty" style="padding:0 22px 22px;">No client logins yet.</p>`}
-              </div>
-            </div>
-          </div>`;
-
-        const uname = $("bm-a-username");
-        const preview = () => { $("bm-a-preview").textContent = `Signs in as ${resolveUsernameToEmail(uname.value || "username")}`; };
-        uname.addEventListener("input", preview);
-        preview();
-
-        $("bm-access-form").addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const st = $("bm-a-status");
-          const uid = $("bm-a-uid").value.trim();
-          const name = $("bm-a-name").value.trim();
-          const orgId = $("bm-a-org").value;
-          const email = resolveUsernameToEmail(uname.value);
-          const username = email.split("@")[0];
-          if (!uid || !name || !orgId || !username) {
-            st.hidden = false; st.className = "bm-status bm-status--error";
-            st.textContent = "Fill in every field."; return;
-          }
-          try {
-            await setClientUser(uid, { orgId, role: "client", name, username });
-            await logActivity("access.grant",
-              `Portal login granted: ${username} → ${S.orgById[orgId]?.name || orgId}`,
-              { orgId, target: username });
-
-            /* Say it AFTER the refresh, not before.
-               refresh() re-renders this whole view, which replaces #bm-a-status
-               with a brand new node — so a message written first was destroyed
-               a few hundred milliseconds later and the screen went silent. The
-               write had worked; there was simply no way to tell. Found by
-               onboarding six clients through the real form and checking what
-               the screen said afterwards, which is the only way this shows up:
-               every database assertion passed the whole time.
-
-               The element below is deliberately re-queried rather than reusing
-               `st`, because `st` now refers to a node that is no longer in the
-               document. */
-            await refresh();
-            const fresh = $("bm-a-status");
-            if (fresh) {
-              fresh.hidden = false;
-              fresh.className = "bm-status bm-status--ok";
-              fresh.textContent =
-                `Saved. ${username} signs in with ${email} and the password you set in the Console.`;
-            }
-          } catch (err) {
-            st.hidden = false; st.className = "bm-status bm-status--error";
-            st.textContent = "Couldn't save: " + (err?.message || err);
-          }
-        });
-      };
 
       /* ══════════════════════════════════════════════════════════
          ACTIVITY — the audit log (§9 item 4)
@@ -1997,6 +1872,76 @@
 
           /* --- invoices --- */
           if (d.invRecord) return recordPaymentFor(d.invRecord);
+
+          if (d.invDoc) {
+            const i = S.invoices.find((x) => x.id === d.invDoc);
+            if (i) openInvoice(i, S.orgById[i.orgId]);
+            return;
+          }
+
+          /* Granting a login, from the client it belongs to. It used to live on
+             a section of its own, which meant picking the organisation back out
+             of a dropdown you had just come from. */
+          if (d.grantLogin) {
+            const st = $("bm-a-status");
+            const say = (msg, ok) => {
+              const el = $("bm-a-status");
+              if (!el) return;
+              el.hidden = false;
+              el.className = `bm-status bm-status--${ok ? "ok" : "error"}`;
+              el.textContent = msg;
+            };
+            const uid = $("bm-a-uid").value.trim();
+            const name = $("bm-a-name").value.trim();
+            const email = resolveUsernameToEmail($("bm-a-username").value);
+            const username = email.split("@")[0];
+            if (!uid || !name || !username) return say("Fill in every field.", false);
+            btn.disabled = true;
+            try {
+              await grantLogin(uid, { orgId: d.grantLogin, role: "client", name, username });
+              await logActivity("access.grant",
+                `Portal login granted: ${username} → ${S.orgById[d.grantLogin]?.name || d.grantLogin}`,
+                { orgId: d.grantLogin, target: username });
+              /* Re-open the record so it shows the login that now exists, then
+                 say so. Said AFTER the re-render, because the element the
+                 message goes into is replaced by it. */
+              await loadAll(); renderChrome(); renderView(S.view, { animate: false });
+              openClient(d.grantLogin);
+              say(`Saved. ${username} signs in with ${email} and the password you set in the Console.`, true);
+            } catch (err) {
+              btn.disabled = false;
+              say("Couldn't save: " + (err?.message || err), false);
+            }
+            return;
+          }
+
+          if (d.orgDelete) {
+            const o = S.orgById[d.orgDelete];
+            const theirs = S.projects.filter((x) => x.orgId === d.orgDelete).length;
+            const invs = S.invoices.filter((x) => x.orgId === d.orgDelete).length;
+            if (!confirm(
+              `Delete ${o?.name || "this client"} permanently?\n\n` +
+              `This removes ${theirs} project(s), ${invs} invoice(s) and every milestone, ` +
+              `request and deliverable under them. It cannot be undone.\n\n` +
+              `If you only want them to stop counting towards your numbers, cancel and use Archive instead.`
+            )) return;
+            btn.disabled = true;
+            const r = await deleteClient(d.orgDelete);
+            await logActivity("client.delete",
+              `Deleted ${o?.name || d.orgDelete}: ${r.projects} project(s), ${r.invoices} invoice(s), ${r.logins} login(s)`,
+              { target: o?.name || d.orgDelete });
+            closeOverlay();
+            await refresh();
+            if (r.logins) {
+              alert(
+                `${o?.name || "The client"} is deleted.\n\n` +
+                `Their Firebase sign-in account still exists — this app never touches ` +
+                `credentials. Delete it in Firebase Console → Authentication → Users, or ` +
+                `they can still sign in and will land on an empty portal.`
+              );
+            }
+            return;
+          }
           if (d.invDel) {
             if (!confirm("Delete this invoice? The client stops seeing it.")) return;
             const dinv = S.invoices.find((x) => x.id === d.invDel) || {};
@@ -2095,6 +2040,14 @@
         }
       });
 
+      /* The one live preview that is not a form submit: the synthetic email a
+         client will sign in with, updated as the username is typed. */
+      document.addEventListener("input", (e) => {
+        if (e.target.id !== "bm-a-username") return;
+        const el = $("bm-a-preview");
+        if (el) el.textContent = `Signs in as ${resolveUsernameToEmail(e.target.value || "username")}`;
+      });
+
       /* Field edits. Same delegation, on change rather than click. */
       document.addEventListener("change", async (e) => {
         const t = e.target;
@@ -2119,6 +2072,16 @@
             const el = row.querySelector(`[data-field="${f}"]`);
             return [f, !el ? undefined : el.type === "checkbox" ? el.checked : el.value];
           }));
+
+          const sl = t.closest("[data-scope-line]");
+          if (sl && t.dataset.sfield) {
+            await updateScopeLine(sl.dataset.pid, sl.dataset.scopeLine, {
+              days: sl.querySelector('[data-sfield="days"]').value,
+              amount: sl.querySelector('[data-sfield="amount"]').value,
+            });
+            await loadAll(); renderChrome(); renderView(S.view, { animate: false });
+            return openProject(sl.dataset.pid);
+          }
 
           const ms = t.closest("[data-milestone]");
           if (ms) {

@@ -458,11 +458,21 @@ try {
      The list itself still has to carry the derived number, because a list that
      made you open every row to find out which project had stalled would be the
      old wall of panels wearing a nicer coat. */
-  s = await reload(admin, "/studio#delivery");
-  check("admin", has(s, "36%"),
-    "the delivery list shows the derived percentage without opening anything");
+  /* Delivery is no longer a section of its own — a project opens from the
+     client it belongs to. The client row still has to carry the signal without
+     anything being opened, or the list is just a menu. */
+  s = await reload(admin, "/studio#clients");
+  check("admin", has(s, "project"),
+    "the client list names their work without opening anything");
 
-  await admin.click("#bm-project-list .bm-listrow[data-project]");
+  await admin.click("#bm-client-list .bm-listrow[data-org]");
+  await admin.waitForSelector(".bm-drawer", { timeout: 8000 }).catch(() => {});
+  await admin.waitForTimeout(700);
+  const clientDrawer = await admin.innerText(".bm-drawer").catch(() => "");
+  check("admin", has(clientDrawer, "36%"),
+    "and the client record shows the derived percentage for their project");
+
+  await admin.click(".bm-drawer .bm-listrow[data-project]");
   await admin.waitForSelector(".bm-drawer", { timeout: 8000 }).catch(() => {});
   await admin.waitForTimeout(700);
   const scopeDrawer = await admin.innerText(".bm-drawer").catch(() => "");

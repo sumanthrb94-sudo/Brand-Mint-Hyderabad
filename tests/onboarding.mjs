@@ -220,23 +220,30 @@ try {
     const email = `${c.user}@brandmintstudios.in`;
     const uid = await createAuthUser(email, CLIENT_PASSWORD);
 
-    await goStudio(admin, "access");
+    /* The login form lives inside the client it belongs to now — there is no
+       separate Access section to visit and no organisation to re-pick. */
+    await goStudio(admin, "clients");
+    await admin.evaluate((name) => {
+      const row = [...document.querySelectorAll("#bm-client-list .bm-listrow[data-org]")]
+        .find((b) => b.textContent.includes(name));
+      row?.click();
+    }, c.name);
+    await admin.waitForSelector("#bm-a-uid", { timeout: 8000 });
+
     await admin.fill("#bm-a-username", c.user);
     await admin.fill("#bm-a-name", c.name);
-    await admin.selectOption("#bm-a-org", { label: c.name }).catch(async () => {
-      await admin.selectOption("#bm-a-org", org.id);
-    });
     await admin.fill("#bm-a-uid", uid);
+    await admin.waitForTimeout(250);
 
     const shown = await admin.evaluate(`document.querySelector("#bm-a-preview")?.innerText || ""`);
     check(shown.includes(email), "the form shows the exact email they will sign in with", shown);
 
-    await admin.click('#bm-access-form button[type="submit"]');
-    await admin.waitForTimeout(2200);
+    await admin.click(`[data-grant-login]`);
+    await admin.waitForTimeout(2600);
     const saved = await admin.evaluate(`document.querySelector("#bm-a-status")?.innerText || ""`);
     check(/saved/i.test(saved), "the login is saved", saved.slice(0, 110));
 
-    const hasPassword = await admin.evaluate(`!!document.querySelector('#view-access input[type="password"]')`);
+    const hasPassword = await admin.evaluate(`!!document.querySelector('input[type="password"]')`);
     check(!hasPassword, "and NO password field exists anywhere on the screen (§4)");
 
     /* ── 5 + 6. what can the client see? ────────────────────────── */

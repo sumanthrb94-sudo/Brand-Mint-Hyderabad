@@ -1237,6 +1237,24 @@ export async function saveScope(projectId, lines) {
 }
 
 /** Moves one line's delivery status. Admin only — the rules enforce it. */
+/**
+ * Change what a scope line is worth, or how long it takes.
+ *
+ * The price was fixed at the moment the engagement was created and there was no
+ * way to change it afterwards — which is wrong for a studio that renegotiates,
+ * discounts, or simply mistyped. `changedAt` records that it moved, so the
+ * agreed figure and the current one are not silently the same thing.
+ *
+ * Both feed derived numbers: `amount` drives what the project is worth and
+ * `days` drives both the weighted progress and the studio's monthly run rate.
+ */
+export async function updateScopeLine(projectId, lineId, { amount, days }) {
+  const patch = { changedAt: serverTimestamp() };
+  if (amount !== undefined && amount !== null && amount !== "") patch.amount = Number(amount) || 0;
+  if (days !== undefined && days !== null && days !== "") patch.days = Number(days) || 0;
+  await updateDoc(doc(db, "projects", projectId, "scope", lineId), patch);
+}
+
 export async function setScopeLineStatus(projectId, lineId, status) {
   if (!SCOPE_STATUS_IDS.includes(status)) throw new Error(`unknown scope status: ${status}`);
   await updateDoc(doc(db, "projects", projectId, "scope", lineId), {
@@ -1330,8 +1348,79 @@ export async function createProject({ orgId, name, type, dueAt, billable }) {
   return ref.id;
 }
 
+/**
+ * Delete a project AND everything hanging off it.
+ *
+ * The old version deleted only the project document. Firestore does not
+ * cascade, so the milestones, intake, deliverables and scope survived as
+ * orphans — invisible, unreachable, and still counted by nothing. The UI even
+ * warned about it, which is not a fix.
+ */
 export async function deleteProject(projectId) {
+  for (const sub of ["milestones", "intake", "deliverables", "scope"]) {
+    const snap = await getDocs(collection(db, "projects", projectId, sub));
+    const batch = writeBatch(db);
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    if (snap.size) await batch.commit();
+  }
   await deleteDoc(doc(db, "projects", projectId));
+}
+
+/**
+ * Delete a client and everything that belongs to them.
+ *
+ * Archiving keeps the history and stops the client counting towards anything;
+ * this removes them. Both exist because they answer different questions —
+ * "this engagement ended" versus "this should never have been here".
+ *
+ * Returns a count of what it removed so the caller can say so afterwards
+ * rather than claiming a silent success.
+ *
+ * WHAT THIS CANNOT DO: remove their Firebase Auth account. That lives outside
+ * this app (§4 — the app never handles credentials), so a deleted client can
+ * still sign in and will land on an empty portal until the account is deleted
+ * in the Firebase Console. The caller must say so.
+ */
+export async function deleteClient(orgId) {
+  const projects = (await getDocs(query(collection(db, "projects"), where("orgId", "==", orgId)))).docs;
+  for (const p of projects) await deleteProject(p.id);
+
+  const invoices = (await getDocs(query(collection(db, "invoices"), where("orgId", "==", orgId)))).docs;
+  const users = (await getDocs(query(collection(db, "users"), where("orgId", "==", orgId)))).docs;
+
+  const batch = writeBatch(db);
+  invoices.forEach((d) => batch.delete(d.ref));
+  users.forEach((d) => batch.delete(d.ref));
+  batch.delete(doc(db, "organisations", orgId));
+  await batch.commit();
+
+  return { projects: projects.length, invoices: invoices.length, logins: users.length };
+}
+
+/**
+ * Who the invoice is FROM.
+ *
+ * `gstin` and `bank` are null on purpose and must stay null until Sumanth
+ * supplies the real ones. An invoice is a financial document: a plausible-
+ * looking GSTIN or account number on it is not a placeholder, it is a false
+ * statement to a client, and the legacy seed already did exactly that
+ * (CLAUDE.md §4 — the fake GSTIN and fake bank account are named there as what
+ * not to do). The invoice template omits each block entirely while it is null
+ * rather than printing an empty label.
+ */
+export const STUDIO = {
+  name: "Brand Mint Studios",
+  city: "Hyderabad, India",
+  email: "hello@brandmintstudios.in",
+  site: "brandmintstudios.in",
+  gstin: null,
+  bank: null,
+};
+
+/** A stable human reference for an invoice, derived from its own id so it
+ *  never needs a counter and never changes. Not a GST serial — see STUDIO. */
+export function invoiceRef(inv) {
+  return "BM-" + String(inv?.id || "").slice(0, 6).toUpperCase();
 }
 
 /** An invoice. Always created `due` — an invoice is not paid until money

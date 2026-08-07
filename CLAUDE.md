@@ -246,6 +246,7 @@ assets/bm-app.js                        Firebase init and every read and write
 assets/bm-app.css                       shared styles, all classes prefixed bm-
 assets/bm-crm.css                       /studio ONLY — the CRM shell. No colour tokens of its own.
 assets/bm-crm-motion.js                 /studio ONLY — optional motion. Hides nothing in CSS.
+assets/bm-invoice.js                    the sendable invoice. Prints via the browser.
 assets/bm-runbooks.js                   playbook drawer + lazy loader
 assets/runbooks/*.js                    the playbooks themselves, as data
 api/payments/*.js                       Razorpay, serverless. No service account.
@@ -383,6 +384,24 @@ Refine it on `/quote` when a real one exists. The retainer is created
 `proposed` unless the box is ticked — no path through that form can quietly
 raise MRR.
 
+### The invoice a client actually receives
+
+`assets/bm-invoice.js` builds the document and calls `print()`. Every browser
+turns that into a PDF, so this needs no library, no service and no build step —
+a PDF generator would have been ~200 KB of dependency producing a worse
+document than the browser's own print engine.
+
+**`STUDIO.gstin` and `STUDIO.bank` are `null` and must stay null until the real
+ones are supplied.** An invoice is a financial document: a plausible-looking
+tax number on one is not a placeholder, it is a false statement to a client,
+and the legacy seed already did exactly that (§4). Each block is omitted
+entirely while its value is null rather than printing an empty label.
+
+The reference (`BM-XXXXXX`) is derived from the invoice's own id, so it never
+needs a counter and never changes. It is **not** a GST serial — if GST invoicing
+is needed, that needs a real sequence and a real GSTIN, and neither should be
+invented here.
+
 ### Part payments, and the fallback that makes them safe
 
 `paidAmount` is how much has actually ARRIVED against an invoice. `status`
@@ -482,9 +501,27 @@ message, which is the exact cost this portal exists to remove.
 
 ### `/studio` — admin only, and it is a CRM
 
-Six sections down the left, **one on screen at a time**: Today · Pipeline ·
-Clients · Delivery · Money · Access. The section lives in the URL hash, so a
-reload keeps you where you were.
+**Four sections** down the left, one on screen at a time: Today · Clients ·
+Leads · Money. The section lives in the URL hash, so a reload keeps you where
+you were.
+
+It was seven. The report was that it was *still* too much — "why so many
+sections to create and track and archive". Delivery and Access were not
+separate concerns, they were the same client seen from two more angles:
+
+- **Delivery folded into Clients.** A project belongs to a client, so it opens
+  from that client. The client row still carries the signal — days blocked,
+  money owed — because a list you must open to read is a menu, not a list.
+- **Access folded into the client it grants access to.** Granting a login used
+  to mean going to another section and picking the organisation back out of a
+  dropdown you had just come from.
+- **Activity moved to Tools.** It is an audit log, not a daily screen.
+
+A client record now holds everything about that client: retainer, projects,
+invoices, portal login, and **Delete**. Archive and Delete both exist because
+they answer different questions — "this engagement ended" versus "this should
+never have been here". Delete cascades through projects, their subcollections
+and invoices; it **cannot** remove the Firebase Auth account, and says so.
 
 It replaced a single page that rendered fifteen panels and every project,
 expanded, simultaneously. The report was *"very complex, I'm unable to
@@ -498,7 +535,7 @@ list of records, and a detail drawer for the one you picked.**
 | Pipeline | leads as a kanban by stage, moved with two buttons; funnel/source/loss against the playbook below |
 | Clients | one row per organisation → drawer: retainer, onboarding, projects, invoices, login. **New engagement** creates all of it in one screen |
 | Delivery | one row per project → drawer: agreed scope, milestones, intake, deliverables |
-| Money | **the invoice ledger** plus retainers. One *Record payment* control per invoice takes the total received, so a part payment is a number rather than a lie in one direction |
+| Money | **the invoice ledger** plus retainers. *Record payment* takes the total received; *Invoice* opens a sendable document |
 | Access | client logins, and the existing ones listed |
 
 `/` or `⌘K` opens a command palette over every client, project, lead and

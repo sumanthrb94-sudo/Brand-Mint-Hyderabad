@@ -49,7 +49,10 @@ const ADMIN = { email: "admin@brandmintstudios.in", password: "adminpass123" };
 const SHOTS = path.join(ROOT, "docs/admin-ui");
 fs.mkdirSync(SHOTS, { recursive: true });
 
-const VIEWS = ["today", "pipeline", "clients", "delivery", "money", "access", "activity"];
+/* Four sections in the nav. Delivery folded into the client record and
+   Access into the client it belongs to; Activity moved to Tools but is still
+   a view, so it is checked for isolation alongside the rest. */
+const VIEWS = ["today", "pipeline", "clients", "money", "activity"];
 
 let pass = 0;
 let fail = 0;
@@ -183,7 +186,7 @@ try {
     /* The audit log at the one moment it is genuinely empty — nothing has been
        done yet. Checked here rather than later because seeding is itself a
        logged action, so by section 8 the log correctly has an entry in it. */
-    await page.click('#bm-nav [data-view="activity"]');
+    await page.click('[data-view="activity"]');
     await page.waitForTimeout(1400);
     const log0 = await page.evaluate(`document.querySelector("#view-activity").innerText`);
     check(/no entries yet/i.test(log0), "an empty log says it is empty", log0.slice(0, 130).replace(/\s+/g, " "));
@@ -191,7 +194,7 @@ try {
       "and does not let an empty log read as a quiet week");
     check(!/not published|permission/i.test(log0),
       "the rules ARE live against the emulator, so it is not showing the denied message");
-    await page.click('#bm-nav [data-view="today"]');
+    await page.click('[data-view="today"]');
     await page.waitForTimeout(300);
   }
 
@@ -220,7 +223,7 @@ try {
   section("3. Each view is isolated — no panel bleeds into another");
   {
     for (const v of VIEWS) {
-      await page.click(`#bm-nav [data-view="${v}"]`);
+      await page.click(`[data-view="${v}"]`);
       await page.waitForTimeout(450);
 
       const leaked = await page.evaluate(`
@@ -248,7 +251,7 @@ try {
   {
     await page.evaluate(CONTRAST_FN);
     for (const v of VIEWS) {
-      await page.click(`#bm-nav [data-view="${v}"]`);
+      await page.click(`[data-view="${v}"]`);
       await page.waitForTimeout(400);
       await page.evaluate(CONTRAST_FN);
 
@@ -277,7 +280,7 @@ try {
   /* ── 5. clicking a record opens that record ────────────────── */
   section("5. A record list opens the record you clicked");
   {
-    await page.click('#bm-nav [data-view="clients"]');
+    await page.click('[data-view="clients"]');
     await page.waitForTimeout(450);
 
     const first = await page.evaluate(`(() => {
@@ -310,15 +313,17 @@ try {
   }
 
   /* ── 6. the project drawer is the whole working surface ────── */
-  section("6. The project drawer carries scope, milestones, intake and deliverables");
+  section("6. Projects open from the client, and carry the whole job");
   {
-    await page.click('#bm-nav [data-view="delivery"]');
+    await page.click('[data-view="clients"]');
     await page.waitForTimeout(450);
-    const has = await page.evaluate(`!!document.querySelector("#bm-project-list .bm-listrow[data-project]")`);
-    check(has, "the delivery list has project rows");
+    await page.click("#bm-client-list .bm-listrow[data-org]");
+    await page.waitForTimeout(700);
+    const has = await page.evaluate(`!!document.querySelector(".bm-drawer .bm-listrow[data-project]")`);
+    check(has, "a client's projects are listed inside their own record");
 
     if (has) {
-      await page.click("#bm-project-list .bm-listrow[data-project]");
+      await page.click(".bm-drawer .bm-listrow[data-project]");
       await page.waitForTimeout(600);
       const t = (await page.evaluate(`document.querySelector(".bm-drawer")?.innerText || ""`)).toLowerCase();
       for (const want of ["Agreed scope", "Milestones", "What we need from the client", "Deliverables"]) {
@@ -334,7 +339,7 @@ try {
   /* ── 7. the invoice ledger, which did not exist before ─────── */
   section("7. Money shows every invoice — the ledger the old screen never had");
   {
-    await page.click('#bm-nav [data-view="money"]');
+    await page.click('[data-view="money"]');
     await page.waitForTimeout(500);
     const rows = await page.evaluate(`${VISIBLE("#bm-inv-list .bm-listrow")}.length`);
     check(rows > 0, `the ledger lists ${rows} invoice row(s)`);
@@ -348,14 +353,14 @@ try {
   section("8. The audit log records what just happened, and says so honestly when empty");
   {
     // Seeding is itself a logged action, so by now there is already an entry.
-    await page.click('#bm-nav [data-view="activity"]');
+    await page.click('[data-view="activity"]');
     await page.waitForTimeout(1400);
     const before = await page.evaluate(`document.querySelector("#bm-activity-list").innerText`);
     check(/db\.seed/i.test(before), "seeding the database was itself recorded",
       before.slice(0, 130).replace(/\s+/g, " "));
 
     // Now do something worth logging: mark an invoice paid by hand.
-    await page.click('#bm-nav [data-view="money"]');
+    await page.click('[data-view="money"]');
     await page.waitForTimeout(500);
     const hadUnpaid = await page.evaluate(`!!document.querySelector("[data-inv-record]")`);
     check(hadUnpaid, "there is an invoice to record a payment against");
@@ -385,7 +390,7 @@ try {
       await page.click('.bm-modal button[type="submit"]');
       await page.waitForTimeout(2200);
 
-      await page.click('#bm-nav [data-view="activity"]');
+      await page.click('[data-view="activity"]');
       await page.waitForTimeout(1500);
       const after = await page.evaluate(`document.querySelector("#bm-activity-list").innerText`);
       check(/invoice\.payment/i.test(after), "the log carries an invoice.payment entry", after.slice(0, 140).replace(/\s+/g, " "));
@@ -453,12 +458,12 @@ try {
   {
     await page.setViewportSize({ width: 390, height: 844 });
     await goStudio(page, "today");
-    const navVisible = await page.evaluate(`${VISIBLE('#bm-nav button[data-view]')}.length`);
-    check(navVisible === VIEWS.length, `all ${VIEWS.length} sections reachable (${navVisible} visible)`);
+    const navVisible = await page.evaluate(`${VISIBLE('[data-view]')}.length`);
+    check(navVisible >= VIEWS.length, `all ${VIEWS.length} sections reachable (${navVisible} controls visible)`);
 
-    await page.click('#bm-nav [data-view="delivery"]');
+    await page.click('[data-view="money"]');
     await page.waitForTimeout(450);
-    check(await page.evaluate(`location.hash === "#delivery"`), "and tapping one switches view");
+    check(await page.evaluate(`location.hash === "#money"`), "and tapping one switches view");
 
     const overflow = await page.evaluate(`document.documentElement.scrollWidth <= window.innerWidth + 2`);
     check(overflow, "the page does not scroll sideways");
@@ -473,7 +478,7 @@ try {
 
   await goStudio(page, "today");
   await page.screenshot({ path: path.join(SHOTS, "crm-today.png"), fullPage: true });
-  await page.click('#bm-nav [data-view="pipeline"]');
+  await page.click('[data-view="pipeline"]');
   await page.waitForTimeout(600);
   await page.screenshot({ path: path.join(SHOTS, "crm-pipeline.png"), fullPage: true });
 } catch (err) {

@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-08-06T16:18:47.928Z",
+  "startedAt": "2026-08-07T12:05:33.338Z",
   "stages": [
     {
       "n": 1,
@@ -192,7 +192,11 @@
         },
         {
           "ok": true,
-          "message": "the delivery list shows the derived percentage without opening anything"
+          "message": "the client list names their work without opening anything"
+        },
+        {
+          "ok": true,
+          "message": "and the client record shows the derived percentage for their project"
         },
         {
           "ok": true,
