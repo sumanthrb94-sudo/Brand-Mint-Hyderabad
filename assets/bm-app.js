@@ -1400,22 +1400,60 @@ export async function deleteClient(orgId) {
 /**
  * Who the invoice is FROM.
  *
- * `gstin` and `bank` are null on purpose and must stay null until Sumanth
- * supplies the real ones. An invoice is a financial document: a plausible-
- * looking GSTIN or account number on it is not a placeholder, it is a false
- * statement to a client, and the legacy seed already did exactly that
- * (CLAUDE.md §4 — the fake GSTIN and fake bank account are named there as what
- * not to do). The invoice template omits each block entirely while it is null
- * rather than printing an empty label.
+ * Only the things that are already public sit here. The payee details —
+ * account number, IFSC, the account holder's legal name, a GSTIN — are
+ * DELIBERATELY NOT IN THIS FILE.
+ *
+ * This repository is public (CLAUDE.md §2). Hardcoding a bank account here
+ * would publish it, permanently and in the git history, to anyone who looks —
+ * which is a different thing from printing it on an invoice sent to one
+ * client. So they live in Firestore on the studio's own organisation document,
+ * where `firestore.rules` already restricts organisation writes to the admin
+ * and lets a client read only their OWN org. No rules change was needed and
+ * none should be made for this.
+ *
+ * The second benefit is ordinary: changing banks is a form, not a deploy.
  */
 export const STUDIO = {
   name: "Brand Mint Studios",
   city: "Hyderabad, India",
   email: "hello@brandmintstudios.in",
   site: "brandmintstudios.in",
-  gstin: null,
-  bank: null,
 };
+
+/** The studio's own organisation — tenant zero. Found by `kind`, not by id,
+ *  so de-hardcoding `brandmint` later (§9 item 5) does not break invoicing. */
+export function studioOrg(orgs) {
+  return (orgs || []).find((o) => o.kind === "studio") || null;
+}
+
+/**
+ * The payee block an invoice prints, or null if it has not been filled in.
+ *
+ * Returns null rather than a half-filled object: the invoice omits the whole
+ * block when there is nothing real to print, instead of showing a labelled
+ * empty line that reads as a mistake. §4 — no plausible-looking placeholder on
+ * a financial document.
+ */
+export function studioPayee(org) {
+  if (!org) return null;
+  const holder = String(org.bankHolder || "").trim();
+  const account = String(org.bankAccount || "").trim();
+  const ifsc = String(org.bankIfsc || "").trim().toUpperCase();
+  const bank = String(org.bankName || "").trim();
+  if (!holder || !account || !ifsc) return null;
+  return { holder, account, ifsc, bank };
+}
+
+/** Save the payee details onto the studio's own organisation document. */
+export async function saveStudioPayee(orgId, { bankHolder, bankAccount, bankIfsc, bankName }) {
+  await updateDoc(doc(db, "organisations", orgId), {
+    bankHolder: String(bankHolder || "").trim(),
+    bankAccount: String(bankAccount || "").trim(),
+    bankIfsc: String(bankIfsc || "").trim().toUpperCase(),
+    bankName: String(bankName || "").trim(),
+  });
+}
 
 /** A stable human reference for an invoice, derived from its own id so it
  *  never needs a counter and never changes. Not a GST serial — see STUDIO. */

@@ -391,11 +391,29 @@ turns that into a PDF, so this needs no library, no service and no build step �
 a PDF generator would have been ~200 KB of dependency producing a worse
 document than the browser's own print engine.
 
-**`STUDIO.gstin` and `STUDIO.bank` are `null` and must stay null until the real
-ones are supplied.** An invoice is a financial document: a plausible-looking
-tax number on one is not a placeholder, it is a false statement to a client,
-and the legacy seed already did exactly that (§4). Each block is omitted
-entirely while its value is null rather than printing an empty label.
+**The payee details are NOT in this repository, and must never be put in it.**
+Account number, IFSC and the account holder's legal name live in Firestore on
+the studio's own organisation document (`kind: "studio"`), edited from a small
+panel on Money. This repo is public (§2): hardcoding a bank account here would
+publish it permanently, in the git history, to anyone who looks — which is a
+different thing from printing it on an invoice sent to one client. The rules
+already restrict organisation writes to the admin, so this needed no rules
+change and should not get one. Changing banks is a form, not a deploy.
+
+`studioPayee()` returns **null unless holder, account and IFSC are all present**,
+and the invoice omits the whole block when it is null rather than printing a
+labelled empty line. An invoice is a financial document: a plausible-looking
+tax number or account number on one is not a placeholder, it is a false
+statement to a client, and the legacy seed already did exactly that (§4).
+
+The same rule applies to **screenshots**. `docs/` is committed, so anything
+rendered into it must use placeholder payee details — `tests/` and the
+screenshot scripts pass `payee: null` or obvious dummies for exactly this
+reason. A real account number in a committed PNG defeats the whole arrangement.
+
+GST is deliberately unimplemented. It needs a real GSTIN and a real serial
+sequence; the `BM-XXXXXX` reference is derived from the document id and is
+**not** a GST serial.
 
 The reference (`BM-XXXXXX`) is derived from the invoice's own id, so it never
 needs a counter and never changes. It is **not** a GST serial — if GST invoicing

@@ -14,17 +14,20 @@
  *
  * WHAT IS DELIBERATELY NOT ON IT
  * ------------------------------
- * No GSTIN and no bank account, until Sumanth supplies the real ones — see
- * STUDIO in bm-app.js. An invoice is a financial document; a plausible-looking
- * tax number on one is not a placeholder, it is a false statement to a client.
- * Each block is omitted entirely while its value is null rather than printing
- * an empty label, so the document never looks half-filled.
+ * No GSTIN, and no payee block until the account details have actually been
+ * entered. An invoice is a financial document; a plausible-looking tax number
+ * or account number on one is not a placeholder, it is a false statement to a
+ * client. Each block is omitted entirely rather than printing an empty label,
+ * so the document never looks half-filled.
+ *
+ * The payee arrives as an ARGUMENT rather than a constant because it lives in
+ * Firestore, not in this public repository — see STUDIO in bm-app.js.
  *
  * Everything else on the page comes from the invoice and the organisation as
  * they are stored. Nothing is computed into existence.
  */
 
-import { STUDIO, invoiceRef, invoiceReceived, invoiceOutstanding, invoiceState, formatINR, escapeHtml } from "/assets/bm-app.js";
+import { STUDIO, invoiceRef, invoiceReceived, invoiceOutstanding, invoiceState, escapeHtml } from "/assets/bm-app.js";
 
 const money = (n) => "₹" + Math.round(Number(n) || 0).toLocaleString("en-IN");
 
@@ -40,7 +43,7 @@ function longDate(ts) {
  * Build the document. Exported separately from printing so it can be tested
  * and eyeballed without a print dialog appearing.
  */
-export function invoiceHtml(inv, org, { note } = {}) {
+export function invoiceHtml(inv, org, { note, payee } = {}) {
   const amount = Number(inv.amount) || 0;
   const received = invoiceReceived(inv);
   const owed = invoiceOutstanding(inv);
@@ -130,6 +133,24 @@ export function invoiceHtml(inv, org, { note } = {}) {
   .foot p { margin: 0 0 7px; font-size: 9.5pt; color: #4a5d54; }
   .foot strong { color: #0b1f1a; }
 
+  .payee {
+    margin: 4px 0 14px; padding: 13px 15px;
+    background: #f5f7f4; border: 1px solid rgba(11,31,26,.13); border-radius: 8px;
+  }
+  .payee .plabel {
+    font-size: 8pt; letter-spacing: .12em; text-transform: uppercase;
+    color: #4a5d54; font-weight: 700; margin-bottom: 7px;
+  }
+  .payee dl {
+    margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 18px; font-size: 10pt;
+  }
+  .payee dt { color: #4a5d54; }
+  .payee dd { margin: 0; color: #0b1f1a; font-weight: 600; }
+  .payee dd.num {
+    font-family: "DejaVu Sans Mono", ui-monospace, monospace;
+    letter-spacing: .02em; font-variant-numeric: tabular-nums;
+  }
+
   .actions { margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap; }
   .actions button {
     font: inherit; font-size: 10.5pt; font-weight: 650; cursor: pointer;
@@ -147,7 +168,6 @@ export function invoiceHtml(inv, org, { note } = {}) {
       <strong>${escapeHtml(STUDIO.name)}</strong>
       <span>${escapeHtml(STUDIO.city)}</span>
       <span>${escapeHtml(STUDIO.email)}</span>
-      ${STUDIO.gstin ? `<span>GSTIN ${escapeHtml(STUDIO.gstin)}</span>` : ""}
     </div>
     <div class="title">
       <h1>Invoice</h1>
@@ -191,8 +211,17 @@ export function invoiceHtml(inv, org, { note } = {}) {
 
   <div class="foot">
     ${note ? `<p>${escapeHtml(note)}</p>` : ""}
-    ${STUDIO.bank ? `<p><strong>Payable to</strong> ${escapeHtml(STUDIO.bank)}</p>` : ""}
-    ${STUDIO.gstin ? "" : `<p>Amounts are exclusive of GST unless stated otherwise.</p>`}
+    ${payee ? `
+      <div class="payee">
+        <div class="plabel">Pay by transfer to</div>
+        <dl>
+          <dt>Account name</dt><dd>${escapeHtml(payee.holder)}</dd>
+          <dt>Account number</dt><dd class="num">${escapeHtml(payee.account)}</dd>
+          <dt>IFSC</dt><dd class="num">${escapeHtml(payee.ifsc)}</dd>
+          ${payee.bank ? `<dt>Bank</dt><dd>${escapeHtml(payee.bank)}</dd>` : ""}
+        </dl>
+      </div>` : ""}
+    <p>Amounts are exclusive of GST unless stated otherwise.</p>
     <p>Questions about this invoice: <strong>${escapeHtml(STUDIO.email)}</strong> · ${escapeHtml(STUDIO.site)}</p>
   </div>
 

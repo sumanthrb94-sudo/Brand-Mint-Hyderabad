@@ -185,6 +185,7 @@
         DEAL_TYPES, createEngagement, monthlyIncome, projectRunRate, projectMode,
         invoiceReceived, invoiceOutstanding, invoiceState, recordPayment,
         deleteClient, setClientUser as grantLogin, invoiceRef, updateScopeLine,
+        studioOrg, studioPayee, saveStudioPayee,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
       import { openInvoice } from "/assets/bm-invoice.js";
@@ -1272,6 +1273,8 @@
 
       RENDER.money = () => {
         const m = money();
+        const studio = studioOrg(S.orgs);
+        const payee = studioPayee(studio);
         const clients = S.orgs.filter((o) => o.kind === "client" && o.status === "active");
         const sorted = [...S.invoices].sort((a, b) => {
           const rank = (x) => (x.status === "paid" ? 1 : 0);
@@ -1321,6 +1324,41 @@
               ${sorted.length ? sorted.map(invoiceRow).join("")
                 : `<p class="bm-empty" style="padding:0 22px 22px;">No invoices raised yet.</p>`}
             </div>
+          </div>
+
+          <div class="bm-panel">
+            <div class="bm-panel-head"><div><h3>Payment details on your invoices</h3>
+              <p>Printed at the foot of every invoice. Stored in your database,
+                 <strong>not in the code</strong> — this repository is public, and an account
+                 number committed to it would be there permanently for anyone to read.
+                 Leave it blank and invoices simply omit the block.</p></div></div>
+            ${studio ? `
+              <div class="bm-field">
+                <label for="f-bank-holder">Account name</label>
+                <input id="f-bank-holder" value="${escapeHtml(studio.bankHolder || "")}" placeholder="As it appears on the account" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bank-account">Account number</label>
+                <input id="f-bank-account" inputmode="numeric" autocomplete="off"
+                  value="${escapeHtml(studio.bankAccount || "")}" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bank-ifsc">IFSC</label>
+                <input id="f-bank-ifsc" autocapitalize="characters" spellcheck="false"
+                  value="${escapeHtml(studio.bankIfsc || "")}" placeholder="e.g. HDFC0001234" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bank-name">Bank</label>
+                <input id="f-bank-name" value="${escapeHtml(studio.bankName || "")}" placeholder="Your bank" />
+              </div>
+              <button type="button" class="bm-btn bm-btn--sm" data-save-payee="${escapeHtml(studio.id)}">Save payment details</button>
+              <p class="bm-status" id="bm-payee-status" hidden></p>
+              <p class="bm-hint" style="margin-top:10px;">
+                ${payee ? "Invoices are printing these." : "Incomplete — invoices are printing no payment block at all, which is better than printing a half-filled one."}
+              </p>`
+              : `<p class="bm-empty">No studio organisation exists yet, so there is nowhere to keep these.
+                   Seed the database once from Tools, or add an organisation with kind
+                   <code>studio</code>.</p>`}
           </div>
 
           <div class="bm-panel bm-panel--flush">
@@ -1871,11 +1909,37 @@
           }
 
           /* --- invoices --- */
+          if (d.savePayee) {
+            btn.disabled = true;
+            try {
+              await saveStudioPayee(d.savePayee, {
+                bankHolder: $("f-bank-holder").value,
+                bankAccount: $("f-bank-account").value,
+                bankIfsc: $("f-bank-ifsc").value,
+                bankName: $("f-bank-name").value,
+              });
+              /* Not logged to the activity feed. The log is admin-readable and
+                 append-only, so writing an account number into it would put a
+                 permanent, uneditable copy of it in a second place for no gain. */
+              await refresh();
+              const st = $("bm-payee-status");
+              if (st) {
+                st.hidden = false;
+                st.className = "bm-status bm-status--ok";
+                st.textContent = "Saved. Every invoice you open from now on carries these.";
+              }
+            } catch (err) {
+              btn.disabled = false;
+              alert("Could not save: " + (err?.message || err));
+            }
+            return;
+          }
+
           if (d.invRecord) return recordPaymentFor(d.invRecord);
 
           if (d.invDoc) {
             const i = S.invoices.find((x) => x.id === d.invDoc);
-            if (i) openInvoice(i, S.orgById[i.orgId]);
+            if (i) openInvoice(i, S.orgById[i.orgId], { payee: studioPayee(studioOrg(S.orgs)) });
             return;
           }
 
