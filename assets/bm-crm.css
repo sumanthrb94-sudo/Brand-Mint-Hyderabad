@@ -67,14 +67,28 @@
 
 /* ── sidebar ──────────────────────────────────────────────────── */
 
+/* THE SIDEBAR IS DARK IN BOTH THEMES, ON PURPOSE.
+
+   It uses --bm-btn-bg / --bm-btn-fg — the one deliberately non theme-adaptive
+   pair in the palette, already measured at 16.37:1 in light AND dark because
+   the primary CTA depends on it. So the most visible change on this screen
+   costs zero new tokens and inherits an assertion that already exists.
+
+   Why fixed rather than theme-adaptive: the sidebar is chrome, not content.
+   Chrome that changes colour with the theme makes the whole window feel like
+   it repainted; chrome that stays put makes the content area read as the thing
+   that changed. It also gives the workspace an edge to sit against, which a
+   white-on-white shell never had — the previous version's sidebar and content
+   were the same two surfaces, so the eye had nothing to anchor on. */
 .bm-crm-side {
   grid-area: side;
   display: flex;
   flex-direction: column;
   gap: 3px;
   padding: 20px 14px 14px;
-  background: var(--bm-white);
-  border-right: var(--hair);
+  background: var(--bm-btn-bg);
+  color: var(--bm-btn-fg);
+  border-right: 0;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -88,7 +102,7 @@
   align-items: center;
   gap: 11px;
   padding: 4px 10px 20px;
-  color: var(--ink);
+  color: var(--bm-btn-fg);
   text-decoration: none;
   font-weight: 700;
   letter-spacing: -0.012em;
@@ -96,6 +110,9 @@
 
 /* The mark carries the one piece of brand gradient on the screen. It is
    decorative — the letter inside it is on --bm-btn-bg, which is measured. */
+/* Inverted now that the sidebar is dark: the mark is the mint block and the
+   letter on it is --bm-btn-bg, which is the same 16.37:1 pair read the other
+   way round. */
 .bm-crm-logo-mark {
   width: 32px;
   height: 32px;
@@ -103,31 +120,23 @@
   border-radius: var(--r-sm);
   display: grid;
   place-items: center;
-  background: var(--bm-btn-bg);
-  color: var(--bm-btn-fg);
+  background: linear-gradient(145deg, var(--mint-2), var(--mint));
+  color: var(--bm-btn-bg);
   font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
   font-weight: 800;
   font-size: 15px;
-  position: relative;
-  overflow: hidden;
 }
 
-.bm-crm-logo-mark::after {
-  content: "";
-  position: absolute;
-  inset: auto -30% -60% -30%;
-  height: 100%;
-  background: radial-gradient(ellipse at 50% 0%, var(--mint) 0%, transparent 70%);
-  opacity: 0.55;
-}
-
+/* --mint-2 on --ink is 12.96:1 (docs/PALETTE-AUDIT.md), and --bm-btn-bg IS
+   --ink's light value held fixed — so these read in both themes. --bm-muted
+   would not: it is tuned for a light card and drops under 4.5:1 here. */
 .bm-crm-logo-sub {
   display: block;
   font-size: 10.5px;
   font-weight: 650;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--bm-muted);
+  color: var(--mint-2);
   margin-top: 1px;
 }
 
@@ -137,7 +146,7 @@
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--bm-muted);
+  color: var(--mint-2);
 }
 
 /* Nav items are buttons, so they carry the interactive contrast floor.
@@ -160,7 +169,7 @@
   border: 0;
   border-radius: var(--r-sm);
   background: transparent;
-  color: var(--ink);
+  color: var(--bm-btn-fg);
   font: inherit;
   font-size: 13.5px;
   font-weight: 550;
@@ -183,54 +192,63 @@
   transition: opacity 150ms ease;
 }
 
-.bm-crm-nav button:hover { background: var(--bm-line); }
+/* OPAQUE, NOT A TRANSLUCENT WASH — and the reason is worth keeping.
+
+   These were first written as a low-alpha wash of the foreground over its own
+   background, which is genuinely safe: it can only move the surface toward the
+   text, so contrast can only rise. tests/admin-ui.mjs failed it at 1.00:1
+   anyway, because its __bg() helper takes a translucent background's raw RGB
+   and discards the alpha — so a 14% cream wash over near-black was measured as
+   solid cream behind cream text.
+
+   The stylesheet was the thing that changed, so the stylesheet is the thing
+   that gives way. Both states now paint one flat colour from a token that
+   already exists, which means what the browser paints and what any tool
+   measures are the same value, and no helper has to interpret an alpha
+   correctly for the floor to hold. */
+.bm-crm-nav button:hover { background: var(--mint-3); }
 .bm-crm-nav button:hover svg { opacity: 1; }
 
-/* The active pair is --bm-btn-fg on --bm-btn-bg — the one fixed, non
-   theme-adaptive pair in the palette, measured at 16.37:1 in both themes.
-   Kept exactly as it was: it is the pair tests/contrast.test.mjs names, and
-   a prettier active state that had to be re-measured is not worth it. */
+/* The active section is a solid mint pill: --bm-btn-bg on --mint, measured at
+   6.76:1 and already the exact pair the marketing site's primary button uses.
+   It also gives the sidebar its one bright point, which a wash never did. */
 .bm-crm-nav button[aria-current="page"] {
-  background: var(--bm-btn-bg);
-  color: var(--bm-btn-fg);
+  background: var(--mint);
+  color: var(--bm-btn-bg);
+  font-weight: 700;
 }
 .bm-crm-nav button[aria-current="page"] svg { opacity: 1; }
 
-/* The mint indicator. Decoration only — no text sits on it, so it carries no
-   contrast obligation, which is exactly why the accent is allowed here and
-   not on a label. */
-.bm-crm-nav button[aria-current="page"]::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 3px;
-  height: 18px;
-  margin-top: -9px;
-  border-radius: 0 3px 3px 0;
-  background: var(--mint);
-}
+/* The 3px mint rail that used to mark the active row is gone: the row itself
+   is now a solid mint pill, so a mint rail on its leading edge marked nothing
+   and was invisible against it. Two indicators for one state is one too many.
 
-/* The count badge on a nav row. Sits on the row, so it must clear contrast
-   against BOTH the resting row and the active (dark) row — which is why it
-   inherits colour rather than declaring its own. */
+   The count badge on a nav row sits on TWO different grounds — the dark
+   sidebar when resting and the mint pill when active — so it declares an
+   opaque pair for each rather than inheriting. Inheriting is what would put
+   --bm-btn-bg text on --mint-3, dark on dark. */
 .bm-crm-nav .bm-crm-count {
   margin-left: auto;
   min-width: 22px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: var(--bm-line);
-  color: inherit;
+  background: var(--mint-3);
+  color: var(--bm-btn-fg);
   font-size: 11.5px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
 
+.bm-crm-nav button[aria-current="page"] .bm-crm-count {
+  background: var(--bm-btn-bg);
+  color: var(--bm-btn-fg);
+}
+
 .bm-crm-side-foot {
   margin-top: auto;
   padding-top: 14px;
-  border-top: var(--hair);
+  border-top: 1px solid rgba(251, 250, 242, 0.14);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -239,7 +257,7 @@
 .bm-crm-who {
   padding: 2px 13px 8px;
   font-size: 11.5px;
-  color: var(--bm-muted);
+  color: rgba(251, 250, 242, 0.72);
   overflow-wrap: anywhere;
 }
 
@@ -343,13 +361,17 @@
   margin-bottom: 22px;
 }
 
+/* Bigger than a section heading normally warrants, deliberately. This screen
+   is opened forty times a day and the first thing it has to do is tell you
+   where you are before you have focused on anything — at 25px it was competing
+   with the panel headings below it rather than leading them. */
 .bm-view-head h2 {
   margin: 0;
   font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
-  font-size: 25px;
-  font-weight: 750;
-  letter-spacing: -0.028em;
-  line-height: 1.15;
+  font-size: 31px;
+  font-weight: 780;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
   color: var(--ink);
 }
 
@@ -443,13 +465,15 @@
   color: var(--bm-muted);
 }
 
+/* The figure is the tile. Everything else on it is a caption, so the number
+   gets the size and the weight and the label gives way. */
 .bm-tile-value {
   margin: 0;
   font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
-  font-size: 29px;
-  font-weight: 780;
-  letter-spacing: -0.035em;
-  line-height: 1.08;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
@@ -1030,7 +1054,7 @@
     padding: 10px 14px;
     overflow-x: auto;
     border-right: 0;
-    border-bottom: var(--hair);
+    border-bottom: 1px solid rgba(251, 250, 242, 0.14);
   }
 
   .bm-crm-logo,
@@ -1040,9 +1064,6 @@
 
   .bm-crm-nav { flex-direction: row; gap: 6px; }
   .bm-crm-nav button { white-space: nowrap; padding: 0 14px; }
-  /* The left rail is meaningless on a horizontal strip — it would sit on the
-     leading edge of a pill in a row, reading as a divider. */
-  .bm-crm-nav button[aria-current="page"]::before { display: none; }
 
   .bm-crm-top { padding: 10px 16px; height: auto; min-height: var(--top); }
   .bm-crm-search { min-width: 0; width: 44px; padding: 0; justify-content: center; }

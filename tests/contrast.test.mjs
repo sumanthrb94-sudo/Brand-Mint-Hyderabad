@@ -129,8 +129,23 @@ const PAIRS = [
      two-step the muted pill was hiding a 4.00:1 behind. */
   { name: "CRM: client monogram (.bm-mono)", fg: "--ink", bg: "--bm-line", on: "--bm-white" },
   { name: "CRM: kanban column count (.bm-kan-n)", fg: "--ink", bg: "--bm-line", on: "--bm-white" },
-  { name: "CRM: sidebar nav item, resting", fg: "--ink", bg: "--bm-white", on: null },
-  { name: "CRM: sidebar nav item, active", fg: "--bm-btn-fg", bg: "--bm-btn-bg", on: null },
+  /* The sidebar is dark in BOTH themes and built entirely from the fixed
+     --bm-btn pair, so resting and active are the same measurement read twice.
+     Hover and active only add a wash of the foreground over its own
+     background, which can move the surface toward the text and therefore only
+     ever raises this ratio — the resting case is the worst case. */
+  /* The sidebar is dark in BOTH themes and every state on it is an OPAQUE pair
+     from an existing token — deliberately, after a translucent version of the
+     same design measured 1.00:1 in tests/admin-ui.mjs, whose __bg() helper
+     keeps a translucent background's RGB and drops its alpha. Flat colours
+     measure the same everywhere. */
+  { name: "CRM: sidebar nav item, resting", fg: "--bm-btn-fg", bg: "--bm-btn-bg", on: null },
+  { name: "CRM: sidebar nav item, hover", fg: "--bm-btn-fg", bg: "--mint-3", on: null },
+  { name: "CRM: sidebar nav item, active", fg: "--bm-btn-bg", bg: "--mint", on: null },
+  { name: "CRM: sidebar count badge, resting", fg: "--bm-btn-fg", bg: "--mint-3", on: null },
+  { name: "CRM: sidebar count badge, on the active pill", fg: "--bm-btn-fg", bg: "--bm-btn-bg", on: null },
+  { name: "CRM: sidebar section label", fg: "--mint-2", bg: "--bm-btn-bg", on: null },
+  { name: "CRM: sidebar wordmark sub", fg: "--mint-2", bg: "--bm-btn-bg", on: null },
   { name: "CRM: lead card on its column", fg: "--ink", bg: "--bg", on: null },
   { name: "CRM: search placeholder in the topbar", fg: "--bm-muted", bg: "--bg", on: null },
 ];
