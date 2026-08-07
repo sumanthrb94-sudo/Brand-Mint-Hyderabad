@@ -42,6 +42,38 @@ row is selling, and a deal that dies there leaves nothing behind to archive. The
 moment you submit that form the client, the project, the agreed scope line, both
 invoices and the milestone schedule all exist at once.
 
+### The flow is now on the screen, not just on this page
+
+Open any client and the first thing in the record is **where this client is** —
+seven stages, the one you are on lit, and the next action written under it.
+
+`Lead → Scope agreed → Agreement signed → Deposit received → In build →
+Delivered → Settled`
+
+It is worked out from the records themselves: the scope you saved, the
+agreement you marked, what has actually been paid, and how far the scope lines
+have moved. **There is nothing there to keep up to date** — no status field to
+remember, nothing that rots if you do not open it for a fortnight. If it says
+you are on Deposit received, that is because money arrived, not because
+somebody ticked a box.
+
+The stage never runs ahead of the facts. An invoice you have raised but not
+been paid is not a deposit. Some lines delivered is not delivered. Paid in full
+but not delivered is not settled, and neither is delivered but still owed. A
+retainer marked *proposed* does not count as an agreement, for the same reason
+it does not count as revenue.
+
+**Agreement signed** is a button on the client, and it records rather than
+signs. Send the document from `/quote` and get it signed by email or Zoho Sign
+as you do now; the button stamps the date it came back. The date is set by the
+server, so it cannot be back-dated — and it is what lights the third stage.
+
+**Brand kit** is on the same record: a logo link, a guidelines link, fonts, and
+colours as hex. Links, never files — their logo already lives in Figma or Drive
+and a copy here would be the one that goes stale. It appears in **their portal
+under Links**, so a client stops emailing you to ask for their own palette.
+Leave it blank and nothing is shown at all, rather than a row of empty labels.
+
 ### Two documents, and they are not the same one
 
 The easiest thing here to get wrong, because both of them have a price on.
@@ -165,7 +197,7 @@ any and is not supposed to.
 |---|---|
 | **Today** | The month, and what needs you. Open this one. |
 | **Pipeline** | Leads as a board. **Log first response the moment you reply** — stamped once, never moves, and the most valuable number in the business. |
-| **Clients** | One row each → retainer, projects, invoices, login, and which onboarding step is next. Mark a retainer signed here. |
+| **Clients** | One row each → **where they are in the flow**, agreement, brand kit, retainer, projects, invoices, login, and which onboarding step is next. Mark a retainer signed here. |
 | **Delivery** | One row per project → move scope lines `agreed → building → delivered → accepted` with a click, raise what you need from the client, put work up for approval. |
 | **Money** | Every invoice ever raised. *Record payment* takes the **total received**, so a part payment is a real number. |
 | **Access** | Client logins, and who has one. |

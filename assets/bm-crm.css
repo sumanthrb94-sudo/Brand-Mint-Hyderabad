@@ -832,6 +832,72 @@
 .bm-facts dt { color: var(--bm-muted); }
 .bm-facts dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
 
+/* ── the flow strip ───────────────────────────────────────────────
+   Seven stages down the side of a client record, derived from data that
+   already exists. Vertical rather than horizontal on purpose: seven labels in
+   a row inside a 640px drawer would either truncate or scroll sideways, and a
+   step you have to scroll to find is a step people miss.
+
+   State is carried by the PIP and by font-weight, never by colour alone —
+   a strip that says "you are here" only in green says nothing to a colourblind
+   reader. Text stays --ink or --bm-muted throughout, both measured. */
+
+.bm-flow {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bm-flow-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  font-size: 13.5px;
+  color: var(--bm-muted);
+}
+
+.bm-flow-pip {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid var(--bm-line);
+  background: var(--bm-white);
+}
+
+/* The connector. Drawn from the pip downward on every step but the last, so
+   the strip reads as one run rather than seven separate rows. */
+.bm-flow-step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 24px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--bm-line);
+}
+
+.bm-flow-step.is-done { color: var(--ink); }
+.bm-flow-step.is-done .bm-flow-pip { border-color: var(--mint); background: var(--mint); }
+.bm-flow-step.is-done:not(:last-child)::before { background: var(--mint); }
+
+.bm-flow-step.is-now {
+  color: var(--ink);
+  font-weight: 700;
+}
+.bm-flow-step.is-now .bm-flow-pip {
+  border-color: var(--mint);
+  background: var(--bm-white);
+  box-shadow: 0 0 0 3px var(--bm-green-bg);
+}
+
+/* Brand kit swatches are NOT here — they are in bm-app.css, because /portal
+   renders them too and loads only that sheet. A copy in each would drift. */
+
 /* ── modal (create forms) ─────────────────────────────────────── */
 
 .bm-modal-scrim {

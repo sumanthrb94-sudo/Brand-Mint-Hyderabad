@@ -1049,3 +1049,34 @@ a.bm-link { color: var(--mint-3); }
   .bm-act { flex-wrap: wrap; }
   .bm-act-go { width: 100%; justify-content: center; margin-top: 4px; }
 }
+
+/* ───────────────────────── brand kit swatches ─────────────────────────
+   Shared by /studio (the editor) and /portal (the client's read-only copy),
+   which is why they live here and not in bm-crm.css — /portal loads only this
+   sheet, and a second copy over there would drift from this one.
+
+   The swatch is the CLIENT'S colour. It is arbitrary, it is not from this
+   palette, and it may be any value including the surface behind it — so each
+   carries its own hairline, and NO TEXT EVER SITS ON ONE. A hex label printed
+   inside a swatch would be a contrast pair that cannot be measured in advance,
+   which is exactly the kind of pair §4 exists to forbid. The value is exposed
+   as a title attribute instead, where the browser renders it on its own
+   ground. parseBrandColors() has already reduced the value to a hex literal
+   before it reaches the style attribute. */
+
+.bm-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+
+.bm-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--bm-line);
+  /* An inner highlight so a swatch the same colour as the card still reads as
+     an object rather than as a hole. */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}

@@ -74,11 +74,21 @@
           <div id="bm-deliverables-list"></div>
         </section>
 
-        <!-- 4. Preview links -->
+        <!-- 4. Preview links, and the brand kit — ONE card, deliberately.
+             §8 allows this portal five things and says to resist the sixth,
+             and §12 makes that a definition-of-done item. The brand kit is
+             addresses and colours, which is what this card already is, so it
+             folds in here rather than becoming a sixth panel. Every extra
+             panel is somewhere a client gets confused and sends a message,
+             which is the exact cost this portal exists to remove. -->
         <section class="bm-card">
           <p class="bm-eyebrow">Preview links</p>
           <h2 class="bm-card-title" style="margin-bottom:16px;">Links</h2>
           <div id="bm-preview-list"></div>
+          <!-- Stays empty unless a brand kit has actually been filled in.
+               brandKit() returns null until then, so this prints nothing
+               rather than a labelled empty row. -->
+          <div id="bm-brandkit"></div>
         </section>
 
         <!-- 5. Invoices -->
@@ -103,6 +113,7 @@
         requireClientAuth,
         getUserProfile,
         getOrg,
+        brandKit,
         getProjectsForOrg,
         getMilestones,
         getIntake,
@@ -161,6 +172,11 @@
         document.getElementById("bm-main").hidden = false;
 
         if (!project) {
+          /* Before the early return, because the brand kit belongs to the
+             ORGANISATION and not to any project. A client between engagements
+             still has a logo and a palette, and this is where they come to
+             find them. */
+          renderBrandKit(org);
           document.getElementById("bm-project-name").textContent = "No active project";
           document.getElementById("bm-project-status").textContent = "—";
           document.getElementById("bm-intake-list").innerHTML = '<p class="bm-empty">Nothing here yet.</p>';
@@ -283,6 +299,45 @@
           });
         }
 
+        /* The brand kit, read-only.
+           Renders NOTHING when brandKit() returns null, which it does until a
+           real value has been saved — the same rule studioPayee() follows on
+           the invoice. A card that printed "Logo: —" would read as something
+           broken rather than as something not yet supplied.
+
+           Both links go through safeUrl for the reason stated below: escaping
+           stops an attribute breaking out, it does not stop a javascript:
+           scheme running when the client clicks. The colours are already
+           filtered to /^#[0-9a-f]{3,6}$/ by parseBrandColors before they are
+           stored, so nothing arbitrary reaches a style attribute. */
+        function renderBrandKit(o) {
+          const el = document.getElementById("bm-brandkit");
+          if (!el) return;
+          const kit = brandKit(o);
+          if (!kit) { el.innerHTML = ""; return; }
+          const link = (url, label) => {
+            const safe = safeUrl(url);
+            return safe
+              ? `<div class="bm-row">
+                   <span class="bm-row-title">${escapeHtml(label)}</span>
+                   <a class="bm-link" href="${escapeHtml(safe)}" target="_blank" rel="noopener">Open</a>
+                 </div>`
+              : "";
+          };
+          el.innerHTML = `
+            <p class="bm-eyebrow" style="margin-top:22px;">Your brand kit</p>
+            ${link(kit.logo, "Logo")}
+            ${link(kit.guide, "Brand guidelines")}
+            ${kit.fonts ? `<div class="bm-row"><span class="bm-row-title">Fonts</span>
+              <span class="bm-row-sub">${escapeHtml(kit.fonts)}</span></div>` : ""}
+            ${kit.colors.length ? `<div class="bm-row" style="display:block;">
+              <span class="bm-row-title">Colours</span>
+              <div class="bm-swatches" style="margin-top:8px;">
+                ${kit.colors.map((c) => `<span class="bm-swatch" style="background:${escapeHtml(c)}" title="${escapeHtml(c)}"></span>`).join("")}
+              </div>
+            </div>` : ""}`;
+        }
+
         // Preview links — every deliverable that has one.
         // Filtered on safeUrl, not on d.url: escaping stops an attribute
         // breaking out, it does not stop a javascript: scheme running on click.
@@ -298,6 +353,8 @@
               )
               .join("")
           : '<p class="bm-empty">No preview links yet.</p>';
+
+        renderBrandKit(org);
 
         /* Agreed scope — the client's own copy of what they bought.
            Read-only for them by rule: delivery status is the studio's

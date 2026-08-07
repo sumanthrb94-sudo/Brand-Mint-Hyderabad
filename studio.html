@@ -186,6 +186,8 @@
         invoiceReceived, invoiceOutstanding, invoiceState, recordPayment,
         deleteClient, setClientUser as grantLogin, invoiceRef, updateScopeLine,
         studioOrg, studioPayee, saveStudioPayee,
+        CLIENT_STAGES, clientStage, brandKit, saveBrandKit, parseBrandColors,
+        markAgreementSigned, clearAgreementSigned,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
       import { openInvoice } from "/assets/bm-invoice.js";
@@ -897,10 +899,85 @@
         const invs = S.invoices.filter((i) => i.orgId === o.id);
         const logins = S.users.filter((u) => u.orgId === o.id && u.role === "client");
 
+        /* Scope is a subcollection and is NOT loaded here. clientStage is told
+           so explicitly (null, not []) rather than being handed an empty array
+           — an unread scope must not report as an unquoted client. */
+        const stage = clientStage(o, { projects: theirs, invoices: invs, scope: null });
+        const kit = brandKit(o);
+
         drawer({
           title: o.name || "Unnamed",
           sub: `${escapeHtml(o.kind || "client")} · ${escapeHtml(o.status || "active")}`,
           body: `
+            <div class="bm-drawer-sec">
+              <h4>Where this client is</h4>
+              <ol class="bm-flow">
+                ${CLIENT_STAGES.map((s, i) => `<li class="bm-flow-step ${
+                  i < stage.index ? "is-done" : i === stage.index ? "is-now" : ""
+                }"><span class="bm-flow-pip" aria-hidden="true"></span><span>${escapeHtml(s.label)}</span></li>`).join("")}
+              </ol>
+              <p class="bm-hint" style="margin-top:10px;">
+                ${stage.next
+                  ? `<strong>Next:</strong> ${escapeHtml(stage.next)}`
+                  : "Delivered and settled in full. Nothing outstanding."}
+              </p>
+              <p class="bm-hint">
+                Worked out from the records themselves — leads, scope, invoices and what has
+                actually been paid. There is nothing here to keep up to date.
+              </p>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Agreement</h4>
+              <dl class="bm-facts">
+                <dt>Signed</dt><dd>${o.agreementSignedAt
+                  ? `<span class="bm-pill bm-pill--green">${escapeHtml(formatDate(o.agreementSignedAt))}</span>`
+                  : `<span class="bm-pill bm-pill--muted">not recorded</span>`}</dd>
+              </dl>
+              <div class="bm-inline-form" style="margin-top:12px;">
+                ${o.agreementSignedAt
+                  ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-agree-clear="${escapeHtml(o.id)}">Clear</button>`
+                  : `<button type="button" class="bm-btn bm-btn--sm" data-agree="${escapeHtml(o.id)}">Mark agreement signed</button>`}
+              </div>
+              <p class="bm-hint" style="margin-top:10px;">
+                This records that an agreement was signed; it does not sign one. Send the
+                document from <a class="bm-link" href="/quote">Scope &amp; quote</a> and have it
+                signed by email or Zoho Sign. The date is set by the server, so it cannot be
+                back-dated.
+              </p>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Brand kit</h4>
+              <p class="bm-hint" style="margin-bottom:12px;">
+                Shown to this client in their own portal, under Links. Addresses and colours
+                only — never files: their logo already lives in Figma or Drive, and a second
+                copy here would be the one that goes stale.
+              </p>
+              <div class="bm-field">
+                <label for="f-bk-logo">Logo link</label>
+                <input id="f-bk-logo" value="${escapeHtml(o.brandLogoUrl || "")}" placeholder="https://…" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bk-guide">Guidelines link</label>
+                <input id="f-bk-guide" value="${escapeHtml(o.brandGuidelinesUrl || "")}" placeholder="https://…" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bk-fonts">Fonts</label>
+                <input id="f-bk-fonts" value="${escapeHtml(o.brandFonts || "")}" placeholder="e.g. Plus Jakarta Sans, Inter" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bk-colors">Colours</label>
+                <input id="f-bk-colors" value="${escapeHtml((o.brandColors || []).join(" "))}" placeholder="#0b1f1a #10b981" />
+                <p class="bm-help">Hex only, separated by spaces or commas. Anything else is discarded rather than saved.</p>
+              </div>
+              ${kit && kit.colors.length ? `<div class="bm-swatches" aria-hidden="true">
+                ${kit.colors.map((c) => `<span class="bm-swatch" style="background:${escapeHtml(c)}"></span>`).join("")}
+              </div>` : ""}
+              <button type="button" class="bm-btn bm-btn--sm" data-bk-save="${escapeHtml(o.id)}">Save brand kit</button>
+              <p class="bm-status" id="bm-bk-status" hidden></p>
+            </div>
+
             <div class="bm-drawer-sec">
               <h4>Retainer</h4>
               <dl class="bm-facts">
@@ -1895,6 +1972,65 @@
               { orgId: d.orgSave, target: was.name || d.orgSave, amount: retainer });
             closeOverlay();
             return refresh();
+          }
+          /* The agreement. Both directions close the drawer and refresh,
+             because the stage strip at the top of that same drawer is derived
+             from this field — leaving it open would show a strip that
+             contradicts the pill directly under it. */
+          if (d.agree) {
+            const o = S.orgById[d.agree];
+            btn.disabled = true;
+            await markAgreementSigned(d.agree);
+            await logActivity("agreement.signed",
+              `${o?.name || d.agree}: agreement recorded as signed`,
+              { orgId: d.agree, target: o?.name || d.agree });
+            closeOverlay();
+            return refresh();
+          }
+          if (d.agreeClear) {
+            const o = S.orgById[d.agreeClear];
+            if (!confirm("Clear the signed date? The client stays exactly as they are; only the record of the agreement goes.")) return;
+            btn.disabled = true;
+            await clearAgreementSigned(d.agreeClear);
+            await logActivity("agreement.cleared",
+              `${o?.name || d.agreeClear}: signed date cleared`,
+              { orgId: d.agreeClear, target: o?.name || d.agreeClear });
+            closeOverlay();
+            return refresh();
+          }
+
+          /* The brand kit does NOT close and refresh, deliberately. It is a
+             four-field form people correct twice in a row, and RENDER.access()
+             already taught us what a refresh does to a confirmation: it
+             rebuilds the view and replaces the status node a moment after the
+             message was written into it, so every assertion passes and the
+             screen goes silent. State is patched in place instead. */
+          if (d.bkSave) {
+            const o = S.orgById[d.bkSave];
+            btn.disabled = true;
+            const payload = {
+              brandLogoUrl: $("f-bk-logo").value,
+              brandGuidelinesUrl: $("f-bk-guide").value,
+              brandFonts: $("f-bk-fonts").value,
+              brandColors: $("f-bk-colors").value,
+            };
+            await saveBrandKit(d.bkSave, payload);
+            Object.assign(o || {}, {
+              brandLogoUrl: String(payload.brandLogoUrl || "").trim(),
+              brandGuidelinesUrl: String(payload.brandGuidelinesUrl || "").trim(),
+              brandFonts: String(payload.brandFonts || "").trim(),
+              brandColors: parseBrandColors(payload.brandColors),
+            });
+            const st = $("bm-bk-status");
+            if (st) {
+              const kept = parseBrandColors(payload.brandColors);
+              st.hidden = false;
+              st.className = "bm-status bm-status--ok";
+              st.textContent = `Saved. ${kept.length} colour${kept.length === 1 ? "" : "s"} kept.` +
+                ` ${o?.name || "This client"} sees this in their portal under Links.`;
+            }
+            btn.disabled = false;
+            return;
           }
           if (d.orgArchive) {
             const o = S.orgById[d.orgArchive];

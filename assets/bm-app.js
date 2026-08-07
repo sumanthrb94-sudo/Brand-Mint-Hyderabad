@@ -1455,6 +1455,169 @@ export async function saveStudioPayee(orgId, { bankHolder, bankAccount, bankIfsc
   });
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   THE AGREEMENT, RECORDED — NOT SIGNED
+
+   §10 puts e-signature on the do-not-build list, and it is right to: signing
+   is a legal artefact, this site has no server, and Zoho Sign already does it
+   properly. So nothing here captures a signature. This records that one
+   happened, which is the part the studio actually needs in order to know a
+   project may start.
+
+   It lives on the organisation document, which the admin can already write and
+   the client can already read, so it needs NO firestore.rules change — the
+   same reason the payee details work. That is the safe order, not a shortcut:
+   rules are published by hand from the Console (§2), so a UI needing new rules
+   would go live denied.
+
+   The date is request.time via serverTimestamp(), never a value the browser
+   supplies. An agreement date that the interested party can set is exactly the
+   kind of record §7 already refused to allow for deliverables.
+   ══════════════════════════════════════════════════════════════════ */
+
+export async function markAgreementSigned(orgId) {
+  await updateDoc(doc(db, "organisations", orgId), {
+    agreementSignedAt: serverTimestamp(),
+  });
+}
+
+/** Clear it again. Deliberately present: a date stamped on the wrong client is
+ *  worse than no date, and the only alternative would be editing Firestore by
+ *  hand. Unlike lead.firstResponseAt this is NOT a once-only stamp, because it
+ *  measures nothing and is not compared across clients — it is a fact about a
+ *  document that either exists or does not. */
+export async function clearAgreementSigned(orgId) {
+  await updateDoc(doc(db, "organisations", orgId), { agreementSignedAt: null });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   THE BRAND KIT
+
+   Links, colours and font names — never files. §10 puts file uploads out of
+   scope, and a brand studio's logo already lives in Figma or Drive where the
+   client's own designer can reach it; copying it into Firestore would make
+   this the second place it lives and the one that goes stale.
+
+   Same organisation document, same reason: no rules change.
+
+   brandKit() returns null unless there is at least one real value, so the
+   portal omits the whole block rather than printing empty labelled rows — the
+   identical rule studioPayee() follows, for the identical reason (§4: an empty
+   field rendered as a field reads as a mistake, not as an absence).
+   ══════════════════════════════════════════════════════════════════ */
+
+/** Hex only, normalised, and anything that is not a colour is dropped rather
+ *  than stored. A swatch is rendered as a background; a junk value there would
+ *  paint nothing and look like a missing colour instead of a bad one. */
+function cleanHex(v) {
+  const s = String(v || "").trim().replace(/^#*/, "#");
+  return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s) ? s.toLowerCase() : null;
+}
+
+export function parseBrandColors(input) {
+  if (!input) return [];
+  const list = Array.isArray(input) ? input : String(input).split(/[\s,]+/);
+  return [...new Set(list.map(cleanHex).filter(Boolean))].slice(0, 8);
+}
+
+export function brandKit(org) {
+  if (!org) return null;
+  const colors = parseBrandColors(org.brandColors);
+  const logo = String(org.brandLogoUrl || "").trim();
+  const guide = String(org.brandGuidelinesUrl || "").trim();
+  const fonts = String(org.brandFonts || "").trim();
+  if (!colors.length && !logo && !guide && !fonts) return null;
+  return { colors, logo, guide, fonts };
+}
+
+export async function saveBrandKit(orgId, { brandLogoUrl, brandGuidelinesUrl, brandFonts, brandColors }) {
+  await updateDoc(doc(db, "organisations", orgId), {
+    brandLogoUrl: String(brandLogoUrl || "").trim(),
+    brandGuidelinesUrl: String(brandGuidelinesUrl || "").trim(),
+    brandFonts: String(brandFonts || "").trim(),
+    brandColors: parseBrandColors(brandColors),
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   WHERE A CLIENT IS IN THE FLOW
+
+   The report was "I don't understand the flow how to add leads scope and give
+   a agreement sign and get paid". Every one of those steps already existed;
+   what did not exist was anywhere on screen that said which one you are on.
+
+   So this ADDS NO DATA. Every stage below is derived from records that are
+   already written, which means it cannot drift out of step with reality and
+   there is nothing new to keep up to date — the property §1 requires of
+   anything that must survive being ignored for a fortnight.
+
+   `next` is the whole point. A stage that only says where you are is a status;
+   a stage that says what to do next is an instruction.
+   ══════════════════════════════════════════════════════════════════ */
+
+export const CLIENT_STAGES = [
+  { key: "new",       label: "New client" },
+  { key: "quoted",    label: "Scope agreed" },
+  { key: "signed",    label: "Agreement signed" },
+  { key: "deposit",   label: "Deposit received" },
+  { key: "building",  label: "In build" },
+  { key: "delivered", label: "Delivered" },
+  { key: "settled",   label: "Settled" },
+];
+
+/**
+ * @param scope  the project's scope lines when the caller has loaded them.
+ *               `null` means NOT LOADED, which is not the same as "no scope"
+ *               and must never be reported as an unscoped project — that is
+ *               the empty-is-not-done rule (§4) applied to a lazy read.
+ */
+export function clientStage(org, { projects = [], invoices = [], scope = null } = {}) {
+  const at = (k) => CLIENT_STAGES.findIndex((s) => s.key === k);
+
+  const received = invoices.reduce((n, i) => n + invoiceReceived(i), 0);
+  const billed = invoices.reduce((n, i) => n + (Number(i.amount) || 0), 0);
+  const anyPaid = received > 0;
+  const allSettled = invoices.length > 0 && received >= billed;
+
+  const lines = Array.isArray(scope) ? scope : [];
+  const hasScope = lines.length > 0;
+  const moved = lines.filter((l) => l.status && l.status !== "agreed").length;
+  const done = lines.filter((l) => l.status === "delivered" || l.status === "accepted").length;
+
+  const signed = !!org?.agreementSignedAt || org?.retainerStatus === "signed";
+
+  let key = "new";
+  if (hasScope) key = "quoted";
+  if (signed) key = "signed";
+  if (anyPaid) key = "deposit";
+  if (moved > 0) key = "building";
+  if (hasScope && done === lines.length) key = "delivered";
+  if (allSettled && (!hasScope || done === lines.length)) key = "settled";
+
+  const NEXT = {
+    new: projects.length
+      ? "Open the project and save an agreed scope on /quote."
+      : "Start an engagement — name, deal, price, weeks.",
+    quoted: "Send the quote, then mark the agreement signed when it comes back.",
+    signed: "Raise the deposit invoice and send it.",
+    deposit: "Raise what you need from them, then move a scope line as it moves.",
+    building: "Move each scope line as it moves. A line is money only at accepted.",
+    delivered: "Raise the balance invoice.",
+    settled: null,
+  };
+
+  return {
+    key,
+    index: at(key),
+    total: CLIENT_STAGES.length,
+    label: CLIENT_STAGES[at(key)].label,
+    next: NEXT[key],
+    /* Stated separately so the UI can say "not loaded" rather than draw a
+       confident empty bar. */
+    scopeKnown: Array.isArray(scope),
+  };
+}
+
 /** A stable human reference for an invoice, derived from its own id so it
  *  never needs a counter and never changes. Not a GST serial — see STUDIO. */
 export function invoiceRef(inv) {
