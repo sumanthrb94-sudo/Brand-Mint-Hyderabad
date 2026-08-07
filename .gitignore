@@ -37,3 +37,11 @@ next-env.d.ts
 docs/journey/*.png
 .gstack/
 docs/admin-ui/*.png
+
+# Ruflo runtime state. Written into the working directory on use, regardless of
+# where the command was run from — §9a names writing into the CWD as a hazard
+# and this is it. Machine-local state, not source: it must never reach a public
+# repository, and it regenerates, so ignoring beats deleting.
+.claude-flow/
+.claude/proven-config.json
+.claude/.proven-config-version
