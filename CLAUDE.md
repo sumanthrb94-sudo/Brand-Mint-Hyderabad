@@ -228,6 +228,11 @@ suite.
 ## 5. Files
 
 ```
+docs/WALKTHROUGH.md                     how to actually run /studio, in order.
+                                        Update it in the SAME commit that
+                                        changes the admin UI, or it becomes a
+                                        confident lie about the screen.
+
 login.html          -> /login           username + password
 portal.html         -> /portal          the client's view
 onboarding.html     -> /onboarding      the intake checklist
