@@ -195,7 +195,7 @@
          is only replaced if the module actually loads. Someone who asked their
          OS for reduced motion never downloads it at all — that is a stronger
          answer than loading it and then animating less. */
-      const NOOP = { view(){}, rows(){}, drawerIn(){}, drawerOut(){ return Promise.resolve(); },
+      const NOOP = { view(){}, rows(){}, tiles(){}, drawerIn(){}, drawerOut(){ return Promise.resolve(); },
                      popIn(){}, bar(){}, count(el, to, f){ if (el) el.textContent = f ? f(to) : String(to); }, tap(){} };
       let mo = NOOP;
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -599,6 +599,7 @@
             </button>`).join("");
         }
 
+        mo.tiles($("view-today").querySelectorAll(".bm-tile"));
         mo.rows(list.children);
         mo.bar($("bm-gaugebar"));
         // Only the headline. Counting every figure on a dense CRM screen means
@@ -1383,6 +1384,7 @@
             </div>
           </div>`;
 
+        mo.tiles($("view-money").querySelectorAll(".bm-tile"));
         mo.rows($("bm-inv-list").children);
       };
 

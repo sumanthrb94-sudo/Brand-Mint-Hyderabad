@@ -746,12 +746,23 @@ main {
   margin-left: 4px;
   text-transform: none;
 }
+/* The four hero claims are the first proof a prospect reads, and they were set
+   in the mono face. Monospace is ~15% wider per character, and inside a
+   quarter-width column that pushed them to two, three, three and two lines —
+   four claims at four different heights, which reads as a broken grid rather
+   than as a set.
+
+   The sans face at the same size fits each on fewer lines and levels the row.
+   The mono is kept where it earns its place: the `.unit` accents (WK, DAY,
+   /50), where fixed-width digits are the point. Colour, size and token are all
+   unchanged, so nothing here alters the measured contrast. */
 .hero-meta span {
   font-size: 12.5px;
   color: var(--muted);
-  font-family: var(--mono);
-  letter-spacing: 0.02em;
-  line-height: 1.35;
+  font-family: var(--sans);
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+  text-wrap: pretty;
 }
 
 /* ---------- HERO CARD ---------- */

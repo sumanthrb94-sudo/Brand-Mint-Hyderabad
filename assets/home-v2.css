@@ -223,8 +223,26 @@ h2.section-title {
 .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
 
 /* Trust strip — the skill's "proof" beat, directly under the fold. */
-.trust { margin-top: 34px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 26px 40px; }
-.trust-item { display: flex; flex-direction: column; gap: 2px; }
+/* Four proof points, and the count is the point: they are the four things a
+   prospect is actually deciding on. `flex-wrap` broke them 3 + 1, orphaning
+   "30 day / Bug warranty" on a line of its own with the hero's dead space
+   under it — which reads as a fifth item someone forgot to finish rather than
+   as the last of four.
+
+   A 4-track grid keeps them level at every width the hero is two columns at,
+   then folds to a clean 2 x 2 rather than to a ragged wrap. Grid, not flex,
+   because the columns then share a width and the numbers line up as a row of
+   figures — which is what makes them scan as one claim instead of four. */
+.trust {
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 26px 28px;
+}
+@media (max-width: 1080px) { .trust { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.trust-item { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .trust-k { font-family: var(--serif); font-size: 1.55rem; line-height: 1; color: var(--ink); }
 .trust-k span { font-family: var(--sans); font-size: 0.82rem; font-weight: 600; color: var(--mint-3); margin-left: 2px; }
 .trust-v { font-size: 0.78rem; color: var(--muted); }

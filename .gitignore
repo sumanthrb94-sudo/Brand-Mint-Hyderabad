@@ -45,3 +45,4 @@ docs/admin-ui/*.png
 .claude-flow/
 .claude/proven-config.json
 .claude/.proven-config-version
+.swarm/

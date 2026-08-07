@@ -86,6 +86,30 @@ export function rows(target, { step = 26, y = 10 } = {}) {
   });
 }
 
+/* ── the headline tiles ───────────────────────────────────────────
+   The four numbers at the top of Today and Money arrive in sequence rather
+   than together. There are never more than four, so the whole run is under
+   200ms and there is no cap to apply — unlike rows(), which has to survive a
+   sixty-row ledger.
+
+   Scale starts at 0.985, not lower: these are the first things read on the
+   screen, and a tile that grows visibly reads as a notification rather than
+   as part of the page. */
+
+export function tiles(target) {
+  const list = els(target);
+  if (!list.length) return;
+  utils.set(list, { opacity: 0, translateY: 8, scale: 0.985 });
+  animate(list, {
+    opacity: [0, 1],
+    translateY: [8, 0],
+    scale: [0.985, 1],
+    duration: 300,
+    ease: EASE,
+    delay: stagger(38),
+  });
+}
+
 /* ── the record drawer ────────────────────────────────────────────
    Slides from the right because that is the direction it came from — the row
    you clicked is still on screen behind it. The scrim fades rather than
