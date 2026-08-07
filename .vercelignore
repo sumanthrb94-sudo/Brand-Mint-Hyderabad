@@ -24,6 +24,34 @@ CLAUDE.md
 firestore.rules
 firebase.json
 
+# ── the legacy CRM, taken off the public host ──────────────────
+# admin.html served at /admin with NO authentication. Lines 29-38 of that file
+# write a 365-day session token on load for the stated purpose of bypassing the
+# gate, and `noindex` keeps it out of Google without stopping anyone who types
+# the URL.
+#
+# Its Supabase project is not in the account any more, so it falls back to the
+# seed in admin/db.js — which sets a legal entity name, gstin 36ABCDE1234F1Z5
+# (36 is Telangana's real GST state code, and the string is correctly formed),
+# a PAN, and an HDFC account and IFSC. admin/modules/invoices.js prints the
+# GSTIN and the IFSC onto generated invoices.
+#
+# So the URL let anyone produce a document that looks like a Brand Mint tax
+# invoice carrying a plausible fake GSTIN and bank account. No client data was
+# exposed — all of it is fabricated — which is exactly what makes it bad
+# rather than harmless (§4: a plausible-looking tax number on an invoice is not
+# a placeholder, it is a false statement).
+#
+# /studio replaces everything this did and has real authentication. Excluded
+# rather than deleted: every file stays in git and on the branch, untouched, so
+# §5's do-not-touch still holds for the source and restoring is one line. This
+# changes what is PUBLISHED, not what exists.
+#
+# Checked before excluding: nothing served references /admin — the only inbound
+# links are admin.html's own stylesheet and module.
+admin.html
+admin/
+
 # ── internal notes, no public value ────────────────────────────
 BUILD-PLAYBOOK.md
 COMPONENTS.md
