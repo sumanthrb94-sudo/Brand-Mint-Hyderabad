@@ -8,10 +8,109 @@ rather than silently doing the other thing.**
 
 ---
 
+## 0. The requirements spec, and what it changed
+
+A formal *Admin Dashboard — Requirements Specification* (v0.1, executive
+sign-off draft) now exists outside this repo. It is a good document — Appendix
+A defines every metric once and bindingly, and SEC-01/02/10 correctly name
+insecure direct object reference as the real risk rather than chasing exotic
+attacks. **Read it as the product direction. Read this file as what is true
+today.** Where they disagree, this file still wins, and the list below is
+exactly where they disagree and why.
+
+Its Section 2 asks each assumption to be confirmed or overturned before
+sign-off. Three were put to Sumanth directly and answered:
+
+| | Answer |
+|---|---|
+| **A2 — React + TypeScript + Supabase/Postgres** | **OVERTURNED. Firebase stays.** |
+| **Company status** | **Not incorporated. No GSTIN.** People *are* working alongside him. |
+| **§10's out-of-scope list** | **Stays.** |
+
+### A2 is overturned, and this is the reasoning
+
+The spec assumes Postgres row-level security. This app's boundary is
+`firestore.rules`, proven against the emulator by 46 tests, with a portal 119
+onboarding checks drive from the client's own side. Firestore rules can express
+every role in the spec's Section 3 matrix. **RLS is a means, not a
+requirement** — SEC-01's actual demand is "enforced at the database layer, not
+in application code", and that is already true here.
+
+Moving would discard a working deployed product and every test proving it, to
+arrive at the same guarantee. The one honest argument for Postgres is that the
+Section 4 executive reporting is easier in SQL. That is not worth a rewrite
+today; revisit it if reporting becomes the bottleneck.
+
+### There are collaborators now
+
+This is the real change, and it is the one that touches security.
+
+**The studio is no longer one person.** People are working alongside Sumanth.
+The spec's five roles — CEO, Partner, Collaborator, Finance, Client Guest —
+are therefore live design work, not a future concern, and its Section 3
+permission matrix is the authority for what each may see.
+
+Two rules from that matrix are non-negotiable and both are already this repo's
+position: enforcement is at the database layer, and **collaborator rates are
+visible only to the CEO and Finance** — a collaborator sees their own rate and
+nobody else's.
+
+> **This is the first change in a long time that genuinely needs
+> `firestore.rules` edits.** Every admin feature since the CRM rebuild needed
+> none. Publish rules FIRST, by hand, from the Console (§2) — new rules are
+> stricter, so old code keeps working against them, whereas new code against
+> old rules is denied.
+
+### §10 stays, so some of the spec is deferred
+
+Sumanth kept the out-of-scope list. That is coherent alongside the roles: he
+needs collaborators to have scoped access, and does not want a timesheet, a
+capacity planner or a ticket system built to feed metrics nobody has asked for.
+
+**These spec requirements are therefore DEFERRED, not built, not silently
+approximated:**
+
+| Deferred | Depends on |
+|---|---|
+| EX-05 capacity view | capacity planning (§10) |
+| EX-06 live project margin | time tracking (§10) |
+| EX-08 warranty exposure | a defect register (§10 ticketing) |
+| OP-09 effort logging · OP-11 defects · OP-13 file attachments | §10 |
+
+A margin figure computed without effort data would be a number that flatters
+or frightens at random, which §4 forbids more strongly than it forbids an
+absent feature. **Show these as "not tracked", never as a zero or an estimate.**
+
+### Two facts that must not reach a document
+
+**There is no Pvt Ltd and no GSTIN.** The spec is headed *Brand Mint Studio
+Pvt. Ltd.* and assumes a GSTIN throughout; neither is true yet.
+
+- No invoice, quote or page may print a GSTIN, a PAN, or a Pvt Ltd billing
+  entity until Sumanth confirms each is real. §4 already forbids this — a
+  plausible-looking tax number on a financial document is a false statement to
+  a client, not a placeholder.
+- **The marketing site still promises "GST invoicing included" and "GST extra
+  at 18%"** (`index.html:270,274`, `home-v2.html:98,361`) and nothing in the
+  stack can produce a GST invoice. That copy is currently false and is the
+  oldest open item here.
+
+### Still open, deliberately not decided
+
+The spec's **A1** says this is an internal tool, not a resellable SaaS, and its
+§10.2 excludes multi-tenancy. §1 below says the opposite — multi-tenant by
+design, intended to be sold. **That was not put to Sumanth and has not been
+settled.** Until it is, keep building multi-tenant: it costs nothing extra
+today and un-picking it later is cheap, whereas retro-fitting it is not.
+
+---
+
 ## 1. What the portal is for
 
-Brand Mint Studios is a solo studio. Sumanth is sales, delivery, QA and
-support. Two consequences govern every decision:
+Brand Mint Studios was a solo studio and is now Sumanth plus collaborators
+(§0). He remains sales, delivery, QA and support; the difference is that other
+people now touch the work and therefore need scoped access. Two consequences
+still govern every decision:
 
 - **His time is the scarcest resource.** A feature that makes work for him
   rather than removing it is a net negative however good it looks.
@@ -734,6 +833,13 @@ ticketing · time tracking · capacity planning · per-project profitability ·
 in-app chat · a settings page · file uploads · a billing engine (Razorpay does
 this) · e-signature (Zoho Sign does this) · analytics (Vercel Web Analytics
 does this)
+
+**This list survived the requirements spec.** It was put to Sumanth explicitly
+— the spec marks five of these as *Must*, because EX-06 margin needs effort
+logging and EX-05 capacity needs commitments — and he kept the list. So the
+spec's dependent metrics are deferred rather than built on invented inputs
+(§0). If that changes, lift the exclusion first and build second, not the
+other way round.
 
 ---
 
