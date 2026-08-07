@@ -232,6 +232,10 @@ docs/WALKTHROUGH.md                     how to actually run /studio, in order.
                                         Update it in the SAME commit that
                                         changes the admin UI, or it becomes a
                                         confident lie about the screen.
+tools/make-manual.mjs                   renders that file to a printable PDF.
+                                        Re-run it after editing the walkthrough
+                                        so docs/brand-mint-studio-manual.pdf
+                                        does not fall behind its own source.
 
 login.html          -> /login           username + password
 portal.html         -> /portal          the client's view
