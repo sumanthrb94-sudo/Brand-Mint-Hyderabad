@@ -19,6 +19,57 @@ Two shortcuts worth learning on day one:
 
 ---
 
+## The whole flow, once
+
+Stranger to money in the bank. Nine steps, four screens. Every one of them is
+explained properly further down — this is only the order they happen in, because
+the sections below describe each screen well and never put them in a line.
+
+| Where | What you do |
+|---|---|
+| Pipeline → **New** | Log the lead the moment the enquiry arrives |
+| Pipeline → **Log first response** | The moment you reply. Stamped once, never moves |
+| `/quote` → **Print / save as PDF** | Send them the scope and the price |
+| Clients → **New engagement** | They said yes. One submit creates everything |
+| Firebase Console, then **Access** | Give them a login. Two halves, both required |
+| Money → **Invoice** | Bill the first 50%. This is the document with your account on it |
+| Delivery | Raise what you need from them · move a scope line when it moves |
+| Money → **Record payment** | The total received, the day it lands |
+| Money → **Invoice** | At launch, the second 50% |
+
+**Nothing exists in the database until New engagement.** Everything above that
+row is selling, and a deal that dies there leaves nothing behind to archive. The
+moment you submit that form the client, the project, the agreed scope line, both
+invoices and the milestone schedule all exist at once.
+
+### Two documents, and they are not the same one
+
+The easiest thing here to get wrong, because both of them have a price on.
+
+| | Quote | Invoice |
+|---|---|---|
+| Made on | `/quote` | Money → **Invoice** |
+| Sent | **before** they say yes | **after** they say yes |
+| Says | what you get, at what price | what you owe, and where to send it |
+| Payment details | never | yes, once you have entered them |
+
+A quotation with your account number on it is asking for money you have not
+earned yet. So `/quote` has no payment block, is not getting one, and finding no
+bank details there is the page working correctly. They print on the invoice and
+nowhere else.
+
+The two also live in different places, which is why deploying this did not make
+them appear: **the account details are in your database, not in the code.** Go to
+**Money → Payment details on your invoices**, fill in the four fields, save. This
+repository is public, so an account number committed into it would be published
+permanently to anyone who looks — a form is the fix, not a deploy.
+
+Until account name, number and IFSC are all three present, an invoice prints no
+payment block whatsoever. That is deliberate: a half-filled one on a financial
+document a client actually receives is worse than none.
+
+---
+
 ## The sixty seconds that matter
 
 **Today** is the only screen you have to open. Four numbers and a list, all
