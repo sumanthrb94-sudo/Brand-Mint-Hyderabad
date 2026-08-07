@@ -102,6 +102,36 @@ document a client actually receives is worse than none.
 
 ---
 
+## Updates — the screen this is all for
+
+**Every live project, one line each, sent together.** It is the second entry in
+the sidebar and it is the one to open on a Tuesday and a Friday.
+
+One box per project. Write what moved, in a sentence, addressed to them. **Save
+all** writes every one of them at once, and each lands on that client's portal
+under *Where we are*, dated, above the milestone — because a date tells them
+when and a sentence tells them what.
+
+Each row then offers **Send on WhatsApp**. That opens WhatsApp with the message
+already written: the update, how many things are open on their side, and a link
+to their portal. It does **not** send on its own — you press send, which is the
+point. A message that went out without being read once is how a wrong number
+gets a client's update.
+
+It needs a number on the client. Open their record → *Who to message* → a name
+and a WhatsApp number. A bare ten-digit number is treated as Indian.
+
+The badge on the sidebar counts **only projects nobody has been told about in a
+week, or ever**. On a week where you have updated everybody it says nothing at
+all, which is the property that makes it worth looking at.
+
+> **This is the answer to "any update?"** The portal is where a client can go
+> and check. WhatsApp is where they actually read things. Writing it once here
+> does both, and it is the difference between the portal being a thing you
+> maintain and a thing that works for you.
+
+---
+
 ## The sixty seconds that matter
 
 **Today** is the only screen you have to open. Four numbers and a list, all
@@ -196,12 +226,13 @@ any and is not supposed to.
 | Section | For |
 |---|---|
 | **Today** | The month, and what needs you. Open this one. |
+| **Updates** | Every live project, a line each, sent to their portal and their WhatsApp in one pass. |
 | **Pipeline** | Leads as a board. **Log first response the moment you reply** — stamped once, never moves, and the most valuable number in the business. |
 | **Clients** | One row each → **where they are in the flow**, agreement, brand kit, retainer, projects, invoices, login, and which onboarding step is next. Mark a retainer signed here. |
 | **Delivery** | One row per project → move scope lines `agreed → building → delivered → accepted` with a click, raise what you need from the client, put work up for approval. |
 | **Money** | Every invoice ever raised. *Record payment* takes the **total received**, so a part payment is a real number. |
 | **Access** | Client logins, and who has one. |
-| **Activity** | Everything that moved money, access or delivery status. Append-only — nobody can edit or delete an entry, **including you**. |
+| **Activity** | The audit log. No longer in the sidebar — reach it from the command palette (`/` or ⌘K). Append-only; nobody can edit or delete an entry, **including you**. |
 
 ---
 

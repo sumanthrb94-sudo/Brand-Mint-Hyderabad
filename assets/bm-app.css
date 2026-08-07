@@ -1080,3 +1080,26 @@ a.bm-link { color: var(--mint-3); }
      an object rather than as a hole. */
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
+
+/* ───────────────────────── the latest update ─────────────────────────
+   The studio's own sentence at the top of "Where we are". Set apart from the
+   milestone under it with a mint rule, because it is a different KIND of
+   statement — a date is a fact the system computed, this is a person telling
+   you something — and a client should be able to see at a glance which is
+   which. --ink on --bm-white, already measured. */
+
+.bm-update-note {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--mint);
+  border-radius: 0 8px 8px 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.bm-update-note .bm-row-sub {
+  display: block;
+  margin-bottom: 5px;
+}

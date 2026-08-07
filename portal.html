@@ -41,6 +41,13 @@
             <h2 class="bm-card-title" id="bm-project-name">—</h2>
             <span class="bm-pill bm-pill--muted" id="bm-project-status">—</span>
           </div>
+          <!-- The studio's own words, written from Updates. It sits above the
+               milestone because it is the thing a client came here to read: a
+               date tells them when, a sentence tells them what. Empty until
+               one has actually been written — a placeholder here would be the
+               portal claiming to have said something it never said. -->
+          <p id="bm-latest-update" hidden></p>
+
           <div class="bm-row-main" style="margin-bottom:12px;">
             <span class="bm-row-title" id="bm-next-milestone-title">No milestones yet</span>
             <span class="bm-row-sub" id="bm-next-milestone-sub">—</span>
@@ -218,6 +225,25 @@
 
         // Next milestone: earliest due, not yet done. An empty milestones
         // subcollection means nobody has set the project up yet — that must
+        /* The latest update from the studio, in their own words.
+           Shown only when one exists. Dated, because "we are nearly there"
+           written five weeks ago is a different statement from the same words
+           written yesterday, and the client is entitled to tell them apart. */
+        const upd = document.getElementById("bm-latest-update");
+        if (upd) {
+          const body = String(project.updateText || "").trim();
+          if (body) {
+            const age = daysSince(project.updateAt);
+            const when = age === null ? "" : age === 0 ? "today" : age === 1 ? "yesterday" : `${age} days ago`;
+            upd.hidden = false;
+            upd.className = "bm-update-note";
+            upd.innerHTML = `<span class="bm-row-sub">Latest from Brand Mint${when ? ` · ${escapeHtml(when)}` : ""}</span>${escapeHtml(body)}`;
+          } else {
+            upd.hidden = true;
+            upd.textContent = "";
+          }
+        }
+
         // never read the same as "all complete".
         const milestones = await getMilestones(project.id);
         const pending = milestones

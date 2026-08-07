@@ -1187,3 +1187,76 @@
   /* Touch has no hover, so the rail would only ever appear mid-tap. */
   .bm-listrow::before { display: none; }
 }
+
+/* ── the Updates screen ───────────────────────────────────────────
+   One card per live project, each a heading, a textarea and one action. Cards
+   rather than table rows because the input is prose: a multi-line field inside
+   a row forces every other row to grow with it, and the studio ends up writing
+   six updates through a letterbox.
+
+   Nothing here is hidden in CSS. mo.rows() sets its own starting state before
+   animating, so with the motion script blocked this screen is a plain, fully
+   usable stack of forms. */
+
+.bm-upd-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+}
+
+.bm-upd {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 18px;
+  background: var(--bm-white);
+  border: var(--hair);
+  border-radius: var(--r-md);
+}
+
+.bm-upd-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.bm-upd-client {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.bm-upd-project {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--bm-muted);
+}
+
+.bm-upd-head .bm-pill { margin-left: auto; flex: none; }
+
+/* Inherits the page font rather than the UA's monospace default, and is tall
+   enough that a two-line update does not scroll inside its own box. */
+.bm-crm .bm-upd-text {
+  width: 100%;
+  min-height: 74px;
+  padding: 11px 12px;
+  border: var(--hair);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  line-height: 1.55;
+  resize: vertical;
+}
+.bm-crm .bm-upd-text::placeholder { color: var(--bm-muted); }
+
+.bm-upd-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}

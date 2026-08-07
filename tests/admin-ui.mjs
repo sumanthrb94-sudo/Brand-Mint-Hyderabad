@@ -49,10 +49,21 @@ const ADMIN = { email: "admin@brandmintstudios.in", password: "adminpass123" };
 const SHOTS = path.join(ROOT, "docs/admin-ui");
 fs.mkdirSync(SHOTS, { recursive: true });
 
-/* Four sections in the nav. Delivery folded into the client record and
-   Access into the client it belongs to; Activity moved to Tools but is still
-   a view, so it is checked for isolation alongside the rest. */
-const VIEWS = ["today", "pipeline", "clients", "money", "activity"];
+/* The sidebar sections, in order. Delivery folded into the client record and
+   Access into the client it belongs to.
+
+   ACTIVITY IS NOT HERE ANY MORE. It was taken out of the sidebar at the
+   owner's request — an audit log is genuinely useful the day something goes
+   wrong and clutter every other day. The VIEW still exists and everything this
+   suite asserted about it still runs; it is reached through the command
+   palette instead, by goActivity() below.
+
+   That is deliberately not a hash hack. Going through the palette means this
+   suite PROVES the log is still reachable rather than trusting the claim —
+   which matters, because removing the only route to an append-only record
+   while saying it is still reachable would be exactly the kind of thing the
+   record exists to catch. */
+const VIEWS = ["today", "pipeline", "updates", "clients", "money"];
 
 let pass = 0;
 let fail = 0;
@@ -116,6 +127,18 @@ async function goStudio(page, hash = "today") {
     }, null, { timeout: 20000 })
     .catch(() => {});
   await page.waitForTimeout(800);
+}
+
+/** Open the Activity view the way a person now has to: the command palette.
+ *  Asserts nothing itself — a failure here surfaces as the activity checks
+ *  failing, which is the honest place for it to show up. */
+async function goActivity(page) {
+  await page.keyboard.press("/");
+  await page.waitForSelector("#bm-cmd-input", { timeout: 10000 });
+  await page.fill("#bm-cmd-input", "activity");
+  await page.waitForTimeout(400);
+  await page.click(".bm-cmd-item");
+  await page.waitForTimeout(1500);
 }
 
 /** Only the elements a person can actually see. */
@@ -186,8 +209,7 @@ try {
     /* The audit log at the one moment it is genuinely empty — nothing has been
        done yet. Checked here rather than later because seeding is itself a
        logged action, so by section 8 the log correctly has an entry in it. */
-    await page.click('[data-view="activity"]');
-    await page.waitForTimeout(1400);
+    await goActivity(page);
     const log0 = await page.evaluate(`document.querySelector("#view-activity").innerText`);
     check(/no entries yet/i.test(log0), "an empty log says it is empty", log0.slice(0, 130).replace(/\s+/g, " "));
     check(/cannot reconstruct|not claiming nothing did/i.test(log0),
@@ -353,8 +375,7 @@ try {
   section("8. The audit log records what just happened, and says so honestly when empty");
   {
     // Seeding is itself a logged action, so by now there is already an entry.
-    await page.click('[data-view="activity"]');
-    await page.waitForTimeout(1400);
+    await goActivity(page);
     const before = await page.evaluate(`document.querySelector("#bm-activity-list").innerText`);
     check(/db\.seed/i.test(before), "seeding the database was itself recorded",
       before.slice(0, 130).replace(/\s+/g, " "));
@@ -390,8 +411,7 @@ try {
       await page.click('.bm-modal button[type="submit"]');
       await page.waitForTimeout(2200);
 
-      await page.click('[data-view="activity"]');
-      await page.waitForTimeout(1500);
+      await goActivity(page);
       const after = await page.evaluate(`document.querySelector("#bm-activity-list").innerText`);
       check(/invoice\.payment/i.test(after), "the log carries an invoice.payment entry", after.slice(0, 140).replace(/\s+/g, " "));
       check(/by hand/i.test(after), "and records that it was settled by hand rather than reconciled");

@@ -77,6 +77,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
             Leads<span class="bm-crm-count" id="bm-n-pipeline" hidden></span>
           </button>
+          <button type="button" data-view="updates">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.4-.7L3 21l1.9-5.4A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/></svg>
+            Updates<span class="bm-crm-count" id="bm-n-updates" hidden></span>
+          </button>
           <button type="button" data-view="clients">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 11.2A3 3 0 0 0 16 5.4M17.5 19a5 5 0 0 0-2-4"/></svg>
             Clients<span class="bm-crm-count" id="bm-n-clients" hidden></span>
@@ -87,31 +91,38 @@
           </button>
         </nav>
 
+        <!--
+          TOOLS IS NOW TWO ENTRIES, NOT SEVEN.
+
+          Asked for directly: Playbooks, Service catalog, Tenancy check and the
+          Activity log come out of the sidebar. They were reference material and
+          a one-off check, sitting permanently in the place you look every day.
+
+          NONE OF THEM IS DELETED, and that distinction is deliberate rather
+          than a hedge:
+
+          - /quote, /services and /tenancy-check are still pages, still routed,
+            still reachable. /tenancy-check especially: it is §9's number one
+            open item and has never been run against live data, so removing the
+            link entirely is how it never gets run.
+          - The Activity log VIEW is gone from here; the collection, the writes
+            and the append-only rule are untouched. It is the only thing that
+            can answer "who changed this and when" the day money or access goes
+            wrong, and it costs nothing to keep because it is no longer on
+            screen. Still reachable from the command palette.
+
+          Sync payments and Seed stay: one is how money gets reconciled, the
+          other is how an empty database gets something in it.
+        -->
         <p class="bm-crm-navlabel">Tools</p>
         <nav class="bm-crm-nav" aria-label="Tools">
           <button type="button" onclick="location.href='/quote'">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h4"/></svg>
             Scope &amp; quote
           </button>
-          <button type="button" onclick="location.href='/services'">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/></svg>
-            Service catalog
-          </button>
-          <button type="button" data-runbook="ops-add-client" data-runbook-label="Onboard a new client end to end">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg>
-            Playbooks
-          </button>
-          <button type="button" data-view="activity">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2.5-6 4 12 2.5-6h5"/></svg>
-            Activity log
-          </button>
           <button type="button" id="bm-sync-payments">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14-4M4 13a8 8 0 0 0 14 4"/><path d="M20 4v5h-5M4 20v-5h5"/></svg>
             Sync payments
-          </button>
-          <button type="button" onclick="location.href='/tenancy-check'">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 5 6.5v5c0 4.3 2.9 8.1 7 9.2 4.1-1.1 7-4.9 7-9.2v-5Z"/><path d="m9.3 12 2 2 3.5-3.7"/></svg>
-            Tenancy check
           </button>
           <button type="button" id="bm-seed">
             <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg>
@@ -150,6 +161,7 @@
       <main class="bm-crm-main" id="bm-main" hidden>
         <section class="bm-view" id="view-today" hidden></section>
         <section class="bm-view" id="view-pipeline" hidden></section>
+        <section class="bm-view" id="view-updates" hidden></section>
         <section class="bm-view" id="view-clients" hidden></section>
         <section class="bm-view" id="view-money" hidden></section>
         <section class="bm-view" id="view-activity" hidden></section>
@@ -187,7 +199,8 @@
         deleteClient, setClientUser as grantLogin, invoiceRef, updateScopeLine,
         studioOrg, studioPayee, saveStudioPayee,
         CLIENT_STAGES, clientStage, brandKit, saveBrandKit, parseBrandColors,
-        markAgreementSigned, clearAgreementSigned,
+        markAgreementSigned, clearAgreementSigned, saveClientContact,
+        saveProjectUpdate, updatableProjects, waNumber, waLink, updateMessage,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
       import { openInvoice } from "/assets/bm-invoice.js";
@@ -316,6 +329,7 @@
       const VIEW_META = {
         today:    { title: "Today", sub: "What needs you, computed from your own data" },
         pipeline: { title: "Leads", sub: "First response, and the plan they are measured against" },
+        updates:  { title: "Updates", sub: "Every live project, one line each, sent together" },
         clients:  { title: "Clients", sub: "Everything about a client in one place" },
         money:    { title: "Money", sub: "Retainers and the invoice ledger" },
         activity: { title: "Activity", sub: "Append-only. Nobody can edit or delete an entry, including you." },
@@ -327,6 +341,12 @@
         const activeProjects = S.projects.filter((p) => S.orgById[p.orgId]?.status === "active");
         const counts = {
           "bm-n-pipeline": openLeads.length,
+          /* Projects nobody has been told about in a week, or ever. A badge
+             counting ALL live projects would read as work to do when there is
+             none; this counts only the ones actually going quiet, so it is
+             zero on the days it should be. */
+          "bm-n-updates": updatableProjects(S.projects, S.orgs)
+            .filter((p) => { const d = p.updateAt ? daysSince(p.updateAt) : null; return d === null || d >= 7; }).length,
           "bm-n-clients": S.orgs.filter((o) => o.kind === "client" && o.status === "active").length,
           "bm-n-money": m.unpaid.length,
         };
@@ -948,6 +968,28 @@
             </div>
 
             <div class="bm-drawer-sec">
+              <h4>Who to message</h4>
+              <p class="bm-hint" style="margin-bottom:12px;">
+                A name and a number, so Updates can put the message straight into WhatsApp.
+                A contact detail, not a credential — nothing in this app ever asks a client
+                for a password, a key or a token.
+              </p>
+              <div class="bm-field">
+                <label for="f-ct-name">Contact name</label>
+                <input id="f-ct-name" value="${escapeHtml(o.contactName || "")}" placeholder="Who you actually talk to" />
+              </div>
+              <div class="bm-field">
+                <label for="f-ct-phone">WhatsApp number</label>
+                <input id="f-ct-phone" inputmode="tel" value="${escapeHtml(o.contactPhone || "")}" placeholder="10 digits, or with country code" />
+                <p class="bm-help">${o.contactPhone
+                  ? (waNumber(o.contactPhone)
+                      ? `Will message +${escapeHtml(waNumber(o.contactPhone))}.`
+                      : "That number is not usable — check it, or Updates cannot message them.")
+                  : "A bare 10-digit number is treated as Indian."}</p>
+              </div>
+            </div>
+
+            <div class="bm-drawer-sec">
               <h4>Brand kit</h4>
               <p class="bm-hint" style="margin-bottom:12px;">
                 Shown to this client in their own portal, under Links. Addresses and colours
@@ -1481,6 +1523,73 @@
           : d.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
       };
 
+      /* ══════════════════════════════════════════════════════════
+         UPDATES — every client, one screen, one pass
+
+         The single thing that was asked for: "update every client at once".
+         Before this, telling six clients where things stood meant opening six
+         drawers, which is why it stopped happening and why "any update?" kept
+         arriving on WhatsApp instead.
+
+         One textarea per live project. Save All writes them together. Each row
+         then offers the same text as a WhatsApp message, because that is where
+         the client actually reads things — the portal is where they can go and
+         check, not where they get told.
+
+         Deliberately NOT auto-sending. The link opens the compose window with
+         the text in it and the studio presses send; a message that went out
+         without being read once is how a wrong number gets a client's update.
+         ══════════════════════════════════════════════════════════ */
+      RENDER.updates = () => {
+        const live = updatableProjects(S.projects, S.orgs);
+        const rows = live.map((p) => {
+          const org = S.orgById[p.orgId] || {};
+          const wa = waNumber(org.contactPhone);
+          const when = p.updateAt ? daysSince(p.updateAt) : null;
+          const stale = when === null || when >= 7;
+          return `
+            <div class="bm-upd" data-upd-row="${escapeHtml(p.id)}">
+              <div class="bm-upd-head">
+                <div>
+                  <p class="bm-upd-client">${escapeHtml(org.name || p.orgId)}</p>
+                  <p class="bm-upd-project">${escapeHtml(p.name || "Untitled project")}</p>
+                </div>
+                <span class="bm-pill ${stale ? "bm-pill--amber" : "bm-pill--green"}">${
+                  when === null ? "never updated" : when === 0 ? "today" : `${when}d ago`
+                }</span>
+              </div>
+              <textarea class="bm-upd-text" data-upd="${escapeHtml(p.id)}" rows="2"
+                placeholder="What moved this week, in one line. They read this, so write it to them."
+                aria-label="Update for ${escapeHtml(org.name || "client")}">${escapeHtml(p.updateText || "")}</textarea>
+              <div class="bm-upd-foot">
+                ${wa
+                  ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-upd-wa="${escapeHtml(p.id)}">Send on WhatsApp</button>`
+                  : `<span class="bm-hint">No number on this client — add one in their record to message them.</span>`}
+              </div>
+            </div>`;
+        }).join("");
+
+        $("view-updates").innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>Updates</h2>
+              <p>Every live project, one line each, sent together. This is the whole reason
+                 the portal stops being the thing you have to remember to open on their
+                 behalf — write it here once and it is on their screen and in their chat.</p>
+            </div>
+            <div class="bm-view-actions">
+              <button type="button" class="bm-btn bm-btn--sm" id="bm-upd-save">Save all</button>
+            </div>
+          </div>
+          <p class="bm-status" id="bm-upd-status" hidden></p>
+          ${live.length
+            ? `<div class="bm-upd-list">${rows}</div>`
+            : `<div class="bm-panel"><p class="bm-empty">No live projects, so there is nobody to update.
+                 That is an empty database, not a quiet week — start an engagement from Clients.</p></div>`}`;
+
+        mo.rows($("view-updates").querySelectorAll(".bm-upd"));
+      };
+
       /* Loaded lazily, NOT in loadAll(). If the rules for this collection are
          not published yet the read is denied, and a denied read inside the
          boot fetch would take the whole CRM down with it. Here it takes down
@@ -1973,6 +2082,69 @@
             closeOverlay();
             return refresh();
           }
+          /* Save every update in one pass.
+
+             Written together, then the view is re-rendered ONCE and the status
+             message written AFTER that render — not before it. Writing it
+             first is the bug this repo has now shipped twice: the refresh
+             replaces the status node a moment later, every database assertion
+             passes, and the screen goes silent. */
+          if (btn.id === "bm-upd-save") {
+            const boxes = [...document.querySelectorAll("[data-upd]")];
+            btn.disabled = true;
+            let written = 0;
+            for (const box of boxes) {
+              const id = box.dataset.upd;
+              const p = S.projects.find((x) => x.id === id);
+              const text = box.value.trim();
+              if (!p || text === String(p.updateText || "").trim()) continue;
+              await saveProjectUpdate(id, text);
+              // Patch local state so the re-render below shows what was saved
+              // without a round trip.
+              p.updateText = text;
+              p.updateAt = text ? new Date() : null;
+              written += 1;
+            }
+            if (written) {
+              await logActivity("client.update",
+                `Sent updates on ${written} project${written === 1 ? "" : "s"}`,
+                { target: `${written} project${written === 1 ? "" : "s"}` });
+            }
+            RENDER.updates();
+            const st = $("bm-upd-status");
+            if (st) {
+              st.hidden = false;
+              st.className = "bm-status bm-status--ok";
+              st.textContent = written
+                ? `Saved ${written} update${written === 1 ? "" : "s"}. Every one of them is on the client's portal now.`
+                : "Nothing changed, so nothing was sent.";
+            }
+            return;
+          }
+
+          /* WhatsApp. Opens the compose window with the message already typed;
+             it does not send. No API, no token, no dependency — wa.me is a
+             documented public URL scheme, and an integration would mean this
+             product started holding a credential (§4). */
+          if (d.updWa) {
+            const p = S.projects.find((x) => x.id === d.updWa);
+            const org = S.orgById[p?.orgId] || {};
+            const box = document.querySelector(`[data-upd="${CSS.escape(d.updWa)}"]`);
+            const text = (box?.value || "").trim();
+            if (!text) { alert("Write the update first — there is nothing to send yet."); return; }
+            const open = (S.detail[p.id]?.intake || []).filter((i) => !i.done).length;
+            const link = waLink(org.contactPhone, updateMessage({
+              clientName: org.contactName || "",
+              projectName: p.name,
+              text,
+              blockers: open,
+              portalUrl: `${location.origin}/portal`,
+            }));
+            if (!link) { alert("That client's number is not usable. Fix it in their record."); return; }
+            window.open(link, "_blank", "noopener");
+            return;
+          }
+
           /* The agreement. Both directions close the drawer and refresh,
              because the stage strip at the top of that same drawer is derived
              from this field — leaving it open would show a strip that
@@ -2014,7 +2186,16 @@
               brandFonts: $("f-bk-fonts").value,
               brandColors: $("f-bk-colors").value,
             };
+            const contact = {
+              contactName: $("f-ct-name").value,
+              contactPhone: $("f-ct-phone").value,
+            };
+            await saveClientContact(d.bkSave, contact);
             await saveBrandKit(d.bkSave, payload);
+            Object.assign(o || {}, {
+              contactName: String(contact.contactName || "").trim(),
+              contactPhone: String(contact.contactPhone || "").trim(),
+            });
             Object.assign(o || {}, {
               brandLogoUrl: String(payload.brandLogoUrl || "").trim(),
               brandGuidelinesUrl: String(payload.brandGuidelinesUrl || "").trim(),
@@ -2026,8 +2207,12 @@
               const kept = parseBrandColors(payload.brandColors);
               st.hidden = false;
               st.className = "bm-status bm-status--ok";
+              const num = waNumber(contact.contactPhone);
               st.textContent = `Saved. ${kept.length} colour${kept.length === 1 ? "" : "s"} kept.` +
-                ` ${o?.name || "This client"} sees this in their portal under Links.`;
+                ` ${o?.name || "This client"} sees the kit in their portal under Links.` +
+                (contact.contactPhone
+                  ? num ? ` Updates will message +${num}.` : " That number is not usable, so Updates cannot message them."
+                  : "");
             }
             btn.disabled = false;
             return;

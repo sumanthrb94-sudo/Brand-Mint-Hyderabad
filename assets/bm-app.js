@@ -1530,6 +1530,21 @@ export function brandKit(org) {
   return { colors, logo, guide, fonts };
 }
 
+/** Who to message, and on what number. Stored on the organisation for the same
+ *  reason everything else here is: the admin can already write it and the
+ *  client can already read their own, so no rules change.
+ *
+ *  This is a CONTACT DETAIL, not a credential (§4). The distinction matters
+ *  and is not subtle: a phone number is something the client hands out to be
+ *  reached on. Nothing here ever asks a client for a password, an API key or a
+ *  token, and no field added to this app ever will. */
+export async function saveClientContact(orgId, { contactName, contactPhone }) {
+  await updateDoc(doc(db, "organisations", orgId), {
+    contactName: String(contactName || "").trim(),
+    contactPhone: String(contactPhone || "").trim(),
+  });
+}
+
 export async function saveBrandKit(orgId, { brandLogoUrl, brandGuidelinesUrl, brandFonts, brandColors }) {
   await updateDoc(doc(db, "organisations", orgId), {
     brandLogoUrl: String(brandLogoUrl || "").trim(),
@@ -1728,6 +1743,109 @@ export async function deleteInvoice(invoiceId) {
 
 export async function updateProject(projectId, data) {
   await updateDoc(doc(db, "projects", projectId), data);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   THE WEEKLY UPDATE — THE ONE THING THIS SCREEN IS FOR
+
+   Asked for directly: "update every client at once". One screen, every live
+   project, a line each, sent together. Before this, telling six clients where
+   things stood meant six separate visits to six separate drawers, which is
+   why it stopped happening and why "any update?" kept arriving by WhatsApp.
+
+   It is TWO FIELDS ON THE PROJECT DOCUMENT, not a subcollection. The admin can
+   already write projects and a client can already read their own, so this
+   needs NO firestore.rules change — a subcollection would have needed one, and
+   rules are published by hand from the Console (§2), so the UI would have gone
+   live denied.
+
+   Only the latest update is kept. A history would need that subcollection, and
+   nobody has asked to read one; the client wants to know where things are now,
+   not to audit what they were told in March. The audit log already records
+   that an update happened.
+
+   `at` is serverTimestamp(), so "3 days ago" on the client's portal is counted
+   from when it was actually written and not from a clock the browser supplied.
+   ══════════════════════════════════════════════════════════════════ */
+
+export async function saveProjectUpdate(projectId, text) {
+  const body = String(text || "").trim().slice(0, 600);
+  await updateDoc(doc(db, "projects", projectId), {
+    updateText: body,
+    updateAt: body ? serverTimestamp() : null,
+  });
+  return body;
+}
+
+/** A project worth sending an update about: it exists, it is not archived, and
+ *  its client is still active. Deliberately NOT "has milestones" or "has
+ *  scope" — a project nobody has set up yet is exactly the one most likely to
+ *  need a message. */
+export function updatableProjects(projects, orgs) {
+  const active = new Set(
+    (orgs || []).filter((o) => o.kind === "client" && o.status !== "archived").map((o) => o.id)
+  );
+  return (projects || []).filter((p) => active.has(p.orgId) && p.status !== "archived");
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   WHATSAPP, WITHOUT AN INTEGRATION
+
+   "All real client contact happens on WhatsApp. The portal exists but nobody
+   opens it." Both halves of that are true and neither is fixed by building
+   more portal.
+
+   So this does not integrate with anything. It builds a wa.me link — the
+   documented public URL scheme — which opens WhatsApp with the message already
+   typed. No API, no token, no dependency, no server, and nothing to break when
+   WhatsApp changes a private interface. §4 also settles it: a WhatsApp
+   Business API integration would mean holding a credential, and this product
+   does not hold credentials.
+
+   It does not SEND. It opens the compose window with the text in it and the
+   studio presses send, which is also the honest behaviour: a message that went
+   out without being read once is how a wrong number gets a client's update.
+   ══════════════════════════════════════════════════════════════════ */
+
+/** Digits only, with India's country code assumed for a bare 10-digit number.
+ *  Returns null rather than guessing at anything else — a wa.me link built
+ *  from a malformed number opens a chat with a stranger. */
+export function waNumber(raw) {
+  const digits = String(raw || "").replace(/\D/g, "");
+  if (!digits) return null;
+  if (digits.length === 10) return `91${digits}`;
+  if (digits.length === 12 && digits.startsWith("91")) return digits;
+  if (digits.length >= 11 && digits.length <= 15) return digits;
+  return null;
+}
+
+export function waLink(phone, message) {
+  const n = waNumber(phone);
+  if (!n) return null;
+  return `https://wa.me/${n}?text=${encodeURIComponent(String(message || "").slice(0, 1200))}`;
+}
+
+/** The message the studio actually sends. Plain, dated, and it names the one
+ *  thing the client has to do — because an update that only reports progress
+ *  invites "ok thanks" and an update that ends in a request gets an answer. */
+export function updateMessage({ clientName, projectName, text, blockers = 0, portalUrl }) {
+  const lines = [];
+  lines.push(`Hi${clientName ? ` ${clientName}` : ""} — update on ${projectName || "your project"}:`);
+  lines.push("");
+  lines.push(String(text || "").trim());
+  if (blockers > 0) {
+    lines.push("");
+    lines.push(
+      blockers === 1
+        ? "There is 1 thing open on your side — it is listed in your portal."
+        : `There are ${blockers} things open on your side — they are listed in your portal.`
+    );
+  }
+  if (portalUrl) {
+    lines.push("");
+    lines.push(portalUrl);
+  }
+  return lines.join("\n");
 }
 
 // Stamps a service-type template onto a project. `startDate` is supplied by

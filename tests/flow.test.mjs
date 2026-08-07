@@ -267,3 +267,67 @@ test("duplicates collapse and the list is capped", () => {
   assert.deepEqual(parseBrandColors("#10b981 #10B981"), ["#10b981"]);
   assert.equal(parseBrandColors(Array.from({ length: 30 }, (_, i) => `#${String(i).padStart(6, "0")}`)).length, 8);
 });
+
+/* ── the weekly update, and WhatsApp ──────────────────────────── */
+
+const upd = await import(
+  "data:text/javascript," +
+    encodeURIComponent([lift("waNumber"), lift("waLink"), lift("updateMessage"), lift("updatableProjects")].join("\n"))
+);
+const { waNumber, waLink, updateMessage, updatableProjects } = upd;
+
+test("a bare 10-digit number is treated as Indian", () => {
+  assert.equal(waNumber("9876543210"), "919876543210");
+  assert.equal(waNumber("98765 43210"), "919876543210");
+  assert.equal(waNumber("+91 98765 43210"), "919876543210");
+});
+
+test("a number that cannot be used returns null rather than a guess", () => {
+  // A wa.me link built from a malformed number opens a chat with a STRANGER,
+  // and the message is a client's project update. Refusing is the only safe
+  // failure here.
+  assert.equal(waNumber(""), null);
+  assert.equal(waNumber("12345"), null);
+  assert.equal(waNumber("abcd"), null);
+  assert.equal(waLink("12345", "hello"), null);
+});
+
+test("the link is a wa.me URL with the message encoded into it", () => {
+  const l = waLink("9876543210", "Hi — update on Site: shipped.");
+  assert.match(l, /^https:\/\/wa\.me\/919876543210\?text=/);
+  assert.ok(l.includes(encodeURIComponent("shipped")));
+  assert.ok(!l.includes(" "), "an unencoded space would truncate the message");
+});
+
+test("the message names the project and carries the update verbatim", () => {
+  const m = updateMessage({ clientName: "Asha", projectName: "Green Basket", text: "Homepage is live." });
+  assert.ok(m.includes("Asha"));
+  assert.ok(m.includes("Green Basket"));
+  assert.ok(m.includes("Homepage is live."));
+});
+
+test("it states open blockers, because an update that ends in a request gets an answer", () => {
+  assert.match(updateMessage({ projectName: "X", text: "y", blockers: 1 }), /1 thing open on your side/);
+  assert.match(updateMessage({ projectName: "X", text: "y", blockers: 3 }), /3 things open on your side/);
+  assert.ok(!/open on your side/.test(updateMessage({ projectName: "X", text: "y", blockers: 0 })));
+});
+
+test("archived clients and archived projects are not updatable", () => {
+  const orgs = [
+    { id: "a", kind: "client", status: "active" },
+    { id: "b", kind: "client", status: "archived" },
+    { id: "s", kind: "studio", status: "active" },
+  ];
+  const projects = [
+    { id: "1", orgId: "a" },
+    { id: "2", orgId: "b" },
+    { id: "3", orgId: "a", status: "archived" },
+    { id: "4", orgId: "s" },
+  ];
+  assert.deepEqual(updatableProjects(projects, orgs).map((p) => p.id), ["1"]);
+});
+
+test("a project with nothing set up is still updatable — it is the likeliest to need one", () => {
+  const out = updatableProjects([{ id: "1", orgId: "a" }], [{ id: "a", kind: "client", status: "active" }]);
+  assert.equal(out.length, 1);
+});
