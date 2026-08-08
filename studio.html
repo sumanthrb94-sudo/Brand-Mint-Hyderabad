@@ -695,25 +695,27 @@
             </div>
           </div>` : ""}
 
-          <div class="bm-split" style="margin-top:18px;">
-            <div class="bm-panel">
-              <div class="bm-panel-head"><div><h3>Stage conversion</h3>
-                <p>Targets come from the sales playbook. Where there is no data this says so
-                   rather than printing a zero.</p></div></div>
-              <div id="bm-kpi-funnel"></div>
-            </div>
-            <div class="bm-panel">
-              <div class="bm-panel-head"><div><h3>Source mix</h3>
-                <p>Any single channel above 50% makes the pipeline fragile.</p></div></div>
-              <div id="bm-kpi-sources"></div>
-            </div>
-            <div class="bm-panel">
-              <div class="bm-panel-head"><div><h3>Loss reasons</h3></div></div>
-              <div id="bm-kpi-losses"></div>
-            </div>
-          </div>`;
+          <!-- THREE ANALYTICS PANELS WERE HERE AND ARE GONE.
 
-        renderKpis();
+               Stage conversion, Source mix and Loss reasons, scored against
+               FUNNEL_TARGETS from brand-mint-admin/ — the business docs
+               CLAUDE.md itself quarantines because "its numbers are
+               aspirations and never seed anything". They were charts of a
+               handful of referral leads against targets written for a studio
+               that does not exist yet.
+
+               Nobody asked for them. They were three of this screen's four
+               panels, and they are exactly the "complex sheet" the owner has
+               named repeatedly. renderKpis() and the constants it reads are
+               untouched in bm-app.js; nothing computes them any more.
+
+               This contradicts CLAUDE.md section 8, which lists them as part
+               of this screen. Section 8 is updated in the same commit. -->`;
+
+        /* renderKpis() is no longer called: the three nodes it wrote into are
+           gone, so it early-returned to a no-op. The function and its
+           constants stay in place, unreferenced, so restoring the panels is a
+           revert rather than a rewrite. */
         mo.rows($("bm-kan").querySelectorAll(".bm-lead"), { step: 18 });
       };
 

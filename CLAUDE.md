@@ -702,7 +702,7 @@ list of records, and a detail drawer for the one you picked.**
 | Section | What it is |
 |---|---|
 | Today | break-even gauge, four tiles, and the action list — every line a fact with the thing that fixes it attached. The headline is **this month** (retainers + live builds, split), not signed MRR alone. Two of its lines exist because `tests/onboarding.mjs` found them missing: projects with **nothing raised with the client** (the portal's whole job, switched off) and retainers **proposed but not signed** |
-| Pipeline | leads as a kanban by stage, moved with two buttons; funnel/source/loss against the playbook below |
+| Pipeline | leads as a kanban by stage, moved with two buttons, and one button that turns a won lead into a client. **The funnel, source-mix and loss-reason panels were removed** — they scored a handful of referral leads against `FUNNEL_TARGETS` from the quarantined business docs, which is the "complex sheet" this screen kept being called |
 | Clients | one row per organisation → drawer: retainer, onboarding, projects, invoices, login. **New engagement** creates all of it in one screen |
 | Delivery | one row per project → drawer: agreed scope, milestones, intake, deliverables |
 | Money | **the invoice ledger** plus retainers. *Record payment* takes the total received; *Invoice* opens a sendable document |
