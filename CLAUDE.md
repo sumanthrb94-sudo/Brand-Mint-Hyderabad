@@ -370,7 +370,13 @@ not have.
 ```
 organisations/{orgId}   { name, kind: studio|client|internal, status: active|archived,
                           retainer, retainerStatus: signed|proposed|none, note }
-users/{uid}             { orgId, role: admin|client, name, username }   uid = Auth uid
+users/{uid}             { orgId, role: admin|partner|collaborator|finance|client,
+                          name, username }                              uid = Auth uid
+rates/{uid}             { rate, currency }   SEPARATE COLLECTION ON PURPOSE — §7.
+                          Firestore cannot withhold a field, so a rate on a
+                          document colleagues may read is a rate they can read.
+projects/{id}.team      [uid]  who may reach it as partner or collaborator.
+                          Absent = CEO-only. Silence is never universal access.
 projects/{projectId}    { orgId, name, type, dueAt, progress, billable, mode: build|retainer }
   ../milestones/{id}    { title, owner: us|client, status, dueAt }
   ../intake/{id}        { label, group: assets|content|access|decisions, raisedAt, done, clearedAt }
@@ -564,6 +570,53 @@ not their own project. Create it in the Client Access panel on `/studio`.
 ---
 
 ## 7. Security rules
+
+### Five roles, and the one the matrix cannot express
+
+`firestore.rules` now implements the spec's Section 3 matrix:
+`admin (CEO) · partner · collaborator · finance · client`.
+
+The CEO is still the **email claim on the token**. Every other role is read
+from `users/{uid}.role`, which only the CEO can write — so the bootstrap
+problem exists once, at the top, and is solved once.
+
+**Partner and Collaborator access is scoped by assignment.** A project carries
+`team`, a list of uids. A project with no `team` — every project written before
+this ruleset — denies staff and stays CEO-only. Silence means no access, never
+universal access.
+
+> **Collaborator rates are in their own collection, `rates/{uid}`, and this is
+> not a stylistic choice.** Firestore grants reads **per document, not per
+> field**: there is no way to return `users/{uid}` while withholding one key.
+> Putting `rate` on the user document and hiding it in the UI would satisfy the
+> screen and violate SEC-01 exactly as written. Do not move it back.
+
+Read is CEO, Finance, or the collaborator themselves. **A partner cannot read
+any rate, including their own** — the matrix says `Partner —` and §3 says no
+screen may grant access the matrix does not. Whether that is intended or an
+artefact of the row being named "collaborator rates" is **unsettled**; it is
+implemented strictly because widening is a one-line change and a review,
+whereas discovering it was wide is an incident.
+
+**`activity` create widened from CEO-only to any staff role.** With five roles,
+a partner moving a scope line or Finance settling an invoice are exactly the
+events worth recording; leaving create at CEO-only would have made the log
+silently incomplete the moment a second person started work — worse than no log,
+because it reads as a full record. Read stays CEO-only. Update and delete stay
+`if false` for everyone.
+
+**Known deviation from the matrix:** Client Guest is specified as seeing
+released deliverables only. The released/internal flag is OP-13, which §10
+defers, so a client still reads every deliverable on their own project. When
+OP-13 lands, that read gains `&& resource.data.released == true`. Recorded here
+rather than quietly approximated.
+
+`tests/rules.test.mjs` proves all of it against the emulator — **64 checks**,
+the original 46 plus 18 matrix cells, and the new ones are mostly denials. A
+role that can see too little is an inconvenience; a role that can see too much
+is the breach SEC-02 names as the realistic failure mode.
+
+### Why the CEO is a token claim
 
 Admin is identified by the **email claim on the token**, not by a `users`
 document. That is deliberate: an earlier version checked

@@ -1,15 +1,138 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    /* ════════════════════════════════════════════════════════════════
+       FIVE ROLES — the spec's Section 3 permission matrix, enforced here.
+
+       SEC-01 says authorisation is enforced at the database layer, not in
+       application code, "so a missed check in a controller cannot expose
+       data". That is this file. Every check in the UI is a convenience; if a
+       rule below allows it, a signed-in user can do it with a console open.
+
+       THE ONE PLACE THE MATRIX CANNOT BE IMPLEMENTED LITERALLY
+       -------------------------------------------------------
+       "Collaborator rates: CEO F · Partner — · Collaborator O (own rate) ·
+       Finance R · Guest —" is a FIELD-level rule. Firestore grants reads per
+       DOCUMENT: there is no way to return users/{uid} while withholding one
+       key from it. Putting `rate` on the user document and hiding it in the
+       UI would satisfy the screen and violate SEC-01 exactly as written.
+
+       So rates live in their own collection, /rates/{uid}, readable by the
+       CEO, Finance, and the person it belongs to. That is the same guarantee
+       the matrix asks for, expressed in the only shape this database can
+       actually enforce.
+
+       WHY THE CEO IS STILL AN EMAIL CLAIM
+       -----------------------------------
+       Unchanged from before, and still deliberate: checking a `users` document
+       for role == 'admin' deadlocks, because the first admin document cannot
+       be written without already being admin. Every OTHER role is read from
+       /users/{uid}, which the CEO alone can write — so the bootstrap problem
+       exists once, at the top, and is solved once.
+
+       FAIL-CLOSED BY CONSTRUCTION
+       ---------------------------
+       role() reads /users/{uid}. A signed-in account with no such document
+       resolves to null, `null.role` errors, and the rule denies. A user whose
+       document is missing can therefore read NOTHING — which is the safe
+       direction, and is why the Client Access panel exists (§6).
+       ════════════════════════════════════════════════════════════════ */
+
     function signedIn() { return request.auth != null; }
-    function isAdmin() { return request.auth != null && request.auth.token.email == 'admin@brandmintstudios.in'; }
-    function me()    { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
-    function myOrg() { return me().orgId; }
+
+    /* The CEO. Token claim, not a document — see above. */
+    function isAdmin() { return signedIn() && request.auth.token.email == 'admin@brandmintstudios.in'; }
+
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function role() { return hasProfile() ? profile().role : 'none'; }
+    function myOrg() { return profile().orgId; }
+
+    function isPartner()      { return role() == 'partner'; }
+    function isCollaborator() { return role() == 'collaborator'; }
+    function isFinance()      { return role() == 'finance'; }
+    function isClient()       { return role() == 'client'; }
+
+    /* Anyone who works for the studio. Never includes a client: the roles are
+       mutually exclusive and `client` is not in this list. */
+    function isStaff() { return isAdmin() || isPartner() || isCollaborator() || isFinance(); }
+
+    /* ── assignment ───────────────────────────────────────────────────
+       Partner and Collaborator access is scoped to ASSIGNED engagements —
+       the matrix's "O" and "R (assigned)". A project carries `team`, a list
+       of uids.
+
+       Two versions, and the split is the same trap the get/list comment below
+       records: on a `list` the wildcard {pid} is unbound, so any get() against
+       it resolves to /projects/null and the whole rule fails. The list form
+       therefore compares the document's OWN field, which Firestore can prove
+       a filtered query respects.
+
+       A project with no `team` field at all — every project written before
+       this ruleset — yields null, and `uid in null` denies. Existing projects
+       are therefore CEO-only until somebody is assigned to them, which is the
+       safe direction: silence means no access, never universal access. */
+    function teamOf(pid) { return get(/databases/$(database)/documents/projects/$(pid)).data.get('team', []); }
+    function assigned(pid) { return signedIn() && request.auth.uid in teamOf(pid); }
+    function assignedHere() { return signedIn() && request.auth.uid in resource.data.get('team', []); }
+
     function projectOrg(pid) { return get(/databases/$(database)/documents/projects/$(pid)).data.orgId; }
-    function mine(pid) { return signedIn() && projectOrg(pid) == myOrg(); }
+    function mine(pid) { return isClient() && projectOrg(pid) == myOrg(); }
+
     function onlyTouches(fields) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields); }
-    match /users/{uid} { allow read: if isAdmin() || (signedIn() && request.auth.uid == uid); allow write: if isAdmin(); }
-    match /organisations/{orgId} { allow read: if isAdmin() || (signedIn() && orgId == myOrg()); allow write: if isAdmin(); }
+
+    /* ── users ────────────────────────────────────────────────────────
+       Staff may READ each other — a team list needs names and roles, and
+       reading a colleague's name is not "user administration". Only the CEO
+       may WRITE, which is the matrix's "User administration: F / — / — / —".
+
+       This document is safe for colleagues to read precisely BECAUSE the rate
+       is not on it. Do not put one here. */
+    match /users/{uid} {
+      allow read: if isAdmin() || isStaff() || (signedIn() && request.auth.uid == uid);
+      allow write: if isAdmin();
+    }
+
+    /* ── rates ────────────────────────────────────────────────────────
+       The matrix rule that has no field-level equivalent, given its own
+       collection so it can be enforced rather than merely displayed.
+
+       A Partner cannot read these AT ALL — not their team's, not their own.
+       That is the matrix as written ("Collaborator rates: Partner —"), and it
+       is the deliberate part: a partner who could read the rate sheet could
+       price a competitor's bid with it. */
+    /* Self-read is COLLABORATOR-only, not "anyone reading their own".
+
+       The matrix row is `Collaborator O (own rate)` and `Partner —`, and §3
+       says no screen may grant access the matrix does not. Read literally,
+       that denies a partner even their own rate. A first draft allowed any
+       signed-in user to read their own document, which is the more obvious
+       design and would have quietly widened the row.
+
+       AMBIGUITY WORTH SETTLING: it is not clear whether "Partner —" means a
+       partner should not see their own compensation, or whether a partner's
+       own rate simply is not part of a resource called "collaborator rates".
+       Implemented the strict way because widening later is a one-line change
+       and a review, whereas discovering it was wide is an incident. Raise it
+       as a change request under §10.1 if partners should see their own. */
+    match /rates/{uid} {
+      allow read: if isAdmin() || isFinance() || (isCollaborator() && request.auth.uid == uid);
+      allow write: if isAdmin();
+    }
+
+    /* ── organisations ────────────────────────────────────────────────
+       Clients: CEO F · Partner F · Collaborator — · Finance R · Guest —
+       A client reads their OWN organisation only; a collaborator gets nothing
+       here at all, because this document carries the commercial relationship
+       (retainer, status) and the matrix gives collaborators no commercial
+       data. */
+    match /organisations/{orgId} {
+      allow read: if isAdmin() || isPartner() || isFinance()
+                     || (isClient() && orgId == myOrg());
+      allow write: if isAdmin() || isPartner();
+    }
+
     // get vs list, deliberately split.
     //
     // `mine(pid)` does get(/projects/$(pid)), which works for a single-document
@@ -23,16 +146,40 @@ service cloud.firestore {
     // prove a query filtered on orgId only returns permitted documents, which
     // is the same pattern /invoices already used and why invoices worked while
     // projects did not.
+    //
+    // The same split now applies to `team` for staff, for the same reason.
     match /projects/{pid} {
-      allow get: if isAdmin() || mine(pid);
-      allow list: if isAdmin() || (signedIn() && resource.data.orgId == myOrg());
-      allow write: if isAdmin();
-      // The agreed scope. The client MUST be able to read it — it is what they
-      // are paying for and the honest answer to "how much is done". They may
-      // not write it: delivery status is the studio's assertion, and a client
-      // who could mark a line accepted could also mark one unaccepted.
-      match /scope/{id} { allow read: if isAdmin() || mine(pid); allow write: if isAdmin(); }
-      match /milestones/{id} { allow read: if isAdmin() || mine(pid); allow write: if isAdmin(); }
+      allow get: if isAdmin() || isFinance() || assigned(pid) || mine(pid);
+      allow list: if isAdmin() || isFinance()
+                     || assignedHere()
+                     || (isClient() && resource.data.orgId == myOrg());
+      /* Partner writes their assigned engagements. A collaborator does not
+         write the engagement record itself — the matrix gives them tasks and
+         files, not the commercial unit. */
+      allow write: if isAdmin() || (isPartner() && assigned(pid));
+
+      /* Scope & change requests: CEO F · Partner O · Collab — · Finance — ·
+         Guest R (own).
+
+         The client MUST be able to read it — it is what they are paying for
+         and the honest answer to "how much is done". They may not write it:
+         delivery status is the studio's assertion, and a client who could mark
+         a line accepted could also mark one unaccepted.
+
+         Collaborators are excluded on purpose: scope carries the line prices. */
+      match /scope/{id} {
+        allow read: if isAdmin() || (isPartner() && assigned(pid)) || mine(pid);
+        allow write: if isAdmin() || (isPartner() && assigned(pid));
+      }
+
+      /* Tasks: CEO F · Partner O · Collaborator O · Finance — · Guest R (own).
+         A collaborator may move their own work along; that is the whole point
+         of giving them access. */
+      match /milestones/{id} {
+        allow read: if isAdmin() || assigned(pid) || mine(pid);
+        allow write: if isAdmin() || ((isPartner() || isCollaborator()) && assigned(pid));
+      }
+
       // `onlyTouches` stops a tick smuggling in a field change. It does NOT stop
       // the client writing whatever they like INTO the fields they are allowed to
       // touch — so the timestamps and the identity are pinned as well.
@@ -48,25 +195,63 @@ service cloud.firestore {
       // request.time is the server's clock, so serverTimestamp() satisfies it
       // and a client-supplied Date cannot. The app already writes exactly this
       // (setIntakeDone, decideDeliverable), so nothing in the UI changes.
-      match /intake/{id} { allow read: if isAdmin() || mine(pid); allow create, delete: if isAdmin();
-        allow update: if isAdmin() || (mine(pid) && onlyTouches(['done','clearedAt']) && request.resource.data.done is bool
-          && (request.resource.data.clearedAt == request.time || request.resource.data.clearedAt == null)); }
-      match /deliverables/{id} { allow read: if isAdmin() || mine(pid); allow create, delete: if isAdmin();
-        allow update: if isAdmin() || (mine(pid) && onlyTouches(['status','decidedAt','decidedBy']) && request.resource.data.status in ['approved','changes_requested']
-          && request.resource.data.decidedBy == request.auth.uid
-          && request.resource.data.decidedAt == request.time); }
-    }
-    match /invoices/{id} { allow read: if isAdmin() || (signedIn() && resource.data.orgId == myOrg()); allow write: if isAdmin(); }
-    match /leads/{id} { allow read, write: if isAdmin(); }
-    match /catalog/{id} { allow read, write: if isAdmin(); }
+      match /intake/{id} {
+        allow read: if isAdmin() || assigned(pid) || mine(pid);
+        allow create, delete: if isAdmin() || ((isPartner() || isCollaborator()) && assigned(pid));
+        allow update: if isAdmin() || ((isPartner() || isCollaborator()) && assigned(pid))
+          || (mine(pid) && onlyTouches(['done','clearedAt']) && request.resource.data.done is bool
+              && (request.resource.data.clearedAt == request.time || request.resource.data.clearedAt == null));
+      }
 
-    // THE AUDIT LOG (§9 item 4).
+      /* Files & deliverables: Guest is "R (own, released only)".
+         The released/internal flag is OP-13, which §10 defers — so a client
+         still reads every deliverable on their own project, exactly as before.
+         THIS IS A KNOWN DEVIATION from the matrix and is recorded rather than
+         quietly approximated: when OP-13 lands, the client read below gains
+         `&& resource.data.released == true`. */
+      match /deliverables/{id} {
+        allow read: if isAdmin() || assigned(pid) || mine(pid);
+        allow create, delete: if isAdmin() || ((isPartner() || isCollaborator()) && assigned(pid));
+        allow update: if isAdmin() || ((isPartner() || isCollaborator()) && assigned(pid))
+          || (mine(pid) && onlyTouches(['status','decidedAt','decidedBy'])
+              && request.resource.data.status in ['approved','changes_requested']
+              && request.resource.data.decidedBy == request.auth.uid
+              && request.resource.data.decidedAt == request.time);
+      }
+    }
+
+    /* Invoices & payments: CEO F · Partner R (own) · Collab — · Finance F ·
+       Guest R (own). Finance gets full write here and nowhere else — that is
+       the whole reason the role exists. */
+    match /invoices/{id} {
+      allow read: if isAdmin() || isFinance() || isPartner()
+                     || (isClient() && resource.data.orgId == myOrg());
+      allow write: if isAdmin() || isFinance();
+    }
+
+    /* Enquiries. Not in the matrix by name; OP-10 makes them operational, and
+       first-response time (EX-04) is a partner-level concern. Collaborators
+       and Finance get nothing: a lead is unqualified commercial data. */
+    match /leads/{id} { allow read, write: if isAdmin() || isPartner(); }
+
+    /* The price catalog. Every staff role may read it; only the CEO sets it. */
+    match /catalog/{id} { allow read: if isStaff(); allow write: if isAdmin(); }
+
+    // THE AUDIT LOG (§9 item 4, and the spec's OP-12).
     //
-    // Append-only, and append-only for EVERYONE — including the admin. That is
+    // Append-only, and append-only for EVERYONE — including the CEO. That is
     // the entire point and it is why `update` and `delete` are `if false`
     // rather than `if isAdmin()`: a log its own subject can rewrite answers
-    // nothing. The admin is the only actor who can write business data here,
-    // so the admin is exactly the actor the log exists to record.
+    // nothing. The CEO is the actor with the most power here, so the CEO is
+    // exactly the actor the log exists to record.
+    //
+    // CREATE IS NOW ANY STAFF, NOT JUST THE CEO. With five roles, a partner
+    // moving a scope line or Finance settling an invoice are precisely the
+    // events worth recording; leaving create at CEO-only would have made the
+    // log silently incomplete the moment a second person started working —
+    // which is worse than no log, because it reads as a full record.
+    //
+    // Read stays CEO-only, per the matrix ("Audit log: F / — / — / — / —").
     //
     // The same pinning the intake/deliverable rules needed, for the same
     // reason. `onlyTouches` constrains WHICH fields may change, never WHAT is
@@ -82,12 +267,9 @@ service cloud.firestore {
     // Sizes are capped so a runaway loop cannot write a 1 MB document per
     // click. Anything not named here (orgId, target, amount) is free-form
     // context and is never trusted for identity or ordering.
-    //
-    // Read is admin-only. The client portal deliberately shows five things
-    // (§8) and this is not one of them.
     match /activity/{id} {
       allow read: if isAdmin();
-      allow create: if isAdmin()
+      allow create: if isStaff()
         && request.resource.data.at == request.time
         && request.resource.data.actor == request.auth.uid
         && request.resource.data.actorEmail == request.auth.token.email

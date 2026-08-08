@@ -72,6 +72,19 @@ beforeEach(async () => {
     await setDoc(doc(db, "invoices/inv-1"), { orgId: "inventory", label: "Retainer", amount: 12500, status: "paid" });
     await setDoc(doc(db, "leads/l1"), { name: "A lead", source: "site", stage: "inbound" });
     await setDoc(doc(db, "catalog/payments-razorpay"), { price: 40000, priceType: "fixed", buildDays: 4 });
+
+    /* THE FIVE ROLES (spec §3). Partner and Collaborator are assigned to
+       gb-project only, so every "assigned vs not" assertion below has a real
+       negative case rather than a hypothetical one. */
+    await setDoc(doc(db, "users/partner-uid"), { orgId: "brandmint", role: "partner", name: "Partner" });
+    await setDoc(doc(db, "users/collab-uid"), { orgId: "brandmint", role: "collaborator", name: "Collaborator" });
+    await setDoc(doc(db, "users/finance-uid"), { orgId: "brandmint", role: "finance", name: "Finance" });
+    await updateDoc(doc(db, "projects/gb-project"), { team: ["partner-uid", "collab-uid"] });
+
+    /* Rates in their own collection — the field-level matrix rule Firestore
+       cannot express on a shared document. */
+    await setDoc(doc(db, "rates/collab-uid"), { rate: 6000, currency: "INR" });
+    await setDoc(doc(db, "rates/partner-uid"), { rate: 12000, currency: "INR" });
   });
 });
 
@@ -79,6 +92,9 @@ const admin = () => env.authenticatedContext("admin-uid", { email: ADMIN_EMAIL }
 const client = () => env.authenticatedContext("gb-uid", { email: "greenbasket@brandmintstudios.in" }).firestore();
 const other = () => env.authenticatedContext("inv-uid", { email: "inventory@brandmintstudios.in" }).firestore();
 const anon = () => env.unauthenticatedContext().firestore();
+const partner = () => env.authenticatedContext("partner-uid", { email: "partner@brandmintstudios.in" }).firestore();
+const collab = () => env.authenticatedContext("collab-uid", { email: "collab@brandmintstudios.in" }).firestore();
+const finance = () => env.authenticatedContext("finance-uid", { email: "finance@brandmintstudios.in" }).firestore();
 
 /* ─────────── anonymous is locked out entirely ─────────── */
 
@@ -489,4 +505,155 @@ test("activity: a signed-out visitor gets nothing", async () => {
 
 test("activity: the admin may read the log", async () => {
   await assertSucceeds(getDocs(collection(admin(), "activity")));
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE FIVE-ROLE MATRIX (spec §3)
+
+   SEC-10 asks for "an authorisation test suite covering every cell of the
+   Section 3 matrix". These are the cells the CEO/Guest tests above do not
+   reach, and the emphasis is deliberately on the DENIALS: a role that can see
+   too little is an inconvenience, a role that can see too much is the breach
+   SEC-02 names as the realistic failure mode for a system this shape.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────── collaborator rates ─────────── */
+
+test("a collaborator reads their OWN rate and nobody else's", async () => {
+  const db = collab();
+  await assertSucceeds(getDoc(doc(db, "rates/collab-uid")));
+  await assertFails(getDoc(doc(db, "rates/partner-uid")));
+});
+
+test("A PARTNER CANNOT READ ANY RATE — not their team's, not their own", async () => {
+  // The matrix says "Collaborator rates: Partner —", and this is the cell that
+  // makes the separate collection necessary at all: a partner who could read
+  // the rate sheet could price a competitor's bid with it.
+  const db = partner();
+  await assertFails(getDoc(doc(db, "rates/collab-uid")));
+  await assertFails(getDoc(doc(db, "rates/partner-uid")));
+});
+
+test("Finance reads every rate; the CEO writes them and nobody else does", async () => {
+  await assertSucceeds(getDoc(doc(finance(), "rates/collab-uid")));
+  await assertSucceeds(getDoc(doc(admin(), "rates/collab-uid")));
+  await assertFails(setDoc(doc(finance(), "rates/collab-uid"), { rate: 1 }));
+  await assertFails(setDoc(doc(collab(), "rates/collab-uid"), { rate: 999999 }));
+  await assertSucceeds(setDoc(doc(admin(), "rates/collab-uid"), { rate: 7000 }));
+});
+
+test("a client can never read a rate", async () => {
+  await assertFails(getDoc(doc(client(), "rates/collab-uid")));
+});
+
+/* ─────────── assignment scopes what staff can reach ─────────── */
+
+test("an assigned partner reads their engagement; an unassigned one does not", async () => {
+  const db = partner();
+  await assertSucceeds(getDoc(doc(db, "projects/gb-project")));
+  await assertFails(getDoc(doc(db, "projects/inv-project")));
+});
+
+test("an assigned collaborator reads tasks on that engagement only", async () => {
+  const db = collab();
+  await assertSucceeds(getDocs(collection(db, "projects/gb-project/milestones")));
+  await assertFails(getDocs(collection(db, "projects/inv-project/milestones")));
+});
+
+test("A COLLABORATOR CANNOT READ SCOPE — it carries the line prices", async () => {
+  // "Scope & change requests: Collaborator —". Scope is commercial data and
+  // the matrix gives collaborators none of it, assigned or not.
+  const db = collab();
+  await assertFails(getDocs(collection(db, "projects/gb-project/scope")));
+  await assertFails(getDoc(doc(db, "projects/gb-project/scope/checkout")));
+});
+
+test("a collaborator cannot read organisations or invoices at all", async () => {
+  const db = collab();
+  await assertFails(getDoc(doc(db, "organisations/greenbasket")));
+  await assertFails(getDoc(doc(db, "invoices/gb-1")));
+  await assertFails(getDocs(collection(db, "leads")));
+});
+
+test("a collaborator may move their assigned work along", async () => {
+  await assertSucceeds(updateDoc(doc(collab(), "projects/gb-project/milestones/m1"), { status: "doing" }));
+});
+
+test("but cannot rewrite the engagement itself", async () => {
+  await assertFails(updateDoc(doc(collab(), "projects/gb-project"), { name: "renamed" }));
+});
+
+/* ─────────── Finance ─────────── */
+
+test("Finance has full write on invoices and nothing else", async () => {
+  const db = finance();
+  await assertSucceeds(getDoc(doc(db, "invoices/gb-1")));
+  await assertSucceeds(updateDoc(doc(db, "invoices/gb-1"), { status: "paid" }));
+  // Read-only on clients, no write.
+  await assertSucceeds(getDoc(doc(db, "organisations/greenbasket")));
+  await assertFails(updateDoc(doc(db, "organisations/greenbasket"), { retainer: 99999 }));
+  // No deliverables, no scope — "Finance: no access to client deliverables".
+  await assertFails(getDocs(collection(db, "projects/gb-project/scope")));
+});
+
+test("a partner cannot settle an invoice — that is Finance's cell", async () => {
+  await assertFails(updateDoc(doc(partner(), "invoices/gb-1"), { status: "paid" }));
+  await assertSucceeds(getDoc(doc(partner(), "invoices/gb-1")));
+});
+
+/* ─────────── the audit log ─────────── */
+
+test("staff can APPEND to the audit log but only the CEO can read it", async () => {
+  // Create had to widen to all staff: with five roles, leaving it CEO-only
+  // would make the log silently incomplete the moment a second person worked,
+  // which is worse than no log because it reads as a full record.
+  const entry = { at: serverTimestamp(), actor: "partner-uid", actorEmail: "partner@brandmintstudios.in",
+                  action: "scope.advance", summary: "moved a line" };
+  await assertSucceeds(setDoc(doc(partner(), "activity/e1"), entry));
+  await assertFails(getDocs(collection(partner(), "activity")));
+  await assertSucceeds(getDocs(collection(admin(), "activity")));
+});
+
+test("nobody can rewrite the log, including a partner covering their tracks", async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), "activity/e9"), { at: new Date(), actor: "partner-uid", action: "x", summary: "y" });
+  });
+  await assertFails(updateDoc(doc(partner(), "activity/e9"), { summary: "nothing happened" }));
+  await assertFails(deleteDoc(doc(partner(), "activity/e9")));
+});
+
+test("a partner cannot attribute a log entry to somebody else", async () => {
+  await assertFails(setDoc(doc(partner(), "activity/e2"), {
+    at: serverTimestamp(), actor: "admin-uid", actorEmail: ADMIN_EMAIL,
+    action: "invoice.delete", summary: "not me",
+  }));
+});
+
+/* ─────────── staff are not clients, and clients are not staff ─────────── */
+
+test("a client cannot reach anything a staff role can", async () => {
+  const db = client();
+  await assertFails(getDocs(collection(db, "users")));
+  await assertFails(getDoc(doc(db, "projects/inv-project")));
+  await assertFails(setDoc(doc(db, "activity/e3"), {
+    at: serverTimestamp(), actor: "gb-uid", actorEmail: "greenbasket@brandmintstudios.in",
+    action: "x", summary: "y",
+  }));
+});
+
+test("a signed-in account with NO users document reads nothing", async () => {
+  // Fail-closed by construction: role() resolves to 'none' and every branch
+  // denies. This is what makes a half-finished Client Access grant safe.
+  const ghost = env.authenticatedContext("ghost-uid", { email: "ghost@brandmintstudios.in" }).firestore();
+  await assertFails(getDoc(doc(ghost, "organisations/greenbasket")));
+  await assertFails(getDoc(doc(ghost, "projects/gb-project")));
+  await assertFails(getDoc(doc(ghost, "rates/collab-uid")));
+});
+
+test("a project with NO team is CEO-only, so silence is never universal access", async () => {
+  // Every project written before this ruleset has no `team` field. It must
+  // deny staff rather than admit them.
+  await assertFails(getDoc(doc(partner(), "projects/inv-project")));
+  await assertFails(getDoc(doc(collab(), "projects/inv-project")));
+  await assertSucceeds(getDoc(doc(admin(), "projects/inv-project")));
 });

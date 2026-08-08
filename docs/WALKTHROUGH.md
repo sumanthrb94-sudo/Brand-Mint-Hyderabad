@@ -261,8 +261,20 @@ was actually paid rather than taking your word for it.
 - **Revoke the old service-account key `090ec957…`.** It was pasted into a chat
   once, which makes it spent whatever happened to the file. Firebase Console →
   Project settings → Service accounts. Nothing in the app needs it.
-- **Publish `firestore.rules`.** Firestore → Rules → paste → Publish. Until then
-  the Activity log records nothing and says so plainly.
+- **Publish `firestore.rules`. This is now the blocking item.** Firestore →
+  Rules → paste the whole file → Publish. It carries the five-role permission
+  matrix — CEO, Partner, Collaborator, Finance, Client — and until it is
+  published none of those roles exists in the database, only in the file.
+  The Activity log also records nothing until then, and says so plainly.
+
+  **Publish before granting anyone a login.** The rules are stricter than what
+  is live, so everything already deployed keeps working against them; the
+  reverse is not true. A collaborator given an account against the old ruleset
+  is a collaborator with no restrictions at all.
+
+  Afterwards, confirm what is actually live rather than trusting the dialog:
+  Console → Firestore → Rules shows the published source, and it should match
+  the file character for character.
 - **Prove tenancy on live data.** Sign in as a real client and open
   `/tenancy-check`. It should say **Isolated**. It is tested six ways against the
   emulator and has never been run against the live database — §9 item 1.
