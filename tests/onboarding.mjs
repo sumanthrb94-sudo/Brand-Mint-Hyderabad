@@ -291,9 +291,26 @@ try {
          It does NOT mask a genuine blank portal. If the page really renders
          nothing the wait simply expires and the check below fails exactly as
          it should — the only difference is that a slow render no longer looks
-         identical to a broken one. */
+         identical to a broken one.
+
+         THE CONDITION MUST BE THE LAST THING TO RENDER, NOT THE FIRST.
+         The first version of this wait used body.innerText.length > 200, and
+         it was WORSE than the sleep it replaced: the shell and the project
+         name clear 200 characters well before the invoices are fetched, so
+         the test read the page earlier than the old 2600ms and all six
+         clients failed their invoice assertions deterministically.
+
+         Invoices are the deepest read on this page — org, then project, then
+         milestones, intake, deliverables, scope, and invoices last — so
+         waiting for a row in #bm-invoices-body dominates every earlier one.
+         Both the populated and the "No invoices yet" states render a <tr>,
+         which is what makes the same condition correct for a retainer-only
+         client with no build invoices at all. */
       await cp
-        .waitForFunction(() => (document.body?.innerText || "").length > 200, null, { timeout: 25000 })
+        .waitForFunction(() => {
+          const rows = document.querySelectorAll("#bm-invoices-body tr");
+          return rows.length > 0;
+        }, null, { timeout: 25000 })
         .catch(() => {});
       portal = await cp.innerText("body");
     } catch (err) {
