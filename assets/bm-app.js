@@ -384,6 +384,106 @@ export async function setClientUser(uid, { orgId, role, name, username }) {
   });
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   THE TEAM — making the five roles usable, not just enforced
+
+   firestore.rules already implements the spec's Section 3 matrix. Until this
+   existed, every one of those roles had to be created by hand-editing
+   documents in the Firebase Console, which means the boundary was enforced
+   and unusable at the same time.
+
+   Three things, and no more: who someone is, what they may see, and which
+   engagements they are on.
+
+   NO PASSWORD, EVER (§4). Like the client access panel, this takes a UID.
+   The account itself is created in the Firebase Console, and the password
+   exists there and nowhere else — this app never sees one. A "create the
+   account for me" button here would mean this form collecting a credential,
+   which is the one thing that is never negotiable.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* The studio's own organisation. Hardcoded, like ADMIN_EMAIL — CLAUDE.md §1
+   records both as the multi-tenancy debt to pay before this ships to a second
+   studio. Named here rather than typed inline again so there is one more
+   place to change and not two. */
+export const STUDIO_ORG_ID = "brandmint";
+
+export const STAFF_ROLES = [
+  { id: "partner", label: "Partner",
+    blurb: "Full operational access to the engagements they are on. Sees clients and invoices; cannot settle one, and cannot read any rate." },
+  { id: "collaborator", label: "Collaborator",
+    blurb: "Tasks and deliverables on assigned engagements only. No clients, no invoices, no scope — scope carries the prices." },
+  { id: "finance", label: "Finance",
+    blurb: "Invoices and payments, in full. Reads clients and rates; cannot touch deliverables or scope." },
+];
+
+/** Everyone who works for the studio. Excludes clients and the CEO — the CEO
+ *  is a token claim, not a row, so there is nothing here to edit. */
+export function staffUsers(users) {
+  const ids = STAFF_ROLES.map((r) => r.id);
+  return (users || []).filter((u) => ids.includes(u.role));
+}
+
+/** Create or update a staff member. Same shape as setClientUser and the same
+ *  rule: a UID, never a password. */
+export async function setStaffUser(uid, { name, role, orgId }) {
+  const id = String(uid || "").trim();
+  if (!id) throw new Error("Paste the UID from the Firebase Console.");
+  if (!STAFF_ROLES.some((r) => r.id === role)) throw new Error("Pick a role.");
+  await setDoc(doc(db, "users", id), {
+    orgId: orgId || STUDIO_ORG_ID,
+    role,
+    name: String(name || "").trim(),
+    username: "",
+  });
+}
+
+export async function setUserRole(uid, role) {
+  await updateDoc(doc(db, "users", uid), { role });
+}
+
+/** Remove someone from the studio. Deletes the users document, which is what
+ *  every rule resolves through — so access stops immediately and everywhere,
+ *  which SEC-08 asks for ("revoked within one business day"). It does NOT
+ *  delete their Auth account; that is the Console's job, and the app says so
+ *  rather than pretending otherwise. */
+export async function removeStaffUser(uid) {
+  await deleteDoc(doc(db, "users", uid));
+  await deleteDoc(doc(db, "rates", uid)).catch(() => {});
+}
+
+/* ── rates, in their own collection ───────────────────────────────
+   Separate because Firestore grants reads per DOCUMENT and cannot withhold a
+   field — see the comment at the top of firestore.rules. Read is CEO,
+   Finance, or the collaborator themselves; a partner cannot read any. */
+
+export async function getRates() {
+  const snap = await getDocs(collection(db, "rates"));
+  return snap.docs.map(withId);
+}
+
+export async function setRate(uid, rate, currency = "INR") {
+  const n = Number(rate) || 0;
+  if (n <= 0) { await deleteDoc(doc(db, "rates", uid)); return null; }
+  await setDoc(doc(db, "rates", uid), { rate: n, currency });
+  return n;
+}
+
+/* ── assignment ───────────────────────────────────────────────────
+   `team` on the project is what the rules key partner and collaborator access
+   off. A project with no team denies staff entirely, so this is the only way
+   anybody but the CEO reaches an engagement. */
+
+export async function setProjectTeam(projectId, uids) {
+  const list = [...new Set((uids || []).map((u) => String(u).trim()).filter(Boolean))];
+  await updateDoc(doc(db, "projects", projectId), { team: list });
+  return list;
+}
+
+export function onTeam(project, uid) {
+  return (project?.team || []).includes(uid);
+}
+
 // --- Admin CRUD: milestones / intake / deliverables ------------------------
 
 export async function addMilestone(projectId, data) {

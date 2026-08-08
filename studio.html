@@ -120,6 +120,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h6M9 16h4"/></svg>
             Scope &amp; quote
           </button>
+          <button type="button" data-view="team">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 11.2A3 3 0 0 0 16 5.4M17.5 19a5 5 0 0 0-2-4"/></svg>
+            Team
+          </button>
           <button type="button" id="bm-sync-payments">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14-4M4 13a8 8 0 0 0 14 4"/><path d="M20 4v5h-5M4 20v-5h5"/></svg>
             Sync payments
@@ -164,6 +168,7 @@
         <section class="bm-view" id="view-updates" hidden></section>
         <section class="bm-view" id="view-clients" hidden></section>
         <section class="bm-view" id="view-money" hidden></section>
+        <section class="bm-view" id="view-team" hidden></section>
         <section class="bm-view" id="view-activity" hidden></section>
       </main>
     </div>
@@ -202,6 +207,8 @@
         markAgreementSigned, clearAgreementSigned, saveClientContact,
         saveProjectUpdate, updatableProjects, waNumber, waLink, updateMessage,
         convertLead, toggleRetainerSigned, toggleArchived,
+        STAFF_ROLES, STUDIO_ORG_ID, staffUsers, setStaffUser, removeStaffUser,
+        getRates, setRate, setProjectTeam, onTeam,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
       import { openInvoice } from "/assets/bm-invoice.js";
@@ -331,6 +338,7 @@
         today:    { title: "Today", sub: "What needs you, computed from your own data" },
         pipeline: { title: "Leads", sub: "First response, and the plan they are measured against" },
         updates:  { title: "Updates", sub: "Every live project, one line each, sent together" },
+        team:     { title: "Team", sub: "Who works here, what they may see, and what they cost" },
         clients:  { title: "Clients", sub: "Everything about a client in one place" },
         money:    { title: "Money", sub: "Retainers and the invoice ledger" },
         activity: { title: "Activity", sub: "Append-only. Nobody can edit or delete an entry, including you." },
@@ -1202,6 +1210,28 @@
             </div>
 
             <div class="bm-drawer-sec">
+              <h4>Who is on this</h4>
+              <p class="bm-hint" style="margin-bottom:11px;">
+                This is the ONLY thing that lets a partner or collaborator reach this engagement.
+                A role on its own grants almost nothing — with nobody ticked below, this project
+                is yours alone, which is what an unassigned project has always been.
+              </p>
+              ${(() => {
+                const staff = staffUsers(S.users);
+                if (!staff.length) return `<p class="bm-empty">Nobody on the team yet. Add someone from Tools → Team.</p>`;
+                return staff.map((u) => {
+                  const on = onTeam(p, u.id);
+                  return `<button type="button" class="bm-btn ${on ? "" : "bm-btn--ghost"} bm-btn--sm"
+                    style="margin:0 6px 6px 0;"
+                    data-team-toggle="${escapeHtml(p.id)}|${escapeHtml(u.id)}">
+                    ${on ? "✓ " : ""}${escapeHtml(u.name || u.id)}
+                    <span class="bm-row-sub"> · ${escapeHtml(STAFF_ROLES.find((r) => r.id === u.role)?.label || u.role)}</span>
+                  </button>`;
+                }).join("");
+              })()}
+            </div>
+
+            <div class="bm-drawer-sec">
               <h4>Agreed scope — what was sold, and how much is done</h4>
               ${scopeBlock(p.id, d.scope)}
             </div>
@@ -1608,6 +1638,100 @@
         mo.rows($("view-updates").querySelectorAll(".bm-upd"));
       };
 
+      /* ══════════════════════════════════════════════════════════
+         TEAM — the screen that makes the five roles usable
+
+         firestore.rules has enforced the Section 3 matrix since it was
+         published. Until this screen existed, every role had to be created by
+         hand-editing documents in the Firebase Console — enforced and
+         unusable at the same time.
+
+         Three things and no more: who someone is, what they may see, and what
+         they cost. Assignment to engagements is NOT here; it lives on the
+         project, because that is where you are when you decide it.
+
+         Rates are loaded separately and lazily. They are their own collection
+         precisely because Firestore cannot withhold a field, so reading them
+         is a second request — and if the rules deny it, that must take down
+         this panel and not the whole CRM.
+         ══════════════════════════════════════════════════════════ */
+      RENDER.team = async () => {
+        const staff = staffUsers(S.users);
+        const el = $("view-team");
+
+        el.innerHTML = `
+          <div class="bm-view-head">
+            <div>
+              <h2>Team</h2>
+              <p>Who works here and what each of them may see. The boundary is enforced by the
+                 database, not by this screen — if a role is set here, it is true everywhere.</p>
+            </div>
+            <div class="bm-view-actions">
+              <button type="button" class="bm-btn bm-btn--sm" id="bm-team-add">Add someone</button>
+            </div>
+          </div>
+
+          <div class="bm-panel bm-panel--flush">
+            <div class="bm-panel-head"><div><h3>People</h3>
+              <p>The CEO is not listed: that role is a claim on your sign-in token rather than a
+                 record, which is what stops the first admin needing to already be one.</p></div></div>
+            <div class="bm-list" id="bm-team-list">
+              ${staff.length ? staff.map((u) => {
+                const r = STAFF_ROLES.find((x) => x.id === u.role);
+                const projects = S.projects.filter((p) => onTeam(p, u.id));
+                return `<div class="bm-listrow" style="cursor:default;">
+                  <span class="bm-listrow-main">
+                    <span class="bm-listrow-title">${escapeHtml(u.name || u.id)}</span>
+                    <span class="bm-listrow-sub">${escapeHtml(r?.blurb || u.role)}</span>
+                    <span class="bm-listrow-sub">${projects.length
+                      ? "On: " + escapeHtml(projects.map((p) => p.name || p.id).join(", "))
+                      : "On no engagements yet — so they can reach nothing. Assign them from a project."}</span>
+                  </span>
+                  <span class="bm-listrow-right">
+                    <span class="bm-pill bm-pill--muted">${escapeHtml(r?.label || u.role)}</span>
+                    <span class="bm-rate" data-rate-for="${escapeHtml(u.id)}">—</span>
+                    <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-team-edit="${escapeHtml(u.id)}">Edit</button>
+                    <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-team-remove="${escapeHtml(u.id)}">Remove</button>
+                  </span>
+                </div>`;
+              }).join("")
+                : `<p class="bm-empty" style="padding:0 24px 24px;">Nobody here yet. That is an empty
+                   list, not a solo studio — add whoever is already working with you.</p>`}
+            </div>
+          </div>
+
+          <div class="bm-panel">
+            <div class="bm-panel-head"><div><h3>How access actually works</h3></div></div>
+            <ul class="bm-hint" style="padding-left:18px;margin:0;">
+              <li><strong>A role on its own grants almost nothing.</strong> Partners and collaborators
+                  reach an engagement only when they are on its team. A project with nobody assigned
+                  is yours alone — silence denies rather than admits.</li>
+              <li><strong>Rates are visible to you and Finance.</strong> A collaborator sees their own.
+                  A partner sees none, including their own — that is the matrix as written.</li>
+              <li><strong>No password is ever typed here.</strong> Create the account in the Firebase
+                  Console, copy the UID, paste it. The password exists there and nowhere else.</li>
+              <li><strong>Removing someone deletes their access immediately</strong> — every rule
+                  resolves through that record. It does not delete their Firebase account.</li>
+            </ul>
+          </div>`;
+
+        mo.rows($("bm-team-list").children);
+
+        /* Lazily, and failing alone. If the rules deny this the panel says so
+           instead of the whole view dying — the same reason Activity is
+           loaded separately. */
+        try {
+          const rates = await getRates();
+          const by = Object.fromEntries(rates.map((r) => [r.id, r]));
+          for (const node of el.querySelectorAll("[data-rate-for]")) {
+            const r = by[node.dataset.rateFor];
+            node.textContent = r ? formatINR(r.rate) + "/day" : "no rate set";
+          }
+        } catch (err) {
+          for (const node of el.querySelectorAll("[data-rate-for]")) node.textContent = "rate hidden";
+        }
+      };
+
       /* Loaded lazily, NOT in loadAll(). If the rules for this collection are
          not published yet the read is denied, and a denied read inside the
          boot fetch would take the whole CRM down with it. Here it takes down
@@ -1903,6 +2027,70 @@
               await logActivity("engagement.create",
                 `New ${DEAL_TYPES.find((d) => d.id === deal).label.toLowerCase()}: ${$("f-e-name").value.trim()}`,
                 { orgId: r.orgId, target: $("f-e-name").value.trim() });
+            },
+          });
+        },
+
+        /* Add or edit a staff member. A UID, never a password (§4) — the
+           account is made in the Firebase Console and the password lives
+           there and nowhere else. */
+        team: (opts = {}) => {
+          const existing = opts.user || null;
+          let role = existing?.role || "collaborator";
+          modal({
+            title: existing ? `Edit ${existing.name || existing.id}` : "Add someone to the team",
+            note: existing
+              ? "Changing a role changes what they can reach everywhere, immediately."
+              : "Create the account in Firebase Console → Authentication → Add user, then paste its UID here. No password is typed into this app, ever.",
+            submitLabel: existing ? "Save" : "Add to team",
+            body: `
+              <div class="bm-field">
+                <label for="f-t-name">Name</label>
+                <input id="f-t-name" value="${escapeHtml(existing?.name || "")}" placeholder="Who they are" required />
+              </div>
+              ${existing ? "" : `<div class="bm-field">
+                <label for="f-t-uid">Firebase UID</label>
+                <input id="f-t-uid" placeholder="Paste from Authentication → Users" required />
+                <p class="bm-help">Not an email and not a password — the long identifier in the UID column.</p>
+              </div>`}
+              <div class="bm-field">
+                <label>Role</label>
+                <div class="bm-seg bm-seg--wrap" id="f-t-role" role="group" aria-label="Role">
+                  ${STAFF_ROLES.map((r) => `<button type="button" data-role="${escapeHtml(r.id)}"
+                     aria-pressed="${r.id === role}">${escapeHtml(r.label)}</button>`).join("")}
+                </div>
+                <span class="bm-row-sub" id="f-t-blurb"></span>
+              </div>
+              <div class="bm-field">
+                <label for="f-t-rate">Day rate (Rs, optional)</label>
+                <input id="f-t-rate" type="number" min="0" step="500" placeholder="Leave blank if not agreed" />
+                <p class="bm-help">Only you and Finance can read this. A partner cannot, including their own.</p>
+              </div>`,
+            onReady: (form) => {
+              const blurb = () => { $("f-t-blurb").textContent = STAFF_ROLES.find((r) => r.id === role)?.blurb || ""; };
+              form.querySelector("#f-t-role").addEventListener("click", (e) => {
+                const b2 = e.target.closest("[data-role]"); if (!b2) return;
+                role = b2.dataset.role;
+                form.querySelectorAll("[data-role]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.role === role)));
+                blurb();
+              });
+              blurb();
+            },
+            onSubmit: async () => {
+              const uid = existing ? existing.id : $("f-t-uid").value.trim();
+              /* setStaffUser writes name, role and orgId together, so it
+                 serves create and edit alike — one path, no chance of an edit
+                 leaving a stale field behind. */
+              await setStaffUser(uid, {
+                name: $("f-t-name").value,
+                role,
+                orgId: existing?.orgId || STUDIO_ORG_ID,
+              });
+              const rate = $("f-t-rate").value;
+              if (String(rate).trim() !== "") await setRate(uid, rate);
+              await logActivity("team.set",
+                `${$("f-t-name").value.trim() || uid} set as ${role}`,
+                { target: $("f-t-name").value.trim() || uid });
             },
           });
         },
@@ -2265,6 +2453,39 @@
              `signed` counts towards break-even, and this is exactly what the
              button sets — so making it one click makes the number MORE likely
              to be true, not less. */
+          if (btn.id === "bm-team-add") return NEW_FORMS.team();
+          if (d.teamEdit) {
+            const u = S.users.find((x) => x.id === d.teamEdit);
+            return NEW_FORMS.team({ user: u });
+          }
+          if (d.teamRemove) {
+            const u = S.users.find((x) => x.id === d.teamRemove);
+            if (!confirm(`Remove ${u?.name || d.teamRemove}? Their access stops immediately and everywhere. Their Firebase account is NOT deleted — do that in the Console.`)) return;
+            btn.disabled = true;
+            await removeStaffUser(d.teamRemove);
+            await logActivity("team.remove", `${u?.name || d.teamRemove} removed from the team`,
+              { target: u?.name || d.teamRemove });
+            return refresh();
+          }
+          /* Assignment lives on the project, because that is where you are
+             when you decide it. This is the ONLY thing that grants a partner
+             or collaborator reach — a role on its own grants almost nothing. */
+          if (d.teamToggle) {
+            const [pid, uid] = d.teamToggle.split("|");
+            const p = S.projects.find((x) => x.id === pid);
+            if (!p) return;
+            const next = onTeam(p, uid)
+              ? (p.team || []).filter((x) => x !== uid)
+              : [...(p.team || []), uid];
+            btn.disabled = true;
+            p.team = await setProjectTeam(pid, next);
+            const u = S.users.find((x) => x.id === uid);
+            await logActivity("team.assign",
+              `${u?.name || uid} ${onTeam(p, uid) ? "added to" : "removed from"} ${p.name || pid}`,
+              { target: p.name || pid });
+            closeOverlay();
+            return refresh();
+          }
           if (d.rToggle) {
             const o = S.orgById[d.rToggle];
             btn.disabled = true;
