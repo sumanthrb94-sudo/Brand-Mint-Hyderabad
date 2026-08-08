@@ -182,7 +182,13 @@ try {
     if (c.retainer) check(/proposed/.test(preview), "and says the retainer is PROPOSED, not counted");
 
     await admin.click('.bm-modal button[type="submit"]');
-    await admin.waitForTimeout(2600);
+    /* Wait for the modal to actually close rather than guessing how long
+       createEngagement takes — it writes an org, a project, a scope line, two
+       invoices and six milestones, and that is slower on the sixth client than
+       on the first. Same reasoning as the portal wait below. */
+    await admin
+      .waitForFunction(() => !document.querySelector(".bm-modal"), null, { timeout: 25000 })
+      .catch(() => {});
 
     /* ── 2. did it create everything, in one submit? ────────────── */
     step("What one submit actually created");
@@ -239,7 +245,16 @@ try {
     check(shown.includes(email), "the form shows the exact email they will sign in with", shown);
 
     await admin.click(`[data-grant-login]`);
-    await admin.waitForTimeout(2600);
+    /* Wait for the confirmation the next line asserts on. Granting re-renders
+       the record and writes the message afterwards, so sleeping at it races
+       the re-render — and a message that has not been written yet is
+       indistinguishable from one that never will be. */
+    await admin
+      .waitForFunction(() => {
+        const el = document.querySelector("#bm-a-status");
+        return el && !el.hidden && (el.innerText || "").trim().length > 0;
+      }, null, { timeout: 25000 })
+      .catch(() => {});
     const saved = await admin.evaluate(`document.querySelector("#bm-a-status")?.innerText || ""`);
     check(/saved/i.test(saved), "the login is saved", saved.slice(0, 110));
 
@@ -259,7 +274,27 @@ try {
     try {
       await signIn(cp, c.user, CLIENT_PASSWORD);
       await cp.goto(`${BASE}/portal?t=${Date.now()}`, { waitUntil: "load" });
-      await cp.waitForTimeout(2600);
+
+      /* WAIT FOR THE PORTAL TO RENDER, DO NOT SLEEP AT IT.
+
+         This was waitForTimeout(2600), and it flaked: Charminar Textiles —
+         the fifth of six, when the emulator is carrying the most data — read
+         back a 61-character body with no console errors, no permission denial
+         and tenancy isolation still passing. The portal had simply not
+         finished loading yet. The identical code passed on a re-run, which is
+         the signature of a race rather than a defect.
+
+         A fixed sleep is the bug: it is a guess about how slow the machine is,
+         and it will guess wrong again on a slower one. This waits for the
+         thing actually being asserted instead.
+
+         It does NOT mask a genuine blank portal. If the page really renders
+         nothing the wait simply expires and the check below fails exactly as
+         it should — the only difference is that a slow render no longer looks
+         identical to a broken one. */
+      await cp
+        .waitForFunction(() => (document.body?.innerText || "").length > 200, null, { timeout: 25000 })
+        .catch(() => {});
       portal = await cp.innerText("body");
     } catch (err) {
       check(false, "the client can sign in and load their portal", err.message);
