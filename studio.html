@@ -926,210 +926,105 @@
         mo.rows($("bm-client-list").children);
       };
 
+      /* ══════════════════════════════════════════════════════════
+         THE CLIENT — SEVEN THINGS, IN THE ORDER THEY HAPPEN
+
+         This replaced ELEVEN sections. The report was blunt and correct: "You
+         didn't even restructure anything." I had spent three passes adding
+         panels to a record that was already too long, then widened the drawer
+         and called it a page.
+
+         The seven below are the owner's own list, in his own order: the quote
+         and its price, signed, login, what has been paid of it, a retainer if
+         he wants one, the updates the client sees, and the links.
+
+         WHAT WAS DELETED, and why each was noise rather than information:
+
+         - "Where this client is", the seven-stage strip. Every stage it showed
+           is now visible as the state of the control that sets it: Signed is a
+           toggle you can see, Paid is a number against a total. A strip that
+           narrates the same seven facts a second time is the complex sheet.
+         - The onboarding checklist. It listed the same steps AGAIN, a third
+           telling of one story.
+         - "Where they came from" and "Who to message" as sections. Both are
+           one line each and now sit under the name, where a fact belongs.
+
+         Nothing was deleted from the DATABASE. clientStage() still exists and
+         is still tested; it is simply not drawn, because the controls say it.
+         ══════════════════════════════════════════════════════════ */
       function openClient(orgId) {
         const o = S.orgById[orgId];
         if (!o) return;
-        const done = onboardingState(o);
-        const next = ONBOARDING_STEPS.find((s) => !done[s.id]);
         const theirs = S.projects.filter((p) => p.orgId === o.id);
         const invs = S.invoices.filter((i) => i.orgId === o.id);
         const logins = S.users.filter((u) => u.orgId === o.id && u.role === "client");
-
-        /* Scope is a subcollection and is NOT loaded here. clientStage is told
-           so explicitly (null, not []) rather than being handed an empty array
-           — an unread scope must not report as an unquoted client. */
-        const stage = clientStage(o, { projects: theirs, invoices: invs, scope: null });
         const kit = brandKit(o);
+
+        /* The whole quotation price, and what has actually arrived against it.
+           Billed is the sum of what was raised — for a 50/50 build that IS the
+           quoted price. Received uses invoiceReceived(), so an invoice written
+           before part payments existed still reads from its status rather than
+           as zero. */
+        const billed = invs.reduce((n, i) => n + (Number(i.amount) || 0), 0);
+        const received = invs.reduce((n, i) => n + invoiceReceived(i), 0);
+        const owed = Math.max(0, billed - received);
+        const pct = billed > 0 ? Math.round((received / billed) * 100) : null;
+
+        const wa = waNumber(o.contactPhone);
+        const sub = [
+          o.contactName || null,
+          o.contactPhone ? (wa ? `+${wa}` : o.contactPhone) : null,
+          o.fromLeadId ? `won from a lead${o.source ? ` · ${SOURCE_LABEL[o.source] || o.source}` : ""}` : null,
+          o.status === "archived" ? "archived" : null,
+        ].filter(Boolean).join(" · ");
 
         drawer({
           title: o.name || "Unnamed",
-          sub: `${escapeHtml(o.kind || "client")} · ${escapeHtml(o.status || "active")}`,
+          sub: sub || "no contact details yet",
           body: `
-            ${o.fromLeadId ? `<div class="bm-drawer-sec">
-              <h4>Where they came from</h4>
-              <p class="bm-hint">Came in as a lead${o.source ? ` via <strong>${escapeHtml(SOURCE_LABEL[o.source] || o.source)}</strong>` : ""}, and was won.
-                 The lead is kept rather than deleted: its first-response time is the single most valuable
-                 number in the business and cannot be recreated once it is gone.</p>
-            </div>` : ""}
-
             <div class="bm-drawer-sec">
-              <h4>Where this client is</h4>
-              <ol class="bm-flow">
-                ${CLIENT_STAGES.map((s, i) => `<li class="bm-flow-step ${
-                  i < stage.index ? "is-done" : i === stage.index ? "is-now" : ""
-                }"><span class="bm-flow-pip" aria-hidden="true"></span><span>${escapeHtml(s.label)}</span></li>`).join("")}
-              </ol>
-              <p class="bm-hint" style="margin-top:10px;">
-                ${stage.next
-                  ? `<strong>Next:</strong> ${escapeHtml(stage.next)}`
-                  : "Delivered and settled in full. Nothing outstanding."}
-              </p>
-              <p class="bm-hint">
-                Worked out from the records themselves — leads, scope, invoices and what has
-                actually been paid. There is nothing here to keep up to date.
-              </p>
-            </div>
-
-            <div class="bm-drawer-sec">
-              <h4>Agreement</h4>
-              <dl class="bm-facts">
-                <dt>Signed</dt><dd>${o.agreementSignedAt
-                  ? `<span class="bm-pill bm-pill--green">${escapeHtml(formatDate(o.agreementSignedAt))}</span>`
-                  : `<span class="bm-pill bm-pill--muted">not recorded</span>`}</dd>
-              </dl>
-              <div class="bm-inline-form" style="margin-top:12px;">
-                ${o.agreementSignedAt
-                  ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-agree-clear="${escapeHtml(o.id)}">Clear</button>`
-                  : `<button type="button" class="bm-btn bm-btn--sm" data-agree="${escapeHtml(o.id)}">Mark agreement signed</button>`}
-              </div>
-              <p class="bm-hint" style="margin-top:10px;">
-                This records that an agreement was signed; it does not sign one. Send the
-                document from <a class="bm-link" href="/quote">Scope &amp; quote</a> and have it
-                signed by email or Zoho Sign. The date is set by the server, so it cannot be
-                back-dated.
-              </p>
-            </div>
-
-            <div class="bm-drawer-sec">
-              <h4>Who to message</h4>
-              <p class="bm-hint" style="margin-bottom:12px;">
-                A name and a number, so Updates can put the message straight into WhatsApp.
-                A contact detail, not a credential — nothing in this app ever asks a client
-                for a password, a key or a token.
-              </p>
-              <div class="bm-field">
-                <label for="f-ct-name">Contact name</label>
-                <input id="f-ct-name" value="${escapeHtml(o.contactName || "")}" placeholder="Who you actually talk to" />
-              </div>
-              <div class="bm-field">
-                <label for="f-ct-phone">WhatsApp number</label>
-                <input id="f-ct-phone" inputmode="tel" value="${escapeHtml(o.contactPhone || "")}" placeholder="10 digits, or with country code" />
-                <p class="bm-help">${o.contactPhone
-                  ? (waNumber(o.contactPhone)
-                      ? `Will message +${escapeHtml(waNumber(o.contactPhone))}.`
-                      : "That number is not usable — check it, or Updates cannot message them.")
-                  : "A bare 10-digit number is treated as Indian."}</p>
-              </div>
-            </div>
-
-            <div class="bm-drawer-sec">
-              <h4>Brand kit</h4>
-              <p class="bm-hint" style="margin-bottom:12px;">
-                Shown to this client in their own portal, under Links. Addresses and colours
-                only — never files: their logo already lives in Figma or Drive, and a second
-                copy here would be the one that goes stale.
-              </p>
-              <div class="bm-field">
-                <label for="f-bk-logo">Logo link</label>
-                <input id="f-bk-logo" value="${escapeHtml(o.brandLogoUrl || "")}" placeholder="https://…" />
-              </div>
-              <div class="bm-field">
-                <label for="f-bk-guide">Guidelines link</label>
-                <input id="f-bk-guide" value="${escapeHtml(o.brandGuidelinesUrl || "")}" placeholder="https://…" />
-              </div>
-              <div class="bm-field">
-                <label for="f-bk-fonts">Fonts</label>
-                <input id="f-bk-fonts" value="${escapeHtml(o.brandFonts || "")}" placeholder="e.g. Plus Jakarta Sans, Inter" />
-              </div>
-              <div class="bm-field">
-                <label for="f-bk-colors">Colours</label>
-                <input id="f-bk-colors" value="${escapeHtml((o.brandColors || []).join(" "))}" placeholder="#0b1f1a #10b981" />
-                <p class="bm-help">Hex only, separated by spaces or commas. Anything else is discarded rather than saved.</p>
-              </div>
-              ${kit && kit.colors.length ? `<div class="bm-swatches" aria-hidden="true">
-                ${kit.colors.map((c) => `<span class="bm-swatch" style="background:${escapeHtml(c)}"></span>`).join("")}
-              </div>` : ""}
-              <button type="button" class="bm-btn bm-btn--sm" data-bk-save="${escapeHtml(o.id)}">Save brand kit</button>
-              <p class="bm-status" id="bm-bk-status" hidden></p>
-            </div>
-
-            <div class="bm-drawer-sec">
-              <h4>Retainer</h4>
-              <dl class="bm-facts">
-                <dt>Monthly</dt><dd>${escapeHtml(formatINR(o.retainer))}${o.retainerInKind ? ` <span class="bm-row-sub">+ ${escapeHtml(formatINR(o.retainerInKind))} in kind, never counted as revenue</span>` : ""}</dd>
-                <dt>Status</dt><dd><span class="bm-pill ${o.retainerStatus === "signed" ? "bm-pill--green" : o.retainerStatus === "proposed" ? "bm-pill--amber" : "bm-pill--muted"}">${escapeHtml(o.retainerStatus || "none")}</span></dd>
-                ${o.note ? `<dt>Note</dt><dd>${escapeHtml(o.note)}</dd>` : ""}
-              </dl>
-              <p class="bm-hint" style="margin-top:12px;">
-                Only <strong>signed</strong> counts towards break-even. Marking a proposal signed
-                changes the number the month is judged on — do it when it is actually signed.
-              </p>
-              <div class="bm-inline-form" style="margin-top:12px;">
-                <input type="number" min="0" step="500" id="bm-d-retainer" value="${Number(o.retainer) || 0}" class="bm-mn-narrow" aria-label="Monthly retainer" />
-                <select id="bm-d-rstatus" aria-label="Retainer status">
-                  ${["signed", "proposed", "none"].map((s) => `<option value="${s}" ${(o.retainerStatus || "none") === s ? "selected" : ""}>${s}</option>`).join("")}
-                </select>
-                <button type="button" class="bm-btn bm-btn--sm" data-org-save="${escapeHtml(o.id)}">Save retainer</button>
-                ${Number(o.retainer) > 0 ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-r-toggle="${escapeHtml(o.id)}">
-                  ${o.retainerStatus === "signed" ? "Mark back to proposed" : "Mark signed"}
-                </button>` : ""}
-                <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-org-archive="${escapeHtml(o.id)}">
-                  ${o.status === "archived" ? "Restore" : "Archive"}
-                </button>
-              </div>
-            </div>
-
-            <div class="bm-drawer-sec">
-              <h4>Onboarding — ${ONBOARDING_STEPS.filter((s) => done[s.id]).length} of ${ONBOARDING_STEPS.length}</h4>
-              <ol class="bm-onb-steps">
-                ${ONBOARDING_STEPS.map((st) => `<li class="${done[st.id] ? "is-done" : next && st.id === next.id ? "is-next" : ""}">
-                  <span class="bm-onb-mark">${done[st.id] ? "✓" : next && st.id === next.id ? "→" : "○"}</span>
-                  <span>${escapeHtml(st.label)}</span>
-                </li>`).join("")}
-              </ol>
-              <p class="bm-hint" style="margin-top:10px;">${next
-                ? `<strong>Next: ${escapeHtml(next.label)}.</strong> ${escapeHtml(next.hint)}`
-                : `All ${ONBOARDING_STEPS.length} done. From here it is delivery.`}</p>
-            </div>
-
-            <div class="bm-drawer-sec">
-              <h4>Projects</h4>
-              <div class="bm-inline-form" style="margin-bottom:10px;">
-                <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-new="project">Add another project</button>
-              </div>
-              ${theirs.length ? `<div class="bm-list">${theirs.map((p) => {
-                const d = S.detail[p.id] || { openIntake: 0, scope: [], milestones: [] };
-                const prog = scopeProgress(d.scope);
+              <h4>Quote &amp; price</h4>
+              ${billed > 0
+                ? `<p class="bm-tile-value" style="font-size:30px;margin-bottom:6px;">${escapeHtml(formatINR(billed))}</p>
+                   <p class="bm-hint">The whole agreed price, from the invoices raised against it.</p>`
+                : `<p class="bm-empty">Nothing quoted yet. Open a project and save an agreed scope on
+                   <a class="bm-link" href="/quote">Scope &amp; quote</a>, or raise an invoice below.</p>`}
+              ${theirs.length ? `<div class="bm-list" style="margin-top:12px;">${theirs.map((p) => {
+                const d = S.detail[p.id] || {};
+                const pr = scopeProgress(d.scope || []);
                 return `<button type="button" class="bm-listrow" data-project="${escapeHtml(p.id)}" style="padding-left:0;padding-right:0;">
                   <span class="bm-listrow-main">
                     <span class="bm-listrow-title">${escapeHtml(p.name || "Untitled")}</span>
-                    <span class="bm-listrow-sub">${escapeHtml(TYPE_LABEL[p.type] || "type not set")} · ${
-                      prog === null ? "no agreed scope" : `${prog}% delivered`}${
-                      d.openIntake ? ` · ${d.openIntake} open with the client` : ""}</span>
+                    <span class="bm-listrow-sub">${pr === null ? "no scope saved yet" : `${pr}% delivered`}</span>
                   </span>
-                  <span class="bm-listrow-right">${chev}</span>
+                  <span class="bm-listrow-right"><svg class="bm-listrow-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
                 </button>`;
-              }).join("")}</div>`
-                : `<p class="bm-empty">No projects yet.</p>`}
+              }).join("")}</div>` : ""}
+              <div class="bm-inline-form" style="margin-top:12px;">
+                <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-new="project">Add a project</button>
+              </div>
             </div>
 
             <div class="bm-drawer-sec">
-              <h4>Invoices</h4>
-              <div class="bm-inline-form" style="margin-bottom:10px;">
-                <button type="button" class="bm-btn bm-btn--sm" data-new="invoice">Raise an invoice</button>
+              <h4>Signed</h4>
+              <div class="bm-inline-form">
+                <button type="button" class="bm-btn ${o.agreementSignedAt ? "" : "bm-btn--ghost"} bm-btn--sm"
+                  data-agree-toggle="${escapeHtml(o.id)}">
+                  ${o.agreementSignedAt ? `✓ Signed ${escapeHtml(formatDate(o.agreementSignedAt))}` : "Not signed — mark it"}
+                </button>
               </div>
-              ${invs.length ? `<div class="bm-list">${invs.map(invoiceRow).join("")}</div>`
-                : `<p class="bm-empty">No invoices raised. That is empty, not settled.</p>`}
+              <p class="bm-hint" style="margin-top:8px;">Records that an agreement was signed; it does not sign one.
+                 Send it from <a class="bm-link" href="/quote">Scope &amp; quote</a>. The date comes from the server, so it cannot be back-dated.</p>
             </div>
 
             <div class="bm-drawer-sec">
               <h4>Portal login</h4>
               ${logins.length
-                ? `<dl class="bm-facts">${logins.map((u) => `
-                    <dt>${escapeHtml(u.name || "—")}</dt>
-                    <dd>${escapeHtml(u.username || "—")}@brandmintstudios.in</dd>`).join("")}</dl>
-                   <p class="bm-hint" style="margin-top:10px;">
-                     They can sign in and see this client's work, and nothing else.</p>
-                   <!-- The confirmation lands here after the drawer re-renders.
-                        Granting a login flips this section from the FORM branch to
-                        this one, so a status element that only existed on the form
-                        left the message with nowhere to go and the screen went
-                        silent — the same failure as before, one layer further in. -->
+                ? `<p class="bm-hint"><strong>${escapeHtml(logins[0].username || "—")}@brandmintstudios.in</strong> can sign in and see this client's work, and nothing else.</p>
                    <p class="bm-status" id="bm-a-status" hidden></p>`
-                : `<p class="bm-empty" style="margin-bottom:12px;">
-                     No login yet — they can see nothing at all.</p>
-                   <ol style="margin:0 0 14px;padding-left:20px;font-size:13px;color:var(--bm-muted);line-height:1.55;">
-                     <li>Firebase Console → Authentication → Users → Add user, with the email below. Set the password there.</li>
+                : `<p class="bm-empty" style="margin-bottom:10px;">No login yet — they can see nothing at all.</p>
+                   <ol style="margin:0 0 12px;padding-left:20px;font-size:13px;color:var(--bm-muted);line-height:1.55;">
+                     <li>Firebase Console → Authentication → Add user, with the email below. Set the password there.</li>
                      <li>Copy the UID and paste it here.</li>
                    </ol>
                    <div class="bm-field">
@@ -1148,23 +1043,98 @@
                    </div>
                    <button type="button" class="bm-btn bm-btn--sm" data-grant-login="${escapeHtml(o.id)}">Give them access</button>
                    <p class="bm-status" id="bm-a-status" hidden></p>
-                   <p class="bm-hint" style="margin-top:10px;">
-                     This form never asks for a password and never will. The password exists
-                     only in the Firebase Console.</p>`}
+                   <p class="bm-hint" style="margin-top:8px;">This form never asks for a password and never will.</p>`}
             </div>
 
             <div class="bm-drawer-sec">
-              <h4>Danger</h4>
-              <p class="bm-hint" style="margin-bottom:10px;">
-                <strong>Archive</strong> keeps the history and stops them counting towards anything —
-                use it when an engagement ends. <strong>Delete</strong> removes the client, their
-                ${theirs.length} project${theirs.length === 1 ? "" : "s"},
-                ${invs.length} invoice${invs.length === 1 ? "" : "s"} and every milestone, request
-                and deliverable under them. It cannot be undone.
-              </p>
-              <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-org-delete="${escapeHtml(o.id)}">
-                Delete ${escapeHtml(o.name || "this client")} and everything in it
-              </button>
+              <h4>Paid</h4>
+              ${billed > 0
+                ? `<p class="bm-hint" style="margin-bottom:8px;">
+                     <strong>${escapeHtml(formatINR(received))}</strong> received of ${escapeHtml(formatINR(billed))}${
+                       owed ? ` · <strong>${escapeHtml(formatINR(owed))}</strong> still owed` : " · settled in full"}</p>
+                   <div class="bm-bar" style="margin-bottom:12px;"><span style="width:${pct}%"></span></div>`
+                : ""}
+              <div class="bm-inline-form" style="margin-bottom:10px;">
+                <button type="button" class="bm-btn bm-btn--sm" data-new="invoice">Raise an invoice</button>
+              </div>
+              ${invs.length ? `<div class="bm-list">${invs.map(invoiceRow).join("")}</div>`
+                : `<p class="bm-empty">No invoices raised. That is empty, not settled.</p>`}
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Retainer</h4>
+              <div class="bm-inline-form">
+                <input type="number" min="0" step="500" id="bm-d-retainer" value="${Number(o.retainer) || 0}" class="bm-mn-narrow" aria-label="Monthly retainer" />
+                <button type="button" class="bm-btn bm-btn--sm" data-org-save="${escapeHtml(o.id)}">Save</button>
+                ${Number(o.retainer) > 0 ? `<button type="button" class="bm-btn ${o.retainerStatus === "signed" ? "" : "bm-btn--ghost"} bm-btn--sm" data-r-toggle="${escapeHtml(o.id)}">
+                  ${o.retainerStatus === "signed" ? "✓ Signed — counting" : "Proposed — not counted"}
+                </button>` : ""}
+              </div>
+              <p class="bm-hint" style="margin-top:8px;">Status: <strong>${escapeHtml(o.retainerStatus || "none")}</strong>.
+                 Only <strong>signed</strong> counts towards break-even.</p>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Updates</h4>
+              ${theirs.length ? theirs.map((p) => `
+                <div style="margin-bottom:12px;">
+                  <p class="bm-row-sub" style="margin-bottom:5px;">${escapeHtml(p.name || "Untitled")}</p>
+                  <textarea class="bm-upd-text" data-upd="${escapeHtml(p.id)}" rows="2"
+                    placeholder="What moved this week. They read this."
+                    aria-label="Update for ${escapeHtml(p.name || "project")}">${escapeHtml(p.updateText || "")}</textarea>
+                </div>`).join("") + `
+                <div class="bm-inline-form">
+                  <button type="button" class="bm-btn bm-btn--sm" id="bm-upd-save">Save updates</button>
+                  ${wa ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-upd-wa="${escapeHtml(theirs[0].id)}">Send on WhatsApp</button>` : ""}
+                </div>
+                <p class="bm-status" id="bm-upd-status" hidden></p>`
+                : `<p class="bm-empty">No projects, so there is nothing to report yet.</p>`}
+            </div>
+
+            <div class="bm-drawer-sec">
+              <h4>Links</h4>
+              <div class="bm-field">
+                <label for="f-bk-logo">Logo link</label>
+                <input id="f-bk-logo" value="${escapeHtml(o.brandLogoUrl || "")}" placeholder="https://…" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bk-guide">Guidelines link</label>
+                <input id="f-bk-guide" value="${escapeHtml(o.brandGuidelinesUrl || "")}" placeholder="https://…" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bk-fonts">Fonts</label>
+                <input id="f-bk-fonts" value="${escapeHtml(o.brandFonts || "")}" placeholder="Plus Jakarta Sans, Inter" />
+              </div>
+              <div class="bm-field">
+                <label for="f-bk-colors">Colours</label>
+                <input id="f-bk-colors" value="${escapeHtml((o.brandColors || []).join(" "))}" placeholder="#0b1f1a #10b981" />
+              </div>
+              ${kit && kit.colors.length ? `<div class="bm-swatches" aria-hidden="true">
+                ${kit.colors.map((c) => `<span class="bm-swatch" style="background:${escapeHtml(c)}"></span>`).join("")}
+              </div>` : ""}
+              <div class="bm-field">
+                <label for="f-ct-name">Contact name</label>
+                <input id="f-ct-name" value="${escapeHtml(o.contactName || "")}" placeholder="Who you talk to" />
+              </div>
+              <div class="bm-field">
+                <label for="f-ct-phone">WhatsApp number</label>
+                <input id="f-ct-phone" inputmode="tel" value="${escapeHtml(o.contactPhone || "")}" placeholder="10 digits" />
+              </div>
+              <button type="button" class="bm-btn bm-btn--sm" data-bk-save="${escapeHtml(o.id)}">Save</button>
+              <p class="bm-status" id="bm-bk-status" hidden></p>
+              <p class="bm-hint" style="margin-top:8px;">The client sees the logo, guidelines, fonts and colours in their own portal.</p>
+            </div>
+
+            <div class="bm-drawer-sec">
+              <div class="bm-inline-form">
+                <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-org-archive="${escapeHtml(o.id)}">
+                  ${o.status === "archived" ? "Restore" : "Archive"}
+                </button>
+                <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-org-delete="${escapeHtml(o.id)}">Delete everything</button>
+              </div>
+              <p class="bm-hint" style="margin-top:8px;">Archive keeps the history and stops them counting.
+                 Delete removes ${theirs.length} project${theirs.length === 1 ? "" : "s"} and
+                 ${invs.length} invoice${invs.length === 1 ? "" : "s"} with everything under them. It cannot be undone.</p>
             </div>`,
         });
       }
@@ -2377,28 +2347,23 @@
             return;
           }
 
-          /* The agreement. Both directions close the drawer and refresh,
-             because the stage strip at the top of that same drawer is derived
-             from this field — leaving it open would show a strip that
-             contradicts the pill directly under it. */
-          if (d.agree) {
-            const o = S.orgById[d.agree];
+          /* One toggle, both directions. Was two buttons and two branches;
+             the state is binary so the control is one thing you can see the
+             state of. Closes and refreshes because the header line above it
+             reads "signed" too. */
+          if (d.agreeToggle) {
+            const o = S.orgById[d.agreeToggle];
             btn.disabled = true;
-            await markAgreementSigned(d.agree);
-            await logActivity("agreement.signed",
-              `${o?.name || d.agree}: agreement recorded as signed`,
-              { orgId: d.agree, target: o?.name || d.agree });
-            closeOverlay();
-            return refresh();
-          }
-          if (d.agreeClear) {
-            const o = S.orgById[d.agreeClear];
-            if (!confirm("Clear the signed date? The client stays exactly as they are; only the record of the agreement goes.")) return;
-            btn.disabled = true;
-            await clearAgreementSigned(d.agreeClear);
-            await logActivity("agreement.cleared",
-              `${o?.name || d.agreeClear}: signed date cleared`,
-              { orgId: d.agreeClear, target: o?.name || d.agreeClear });
+            if (o?.agreementSignedAt) {
+              if (!confirm("Clear the signed date? The client stays exactly as they are.")) { btn.disabled = false; return; }
+              await clearAgreementSigned(d.agreeToggle);
+              await logActivity("agreement.cleared", `${o?.name || d.agreeToggle}: signed date cleared`,
+                { orgId: d.agreeToggle, target: o?.name || d.agreeToggle });
+            } else {
+              await markAgreementSigned(d.agreeToggle);
+              await logActivity("agreement.signed", `${o?.name || d.agreeToggle}: agreement recorded as signed`,
+                { orgId: d.agreeToggle, target: o?.name || d.agreeToggle });
+            }
             closeOverlay();
             return refresh();
           }

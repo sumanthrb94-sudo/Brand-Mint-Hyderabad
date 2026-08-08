@@ -323,9 +323,25 @@ try {
        version did exactly that and "Retainer" passed only by coincidence,
        matching the onboarding step label further down the drawer. */
     const drawerText = (await page.evaluate(`document.querySelector(".bm-drawer")?.innerText || ""`)).toLowerCase();
-    for (const want of ["Retainer", "Onboarding", "Projects", "Invoices", "Portal login"]) {
-      check(drawerText.includes(want.toLowerCase()), `the client drawer shows "${want}"`);
+
+    /* SEVEN SECTIONS, and the list changed on purpose.
+       This used to assert Retainer / Onboarding / Projects / Invoices / Portal
+       login — the ELEVEN-section record. The owner's verdict on that was "you
+       didn't even restructure anything", and he was right: three passes had
+       added panels to a record already too long.
+
+       The seven below are his own list in his own order. "Onboarding" and the
+       seven-stage strip are deliberately GONE, not renamed: every stage they
+       narrated is visible as the state of the control that sets it, and a
+       panel restating it was the third telling of one story.
+
+       Asserting the old headings here would have kept the suite green while
+       the screen it describes no longer existed, which is worse than no test. */
+    for (const want of ["Quote & price", "Signed", "Portal login", "Paid", "Retainer", "Updates", "Links"]) {
+      check(drawerText.includes(want.toLowerCase()), `the client record shows "${want}"`);
     }
+    check(!/onboarding/.test(drawerText),
+      "and the onboarding checklist is GONE — it told the same story a third time");
     check(/signed|proposed|none/.test(drawerText), "and states the retainer status explicitly");
 
     await page.keyboard.press("Escape");
