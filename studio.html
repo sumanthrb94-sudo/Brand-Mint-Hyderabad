@@ -1084,10 +1084,10 @@
                     aria-label="Update for ${escapeHtml(p.name || "project")}">${escapeHtml(p.updateText || "")}</textarea>
                 </div>`).join("") + `
                 <div class="bm-inline-form">
-                  <button type="button" class="bm-btn bm-btn--sm" id="bm-upd-save">Save updates</button>
+                  <button type="button" class="bm-btn bm-btn--sm" id="bm-c-upd-save">Save updates</button>
                   ${wa ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-upd-wa="${escapeHtml(theirs[0].id)}">Send on WhatsApp</button>` : ""}
                 </div>
-                <p class="bm-status" id="bm-upd-status" hidden></p>`
+                <p class="bm-status" id="bm-c-upd-status" hidden></p>`
                 : `<p class="bm-empty">No projects, so there is nothing to report yet.</p>`}
             </div>
 
@@ -2291,8 +2291,16 @@
              first is the bug this repo has now shipped twice: the refresh
              replaces the status node a moment later, every database assertion
              passes, and the screen goes silent. */
-          if (btn.id === "bm-upd-save") {
-            const boxes = [...document.querySelectorAll("[data-upd]")];
+          /* Two surfaces carry update boxes now — the Updates view and the
+             client record — so the handler is scoped to the one that was
+             actually clicked. Querying the whole document would have saved the
+             Updates screen's textareas from a button inside the drawer, and
+             getElementById would have resolved the status node to whichever
+             came first in document order rather than the one in front of the
+             user. The ids are distinct for the same reason. */
+          if (btn.id === "bm-upd-save" || btn.id === "bm-c-upd-save") {
+            const surface = btn.closest(".bm-drawer") || btn.closest(".bm-view") || document;
+            const boxes = [...surface.querySelectorAll("[data-upd]")];
             btn.disabled = true;
             let written = 0;
             for (const box of boxes) {
@@ -2312,8 +2320,10 @@
                 `Sent updates on ${written} project${written === 1 ? "" : "s"}`,
                 { target: `${written} project${written === 1 ? "" : "s"}` });
             }
-            RENDER.updates();
-            const st = $("bm-upd-status");
+            if (!btn.closest(".bm-drawer")) RENDER.updates();
+            const st = btn.closest(".bm-drawer")
+              ? btn.closest(".bm-drawer").querySelector("#bm-c-upd-status")
+              : $("bm-upd-status");
             if (st) {
               st.hidden = false;
               st.className = "bm-status bm-status--ok";
