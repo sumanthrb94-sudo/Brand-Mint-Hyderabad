@@ -1126,6 +1126,82 @@ export function monthlyIncome({ orgs, projects, scopeByProject, orgById }) {
  *
  * Returns the ids it created so the caller can open the record.
  */
+/* ── one-click state, instead of a form ───────────────────────────
+   "I should be able to do it by sliding of a button or click of a button."
+   These are deliberately thin: each is one field, flipped, with no other way
+   to get it wrong. The rules that matter still hold — a retainer only counts
+   as revenue at `signed`, and that is exactly what the toggle sets, so making
+   it one click makes it MORE likely to be true, not less. */
+
+export async function toggleRetainerSigned(org) {
+  const to = org?.retainerStatus === "signed" ? "proposed" : "signed";
+  await updateDoc(doc(db, "organisations", org.id), { retainerStatus: to });
+  return to;
+}
+
+export async function toggleArchived(org) {
+  const to = org?.status === "archived" ? "active" : "archived";
+  await updateDoc(doc(db, "organisations", org.id), { status: to });
+  return to;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   A LEAD BECOMES A CLIENT — the link that was missing
+
+   The report was exact: "These individual components are not being linked.
+   That is the issue with you." It was right. A lead sat in the pipeline, the
+   quote was a separate page, and createEngagement() built a client from a
+   blank form that never looked at either — so every step re-typed what the
+   system already knew, and the lead had to be closed by hand afterwards or it
+   sat on the board forever.
+
+   convertLead() is one call. It carries the name, the contact and the source
+   forward, creates everything createEngagement() creates, and marks the lead
+   won with a pointer to what it became. Nothing is typed twice and nothing is
+   left open behind you.
+
+   The lead is NOT deleted. `stage: "signed"` takes it off the board (the
+   kanban shows OPEN_LEAD_STAGES only), so it "becomes" the client from where
+   you sit — while firstResponseAt survives, which is the single most valuable
+   number in the business (§6) and would be destroyed by a delete. It is also
+   the only way to ever answer "what did we quote them originally".
+   ══════════════════════════════════════════════════════════════════ */
+
+export async function convertLead(leadId, opts = {}) {
+  const lead = (await getDoc(doc(db, "leads", leadId))).data();
+  if (!lead) throw new Error("That lead no longer exists.");
+  if (lead.orgId) throw new Error("That lead has already become a client.");
+
+  const out = await createEngagement({
+    ...opts,
+    name: opts.name || lead.name,
+  });
+
+  await updateDoc(doc(db, "leads", leadId), {
+    stage: "signed",
+    orgId: out.orgId,
+    wonAt: serverTimestamp(),
+  });
+
+  /* Contact details follow the lead across, so the client is messageable from
+     Updates the moment they exist rather than after another form. */
+  if (lead.contactName || lead.contactPhone || lead.email) {
+    await updateDoc(doc(db, "organisations", out.orgId), {
+      contactName: String(lead.contactName || lead.name || "").trim(),
+      contactPhone: String(lead.contactPhone || lead.phone || "").trim(),
+      fromLeadId: leadId,
+      source: String(lead.source || "").trim(),
+    });
+  } else {
+    await updateDoc(doc(db, "organisations", out.orgId), {
+      fromLeadId: leadId,
+      source: String(lead.source || "").trim(),
+    });
+  }
+
+  return { ...out, leadId };
+}
+
 export async function createEngagement({
   name, deal, price, weeks, retainer, retainerSigned, type, startAt,
 }) {

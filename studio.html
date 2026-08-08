@@ -201,6 +201,7 @@
         CLIENT_STAGES, clientStage, brandKit, saveBrandKit, parseBrandColors,
         markAgreementSigned, clearAgreementSigned, saveClientContact,
         saveProjectUpdate, updatableProjects, waNumber, waLink, updateMessage,
+        convertLead, toggleRetainerSigned, toggleArchived,
       } from "/assets/bm-app.js";
       import { bindRunbookButtons } from "/assets/bm-runbooks.js";
       import { openInvoice } from "/assets/bm-invoice.js";
@@ -736,6 +737,13 @@
             ${responded ? "" : `<button type="button" class="bm-lead-move" data-lead-respond="${escapeHtml(l.id)}">Log first response</button>`}
             <button type="button" class="bm-lead-move" data-lead-lose="${escapeHtml(l.id)}">Lost</button>
           </div>
+          <!-- THE LINK THAT WAS MISSING. One button turns this lead into a
+               client: the name, contact and source carry across, the project,
+               the quoted scope line and both invoices are created, and the
+               lead comes off the board marked won with a pointer to what it
+               became. Nothing is typed twice and nothing is left open. -->
+          <button type="button" class="bm-btn bm-btn--sm" style="width:100%;"
+            data-lead-win="${escapeHtml(l.id)}">Won — make them a client</button>
         </article>`;
       }
 
@@ -929,6 +937,13 @@
           title: o.name || "Unnamed",
           sub: `${escapeHtml(o.kind || "client")} · ${escapeHtml(o.status || "active")}`,
           body: `
+            ${o.fromLeadId ? `<div class="bm-drawer-sec">
+              <h4>Where they came from</h4>
+              <p class="bm-hint">Came in as a lead${o.source ? ` via <strong>${escapeHtml(SOURCE_LABEL[o.source] || o.source)}</strong>` : ""}, and was won.
+                 The lead is kept rather than deleted: its first-response time is the single most valuable
+                 number in the business and cannot be recreated once it is gone.</p>
+            </div>` : ""}
+
             <div class="bm-drawer-sec">
               <h4>Where this client is</h4>
               <ol class="bm-flow">
@@ -1037,6 +1052,9 @@
                   ${["signed", "proposed", "none"].map((s) => `<option value="${s}" ${(o.retainerStatus || "none") === s ? "selected" : ""}>${s}</option>`).join("")}
                 </select>
                 <button type="button" class="bm-btn bm-btn--sm" data-org-save="${escapeHtml(o.id)}">Save retainer</button>
+                ${Number(o.retainer) > 0 ? `<button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-r-toggle="${escapeHtml(o.id)}">
+                  ${o.retainerStatus === "signed" ? "Mark back to proposed" : "Mark signed"}
+                </button>` : ""}
                 <button type="button" class="bm-btn bm-btn--ghost bm-btn--sm" data-org-archive="${escapeHtml(o.id)}">
                   ${o.status === "archived" ? "Restore" : "Archive"}
                 </button>
@@ -1755,18 +1773,25 @@
            is derived by createEngagement() from rules the studio already
            follows, and the live preview at the bottom states exactly what is
            about to be created before anything is. */
-        engagement: () => {
+        engagement: (opts = {}) => {
+          /* Optionally opened FROM a lead. When it is, the name arrives filled
+             in and the submit routes through convertLead(), which closes and
+             links the lead in the same action — so winning a deal is one
+             button and one form, not two records to keep in step by hand. */
+          const lead = opts.lead || null;
           let deal = "then";
           const money = (v) => "Rs " + (Number(v) || 0).toLocaleString("en-IN");
 
           modal({
-            title: "New engagement",
-            note: "Four answers. The client, the projects, the 50/50 invoices and the schedule are all created from them.",
+            title: lead ? `Win ${lead.name || "this lead"}` : "New engagement",
+            note: lead
+              ? "The lead's name, contact and source carry across. It comes off the board marked won, pointing at the client it became — its first-response time is kept, because that number is never recreatable."
+              : "Four answers. The client, the projects, the 50/50 invoices and the schedule are all created from them.",
             submitLabel: "Create engagement",
             body: `
               <div class="bm-field">
                 <label for="f-e-name">Client</label>
-                <input id="f-e-name" placeholder="Nalanda Interiors" required />
+                <input id="f-e-name" placeholder="Nalanda Interiors" value="${escapeHtml(lead?.name || "")}" required />
               </div>
 
               <div class="bm-field">
@@ -1858,7 +1883,7 @@
             },
 
             onSubmit: async () => {
-              const r = await createEngagement({
+              const payload = {
                 name: $("f-e-name").value,
                 deal,
                 price: $("f-e-price").value,
@@ -1866,7 +1891,15 @@
                 retainer: $("f-e-retainer").value,
                 retainerSigned: $("f-e-signed").checked,
                 type: $("f-e-type").value || null,
-              });
+              };
+              const r = lead
+                ? await convertLead(lead.id, payload)
+                : await createEngagement(payload);
+              if (lead) {
+                await logActivity("lead.won",
+                  `${lead.name || lead.id} became a client — ${SOURCE_LABEL[lead.source] || lead.source || "source not set"}`,
+                  { orgId: r.orgId, target: lead.name || lead.id });
+              }
               await logActivity("engagement.create",
                 `New ${DEAL_TYPES.find((d) => d.id === deal).label.toLowerCase()}: ${$("f-e-name").value.trim()}`,
                 { orgId: r.orgId, target: $("f-e-name").value.trim() });
@@ -2061,6 +2094,17 @@
             return refresh();
           }
           if (d.leadLose) { btn.disabled = true; await updateLead(d.leadLose, { stage: "lost" }); return refresh(); }
+
+          /* Won. Opens the SAME New engagement form the Clients section uses,
+             with the lead's name already in it — so there is one form to learn
+             rather than two — and routes the submit through convertLead() so
+             the lead is closed and linked in the same action. */
+          if (d.leadWin) {
+            const lead = S.leads.find((l) => l.id === d.leadWin);
+            if (!lead) return;
+            if (lead.orgId) { alert("That lead has already become a client."); return; }
+            return NEW_FORMS.engagement({ lead });
+          }
           if (d.leadReopen) { btn.disabled = true; await updateLead(d.leadReopen, { stage: "inbound", lossReason: null }); return refresh(); }
           if (d.leadDel) {
             if (!confirm("Delete this lead? Its first-response time goes with it.")) return;
@@ -2216,6 +2260,20 @@
             }
             btn.disabled = false;
             return;
+          }
+          /* One click, one field. The rule that matters still holds: only
+             `signed` counts towards break-even, and this is exactly what the
+             button sets — so making it one click makes the number MORE likely
+             to be true, not less. */
+          if (d.rToggle) {
+            const o = S.orgById[d.rToggle];
+            btn.disabled = true;
+            const to = await toggleRetainerSigned(o);
+            await logActivity("retainer.set",
+              `${o?.name || d.rToggle}: retainer ${formatINR(o?.retainer || 0)} marked ${to}`,
+              { orgId: d.rToggle, target: o?.name || d.rToggle, amount: Number(o?.retainer) || 0 });
+            closeOverlay();
+            return refresh();
           }
           if (d.orgArchive) {
             const o = S.orgById[d.orgArchive];

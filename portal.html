@@ -341,15 +341,25 @@
           if (!el) return;
           const kit = brandKit(o);
           if (!kit) { el.innerHTML = ""; return; }
-          const link = (url, label) => {
-            const safe = safeUrl(url);
-            return safe
+          /* safeUrl() is called INSIDE the link attribute, not hoisted into a
+             variable first. Deliberate, and not style: tests/scope.test.mjs
+             scans this file for interpolated link attributes and fails any
+             that does not literally contain safeUrl(. A hoisted variable
+             passes the guard at runtime while defeating the textual check —
+             which is exactly how an unguarded one would get in later behind a
+             rename. The double call is a tiny pure function; the mechanical
+             guarantee is worth more.
+
+             (Do not write the scanned pattern out in prose anywhere in this
+             file. The first version of this comment did, and the scanner
+             matched the comment.) */
+          const link = (url, label) =>
+            safeUrl(url)
               ? `<div class="bm-row">
                    <span class="bm-row-title">${escapeHtml(label)}</span>
-                   <a class="bm-link" href="${escapeHtml(safe)}" target="_blank" rel="noopener">Open</a>
+                   <a class="bm-link" href="${escapeHtml(safeUrl(url))}" target="_blank" rel="noopener">Open</a>
                  </div>`
               : "";
-          };
           el.innerHTML = `
             <p class="bm-eyebrow" style="margin-top:22px;">Your brand kit</p>
             ${link(kit.logo, "Logo")}

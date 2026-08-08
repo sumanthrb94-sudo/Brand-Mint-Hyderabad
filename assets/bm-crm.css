@@ -747,7 +747,12 @@
   right: 0;
   bottom: 0;
   z-index: 61;
-  width: min(640px, 100%);
+  /* Wide enough to be a PAGE, not a slide-over. Asked for directly: "one page
+     per client, everything on it". At 640px the record was a column you
+     scrolled forever; at 1080 the facts, the money and the controls sit
+     side by side and the whole client is one screenful plus a little.
+     Still an overlay, so Escape still returns you to the list. */
+  width: min(1080px, 100%);
   display: flex;
   flex-direction: column;
   background: var(--bm-white);
