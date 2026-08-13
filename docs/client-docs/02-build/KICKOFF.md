@@ -62,7 +62,7 @@ We'll send instructions. These stay yours — you're never locked to us.
 3. Final invoice, payment clears
 4. We point your domain at the store and go live
 5. You get a walkthrough video, documentation, and every login
-6. 30 days of bug warranty starts
+6. The bug warranty starts — {{WARRANTY_DAYS}} days (30 on Starter and Growth, **60 on Commerce**)
 
 ## Things that commonly cause delay
 

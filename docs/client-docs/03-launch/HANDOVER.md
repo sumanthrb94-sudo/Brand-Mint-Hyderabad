@@ -62,7 +62,7 @@ Not covered: new features, content changes, changes made by others, third-party 
 
 **Care Plan — ₹12,500/month.** Hosting managed, security updates, backups, uptime monitoring, small fixes. Someone answers when something breaks.
 
-Without a plan, support is ₹{{RATE}}/hour with no guaranteed response time.
+Without a plan, support is quoted per request as a fixed scope, with no guaranteed response time. We do not bill by the hour — you get a price before the work starts, never an invoice after it.
 
 ## If something breaks at 11pm
 

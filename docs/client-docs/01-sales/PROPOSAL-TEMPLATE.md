@@ -39,9 +39,25 @@ Timelines run from the deposit clearing and your materials arriving. Delays on e
 |---|---|
 | {{TIER_NAME}} | ₹{{AMOUNT}} |
 | {{ADD_ON}} | ₹{{AMOUNT}} |
-| **Subtotal** | **₹{{AMOUNT}}** |
-| GST 18% | ₹{{AMOUNT}} |
 | **Total** | **₹{{AMOUNT}}** |
+
+All amounts are exclusive of GST at 18%.
+
+<!-- DO NOT ADD A "GST 18%" ROW AND A GST-INCLUSIVE TOTAL UNTIL BRAND MINT IS
+     ACTUALLY GST REGISTERED.
+
+     Quoting a tax we cannot then invoice is not a rounding detail. It bills
+     the client 18% we are not entitled to collect, and it denies them the
+     input credit they believe they are buying — so they pay more and can
+     claim less. Saying "exclusive of 18% GST" is accurate today; printing a
+     GST amount and a total that includes it is not.
+
+     When registration completes: put the real GSTIN into the studio record on
+     Money -> Payment details. Invoices will start heading themselves Tax
+     Invoice and printing it. Then restore the GST row here, and settle the
+     invoice arithmetic at the same time - assets/bm-invoice.js deliberately
+     does not compute GST yet, because api/payments/verify.js requires the
+     Razorpay charge to equal invoice.amount exactly. -->
 
 **Payment:** 50% to begin, 50% on completion and sign-off, before go-live.
 
@@ -65,7 +81,7 @@ These are set up in your name so you own them. Billed by the provider, not by us
 
 ## After launch
 
-30-day bug warranty included. After that, a Care Plan from ₹12,500/month keeps the store patched, backed up, monitored, and supported. Optional, cancel with 30 days' notice.
+{{WARRANTY_DAYS}}-day bug warranty included — 30 days on Starter and Growth, **60 on Commerce**. After that, a Care Plan from ₹12,500/month keeps the store patched, backed up, monitored, and supported. Optional, cancel with 30 days' notice.
 
 ## Next step
 

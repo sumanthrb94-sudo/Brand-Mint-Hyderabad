@@ -2,6 +2,16 @@
 
 Internal. Never send this.
 
+> **The app already tracks this, and it is the source of truth.** `/studio` →
+> Money lists every invoice ever raised, and *Record payment* takes the **total
+> received** so a part payment is a real number rather than a guess. Keeping a
+> second running total here is how the two end up disagreeing, and then neither
+> can be trusted against a bank statement.
+>
+> Use this sheet for what the app deliberately does not hold: the chase
+> sequence below, and the notes at the bottom — who promised what, and when.
+> Those are a record of a conversation, not of money.
+
 | # | Milestone | Amount | Invoice sent | Due | Cleared | Days late |
 |---|---|---|---|---|---|---|
 | 1 | Deposit 50% | ₹{{N}} | | | | |

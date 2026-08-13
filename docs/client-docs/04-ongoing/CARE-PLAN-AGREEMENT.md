@@ -34,7 +34,7 @@ Response means we've picked it up and told you what's happening. Not that it's f
 - Fixing problems caused by changes made by the Client or others
 - Marketing, ads, SEO campaigns
 
-Quoted separately at ₹{{RATE}}/hour or as a project.
+Quoted separately as a fixed scope before the work begins. This plan is a defined scope of work, not an hourly bucket — so nothing here is measured against a timesheet, and anything outside it gets a price rather than a running meter.
 
 ## 4. Payment
 

@@ -40,6 +40,35 @@ Enquiry
   → PAYMENT CLEARS  ← go-live only here
   → DNS switch, launch
   → Handover pack + walkthrough video
-  → 30-day warranty
+  → Warranty: 30 days, or 60 on Commerce
   → Care Plan starts
 ```
+
+## Where the numbers come from
+
+Prices, lengths, warranties, add-ons, care plans and the client-responsibilities
+list all live in one place — `TIERS`, `CARE_PLANS`, `ADD_ONS` and
+`CLIENT_PROVIDES` in `assets/bm-app.js` — and `tests/tiers.test.mjs` restates
+them independently so a change in one place fails the suite rather than passing
+silently. Fill these templates from there, not from memory.
+
+The client-responsibilities list in particular must match `CLIENT_PROVIDES`
+exactly: the SOW says the delivery date extends day for day while any of it is
+outstanding, and the portal raises that same list as dated intake the moment an
+engagement is created. If the two ever disagree, the portal is chasing things
+the client never agreed to — and not chasing the ones they did.
+
+## Two things stay blank on purpose
+
+- **The supplier GSTIN.** Brand Mint is not GST registered yet, so it is left
+  off the document entirely rather than filled with a placeholder. A tax number
+  on a signed agreement that does not exist is a false statement, not a draft.
+  Prices are still written as exclusive of 18% GST — that is what the client
+  will owe once registration completes. The proposal deliberately shows no GST
+  row and no GST-inclusive total for the same reason: quoting a tax we cannot
+  then invoice bills the client 18% we may not collect and denies them the
+  input credit they think they are buying.
+- **Anything that would be a client credential.** Every access request is
+  worded as *add hello@brandmintstudios.in to your own account*. Never ask a
+  client for a password, an API key or a dashboard login — if one landed in
+  this system, one breach would become their breach.
