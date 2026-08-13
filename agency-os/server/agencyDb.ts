@@ -17,7 +17,9 @@ export type OnboardingInput = {
   companyName: string;
   email: string;
   phone?: string;
-  serviceType: "website" | "internal_tool" | "brand_identity" | "performance_media" | "ecommerce";
+  serviceType: "ecommerce";
+  serviceTier: "starter_store" | "growth_store" | "commerce_store";
+  selectedAddons?: ("android_app" | "additional_payment_gateway" | "extra_design_revision")[];
   preferredTimeline?: string;
   projectBrief: string;
   deliverables?: string;
@@ -57,6 +59,8 @@ export async function createCompletedOnboarding(input: OnboardingInput) {
     clientId: client.id,
     clientContactId: contact.id,
     serviceType: input.serviceType,
+    serviceTier: input.serviceTier,
+    selectedAddons: input.selectedAddons?.length ? JSON.stringify(input.selectedAddons) : null,
     preferredTimeline: input.preferredTimeline?.trim() || null,
     projectBrief: input.projectBrief.trim(),
     deliverables: input.deliverables?.trim() || null,

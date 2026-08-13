@@ -8,6 +8,7 @@ import { AdminGuard } from "@/components/AdminGuard";
 import Home from "@/pages/Home";
 import LegalPage from "@/pages/LegalPage";
 import Onboarding from "@/pages/Onboarding";
+import PublicHome from "@/pages/PublicHome";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -15,7 +16,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={PublicHome} />
+      <Route path="/admin" component={() => <AdminGuard><Home /></AdminGuard>} />
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/portal" component={ClientPortal} />
       <Route path="/operations" component={() => <AdminGuard><AdminWorkspace /></AdminGuard>} />
@@ -23,6 +25,8 @@ function Router() {
       <Route path="/terms" component={() => <LegalPage type="terms" />} />
       <Route path="/privacy" component={() => <LegalPage type="privacy" />} />
       <Route path="/cookies" component={() => <LegalPage type="cookies" />} />
+      <Route path="/refund-policy" component={() => <LegalPage type="refund" />} />
+      <Route path="/shipping-policy" component={() => <LegalPage type="shipping" />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

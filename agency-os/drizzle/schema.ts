@@ -39,6 +39,8 @@ export const onboardingSubmissions = mysqlTable("onboardingSubmissions", {
   clientId: int("clientId").notNull().references(() => clients.id),
   clientContactId: int("clientContactId").notNull().references(() => clientContacts.id),
   serviceType: mysqlEnum("serviceType", ["website", "internal_tool", "brand_identity", "performance_media", "ecommerce"]).notNull(),
+  serviceTier: mysqlEnum("serviceTier", ["starter_store", "growth_store", "commerce_store"]),
+  selectedAddons: text("selectedAddons"),
   preferredTimeline: varchar("preferredTimeline", { length: 256 }),
   projectBrief: text("projectBrief").notNull(),
   deliverables: text("deliverables"),

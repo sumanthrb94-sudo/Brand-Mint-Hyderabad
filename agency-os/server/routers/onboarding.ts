@@ -3,12 +3,14 @@ import { notifyOwner } from "../_core/notification";
 import { publicProcedure, router } from "../_core/trpc";
 import { createCompletedOnboarding, createNotification, REQUIRED_POLICY_TYPES } from "../agencyDb";
 
-const onboardingSchema = z.object({
+export const onboardingSchema = z.object({
   name: z.string().trim().min(1).max(256),
   companyName: z.string().trim().min(1).max(256),
   email: z.string().trim().email().max(320),
   phone: z.string().trim().max(48).optional(),
-  serviceType: z.enum(["website", "internal_tool", "brand_identity", "performance_media", "ecommerce"]),
+  serviceType: z.literal("ecommerce"),
+  serviceTier: z.enum(["starter_store", "growth_store", "commerce_store"]),
+  selectedAddons: z.array(z.enum(["android_app", "additional_payment_gateway", "extra_design_revision"])).optional(),
   preferredTimeline: z.string().trim().max(256).optional(),
   projectBrief: z.string().trim().min(1).max(10000),
   deliverables: z.string().trim().max(10000).optional(),

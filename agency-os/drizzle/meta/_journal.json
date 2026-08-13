@@ -15,6 +15,13 @@
       "when": 1786633631768,
       "tag": "0001_cultured_hardball",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786639509546,
+      "tag": "0002_tan_thunderbolts",
+      "breakpoints": true
     }
   ]
 }

@@ -1,8 +1,9 @@
 import { BrandMark } from "@/components/BrandMark";
+import { PublicMotion } from "@/components/PublicMotion";
 import { AlertTriangle, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 
-type PolicyType = "terms" | "privacy" | "cookies";
+type PolicyType = "terms" | "privacy" | "cookies" | "refund" | "shipping";
 
 const policyDetails: Record<PolicyType, { title: string; sections: { heading: string; body: string }[] }> = {
   terms: {
@@ -29,12 +30,28 @@ const policyDetails: Record<PolicyType, { title: string; sections: { heading: st
       { heading: "Policy maintenance", body: "The policy must be updated when analytics, advertising, support, authentication or other embedded services change their browser-storage behavior." },
     ],
   },
+  refund: {
+    title: "Refund Policy",
+    sections: [
+      { heading: "Working draft", body: "This policy requires legal review before publication. The final version must state the client’s statutory rights, the merchant’s eligibility rules, exclusion categories, return or inspection requirements, refunds timetable, and the payment method used for approved refunds." },
+      { heading: "Ecommerce delivery scope", body: "For an ecommerce-store engagement, the Growth Store tier may include a returns and refunds flow and Razorpay refund processing. The client’s final published policy content remains subject to its own business operations and legal sign-off." },
+      { heading: "Operational alignment", body: "A store’s customer-facing refund policy, admin returns workflow, order status definitions, and payment-provider processing must align before launch." },
+    ],
+  },
+  shipping: {
+    title: "Shipping Policy",
+    sections: [
+      { heading: "Working draft", body: "This policy requires legal review before publication. The final version must specify shipping locations, processing times, delivery estimates, shipping charges, tracking availability, address-change rules, and the handling of failed or delayed deliveries." },
+      { heading: "Ecommerce delivery scope", body: "Starter Store supports an admin-entered courier and tracking number. Growth Store may include courier API integration and live customer tracking through a supported courier provider." },
+      { heading: "Operational alignment", body: "The client’s approved shipping policy must match the couriers, regions, fulfilment process and customer communications used by the live store." },
+    ],
+  },
 };
 
 export default function LegalPage({ type }: { type: PolicyType }) {
   const policy = policyDetails[type];
   return (
-    <main className="min-h-screen bg-[#f6f8f4] px-5 py-5 sm:px-8 sm:py-8">
+    <main className="min-h-screen bg-[#f7f1e6] px-5 py-5 sm:px-8 sm:py-8"><PublicMotion />
       <div className="mx-auto max-w-[800px]"><header className="flex items-center justify-between border-b border-[#dbe9e2] pb-5"><Link href="/"><BrandMark /></Link><Link href="/onboarding" className="text-xs font-bold text-[#315347] underline-offset-4 hover:underline">Client onboarding</Link></header>
         <article className="py-14 sm:py-20"><Link href="/" className="inline-flex items-center gap-2 text-xs font-bold text-[#59776b] hover:text-[#0d8855]"><ArrowLeft className="h-3.5 w-3.5" />Return to overview</Link><p className="eyebrow mt-10">Brand Mint Studios</p><h1 className="mt-4 font-display text-5xl tracking-[-0.06em] text-[#103328] sm:text-6xl">{policy.title}</h1>
           <div className="mt-8 flex gap-3 rounded-2xl border border-[#f1dcad] bg-[#fff8e8] p-4 text-sm leading-6 text-[#795b22]"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><p><strong>Working draft.</strong> This content is not formal legal advice and requires review by qualified counsel before publication or reliance.</p></div>

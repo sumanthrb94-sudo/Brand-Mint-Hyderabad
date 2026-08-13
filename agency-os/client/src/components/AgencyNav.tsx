@@ -5,7 +5,7 @@ import { Link, useLocation } from "wouter";
 import { BrandMark } from "./BrandMark";
 
 const navigation = [
-  { label: "Overview", href: "/", icon: LayoutDashboard },
+  { label: "Overview", href: "/admin", icon: LayoutDashboard },
   { label: "Client onboarding", href: "/onboarding", icon: Users },
   { label: "Projects", href: "/deliverables", icon: ClipboardList },
   { label: "Invoices", href: "/operations", icon: ReceiptText },
@@ -28,7 +28,7 @@ export function AgencyNav() {
       <nav className="mt-12 space-y-1" aria-label="Operations navigation">
         {navigation.map((item) => {
           const Icon = item.icon;
-          const active = item.href === "/" ? location === "/" : location.startsWith(item.href.replace("/#", "/"));
+          const active = item.href === "/admin" ? location === "/admin" : location.startsWith(item.href.replace("/#", "/"));
           return (
             <Link key={item.label} href={item.href} className={`agency-nav-item ${active ? "is-active" : ""}`}>
               <Icon className="h-4 w-4" strokeWidth={1.8} />

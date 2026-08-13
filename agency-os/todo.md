@@ -17,6 +17,39 @@
 - [x] Document the user-selected provider-independent operating model, including the CEO’s manual email and e-signature responsibilities.
 - [x] Defer any future transactional-email or managed e-signature connection until the user selects and approves a provider account and credentials.
 - [x] Verify responsive UI, accessibility, legal-gate behavior, and key workflows visually before delivery.
-- [ ] Commit and synchronize the completed project to the connected GitHub repository.
+- [x] Commit and synchronize the completed project to the connected GitHub repository.
 - [x] Connect the CEO KPI cards and onboarding page to the implemented live procedures before confirming the dashboard and onboarding features as complete.
 - [x] Verify the legal policy routes and UI files in the completed project before the final checkpoint.
+- [x] Inspect the connected Vercel availability and repository configuration for a compatible Agency OS deployment.
+- [x] Do not deploy `manus/brand-mint-agency-os` to Vercel because the user selected branch-only delivery and no compatible dedicated Vercel target is authorized.
+- [x] Preserve the Agency OS as a GitHub-branch-only delivery; do not create, replace, or modify any Vercel project.
+- [x] Investigate the reported Vercel production mismatch, including unexpected website content, data-platform references, and the source deployment branch.
+- [x] Restore the intended prior production experience or remove unintended content only after the user confirms the verified corrective target.
+- [x] Add selective Framer Motion transitions for meaningful page, panel, modal, and feedback states in the Agency OS.
+- [x] Add Lenis only for public editorial onboarding and policy pages, while retaining native scrolling for dense CEO and client dashboard surfaces.
+- [x] Refine Agency OS interaction surfaces, hierarchy, loading states, and empty states using the existing Tailwind and shadcn/ui foundation.
+- [x] Verify motion and Lenis behavior at desktop/mobile breakpoints, including reduced-motion accessibility.
+- [x] Run independent end-to-end validation passes for source provenance, backend procedures, deployment state, and responsive UI without changing Vercel production.
+- [x] Present a verified explanation for the unexpected Supabase/Firestore references and the live production source branch before proposing any correction.
+- [x] Compare `claude/new-session-glceza` and `manus/brand-mint-agency-os` across actual code, UI, data/auth architecture, operational workflows, testing, and production suitability.
+- [x] Preserve both branches and propose a finalization plan only after presenting the verified comparison to the user.
+- [x] Identify the immediately prior verified Claude production deployment and obtain explicit confirmation of its deployment ID before restoring production.
+- [x] Restore only the confirmed Claude deployment to Vercel production; leave `manus/brand-mint-agency-os` unchanged.
+- [x] Verify Vercel production now resolves to `dpl_9f8i9yZw5qGsJcsCro7RuGdQ72iz` / commit `811c8cb32db98c0e6e3cd214e8e7732a083f7848` after the promotion.
+- [x] Verify that `manus/brand-mint-agency-os` received no commits or branch modifications during the production restoration.
+- [x] Produce a detailed, evidence-based comparison of the Claude and Manus branches across scope, UI, architecture, data/authentication, testing, deployment behavior, and operational risks without changing either branch.
+- [x] Replace all non-ecommerce public service categories with the confirmed Starter Store, Growth Store, and Commerce Store tiers, including their fixed prices, timelines, and 18% GST disclosure.
+- [x] Add the confirmed care plans, add-ons, client-provided inputs, client-paid accounts, excluded work, and commercial terms to the public ecommerce journey.
+- [x] Replace onboarding service selection with the confirmed ecommerce tiers and add-on choices; remove unapproved service options.
+- [x] Align legal-policy references and public copy with ecommerce scope, including Privacy, Terms, Refund, and Shipping policy requirements as working drafts pending legal review.
+- [x] Add the confirmed ecommerce Refund and Shipping policy draft routes, each marked for legal review before publication.
+- [x] Keep Razorpay references limited to the confirmed ecommerce scope; do not create payment links, charge customers, or enable a new payment flow without a separate approved integration step.
+- [x] Build a cream-led public Brand Mint ecommerce homepage with hero, confirmed store tiers, care plans, scope, process, FAQ, and project enquiry; exclude unapproved selected-work content.
+- [x] Add a responsive public navigation with clear routes into project onboarding, client portal, and secure CEO/admin access.
+- [x] Apply selective Framer Motion animation and a Lenis layer only to public editorial pages, preserving reduced-motion support and native dashboard scrolling.
+- [x] Preserve owner-based OAuth as the secure admin test path; do not add a default or hard-coded admin username/password.
+- [x] Validate public-homepage, onboarding, client portal, and CEO access journeys at desktop and mobile breakpoints.
+- [x] Unify the public, onboarding, portal, and CEO access surfaces around the approved Brand Mint wordmark asset.
+- [x] Do not add a Selected work section because the client-confirmed scope authorizes ecommerce services only and does not approve case-study content for this page.
+- [x] Add a direct project-enquiry capture section to the public homepage and revalidate it at desktop and mobile breakpoints.
+- [ ] Commit and push the final ecommerce-aligned Agency OS update to `manus/brand-mint-agency-os` for user-controlled production testing.
