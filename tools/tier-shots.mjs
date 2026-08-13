@@ -191,6 +191,26 @@ try {
   await page.keyboard.press("Escape");
   await page.waitForTimeout(500);
 
+  /* The payee panel only renders once a studio organisation exists — before
+     that it correctly says there is nowhere to keep the details rather than
+     showing a form that writes nothing. Create one so the GSTIN field is
+     actually visible in the shot.
+
+     NO REAL DETAILS. The bank fields and the GSTIN are left empty on purpose:
+     this PNG is committed to a public repository, and the whole point of
+     keeping those in Firestore is that they never appear in one. */
+  await page.evaluate(async () => {
+    const m = await import("/assets/bm-app.js");
+    const orgs = await m.getAllOrgs();
+    if (!orgs.some((o) => o.kind === "studio")) {
+      await m.createOrg({
+        name: "Brand Mint Studios", kind: "studio", status: "active",
+        retainer: 0, retainerStatus: "none",
+      });
+    }
+  });
+  await page.waitForTimeout(1200);
+
   /* Money — the 50/50 invoices the tier raised, and the GSTIN field that stays
      empty until registration completes. */
   await goStudio(page, "money");
