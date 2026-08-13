@@ -2,7 +2,7 @@ import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
-import type { Request } from "express";
+import type { IncomingHttpHeaders } from "node:http";
 
 export type FirebaseAgencyUser = {
   id: string;
@@ -75,7 +75,7 @@ export async function resolveFirebaseUser(token: DecodedIdToken): Promise<Fireba
   return user;
 }
 
-export async function authenticateFirebaseRequest(req: Request): Promise<FirebaseAgencyUser | null> {
+export async function authenticateFirebaseRequest(req: { headers: IncomingHttpHeaders }): Promise<FirebaseAgencyUser | null> {
   const authorization = req.headers.authorization;
   const token = authorization?.startsWith("Bearer ") ? authorization.slice(7) : null;
   if (!token) return null;

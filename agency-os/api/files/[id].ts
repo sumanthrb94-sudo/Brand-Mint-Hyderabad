@@ -1,8 +1,8 @@
-import type { Request, Response } from "express";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { authenticateFirebaseRequest } from "../../server/firebase";
 import { filterRecords, getSignedFileUrl } from "../../server/firebaseRepository";
 
-export default async function fileHandler(req: Request, res: Response) {
+export default async function fileHandler(req: VercelRequest, res: VercelResponse) {
   try {
     const user = await authenticateFirebaseRequest(req);
     if (!user) return res.status(401).json({ error: "Authentication is required" });

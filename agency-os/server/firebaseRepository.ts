@@ -1,4 +1,4 @@
-import { Timestamp, type DocumentData } from "firebase-admin/firestore";
+import type { DocumentData, QueryDocumentSnapshot } from "firebase-admin/firestore";
 import { firebaseDb, firebaseStorage, makeNumericId } from "./firebase";
 
 export const COLLECTIONS = {
@@ -15,8 +15,12 @@ export const COLLECTIONS = {
   notifications: "notifications",
 } as const;
 
+function hasFirestoreDate(value: unknown): value is { toDate: () => Date } {
+  return Boolean(value && typeof value === "object" && "toDate" in value && typeof (value as { toDate?: unknown }).toDate === "function");
+}
+
 function normalize(value: unknown): unknown {
-  if (value instanceof Timestamp) return value.toDate();
+  if (hasFirestoreDate(value)) return value.toDate();
   if (Array.isArray(value)) return value.map(normalize);
   if (value && typeof value === "object") {
     return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, child]) => [key, normalize(child)]));
@@ -32,7 +36,9 @@ export function fromSnapshot<T extends { id: number }>(snapshot: { id: string; d
 
 export async function listRecords<T extends { id: number }>(collection: keyof typeof COLLECTIONS): Promise<T[]> {
   const snapshot = await firebaseDb().collection(COLLECTIONS[collection]).get();
-  return snapshot.docs.map((document) => fromSnapshot<T>(document)).filter((record): record is T => Boolean(record));
+  return snapshot.docs
+    .map((document: QueryDocumentSnapshot<DocumentData>) => fromSnapshot<T>(document))
+    .filter((record: T | undefined): record is T => Boolean(record));
 }
 
 export async function getRecord<T extends { id: number }>(collection: keyof typeof COLLECTIONS, id: number): Promise<T | undefined> {
