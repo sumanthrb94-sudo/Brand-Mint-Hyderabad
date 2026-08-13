@@ -1550,7 +1550,7 @@ export async function markLeadFirstResponse(id) {
  */
 export const DEAL_TYPES = [
   { id: "oneoff", label: "One-time project", build: true, retainer: false,
-    blurb: "A build, 50% up front and 50% at launch. Nothing after." },
+    blurb: "A build, 50% to start and 50% on completion. Nothing after." },
   { id: "then", label: "Project, then retainer", build: true, retainer: true,
     blurb: "The build, then a monthly retainer starting at launch." },
   { id: "retainer", label: "Retainer only", build: false, retainer: true,
