@@ -161,25 +161,48 @@ gap is visible without being counted.
 
 ## A. Taking on a client
 
-One screen, four answers. It replaced seven steps across three pages, which is
+One screen, three answers. It replaced seven steps across three pages, which is
 why it kept getting abandoned halfway.
 
 1. **Clients → New engagement** (the same button is on Delivery).
 2. **Name them, then pick the deal** — One-time project · Project then retainer ·
    Retainer only. The form asks only for what that shape needs.
-3. **Price and weeks.** One number each. Optionally pick the kind of work, which
-   stamps a milestone schedule for free.
-4. **Read the preview.** It writes out exactly what is about to be created — the
-   build, both invoice dates and amounts, and the monthly run rate while it runs.
-   If that sentence is wrong, fix it before submitting rather than after.
-5. **Create.** One submit makes the client, the project, the agreed scope line,
-   the 50% now / 50% at launch invoices, and the schedule.
+3. **Pick the tier.** Starter ₹99,000 · 8 weeks, Growth ₹2,00,000 · 12 weeks,
+   Commerce ₹3,00,000 · 12+ weeks. **You do not type a price or a length** — the
+   tier carries both, which is the entire reason tiers exist. Tick any add-ons.
+4. **Pick the care plan** if the deal has a retainer — Care ₹12,500, Growth
+   ₹25,000, Managed Commerce ₹50,000 a month.
+5. **Read the preview.** It writes out exactly what is about to be created — the
+   tier and any add-ons, the total, both invoice dates and amounts, how many
+   milestones will be stamped and how many things will be raised with the
+   client. If that sentence is wrong, fix it before submitting rather than after.
+6. **Create.** One submit makes the client, the project, the agreed scope lines,
+   the 50% to start / 50% on completion invoices, the full milestone schedule,
+   and the seven things you need **from them**, dated from today.
 
-The scope becomes **one** line, not an invented four-phase breakdown — a
+> **Negotiated a different number?** There is a collapsed *Negotiated a different
+> price or length?* section. Leave it alone and the tier's published price and
+> length are used. Anything typed there wins, and applies to the tier line only —
+> add-ons keep their published prices.
+
+The tier becomes **one** scope line, plus one line per add-on. Not a breakdown of
+the tier's own sections: nobody agreed what share of ₹99,000 is "Checkout", and a
 breakdown nobody agreed to is fiction with a progress bar attached. Refine it on
 `/quote` when a real one exists.
 
 No path through this form marks a retainer signed unless you tick the box.
+
+### What the client sees straight away
+
+Creating the engagement raises the client's own list as **intake** — product
+photography, descriptions, brand assets, GST details, policy sign-off, UAT
+sign-off. They appear on their portal under *What we need from you*, dated, and
+they start ageing immediately.
+
+That matters more than it looks. The terms say delays in client input extend the
+timeline day for day; the intake list is what makes that clause a visible fact
+rather than an argument eight weeks later. Two milestones are also owned by the
+client — the asset handover and the 5-day UAT window — for the same reason.
 
 ---
 
@@ -212,9 +235,9 @@ account.
 
 | Deal | Build | Retainer | What Delivery shows |
 |---|---|---|---|
-| One-time | yes, 50/50 | none, by agreement | % delivered, from the scope |
-| Then retainer | yes, 50/50 | starts at launch | % delivered, then ongoing |
-| Retainer only | no | the whole engagement | **Ongoing** — no end date, by design |
+| One-time | a tier, 50/50 | none, by agreement | % delivered, from the scope |
+| Then retainer | a tier, 50/50 | a care plan, from launch | % delivered, then ongoing |
+| Retainer only | no | a care plan, the whole engagement | **Ongoing** — no end date, by design |
 
 A retainer engagement is never nagged about missing milestones. It does not have
 any and is not supposed to.

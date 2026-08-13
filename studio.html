@@ -194,6 +194,8 @@
         daysSince, formatDate, formatINR, formatDuration, minutesBetween, minutesSince,
         escapeHtml, safeUrl,
         BREAK_EVEN_MONTHLY, SERVICE_TYPES, RETIRED_SERVICE_TYPES, isRetiredType, MILESTONE_TEMPLATES,
+        TIERS, tier, tierIncludes, CARE_PLANS, carePlan, carePlanIncludes, CARE_NOTICE_DAYS,
+        ADD_ONS, addOn, CLIENT_PROVIDES, CLIENT_PAID_ACCOUNTS, NOT_INCLUDED, warrantyDaysFor,
         LEAD_STAGES, OPEN_LEAD_STAGES, FUNNEL_TARGETS, LEAD_SOURCES, LOSS_REASONS,
         FAST_RESPONSE_MINUTES, MARKET_MEDIAN_RESPONSE_HOURS,
         SCOPE_STATUS, SCOPE_STATUS_IDS,
@@ -202,7 +204,7 @@
         DEAL_TYPES, createEngagement, monthlyIncome, projectRunRate, projectMode,
         invoiceReceived, invoiceOutstanding, invoiceState, recordPayment,
         deleteClient, setClientUser as grantLogin, invoiceRef, updateScopeLine,
-        studioOrg, studioPayee, saveStudioPayee,
+        studioOrg, studioPayee, saveStudioPayee, studioGstin, saveStudioGstin, isGstin,
         CLIENT_STAGES, clientStage, brandKit, saveBrandKit, parseBrandColors,
         markAgreementSigned, clearAgreementSigned, saveClientContact,
         saveProjectUpdate, updatableProjects, waNumber, waLink, updateMessage,
@@ -1496,10 +1498,22 @@
                 <label for="f-bank-name">Bank</label>
                 <input id="f-bank-name" value="${escapeHtml(studio.bankName || "")}" placeholder="Your bank" />
               </div>
+              <div class="bm-field">
+                <label for="f-gstin">GSTIN</label>
+                <input id="f-gstin" autocapitalize="characters" spellcheck="false" maxlength="15"
+                  value="${escapeHtml(studio.gstin || "")}" placeholder="Leave blank until registration completes" />
+                <span class="bm-row-sub">Your published prices are exclusive of GST. Until a real
+                  GSTIN is entered here, invoices are headed <em>Invoice</em> and carry no tax
+                  number — a plausible-looking one on a financial document is a false statement to
+                  a client, not a placeholder.</span>
+              </div>
               <button type="button" class="bm-btn bm-btn--sm" data-save-payee="${escapeHtml(studio.id)}">Save payment details</button>
               <p class="bm-status" id="bm-payee-status" hidden></p>
               <p class="bm-hint" style="margin-top:10px;">
-                ${payee ? "Invoices are printing these." : "Incomplete — invoices are printing no payment block at all, which is better than printing a half-filled one."}
+                ${payee ? "Invoices are printing your payment details." : "Payment details incomplete — invoices are printing no payment block at all, which is better than printing a half-filled one."}
+                ${studioGstin(studio)
+                  ? " Invoices are headed <strong>Tax Invoice</strong> and print your GSTIN."
+                  : " No GSTIN set, so invoices print none."}
               </p>`
               : `<p class="bm-empty">No studio organisation exists yet, so there is nowhere to keep these.
                    Seed the database once from Tools, or add an organisation with kind
@@ -1881,13 +1895,15 @@
              button and one form, not two records to keep in step by hand. */
           const lead = opts.lead || null;
           let deal = "then";
+          let tierId = "starter";
+          let careId = "care";
           const money = (v) => "Rs " + (Number(v) || 0).toLocaleString("en-IN");
 
           modal({
             title: lead ? `Win ${lead.name || "this lead"}` : "New engagement",
             note: lead
               ? "The lead's name, contact and source carry across. It comes off the board marked won, pointing at the client it became — its first-response time is kept, because that number is never recreatable."
-              : "Four answers. The client, the projects, the 50/50 invoices and the schedule are all created from them.",
+              : "A name, a deal and a tier. The price, the length, the 50/50 invoices, the schedule and the client's own to-do list all follow from those.",
             submitLabel: "Create engagement",
             body: `
               <div class="bm-field">
@@ -1906,28 +1922,55 @@
 
               <div id="f-e-build">
                 <div class="bm-field">
-                  <label for="f-e-price">Project price (Rs, before GST)</label>
-                  <input id="f-e-price" type="number" min="0" step="5000" placeholder="600000" />
+                  <label>Tier</label>
+                  <div class="bm-seg bm-seg--wrap" id="f-e-tier" role="group" aria-label="Tier">
+                    ${TIERS.map((t) => `<button type="button" data-tier="${escapeHtml(t.id)}"
+                       aria-pressed="${t.id === "starter"}">${escapeHtml(t.label)} · ${escapeHtml(money(t.price))} · ${t.weeks}${t.weeksNote ? "+" : ""} wk</button>`).join("")}
+                  </div>
+                  <span class="bm-row-sub" id="f-e-tier-blurb"></span>
                 </div>
+
                 <div class="bm-field">
-                  <label for="f-e-weeks">Length (weeks)</label>
-                  <input id="f-e-weeks" type="number" min="1" max="52" value="10" />
+                  <label>Add-ons</label>
+                  ${ADD_ONS.map((a) => `<label class="bm-mn-check" style="margin-bottom:6px;">
+                      <input type="checkbox" class="f-e-addon" value="${escapeHtml(a.id)}" />
+                      ${escapeHtml(a.label)} — ${escapeHtml(money(a.price))}
+                    </label>`).join("")}
                 </div>
-                <div class="bm-field">
-                  <label for="f-e-type">Kind of work (optional — stamps a schedule)</label>
-                  <select id="f-e-type">
-                    <option value="">Not set</option>
-                    ${SERVICE_TYPES.map((t) => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.label)}</option>`).join("")}
-                  </select>
-                </div>
+
+                <details id="f-e-adjust">
+                  <summary class="bm-row-sub" style="cursor:pointer;">Negotiated a different price or length?</summary>
+                  <div class="bm-field" style="margin-top:10px;">
+                    <label for="f-e-price">Project price (Rs, before GST)</label>
+                    <input id="f-e-price" type="number" min="0" step="5000" />
+                  </div>
+                  <div class="bm-field">
+                    <label for="f-e-weeks">Length (weeks)</label>
+                    <input id="f-e-weeks" type="number" min="1" max="52" />
+                  </div>
+                  <p class="bm-hint">Blank means the tier's own published price and length are used.
+                     Anything typed here wins, and applies to the tier line only — add-ons keep
+                     their published prices.</p>
+                </details>
               </div>
 
               <div id="f-e-ret">
                 <div class="bm-field">
-                  <label for="f-e-retainer">Monthly retainer (Rs)</label>
-                  <input id="f-e-retainer" type="number" min="0" step="500" placeholder="25000" />
+                  <label>Care plan</label>
+                  <div class="bm-seg bm-seg--wrap" id="f-e-care" role="group" aria-label="Care plan">
+                    ${CARE_PLANS.map((p) => `<button type="button" data-care="${escapeHtml(p.id)}"
+                       aria-pressed="${p.id === "care"}">${escapeHtml(p.label)} · ${escapeHtml(money(p.monthly))}/mo</button>`).join("")}
+                  </div>
+                  <span class="bm-row-sub" id="f-e-care-blurb"></span>
                 </div>
-                <label class="bm-mn-check" style="margin-bottom:6px;">
+                <details>
+                  <summary class="bm-row-sub" style="cursor:pointer;">Different monthly amount?</summary>
+                  <div class="bm-field" style="margin-top:10px;">
+                    <label for="f-e-retainer">Monthly retainer (Rs)</label>
+                    <input id="f-e-retainer" type="number" min="0" step="500" />
+                  </div>
+                </details>
+                <label class="bm-mn-check" style="margin:10px 0 6px;">
                   <input type="checkbox" id="f-e-signed" /> Already signed
                 </label>
                 <p class="bm-hint">Unticked it is recorded as <strong>proposed</strong> and counts as nothing.
@@ -1938,26 +1981,47 @@
 
             onReady: (form) => {
               const shape = () => DEAL_TYPES.find((d) => d.id === deal);
+              const chosenAddOns = () =>
+                [...form.querySelectorAll(".f-e-addon:checked")].map((c) => addOn(c.value)).filter(Boolean);
+
+              /* One place that works out what will actually be created, used by
+                 both the preview and the submit. Two copies of this arithmetic
+                 is how a preview starts describing something other than what
+                 the button does. */
+              const figures = () => {
+                const t = tier(tierId);
+                const priceIn = Number(form.querySelector("#f-e-price").value) || 0;
+                const weeksIn = Number(form.querySelector("#f-e-weeks").value) || 0;
+                const base = priceIn || t?.price || 0;
+                const wk = weeksIn || t?.weeks || 0;
+                const extras = chosenAddOns();
+                const total = base + extras.reduce((n, a) => n + a.price, 0);
+                const retIn = Number(form.querySelector("#f-e-retainer").value) || 0;
+                const plan = carePlan(careId);
+                return { t, base, wk, extras, total, ret: retIn || plan?.monthly || 0, plan };
+              };
+
               const preview = () => {
                 const sh = shape();
+                const f = figures();
                 const name = form.querySelector("#f-e-name").value.trim() || "This client";
-                const price = Number(form.querySelector("#f-e-price").value) || 0;
-                const wk = Number(form.querySelector("#f-e-weeks").value) || 0;
-                const ret = Number(form.querySelector("#f-e-retainer").value) || 0;
                 const signed = form.querySelector("#f-e-signed").checked;
-                const end = new Date(Date.now() + wk * 7 * 86400000);
+                const end = new Date(Date.now() + f.wk * 7 * 86400000);
                 const bits = [];
-                if (sh.build && price > 0 && wk > 0) {
-                  bits.push(`a <strong>${escapeHtml(money(price))}</strong> build over <strong>${wk} weeks</strong>`);
-                  bits.push(`invoices ${escapeHtml(money(Math.round(price / 2)))} now and ${escapeHtml(money(price - Math.round(price / 2)))} due ${escapeHtml(end.toLocaleDateString("en-IN", { day: "numeric", month: "short" }))}`);
-                  bits.push(`about <strong>${escapeHtml(money(Math.round(price / Math.max(1, (wk * 5) / 21.7))))}/month</strong> while it runs`);
+                if (sh.build && f.total > 0 && f.wk > 0) {
+                  bits.push(`<strong>${escapeHtml(f.t?.label || "a build")}</strong> at ${escapeHtml(money(f.base))} over <strong>${f.wk} weeks</strong>`);
+                  if (f.extras.length) {
+                    bits.push(`plus ${f.extras.map((a) => `${escapeHtml(a.label)} (${escapeHtml(money(a.price))})`).join(" and ")} — <strong>${escapeHtml(money(f.total))}</strong> in total`);
+                  }
+                  bits.push(`invoices ${escapeHtml(money(Math.round(f.total / 2)))} now and ${escapeHtml(money(f.total - Math.round(f.total / 2)))} on completion, due ${escapeHtml(end.toLocaleDateString("en-IN", { day: "numeric", month: "short" }))}`);
+                  if (f.t) bits.push(`a ${MILESTONE_TEMPLATES[f.t.id]?.length || 0}-milestone schedule and ${CLIENT_PROVIDES.length} things raised with the client`);
                 }
-                if (sh.retainer && ret > 0) {
-                  bits.push(`a ${escapeHtml(money(ret))}/month retainer, <strong>${signed ? "signed" : "proposed"}</strong>${signed ? "" : " — not counted yet"}`);
+                if (sh.retainer && f.ret > 0) {
+                  bits.push(`${f.plan ? `the <strong>${escapeHtml(f.plan.label)}</strong> plan at ` : "a retainer of "}${escapeHtml(money(f.ret))}/month, <strong>${signed ? "signed" : "proposed"}</strong>${signed ? "" : " — not counted yet"}`);
                 }
                 form.querySelector("#f-e-preview").innerHTML = bits.length
                   ? `Creates <strong>${escapeHtml(name)}</strong> with ${bits.join(", ")}.`
-                  : "Fill in the amounts and this will say exactly what it is about to create.";
+                  : "Pick a tier and this will say exactly what it is about to create.";
               };
 
               const sync = () => {
@@ -1968,6 +2032,18 @@
                 form.querySelectorAll("#f-e-deal button").forEach((b) => {
                   b.setAttribute("aria-pressed", String(b.dataset.deal === deal));
                 });
+                form.querySelectorAll("#f-e-tier button").forEach((b) => {
+                  b.setAttribute("aria-pressed", String(b.dataset.tier === tierId));
+                });
+                form.querySelectorAll("#f-e-care button").forEach((b) => {
+                  b.setAttribute("aria-pressed", String(b.dataset.care === careId));
+                });
+                const t = tier(tierId);
+                form.querySelector("#f-e-tier-blurb").textContent =
+                  t ? `${t.blurb}${t.weeksNote ? ` ${t.weeksNote}.` : ""} ${t.warrantyDays}-day bug warranty.` : "";
+                const plan = carePlan(careId);
+                form.querySelector("#f-e-care-blurb").textContent =
+                  plan ? `${carePlanIncludes(plan.id).join(" · ")}. Cancel with ${CARE_NOTICE_DAYS} days' notice.` : "";
                 preview();
               };
 
@@ -1975,6 +2051,20 @@
                 const b = e.target.closest("[data-deal]");
                 if (!b) return;
                 deal = b.dataset.deal;
+                mo.tap(b);
+                sync();
+              });
+              form.querySelector("#f-e-tier").addEventListener("click", (e) => {
+                const b = e.target.closest("[data-tier]");
+                if (!b) return;
+                tierId = b.dataset.tier;
+                mo.tap(b);
+                sync();
+              });
+              form.querySelector("#f-e-care").addEventListener("click", (e) => {
+                const b = e.target.closest("[data-care]");
+                if (!b) return;
+                careId = b.dataset.care;
                 mo.tap(b);
                 sync();
               });
@@ -1991,7 +2081,9 @@
                 weeks: $("f-e-weeks").value,
                 retainer: $("f-e-retainer").value,
                 retainerSigned: $("f-e-signed").checked,
-                type: $("f-e-type").value || null,
+                type: tierId || null,
+                carePlan: careId || null,
+                addOns: [...document.querySelectorAll(".f-e-addon:checked")].map((c) => c.value),
               };
               const r = lead
                 ? await convertLead(lead.id, payload)
@@ -2495,13 +2587,22 @@
           /* --- invoices --- */
           if (d.savePayee) {
             btn.disabled = true;
+            /* Read every field BEFORE anything async: refresh() rebuilds this
+               whole panel, and reading afterwards would read the new inputs. */
+            const bank = {
+              bankHolder: $("f-bank-holder").value,
+              bankAccount: $("f-bank-account").value,
+              bankIfsc: $("f-bank-ifsc").value,
+              bankName: $("f-bank-name").value,
+            };
+            const gstinIn = $("f-gstin")?.value || "";
             try {
-              await saveStudioPayee(d.savePayee, {
-                bankHolder: $("f-bank-holder").value,
-                bankAccount: $("f-bank-account").value,
-                bankIfsc: $("f-bank-ifsc").value,
-                bankName: $("f-bank-name").value,
-              });
+              /* The GSTIN goes first, because it is the one that can be
+                 rejected. Saving the bank details first would leave them
+                 written while the button reports a failure — the operation
+                 would be half-done and the message would say it was not. */
+              const savedGstin = await saveStudioGstin(d.savePayee, gstinIn);
+              await saveStudioPayee(d.savePayee, bank);
               /* Not logged to the activity feed. The log is admin-readable and
                  append-only, so writing an account number into it would put a
                  permanent, uneditable copy of it in a second place for no gain. */
@@ -2510,7 +2611,9 @@
               if (st) {
                 st.hidden = false;
                 st.className = "bm-status bm-status--ok";
-                st.textContent = "Saved. Every invoice you open from now on carries these.";
+                st.textContent = savedGstin
+                  ? "Saved. Invoices are now headed Tax Invoice and carry your GSTIN."
+                  : "Saved. Every invoice you open from now on carries these.";
               }
             } catch (err) {
               btn.disabled = false;
@@ -2523,7 +2626,10 @@
 
           if (d.invDoc) {
             const i = S.invoices.find((x) => x.id === d.invDoc);
-            if (i) openInvoice(i, S.orgById[i.orgId], { payee: studioPayee(studioOrg(S.orgs)) });
+            if (i) {
+              const st = studioOrg(S.orgs);
+              openInvoice(i, S.orgById[i.orgId], { payee: studioPayee(st), gstin: studioGstin(st) });
+            }
             return;
           }
 

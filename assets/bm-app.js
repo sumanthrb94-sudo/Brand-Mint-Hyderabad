@@ -558,40 +558,292 @@ export function probeProjectAccess(projectId) {
 // studio that has not been hired — it is a target, not this month's bar.
 export const BREAK_EVEN_MONTHLY = 100000;
 
-// priceFloor is the published "from" price. These six are verified to match
-// both the live marketing site and brand-mint-admin/03-SERVICE-CATALOG.md
-// exactly, so they are safe to hardcode. Add-on prices are NOT hardcoded —
-// see FEATURE_CATALOG.
-/* TWO SERVICE LINES. It was seven.
+/* The studio's own day rate. It prices nothing a client sees any more — the
+ * tiers below are fixed prices, not day counts — but it is still the number
+ * that converts a fixed-price add-on into a length, and it is the number a
+ * change order is argued from.
  *
- * Brand system, Performance media, SEO & content engine, AI integration and
- * Internal build were retired — not because the work stopped, but because they
- * were headline CATEGORIES rather than things a buyer asks for. The studio's
- * own homepage has always said one sentence: custom websites and bespoke
- * internal tools. The service list now says the same.
- *
- * Nothing became unsellable. Every retired line still ships inside one of the
- * two: brand and SEO are part of a website build, AI and automation are the
- * high end of an internal tool. The catalog in bm-catalog.js still prices all
- * 43 features, including the ₹2,00,000 brand system and the ₹1,50,000
- * internal copilot.
- *
- * THE FLOORS CHANGED BECAUSE THE OLD ONES CONTRADICTED THE CATALOG.
- * A floor exists to stop work that is not worth starting, not to advertise a
- * price. The old website floor of ₹2,00,000 was 20 days, which is above every
- * website bundle the catalog can assemble except a full shop — so /quote
- * priced a brochure site at ₹40,000 while /services claimed ₹2,00,000. The old
- * internal-tool floor of ₹4,00,000 was 40 days, and nothing in the catalog
- * reaches it: the largest single tool is the ₹1,50,000 copilot.
- *
- * The new floors sit on real catalog bundles at the live ₹10,000 day rate:
- *   site  ₹80,000  = 8 days  = dynamic site + SEO + images
- *   tool  ₹1,00,000 = 10 days = CRM / pipeline, the smallest full system
- */
-export const SERVICE_TYPES = [
-  { id: "site", label: "Custom website", priceFloor: 80000, recurring: false },
-  { id: "tool", label: "Custom internal tool", priceFloor: 100000, recurring: false },
+ * It lives here, not in a generated catalog file. The previous copy was
+ * emitted from an external `commerce-skeleton` repo that nothing else in this
+ * deployment reads, and a second copy in `brand-mint-admin/finance/
+ * pricing-calculator.md` says ₹25,000 — 2.5× this one. A number that exists in
+ * three places with two values is not a source of truth. */
+export const DAY_RATE = 10000;
+
+/* ══════════════════════════════════════════════════════════════════
+   ONE THING IS SOLD: AN ECOMMERCE STORE, IN THREE TIERS
+
+   This studio used to publish seven service lines, then two. It now sells one
+   product at three depths. That is not a narrowing of ambition, it is the
+   difference between a menu and an offer: a buyer choosing between "Custom
+   website" and "AI integration" is being asked to design their own engagement,
+   which is the studio's job, not theirs.
+
+   THE PRICE AND THE LENGTH ARE PART OF THE PRODUCT, NOT AN ESTIMATE.
+   Every previous model here derived a price — days × day rate × a scale
+   multiplier — which meant the number a client saw depended on which screen
+   produced it, and /quote and /services disagreed by 5× at one point. A tier
+   has ONE price and ONE length, written down once, here. Picking a tier on
+   /studio fills both in, so there is no screen left on which they can drift.
+
+   `weeksNote` exists only for Commerce, whose published length is "12+". That
+   plus is real — depth beyond Growth is scoped per store — so `weeks` carries
+   the floor of 12 and the note carries the honesty. Nothing invents a 13.
+
+   WHAT `includes` IS AND IS NOT
+   Tier 2 and 3 are published as "everything in the tier below, plus …", so
+   they are modelled that way: `inherits` names the tier below and `adds` lists
+   only what is new. tierIncludes() walks the chain. Duplicating the full list
+   into each tier would guarantee that one day Growth silently stops including
+   something Starter does.
+
+   These lists are quotable — they are what the client agreed to — but they are
+   NOT priced individually and must never be. Apportioning ₹99,000 across six
+   sections would invent a number for "Checkout & Payments" that nobody agreed
+   to, and then hang a progress bar off it. The tier is one agreed line of
+   money (see createEngagement); the sections drive the SCHEDULE, which is a
+   shape the client did agree to.
+   ══════════════════════════════════════════════════════════════════ */
+export const TIERS = [
+  {
+    id: "starter",
+    label: "Starter Store",
+    price: 99000,
+    weeks: 8,
+    warrantyDays: 30,
+    blurb: "A complete, working online store. Everything needed to take orders and get paid.",
+    adds: [
+      { group: "Foundation", items: [
+        "Database design and setup",
+        "Customer accounts — phone OTP login and signup",
+        "Deployment, domain connection, SSL",
+      ] },
+      { group: "Storefront", items: [
+        "Homepage and design system",
+        "Product listing pages",
+        "Product detail pages",
+        "Search and category filters",
+        "Cart",
+      ] },
+      { group: "Checkout & payments", items: [
+        "Checkout flow",
+        "Razorpay integration — online payments and COD",
+        "Payment confirmation and webhook handling",
+      ] },
+      { group: "Orders", items: [
+        "Order placement and confirmation",
+        "Order confirmation emails to customer",
+        "Shipping — admin enters courier and tracking number manually",
+        "Customer order history",
+      ] },
+      { group: "Admin", items: [
+        "Admin dashboard — view and manage orders",
+        "Product management — add, edit, remove",
+        "Stock levels and out-of-stock handling",
+      ] },
+      { group: "Compliance & launch", items: [
+        "GST tax invoice PDF",
+        "Legal pages — Privacy Policy, Terms, Refund Policy, Shipping Policy",
+        "On-page SEO setup",
+        "Automated smoke tests (Playwright)",
+        "5-day client testing window (UAT) before launch",
+        "Handover — walkthrough video and documentation",
+        "30-day bug warranty",
+      ] },
+    ],
+  },
+  {
+    id: "growth",
+    label: "Growth Store",
+    price: 200000,
+    weeks: 12,
+    warrantyDays: 30,
+    inherits: "starter",
+    blurb: "Everything in Starter, plus the systems that reduce daily manual work.",
+    adds: [
+      { group: "Shipping & returns", items: [
+        "Courier API integration (Shiprocket / Delhivery)",
+        "Live tracking for customers",
+        "Returns and refunds flow",
+        "Refund processing through Razorpay",
+      ] },
+      { group: "Selling", items: [
+        "Coupons and discount codes",
+        "Abandoned cart recovery emails",
+        "Transactional emails across the full order lifecycle",
+      ] },
+      { group: "Admin", items: [
+        "Full admin dashboard with sales reporting",
+        "Inventory rules and low-stock alerts",
+        "Internal support inbox — customer messages handled by your team",
+      ] },
+      { group: "Quality & data", items: [
+        "Full end-to-end test suite (Playwright) running on every deploy",
+        "Analytics — GA4, Meta Pixel, conversion tracking",
+        "Full SEO audit and Lighthouse performance pass",
+      ] },
+    ],
+  },
+  {
+    id: "commerce",
+    label: "Commerce Store",
+    price: 300000,
+    weeks: 12,
+    weeksNote: "12+ weeks — depth beyond Growth is scoped per store",
+    warrantyDays: 60,
+    inherits: "growth",
+    blurb: "Everything in Growth, plus depth for stores with a team and volume.",
+    adds: [
+      { group: "Access & reporting", items: [
+        "Role-based admin access (staff, manager, owner)",
+        "Advanced reporting and data exports",
+      ] },
+      { group: "Customer features", items: [
+        "Product reviews and ratings",
+        "Wishlist",
+        "Loyalty or referral programme",
+      ] },
+      { group: "Scale", items: [
+        "Performance budgets enforced in CI",
+        "60-day bug warranty",
+      ] },
+    ],
+  },
 ];
+
+/** A tier by id, or null. */
+export function tier(id) {
+  return TIERS.find((t) => t.id === id) || null;
+}
+
+/**
+ * Everything a tier includes, resolved down the inheritance chain, oldest
+ * tier first. Groups with the same name merge, so Growth's "Admin" additions
+ * sit under the same heading as Starter's rather than opening a second one.
+ */
+export function tierIncludes(id) {
+  const chain = [];
+  for (let t = tier(id); t; t = t.inherits ? tier(t.inherits) : null) chain.unshift(t);
+  const groups = [];
+  chain.forEach((t) => {
+    (t.adds || []).forEach((g) => {
+      const found = groups.find((x) => x.group === g.group);
+      if (found) found.items.push(...g.items);
+      else groups.push({ group: g.group, items: [...g.items] });
+    });
+  });
+  return groups;
+}
+
+/* Monthly care plans. A store does not stop needing attention at launch, and
+ * "call me when it breaks" is how a studio ends up doing unpaid work forever.
+ *
+ * Each plan is a DEFINED SCOPE OF WORK, not an hourly bucket — the difference
+ * matters commercially and it matters here: a bucket has to be tracked against
+ * hours, and time tracking is on §10's do-not-build list. A defined scope
+ * needs no timesheet to be honest.
+ *
+ * These are retainers, so everything §4 says about retainers applies: created
+ * `proposed`, and only `signed` is ever money. */
+export const CARE_PLANS = [
+  { id: "care", label: "Care", monthly: 12500,
+    adds: ["Hosting, SSL, security updates", "Backups and uptime monitoring", "Small fixes"] },
+  { id: "growth-care", label: "Growth", monthly: 25000, inherits: "care",
+    adds: ["Content updates", "Monthly report", "One small feature per month"] },
+  { id: "managed", label: "Managed Commerce", monthly: 50000, inherits: "growth-care",
+    adds: ["Catalogue operations", "Campaign management", "Priority support"] },
+];
+
+export const CARE_NOTICE_DAYS = 30;
+
+export function carePlan(id) {
+  return CARE_PLANS.find((p) => p.id === id) || null;
+}
+
+/** Everything a care plan covers, resolved down the chain. */
+export function carePlanIncludes(id) {
+  const out = [];
+  for (let p = carePlan(id); p; p = p.inherits ? carePlan(p.inherits) : null) out.unshift(...p.adds);
+  return out;
+}
+
+/* Add-ons. Priced, and deliberately priced in DAYS TOO.
+ *
+ * `days` is not a second opinion about the price — it is the price divided by
+ * the studio's own ₹10,000 day rate, which is what makes an add-on weighable
+ * against the tier it is bolted onto. scopeProgress() weights by days, so an
+ * add-on with no days would either count as half the job or as none of it.
+ * Deriving rather than hardcoding means the two can never disagree. */
+export const ADD_ONS = [
+  { id: "android", label: "Android app", price: 50000,
+    note: "The store packaged as an Android app from the same codebase, plus Play Store listing, assets, declarations and submission. Review timing is Google's and outside our control." },
+  { id: "gateway", label: "Additional payment gateway", price: 25000, note: null },
+  { id: "revision", label: "Extra design revision round", price: 15000, note: null },
+];
+
+/** An add-on's length in days, derived from the published day rate so a price
+ *  and a schedule can never drift apart. */
+export function addOnDays(item) {
+  const price = Number(item?.price) || 0;
+  return Math.max(1, Math.round(price / DAY_RATE));
+}
+
+export function addOn(id) {
+  return ADD_ONS.find((a) => a.id === id) || null;
+}
+
+/* What the client owes us before we can start, and what they buy in their own
+ * name. Both are published, and both earn their place in the product rather
+ * than only on a page:
+ *
+ *  - CLIENT_PROVIDES is raised as INTAKE the moment an engagement is created,
+ *    so the portal has something dated to chase from day one. That is the
+ *    single thing this whole product exists to do (§8 item 2), and until now
+ *    it depended on the admin remembering to type the list in.
+ *  - CLIENT_PAID_ACCOUNTS is stated so an invoice is never a surprise. These
+ *    are billed by the provider, not by us, and are set up in the client's
+ *    name so the client owns them.
+ */
+export const CLIENT_PROVIDES = [
+  { label: "Product photography", group: "assets" },
+  { label: "Product descriptions and copy", group: "content" },
+  { label: "Product data entry — we set up the structure and load a sample set", group: "content" },
+  { label: "Brand assets — logo, colours, fonts (if existing)", group: "assets" },
+  { label: "Business and GST details for invoicing", group: "decisions" },
+  { label: "Legal policy content sign-off", group: "decisions" },
+  { label: "Testing and sign-off within the 5-day UAT window", group: "decisions" },
+];
+
+export const CLIENT_PAID_ACCOUNTS = [
+  "Domain registration",
+  "Hosting / cloud (GCP or equivalent)",
+  "SMS / OTP credits",
+  "Razorpay transaction fees",
+  "Email service",
+  "Google Play developer account (if the app is included)",
+];
+
+/** Quoted separately if required. Published so a conversation about scope
+ *  starts from a written list rather than from a disagreement. */
+export const NOT_INCLUDED = [
+  "Marketplace integrations (Amazon, Flipkart)",
+  "Multi-vendor / marketplace functionality",
+  "Multi-currency or multi-language",
+  "Native mobile application (React Native)",
+  "Product photography or copywriting",
+  "Ongoing marketing, ads, or content",
+  "WhatsApp / AI chat automation",
+];
+
+/* The tiers ARE the service types — `project.type` stores a tier id, so one
+ * list feeds every picker, label and milestone template. Derived rather than
+ * written twice, because two lists of the same thing drift. */
+export const SERVICE_TYPES = TIERS.map((t) => ({
+  id: t.id,
+  label: t.label,
+  priceFloor: t.price,
+  recurring: false,
+}));
 
 /* Retired lines, kept ONLY so a project created under one still renders its
  * name instead of a blank.
@@ -602,8 +854,14 @@ export const SERVICE_TYPES = [
  * that resolves is the difference between "this was a brand engagement" and a
  * record that quietly lost a fact.
  *
+ * `site` and `tool` joined this list when the studio moved to tiers. They were
+ * live for the whole of the studio's history to date, so this is the entry
+ * that actually gets used.
+ *
  * Never offered in a picker. serviceTypeLabel() is the only way in. */
 export const RETIRED_SERVICE_TYPES = [
+  { id: "site", label: "Custom website" },
+  { id: "tool", label: "Custom internal tool" },
   { id: "brand", label: "Brand system" },
   { id: "media", label: "Performance media" },
   { id: "seo", label: "SEO & content engine" },
@@ -625,14 +883,42 @@ export function isRetiredType(id) {
   return RETIRED_SERVICE_TYPES.some((t) => t.id === id);
 }
 
-// Standing commercial terms. Every one of these is stated in the service
-// catalog — none is invented.
+/* Standing commercial terms. Every one of these is stated in the published
+ * services document — none is invented.
+ *
+ * TWO OF THESE CHANGED WITH THE TIERS AND BOTH MATTER COMMERCIALLY.
+ *
+ * `paymentSchedule` no longer says "50% at launch". It says 50% on
+ * COMPLETION, where completion means finished, tested and signed off on
+ * staging — and go-live follows the payment. Those are different events and
+ * the old wording put them in the wrong order: it made launch the trigger for
+ * the final invoice, which means handing over a live store and then asking to
+ * be paid for it. The store is the leverage; it should not be given away
+ * before the money arrives.
+ *
+ * `warrantyDays` is the Starter and Growth figure. Commerce carries 60, which
+ * is why warranty lives on the TIER as well — read it from there via
+ * warrantyDaysFor() rather than from this constant, which is only the default
+ * for an engagement with no tier recorded.
+ *
+ * GST is stated as "extra at 18%" because that is what the published pricing
+ * says and it is what the client will owe. That is NOT the same as claiming
+ * we can issue a GST invoice today: registration is in progress, so the
+ * GSTIN is read from Firestore and an invoice prints the tax block only when
+ * a real number is present. See studioGstin(). */
 export const SCOPE_TERMS = {
   warrantyDays: 30,
   reviewRoundsIncluded: 2,
   extraReviewRoundPrice: 15000,
-  paymentSchedule: "50% advance to start, 50% at launch",
-  gst: "GST extra",
+  paymentSchedule: "50% to start, 50% on completion — completion means finished, tested and signed off on staging. Go-live follows payment.",
+  gst: "GST extra at 18%",
+  gstRate: 0.18,
+  timelineRule:
+    "Timelines run from signed scope and receipt of client assets. Delays in client input or feedback extend the timeline day for day.",
+  uatRule:
+    "UAT covers defects against the agreed scope. New functionality identified during testing is quoted separately.",
+  ownershipRule:
+    "On final payment, all code, design files and accounts transfer to the client.",
   freeAfterLaunch: "Bugs — anything that does not behave as specified in this document — are fixed free for 30 days after launch.",
   chargeable: [
     "Design changes after sign-off",
@@ -643,6 +929,13 @@ export const SCOPE_TERMS = {
   chargeableRule:
     "Any of the above requires either a new fixed-scope contract or an open retainer. We will quote before starting, never after.",
 };
+
+/** How long bugs are fixed free, for a given tier. Commerce carries 60 days
+ *  where the others carry 30, so this reads the tier and falls back to the
+ *  standing term only when a project has no tier recorded. */
+export function warrantyDaysFor(typeId) {
+  return tier(typeId)?.warrantyDays ?? SCOPE_TERMS.warrantyDays;
+}
 
 // Add-on features. Deliberately NO prices here — a wrong number in a
 // client-facing quote is a direct financial loss, so prices are set once by
@@ -979,10 +1272,63 @@ export async function dedupeIntake(projectId) {
   return { removed: doomed.length, kept: byLabel.size };
 }
 
-// Milestone templates per service type. `offsetDays` is measured from a start
-// date the admin picks at apply time — no date is ever invented here, the
-// template only supplies the shape and the ownership split.
+/* Milestone templates per tier. `offsetDays` is measured from a start date the
+ * admin picks at apply time — no date is ever invented here, the template only
+ * supplies the shape and the ownership split.
+ *
+ * These span the tier's published length exactly: Starter's last milestone
+ * lands on day 56 (8 weeks), Growth's and Commerce's on day 84 (12 weeks). A
+ * template that overran its own quoted timeline would put every engagement
+ * into visible lateness on the day it was created.
+ *
+ * TWO MILESTONES ARE OWNED BY THE CLIENT AND BOTH ARE DELIBERATE.
+ * `owner: "client"` is what turns "the project is late" into "the project is
+ * late because we have been waiting nine days" (§6). The asset handover and
+ * the 5-day UAT window are exactly the two points where a store stalls on the
+ * client's desk, and the terms say so in writing: delays in client input
+ * extend the timeline day for day. Recording them as client-owned is how that
+ * clause becomes visible rather than something argued about later.
+ *
+ * The retired templates below are kept for the same reason RETIRED_SERVICE_TYPES
+ * is: an old project still opens its schedule. */
 export const MILESTONE_TEMPLATES = {
+  starter: [
+    { title: "Kickoff + scope sign-off", owner: "us", offsetDays: 3 },
+    { title: "Brand assets + product data supplied", owner: "client", offsetDays: 7 },
+    { title: "Design system + key screens", owner: "us", offsetDays: 14 },
+    { title: "Storefront — catalogue, search, cart", owner: "us", offsetDays: 28 },
+    { title: "Checkout, Razorpay + orders", owner: "us", offsetDays: 38 },
+    { title: "Admin, legal pages + SEO setup", owner: "us", offsetDays: 45 },
+    { title: "UAT — 5-day client testing window", owner: "client", offsetDays: 52 },
+    { title: "Launch + handover", owner: "us", offsetDays: 56 },
+  ],
+  growth: [
+    { title: "Kickoff + scope sign-off", owner: "us", offsetDays: 3 },
+    { title: "Brand assets + product data supplied", owner: "client", offsetDays: 7 },
+    { title: "Design system + key screens", owner: "us", offsetDays: 14 },
+    { title: "Storefront — catalogue, search, cart", owner: "us", offsetDays: 28 },
+    { title: "Checkout, Razorpay + orders", owner: "us", offsetDays: 40 },
+    { title: "Courier API, tracking + returns", owner: "us", offsetDays: 52 },
+    { title: "Coupons, abandoned cart + lifecycle emails", owner: "us", offsetDays: 60 },
+    { title: "Admin reporting, inventory + support inbox", owner: "us", offsetDays: 68 },
+    { title: "Analytics, SEO audit + full test suite", owner: "us", offsetDays: 75 },
+    { title: "UAT — 5-day client testing window", owner: "client", offsetDays: 80 },
+    { title: "Launch + handover", owner: "us", offsetDays: 84 },
+  ],
+  commerce: [
+    { title: "Kickoff + scope sign-off", owner: "us", offsetDays: 3 },
+    { title: "Brand assets + product data supplied", owner: "client", offsetDays: 7 },
+    { title: "Design system + key screens", owner: "us", offsetDays: 14 },
+    { title: "Storefront — catalogue, search, cart", owner: "us", offsetDays: 26 },
+    { title: "Checkout, Razorpay + orders", owner: "us", offsetDays: 36 },
+    { title: "Courier API, tracking + returns", owner: "us", offsetDays: 46 },
+    { title: "Coupons, abandoned cart + lifecycle emails", owner: "us", offsetDays: 54 },
+    { title: "Role-based admin + advanced reporting", owner: "us", offsetDays: 62 },
+    { title: "Reviews, wishlist + loyalty", owner: "us", offsetDays: 70 },
+    { title: "Analytics, SEO + performance budgets in CI", owner: "us", offsetDays: 76 },
+    { title: "UAT — 5-day client testing window", owner: "client", offsetDays: 81 },
+    { title: "Launch + handover", owner: "us", offsetDays: 84 },
+  ],
   site: [
     { title: "Mint workshop + IA brief", owner: "us", offsetDays: 7 },
     { title: "Content + assets supplied", owner: "client", offsetDays: 5 },
@@ -1257,28 +1603,6 @@ export function monthlyIncome({ orgs, projects, scopeByProject, orgById }) {
   return { retainer, project, total: retainer + project, liveBuilds, liveBuildValue: value, liveBuildDays: days };
 }
 
-/**
- * Start an engagement in ONE step.
- *
- * This exists because onboarding a client was seven steps across three
- * screens: add the client, add the project, go to /quote, build the scope,
- * save it to the project, come back, apply a milestone template. Every one of
- * those was a place to stop halfway, and people did.
- *
- * A name, a deal type, a price and a number of weeks is genuinely all the
- * information required — everything else here is derived from those four
- * answers, using rules the studio already follows:
- *
- *   - the scope becomes ONE agreed line. Not an invented four-phase
- *     breakdown: a breakdown nobody agreed to would be fiction with a
- *     progress bar attached. Refine it on /quote when there is a real one.
- *   - invoicing is 50/50 — advance now, balance at the end date — because
- *     that is what every Brand Mint contract says.
- *   - the retainer starts PROPOSED unless explicitly marked signed, so no
- *     path through this form can quietly inflate MRR.
- *
- * Returns the ids it created so the caller can open the record.
- */
 /* ── one-click state, instead of a form ───────────────────────────
    "I should be able to do it by sliding of a button or click of a button."
    These are deliberately thin: each is one field, flipped, with no other way
@@ -1355,20 +1679,74 @@ export async function convertLead(leadId, opts = {}) {
   return { ...out, leadId };
 }
 
+/**
+ * Start an engagement: organisation, project, scope, invoices, schedule and
+ * the client's own to-do list, in one submit.
+ *
+ * This exists because onboarding a client was seven steps across three
+ * screens: add the client, add the project, go to /quote, build the scope,
+ * save it to the project, come back, apply a milestone template. Every one of
+ * those was a place to stop halfway, and people did.
+ *
+ * The rules the studio already follows still hold, and are not relaxed by the
+ * form being faster:
+ *
+ *   - the tier becomes ONE agreed scope line, plus one line per add-on. Not
+ *     an invented breakdown of the tier's own sections: nobody agreed what
+ *     share of ₹99,000 is "Checkout", and a breakdown nobody agreed to is
+ *     fiction with a progress bar attached. Refine it on /quote when there is
+ *     a real one.
+ *   - invoicing is 50/50 — advance now, balance at completion — because that
+ *     is what every Brand Mint contract says.
+ *   - the retainer starts PROPOSED unless explicitly marked signed, so no
+ *     path through this form can quietly inflate MRR.
+ *
+ * Returns the ids it created so the caller can open the record.
+ *
+ * PICKING A TIER FILLS IN THE PRICE AND THE LENGTH.
+ * `price` and `weeks` are still accepted and still win when passed, because a
+ * negotiated deal is a real thing and a form that could not express one would
+ * push the studio back into editing records by hand afterwards. But neither is
+ * required any more: a tier carries both, so the ordinary case is a name, a
+ * tier and a date. That is the whole point of tiers — they were introduced to
+ * stop the same store being priced differently on two screens.
+ *
+ * ADD-ONS ARE THEIR OWN SCOPE LINES, NOT AN ADJUSTED TOTAL.
+ * Bolting ₹50,000 onto the tier price would lose the fact that an Android app
+ * was sold. Separate lines mean the invoice total is still right, the client's
+ * portal shows what they bought, and `scopeProgress()` can weight the app
+ * against the store instead of treating the whole engagement as one lump.
+ *
+ * THE CLIENT'S OWN LIST IS RAISED HERE, DATED, AT CREATION.
+ * CLIENT_PROVIDES becomes intake immediately. Until now the portal's central
+ * feature — "what we are waiting on you for, and since when" — depended on the
+ * admin remembering to type seven items in, and `tests/onboarding.mjs` found
+ * six perfectly-onboarded clients with nothing raised against any of them.
+ * The list is published and identical for every store, so there is nothing to
+ * decide and no reason for it to be a manual step.
+ */
 export async function createEngagement({
   name, deal, price, weeks, retainer, retainerSigned, type, startAt,
+  carePlan: carePlanId, addOns = [], raiseIntake = true,
 }) {
   const shape = DEAL_TYPES.find((d) => d.id === deal);
   if (!shape) throw new Error("Pick a deal type.");
   const clientName = String(name || "").trim();
   if (!clientName) throw new Error("Give the client a name.");
 
-  const money = Number(price) || 0;
-  const wk = Number(weeks) || 0;
-  if (shape.build && !(money > 0)) throw new Error("A project needs a price above zero.");
-  if (shape.build && !(wk > 0)) throw new Error("A project needs a length in weeks.");
-  const monthly = Number(retainer) || 0;
-  if (shape.retainer && !(monthly > 0)) throw new Error("A retainer needs a monthly amount above zero.");
+  // A tier supplies price and length; an explicit value still overrides it.
+  const picked = tier(type);
+  const money = Number(price) || picked?.price || 0;
+  const wk = Number(weeks) || picked?.weeks || 0;
+  if (shape.build && !(money > 0)) throw new Error("Pick a tier, or give the project a price above zero.");
+  if (shape.build && !(wk > 0)) throw new Error("Pick a tier, or give the project a length in weeks.");
+
+  // A care plan supplies the monthly amount the same way a tier supplies the
+  // price. Its status is still governed by the tick box below — §4 does not
+  // relax because the number came from a list instead of a keyboard.
+  const plan = carePlan(carePlanId);
+  const monthly = Number(retainer) || plan?.monthly || 0;
+  if (shape.retainer && !(monthly > 0)) throw new Error("Pick a care plan, or give the retainer a monthly amount above zero.");
 
   const orgId = await createOrg({
     name: clientName,
@@ -1386,7 +1764,9 @@ export async function createEngagement({
 
   const projectId = await createProject({
     orgId,
-    name: shape.build ? `${clientName} build` : `${clientName} retainer`,
+    // Named after what was sold, so a list of projects reads as a list of
+    // engagements rather than of the word "build" repeated.
+    name: picked ? `${clientName} — ${picked.label}` : shape.build ? `${clientName} build` : `${clientName} retainer`,
     type: type || null,
     dueAt: shape.build ? end : null,
     billable: true,
@@ -1397,18 +1777,49 @@ export async function createEngagement({
   // and the dashboard nags about its missing milestones forever — which is how
   // an action list stops being believed.
   await updateProject(projectId, { mode: shape.build ? "build" : "retainer" });
+  if (shape.retainer && plan) await updateDoc(doc(db, "organisations", orgId), { carePlan: plan.id });
 
   if (shape.build) {
-    await saveScope(projectId, [{
-      featureId: "agreed-build",
-      label: "Agreed build",
-      amount: money,
-      days: Math.round(wk * 5),
-    }]);
-    await createInvoice({ orgId, label: "50% advance", amount: Math.round(money / 2), dueAt: start });
-    await createInvoice({ orgId, label: "50% on launch", amount: money - Math.round(money / 2), dueAt: end });
+    /* The tier is one line. Each add-on is its own, priced as published and
+       lengthened at the day rate, so the total below is the sum of what was
+       actually sold rather than a number typed into a box. */
+    const chosen = (addOns || []).map((id) => addOn(id)).filter(Boolean);
+    const lines = [
+      {
+        featureId: "agreed-build",
+        label: picked ? picked.label : "Agreed build",
+        amount: money,
+        days: Math.round(wk * 5),
+      },
+      ...chosen.map((a) => ({
+        featureId: `addon-${a.id}`,
+        label: a.label,
+        amount: a.price,
+        days: addOnDays(a),
+      })),
+    ];
+    await saveScope(projectId, lines);
+
+    const total = lines.reduce((n, l) => n + l.amount, 0);
+    const half = Math.round(total / 2);
+    await createInvoice({ orgId, label: "50% to start", amount: half, dueAt: start });
+    await createInvoice({ orgId, label: "50% on completion", amount: total - half, dueAt: end });
+
     if (type && MILESTONE_TEMPLATES[type]) {
       await applyMilestoneTemplate(projectId, type, start.toISOString().slice(0, 10));
+    }
+
+    /* Raise the client's own list. This is the portal's reason to exist, and
+       leaving it to be typed in later is why six onboarded clients once had
+       nothing raised against any of them.
+
+       raisedAt is pinned to serverTimestamp() inside addIntakeItem(), which is
+       correct and load-bearing: the AGE of a blocker is what makes it move
+       (§6), and an age the studio could choose would mean nothing. */
+    if (raiseIntake) {
+      for (const item of CLIENT_PROVIDES) {
+        await addIntakeItem(projectId, { label: item.label, group: item.group });
+      }
     }
   }
 
@@ -1682,6 +2093,61 @@ export async function saveStudioPayee(orgId, { bankHolder, bankAccount, bankIfsc
     bankIfsc: String(bankIfsc || "").trim().toUpperCase(),
     bankName: String(bankName || "").trim(),
   });
+}
+
+/* ── The GSTIN, which does not exist yet ──────────────────────────
+   The published pricing says "exclusive of 18% GST" and the tiers promise the
+   CLIENT'S store a GST tax invoice PDF. Neither of those is a claim that Brand
+   Mint can issue a GST invoice today: registration is in progress, and until
+   it completes there is no GSTIN.
+
+   So the number is treated exactly like the bank account — read from Firestore
+   on the studio's own organisation document, absent from this public repo, and
+   NULL until it is real. The invoice omits the entire tax block when it is
+   null rather than printing a label with nothing after it, or worse, a
+   plausible-looking number.
+
+   That last part is not hypothetical here. The legacy `admin/` seed contains
+   an invented GSTIN and prints it on documents (§4). A fake tax number on an
+   invoice is not a placeholder — it is a false statement to a client, and it
+   denies them the input credit they think they are getting.
+
+   No GSTIN-shaped literal appears anywhere in this repository, including in
+   comments and in the hint below, and tests/tiers.test.mjs enforces that with
+   no exceptions. An example number in a placeholder is how a plausible one
+   ends up copied into a real field.
+
+   A GSTIN is 15 characters: 2 state code, 10 PAN, 1 entity, 1 'Z', 1 check.
+   The length and shape are checked so a half-typed number never reaches a
+   document; this validates FORM, not registration, and cannot tell a real
+   GSTIN from a well-formed invention. It is the last line of defence, not the
+   first — the first is not typing one in until it exists. */
+const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/;
+
+export function isGstin(value) {
+  return GSTIN_RE.test(String(value || "").trim().toUpperCase());
+}
+
+/** The studio's GSTIN, or null when it has not been set or is malformed.
+ *  Callers must treat null as "no tax block on this document" (§4). */
+export function studioGstin(org) {
+  const raw = String(org?.gstin || "").trim().toUpperCase();
+  return isGstin(raw) ? raw : null;
+}
+
+/** Save the GSTIN. Rejects anything that is not a well-formed GSTIN, and
+ *  accepts empty as a deliberate clear — there must be a way to remove a
+ *  number that was entered by mistake without editing the database by hand. */
+export async function saveStudioGstin(orgId, gstin) {
+  const raw = String(gstin || "").trim().toUpperCase();
+  if (raw && !isGstin(raw)) {
+    throw new Error(
+      "That is not a valid GSTIN. It is 15 characters: a 2-digit state code, " +
+      "your 10-character PAN, an entity digit, the letter Z, and a check character."
+    );
+  }
+  await updateDoc(doc(db, "organisations", orgId), { gstin: raw });
+  return raw || null;
 }
 
 /* ══════════════════════════════════════════════════════════════════

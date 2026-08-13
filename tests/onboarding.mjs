@@ -65,27 +65,56 @@ const step = (t) => process.stdout.write(`\n  \x1b[2m${t}\x1b[0m\n`);
 const client = (t) => process.stdout.write(`\n\x1b[1m${t}\x1b[0m\n`);
 
 /* ── the six engagements a new CEO would open ─────────────────────
-   Deliberately spread across all three deal shapes and both extremes of
-   price, because the cheap retainer-only client and the six-lakh build stress
-   completely different parts of the screen. */
+   Deliberately spread across all three deal shapes AND all three tiers,
+   because a Starter store on a one-off and a Commerce store with an Android
+   app stress completely different parts of the screen.
+
+   `tier` is the whole input for a build now. There is no price and no weeks
+   here for the ordinary cases, and that absence is the assertion: the tier
+   carries both, so the test knows the expected total only by looking the tier
+   up — exactly as the studio does. `price`/`weeks` appear on ONE fixture, to
+   prove the negotiated-deal override still works, and `retainer` on one, to
+   prove a care plan can be overridden by a typed amount. */
+
+/** The published tiers, restated here on purpose. If bm-app.js and this table
+ *  disagree, one of them changed without the other being considered — which is
+ *  the failure this catches. A test that imported the number it is checking
+ *  would assert only that arithmetic is deterministic. */
+const TIER_PRICE = { starter: 99000, growth: 200000, commerce: 300000 };
+const ADDON_PRICE = { android: 50000, gateway: 25000, revision: 15000 };
+const CARE_PRICE = { care: 12500, "growth-care": 25000, managed: 50000 };
 
 const CLIENTS = [
-  { name: "Nalanda Interiors",   user: "nalanda",   deal: "then",     price: 600000, weeks: 10, retainer: 25000, type: "site" },
-  { name: "Sarojini Exports",    user: "sarojini",  deal: "oneoff",   price: 400000, weeks: 6,  retainer: 0,     type: "site" },
-  { name: "Kaveri Clinic",       user: "kaveri",    deal: "retainer", price: 0,      weeks: 0,  retainer: 12500, type: "" },
-  /* Was type "brand". That line was retired when the seven service types
-     became two — brand work now ships INSIDE a website build rather than as a
-     headline service, so no new project can be typed "brand" and the New
-     engagement form no longer offers it.
-
-     The engagement is unchanged in every other respect; only the type it is
-     sold under moved. Leaving it as "brand" would have asserted that a service
-     the studio no longer offers still stamps a schedule, which is a test
-     describing a business that does not exist. */
-  { name: "Deccan Dental Group", user: "deccan",    deal: "then",     price: 250000, weeks: 4,  retainer: 15000, type: "site" },
-  { name: "Charminar Textiles",  user: "charminar", deal: "oneoff",   price: 180000, weeks: 3,  retainer: 0,     type: "tool" },
-  { name: "Golconda Coffee",     user: "golconda",  deal: "retainer", price: 0,      weeks: 0,  retainer: 8000,  type: "" },
+  { name: "Nalanda Interiors",   user: "nalanda",   deal: "then",     tier: "growth",   care: "growth-care" },
+  { name: "Sarojini Exports",    user: "sarojini",  deal: "oneoff",   tier: "starter" },
+  { name: "Kaveri Clinic",       user: "kaveri",    deal: "retainer", care: "care" },
+  { name: "Deccan Dental Group", user: "deccan",    deal: "then",     tier: "starter",  care: "care" },
+  /* The one that carries add-ons. Each is its own scope line, so this fixture
+     also proves the total is the sum of what was sold rather than a number
+     typed into a box. */
+  { name: "Charminar Textiles",  user: "charminar", deal: "oneoff",   tier: "commerce", addOns: ["android", "gateway"] },
+  /* Retainer-only on a NEGOTIATED monthly amount, below every published plan.
+     Proves the typed override still beats the picked plan. */
+  { name: "Golconda Coffee",     user: "golconda",  deal: "retainer", care: "care", retainer: 8000 },
 ];
+
+/** What this engagement should cost, worked out the way the studio would. */
+function expectedTotal(c) {
+  if (!c.tier) return 0;
+  return (c.price || TIER_PRICE[c.tier]) + (c.addOns || []).reduce((n, a) => n + ADDON_PRICE[a], 0);
+}
+
+/** How many scope lines it should have: the tier, plus one per add-on. */
+function expectedLines(c) {
+  return c.tier ? 1 + (c.addOns || []).length : 0;
+}
+
+/** The monthly retainer it should end up with: a typed amount wins over the
+ *  picked plan, exactly as createEngagement() resolves it. */
+function expectedRetainer(c) {
+  if (c.retainer) return c.retainer;
+  return c.care ? CARE_PRICE[c.care] : 0;
+}
 
 /* ── emulator plumbing ────────────────────────────────────────────── */
 
@@ -143,7 +172,9 @@ const readAll = (page) => page.evaluate(async () => {
   for (const p of projects) scope[p.id] = await m.getScope(p.id);
   const milestones = {};
   for (const p of projects) milestones[p.id] = await m.getMilestones(p.id);
-  return { orgs, projects, invoices, users, scope, milestones };
+  const intake = {};
+  for (const p of projects) intake[p.id] = await m.getIntake(p.id);
+  return { orgs, projects, invoices, users, scope, milestones, intake };
 });
 
 /* ── run ──────────────────────────────────────────────────────────── */
@@ -166,7 +197,12 @@ try {
   await signIn(admin, ADMIN.email, ADMIN.password);
 
   for (const c of CLIENTS) {
-    client(`${c.name} — ${c.deal}${c.price ? ` · Rs ${c.price.toLocaleString("en-IN")} / ${c.weeks}w` : ""}${c.retainer ? ` · Rs ${c.retainer.toLocaleString("en-IN")}/mo` : ""}`);
+    const banner = [
+      c.deal,
+      c.tier ? `${c.tier}${(c.addOns || []).length ? ` + ${c.addOns.join(" + ")}` : ""} · Rs ${expectedTotal(c).toLocaleString("en-IN")}` : null,
+      expectedRetainer(c) ? `Rs ${expectedRetainer(c).toLocaleString("en-IN")}/mo` : null,
+    ].filter(Boolean).join(" · ");
+    client(`${c.name} — ${banner}`);
 
     /* ── 1. open the engagement ─────────────────────────────────── */
     step("New engagement");
@@ -177,18 +213,38 @@ try {
     await admin.click(`[data-deal="${c.deal}"]`);
     await admin.waitForTimeout(250);
 
-    if (c.price) {
-      await admin.fill("#f-e-price", String(c.price));
-      await admin.fill("#f-e-weeks", String(c.weeks));
-      if (c.type) await admin.selectOption("#f-e-type", c.type).catch(() => {});
+    /* A build is now THREE clicks: deal, tier, and any add-ons. No price and
+       no length are typed, which is the point of tiers. */
+    if (c.tier) {
+      await admin.click(`[data-tier="${c.tier}"]`);
+      for (const a of c.addOns || []) await admin.check(`.f-e-addon[value="${a}"]`);
     }
-    if (c.retainer) await admin.fill("#f-e-retainer", String(c.retainer));
+    if (c.care) await admin.click(`[data-care="${c.care}"]`);
+
+    /* The overrides live behind a <details>, so they must be opened before
+       Playwright can type into them — which is itself worth asserting: if the
+       ordinary path ever required opening that, the form would have stopped
+       being three clicks. */
+    if (c.price || c.retainer) {
+      await admin.evaluate(`document.querySelectorAll("details").forEach((d) => { d.open = true; })`);
+      if (c.price) {
+        await admin.fill("#f-e-price", String(c.price));
+        await admin.fill("#f-e-weeks", String(c.weeks));
+      }
+      if (c.retainer) await admin.fill("#f-e-retainer", String(c.retainer));
+    }
     await admin.waitForTimeout(350);
 
     const preview = await admin.evaluate(`document.querySelector("#f-e-preview")?.innerText || ""`);
     check(preview.includes(c.name), "the preview names the client before anything is created", preview.slice(0, 100));
-    if (c.price) check(/build over/.test(preview), "and states the build and its length");
-    if (c.retainer) check(/proposed/.test(preview), "and says the retainer is PROPOSED, not counted");
+    if (c.tier) {
+      check(preview.includes(String(expectedTotal(c).toLocaleString("en-IN"))),
+        `the preview states the real total, add-ons included (Rs ${expectedTotal(c).toLocaleString("en-IN")})`,
+        preview.slice(0, 220));
+      check(/milestone schedule and \d+ things raised with the client/.test(preview),
+        "and says the schedule and the client's own list will be created too");
+    }
+    if (expectedRetainer(c)) check(/proposed/.test(preview), "and says the retainer is PROPOSED, not counted");
 
     await admin.click('.bm-modal button[type="submit"]');
     /* Wait for the modal to actually close rather than guessing how long
@@ -210,17 +266,25 @@ try {
     check(!!proj, "a project exists for it");
 
     const invs = db.invoices.filter((i) => i.orgId === org.id);
-    if (c.price) {
+    if (c.tier) {
+      const want = expectedTotal(c);
       check(invs.length === 2, `two invoices, 50/50 (${invs.length})`);
       const total = invs.reduce((s, i) => s + Number(i.amount), 0);
-      check(total === c.price, `and they add up to the price (${total} vs ${c.price})`);
+      check(total === want, `and they add up to the tier plus its add-ons (${total} vs ${want})`);
       const sc = db.scope[proj?.id] || [];
-      check(sc.length === 1, `one agreed scope line, not an invented breakdown (${sc.length})`);
-      check(Number(sc[0]?.amount) === c.price, "worth the agreed price");
-      if (c.type) {
-        const ms = db.milestones[proj?.id] || [];
-        check(ms.length > 0, `a schedule was stamped (${ms.length} milestones)`);
-      }
+      check(sc.length === expectedLines(c),
+        `${expectedLines(c)} scope line(s) — the tier, plus one per add-on, never an invented breakdown (${sc.length})`);
+      const scTotal = sc.reduce((n, l) => n + Number(l.amount || 0), 0);
+      check(scTotal === want, `the scope is worth what was sold (${scTotal} vs ${want})`);
+      /* Every tier has a template, so a missing schedule is now a real
+         failure rather than a skipped optional step. */
+      const ms = db.milestones[proj?.id] || [];
+      check(ms.length > 0, `a schedule was stamped (${ms.length} milestones)`);
+      check(ms.some((m) => m.owner === "client"),
+        "and at least one milestone is owned by the CLIENT — the whole point of dating their side");
+      /* The client's own list, raised without anybody typing it. */
+      const intake = db.intake[proj?.id] || [];
+      check(intake.length > 0, `${intake.length} thing(s) raised with the client at creation, unprompted`);
     } else {
       check(invs.length === 0, `a retainer-only engagement raises no build invoices (${invs.length})`);
       check((db.scope[proj?.id] || []).length === 0, "and has no scope, by design");

@@ -14,14 +14,35 @@
  *
  * WHAT IS DELIBERATELY NOT ON IT
  * ------------------------------
- * No GSTIN, and no payee block until the account details have actually been
- * entered. An invoice is a financial document; a plausible-looking tax number
- * or account number on one is not a placeholder, it is a false statement to a
- * client. Each block is omitted entirely rather than printing an empty label,
- * so the document never looks half-filled.
+ * No payee block until the account details have actually been entered, and no
+ * GSTIN until one exists. An invoice is a financial document; a
+ * plausible-looking tax number or account number on one is not a placeholder,
+ * it is a false statement to a client. Each block is omitted entirely rather
+ * than printing an empty label, so the document never looks half-filled.
  *
- * The payee arrives as an ARGUMENT rather than a constant because it lives in
+ * Both arrive as ARGUMENTS rather than constants because they live in
  * Firestore, not in this public repository — see STUDIO in bm-app.js.
+ *
+ * THE GSTIN IDENTIFIES; IT DOES NOT YET CALCULATE.
+ * When a real GSTIN is passed the document names itself a Tax Invoice and
+ * prints the number, which is the identification a registered supplier owes a
+ * client. It does NOT add 18% to the total, and that restraint is deliberate:
+ *
+ *   - published prices are exclusive of GST, so the tax is genuinely on top;
+ *   - but `api/payments/create-order.js` charges `invoice.amount` and
+ *     `verify.js` requires the payment to match it EXACTLY — that check is the
+ *     control that stops underpayment (§6);
+ *   - so printing amount × 1.18 as the total while Razorpay charges `amount`
+ *     would produce an invoice the client cannot actually settle online, and
+ *     silently treating `amount` as tax-inclusive would quietly cut every
+ *     price the studio publishes by 15%.
+ *
+ * Neither is a rounding detail — both are wrong in rupees. Making the tax
+ * arithmetic real means deciding whether `invoice.amount` is inclusive or
+ * exclusive and changing the amount check in verify.js in the SAME change.
+ * That is a deliberate piece of work for the day registration completes, not
+ * something to infer here. Until then the footer states the position in words,
+ * which is accurate and settles nothing falsely.
  *
  * Everything else on the page comes from the invoice and the organisation as
  * they are stored. Nothing is computed into existence.
@@ -43,7 +64,7 @@ function longDate(ts) {
  * Build the document. Exported separately from printing so it can be tested
  * and eyeballed without a print dialog appearing.
  */
-export function invoiceHtml(inv, org, { note, payee } = {}) {
+export function invoiceHtml(inv, org, { note, payee, gstin } = {}) {
   const amount = Number(inv.amount) || 0;
   const received = invoiceReceived(inv);
   const owed = invoiceOutstanding(inv);
@@ -168,9 +189,10 @@ export function invoiceHtml(inv, org, { note, payee } = {}) {
       <strong>${escapeHtml(STUDIO.name)}</strong>
       <span>${escapeHtml(STUDIO.city)}</span>
       <span>${escapeHtml(STUDIO.email)}</span>
+      ${gstin ? `<span>GSTIN ${escapeHtml(gstin)}</span>` : ""}
     </div>
     <div class="title">
-      <h1>Invoice</h1>
+      <h1>${gstin ? "Tax Invoice" : "Invoice"}</h1>
       <div class="ref">${escapeHtml(invoiceRef(inv))}</div>
       <span class="status status--${state}">${escapeHtml(statusLabel)}</span>
     </div>
@@ -221,7 +243,9 @@ export function invoiceHtml(inv, org, { note, payee } = {}) {
           ${payee.bank ? `<dt>Bank</dt><dd>${escapeHtml(payee.bank)}</dd>` : ""}
         </dl>
       </div>` : ""}
-    <p>Amounts are exclusive of GST unless stated otherwise.</p>
+    <p>${gstin
+      ? "Amounts are exclusive of GST. GST is charged at 18% and is billed separately."
+      : "Amounts are exclusive of GST."}</p>
     <p>Questions about this invoice: <strong>${escapeHtml(STUDIO.email)}</strong> · ${escapeHtml(STUDIO.site)}</p>
   </div>
 

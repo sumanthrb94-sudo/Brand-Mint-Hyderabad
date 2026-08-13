@@ -44,7 +44,7 @@
             <input id="bm-client-name" placeholder="Green Basket" />
           </div>
           <div class="bm-field">
-            <label for="bm-base-service">Base service</label>
+            <label for="bm-base-service">Tier</label>
             <select id="bm-base-service"></select>
             <span class="bm-row-sub" id="bm-base-note"></span>
           </div>
@@ -118,6 +118,9 @@
         formatINR,
         escapeHtml,
         SERVICE_TYPES,
+        TIERS,
+        tier,
+        ADD_ONS,
         FEATURE_CATALOG,
         FEATURE_CATEGORIES,
         SCOPE_TERMS,
@@ -476,10 +479,12 @@
         projects = allProjects;
         orgById = Object.fromEntries(orgs.map((o) => [o.id, o]));
 
+        /* Tiers are FIXED prices, not "from" prices — that distinction is the
+           whole reason they exist, so the wording here says the price and the
+           length rather than a floor to be negotiated up from. */
         document.getElementById("bm-base-service").innerHTML =
-          `<option value="">No base service</option>` +
-          SERVICE_TYPES.filter((s) => s.priceFloor > 0)
-            .map((s) => `<option value="${s.id}">${escapeHtml(s.label)} — from ${formatINR(s.priceFloor)}${s.recurring ? "/mo" : ""}</option>`)
+          `<option value="">No tier — pricing loose scope only</option>` +
+          TIERS.map((t) => `<option value="${t.id}">${escapeHtml(t.label)} — ${formatINR(t.price)} · ${t.weeks}${t.weeksNote ? "+" : ""} weeks</option>`)
             .join("");
 
         document.getElementById("bm-intake-project").innerHTML = projects

@@ -403,9 +403,97 @@ failure that did not happen and would probably retry the action. `getActivity()`
 does throw, on purpose — the Activity view has to tell a denied read apart from
 an empty collection, or an unpublished ruleset looks exactly like a quiet week.
 
-`project.type` uses the service-catalog vocabulary in `SERVICE_TYPES`
-(`site | tool | brand | media | seo | ai | internal`) so milestone templates
-can key off it. `null` means not set, and renders as such.
+`project.type` holds a **tier id** — `starter | growth | commerce` — and
+`SERVICE_TYPES` is derived from `TIERS` so one list feeds every picker, label
+and milestone template. `null` means not set, and renders as such.
+
+Seven older ids (`site · tool · brand · media · seo · ai · internal`) live on in
+`RETIRED_SERVICE_TYPES`. They are never offered in a picker, and exist so a
+project created under one still renders its name: `project.type` is stored on
+the document, so dropping an id would blank every historic project's type and —
+worse — let the next save silently re-type it. `serviceTypeLabel()` is the only
+way in; `isRetiredType()` keeps the retired option visible on the project it
+belongs to and nowhere else.
+
+### The studio sells one thing, at three depths
+
+`TIERS` in `bm-app.js` is the offer, and each carries **a fixed price and a
+fixed length** rather than a floor to negotiate up from:
+
+| | Price | Length | Warranty |
+|---|---|---|---|
+| Starter Store | ₹99,000 | 8 weeks | 30 days |
+| Growth Store | ₹2,00,000 | 12 weeks | 30 days |
+| Commerce Store | ₹3,00,000 | 12+ weeks | **60 days** |
+
+That fixedness is the point. Every previous model here *derived* a price —
+days × day rate × a scale multiplier — so the number depended on which screen
+produced it, and `/quote` and `/services` disagreed by 5× at one point. Picking
+a tier now fills in both, so there is no screen left on which they can drift.
+
+Growth and Commerce are published as "everything in the tier below, plus…", so
+they are modelled that way: `inherits` names the tier below, `adds` lists only
+what is new, and `tierIncludes()` walks the chain. Duplicating the full list
+into each tier would guarantee that one day Growth silently stops including
+something Starter does.
+
+**The inclusion lists are quotable but must never be priced individually.**
+Nobody agreed what share of ₹99,000 is "Checkout & Payments", so apportioning it
+would invent a number and then hang a progress bar off it — the same fiction §6
+already forbids for milestones. The tier is **one** agreed scope line; each
+add-on is its own. The sections drive the *schedule*, which is a shape the
+client did agree to.
+
+`CARE_PLANS` (₹12,500 · ₹25,000 · ₹50,000 a month) are retainers and every
+retainer rule applies: created `proposed`, and only `signed` is money. They are
+a **defined scope of work, not an hourly bucket** — which matters here and not
+only commercially, because a bucket would need a timesheet and time tracking is
+on §10's do-not-build list.
+
+`ADD_ONS` carry a published price and derive their `days` from `DAY_RATE`, so a
+price and a schedule cannot drift apart. `scopeProgress()` weights by days, and
+an add-on with no days would count as either half the job or none of it.
+
+`DAY_RATE` (₹10,000) now lives in `bm-app.js`. It prices nothing a client sees —
+the tiers are fixed — but it converts a fixed-price add-on into a length and is
+what a change order is argued from.
+
+`CLIENT_PROVIDES` is **raised as intake by `createEngagement()`**, dated, at
+creation. That is not a convenience: the portal's central feature is "what we
+are waiting on you for, and since when", and until now it depended on the admin
+remembering to type seven items in — `tests/onboarding.mjs` found six perfectly
+onboarded clients with nothing raised against any of them. Two milestones are
+client-owned for the same reason (asset handover, and the 5-day UAT window), so
+the terms' "delays in client input extend the timeline day for day" becomes a
+visible dated fact rather than an argument eight weeks later.
+
+### GST is priced but not yet invoiceable, and those are different
+
+Published pricing is **exclusive of 18% GST** and that is what the marketing
+pages now say. It is *not* a claim that Brand Mint can issue a GST invoice
+today — registration is in progress and there is no GSTIN.
+
+So the GSTIN follows the payee pattern exactly (§6): read from Firestore on the
+studio's own org document, absent from this public repo, and **null until it is
+real**. `studioGstin()` returns null unless the value is a well-formed 15-char
+GSTIN; the invoice then omits the tax block entirely rather than printing a
+label with nothing after it. `isGstin()` validates *form*, not registration — it
+is the last line of defence, not the first.
+
+> **The invoice identifies; it does not yet calculate.** With a real GSTIN the
+> document names itself a Tax Invoice and prints the number. It does **not** add
+> 18% to the total, and that restraint is load-bearing:
+> `api/payments/create-order.js` charges `invoice.amount` and `verify.js`
+> requires an exact match, so printing `amount × 1.18` would produce an invoice
+> the client cannot settle online, while treating `amount` as tax-inclusive
+> would quietly cut every published price by 15%. Both are wrong in rupees.
+> Making the tax arithmetic real means deciding what `invoice.amount` means and
+> changing the amount check in `verify.js` **in the same change**. Do not infer
+> it in the template.
+
+Building a **GST invoice generator inside a client's store** is a Tier 1
+deliverable and is entirely fine. Only Brand Mint's own pricing line and its own
+invoices are constrained here.
 
 `project.progress` is `null` when unrecorded — **never coerce it to 0**, or the
 portal draws an empty bar that reads as "started, nothing done".
@@ -772,7 +860,7 @@ It has already found two things no admin-side test could:
 > file in the repo, because precision reads as authority),
 > `finance/pricing-calculator.md` (**actively contradicts production**: ₹25,000/day
 > against the real ₹10,000, so anything quoting from it prices 2.5× the live
-> site — treat as superseded by `assets/bm-catalog.js`),
+> site — treat as superseded by `DAY_RATE` in `assets/bm-app.js`),
 > `11-HIRING-ROADMAP.md` (six salaries and ESOP percentages for a one-person
 > company), `00-EXECUTIVE-SUMMARY.md` ("Currently 18 inbound leads/month",
 > present tense, unsupported anywhere), and `12-METRICS-AND-KPIS.md`.
