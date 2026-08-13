@@ -2032,7 +2032,13 @@
                     bits.push(`plus ${f.extras.map((a) => `${escapeHtml(a.label)} (${escapeHtml(money(a.price))})`).join(" and ")} — <strong>${escapeHtml(money(f.total))}</strong> in total`);
                   }
                   bits.push(`invoices ${escapeHtml(money(Math.round(f.total / 2)))} now and ${escapeHtml(money(f.total - Math.round(f.total / 2)))} on completion, due ${escapeHtml(end.toLocaleDateString("en-IN", { day: "numeric", month: "short" }))}`);
-                  if (f.t) bits.push(`a ${MILESTONE_TEMPLATES[f.t.id]?.length || 0}-milestone schedule and ${CLIENT_PROVIDES.length} things raised with the client`);
+                  if (f.t) {
+                    const n = MILESTONE_TEMPLATES[f.t.id]?.length || 0;
+                    // "an 11-milestone", "a 12-milestone" — the article follows
+                    // how the number is SAID, not how it is spelt.
+                    const article = /^(8|11|18)/.test(String(n)) ? "an" : "a";
+                    bits.push(`${article} ${n}-milestone schedule and ${CLIENT_PROVIDES.length} things raised with the client`);
+                  }
                 }
                 if (sh.retainer && f.ret > 0) {
                   bits.push(`${f.plan ? `the <strong>${escapeHtml(f.plan.label)}</strong> plan at ` : "a retainer of "}${escapeHtml(money(f.ret))}/month, <strong>${signed ? "signed" : "proposed"}</strong>${signed ? "" : " — not counted yet"}`);

@@ -310,6 +310,15 @@ try {
       check(ms.length > 0, `a schedule was stamped (${ms.length} milestones)`);
       check(ms.some((m) => m.owner === "client"),
         "and at least one milestone is owned by the CLIENT — the whole point of dating their side");
+      /* Firestore returns documents ordered by id, which for auto-ids is
+         effectively random, so the schedule used to render shuffled — UAT
+         before kickoff, launch in the middle. Read through getMilestones(),
+         which sorts, so both /studio and the client's portal get a schedule
+         rather than a pile. */
+      const due = ms.map((m) => m.dueAt?.toMillis?.() ?? Infinity);
+      check(due.every((d, i) => i === 0 || due[i - 1] <= d),
+        "and the schedule comes back in date order, not document order",
+        ms.map((m) => m.title).slice(0, 4).join(" → "));
       /* The client's own list, raised without anybody typing it. */
       const intake = db.intake[proj?.id] || [];
       check(intake.length > 0, `${intake.length} thing(s) raised with the client at creation, unprompted`);

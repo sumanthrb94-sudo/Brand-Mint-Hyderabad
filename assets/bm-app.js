@@ -172,9 +172,32 @@ export async function getAllProjects() {
   return snap.docs.map(withId);
 }
 
+/**
+ * A project's schedule, IN DATE ORDER.
+ *
+ * Firestore returns documents ordered by id, which for auto-ids is effectively
+ * random, so the schedule rendered as a shuffled list: UAT before kickoff,
+ * launch in the middle. That was survivable when a template stamped six
+ * milestones and obvious nonsense at eleven — it is a schedule, and a schedule
+ * out of order is not one.
+ *
+ * Sorted here rather than in the view because BOTH sides read it: /studio's
+ * project drawer and the client's own portal. Sorting in one of them would
+ * have left the client looking at the shuffled version, which is the half that
+ * matters more — "what is next" is the question the portal exists to answer.
+ *
+ * A milestone with no date sorts LAST, not first. An undated item is one
+ * nobody has scheduled yet; putting it at the top would make it read as the
+ * next thing due.
+ */
 export async function getMilestones(projectId) {
   const snap = await getDocs(collection(db, "projects", projectId, "milestones"));
-  return snap.docs.map(withId);
+  const at = (m) => {
+    const d = m.dueAt?.toDate?.() ?? (m.dueAt ? new Date(m.dueAt) : null);
+    const t = d?.getTime?.();
+    return Number.isFinite(t) ? t : Infinity;
+  };
+  return snap.docs.map(withId).sort((a, b) => at(a) - at(b));
 }
 
 export async function getIntake(projectId) {
