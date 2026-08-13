@@ -1,12 +1,12 @@
 import { PublicInquiry } from "@/components/PublicInquiry";
 import { PublicMotion } from "@/components/PublicMotion";
+import { BrandMark } from "@/components/BrandMark";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion, type Transition, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check, ChevronDown, Menu, PackageCheck, ShieldCheck, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
-const wordmark = "/manus-storage/brand-mint-primary-dark_cba2a556.svg";
 const rise = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } };
 
 const tiers = [
@@ -37,7 +37,7 @@ export default function PublicHome() {
     <PublicMotion />
     <div className="public-noise" aria-hidden="true" />
     <header className="public-nav ecom-nav">
-      <Link href="/" className="public-brand" aria-label="Brand Mint home"><img src={wordmark} alt="Brand Mint" /><span>Hyderabad</span></Link>
+      <Link href="/" className="public-brand" aria-label="Brand Mint home"><BrandMark /><span>Hyderabad</span></Link>
       <nav className="public-nav-links" aria-label="Primary navigation"><a href="#tiers">Stores</a><a href="#care">Care plans</a><a href="#scope">Scope</a><a href="#faq">FAQ</a><Link href="/portal">Client portal</Link></nav>
       <div className="hidden items-center gap-3 md:flex"><Link href="/admin" className="public-ceo-link">CEO access</Link><a href="#enquiry"><Button className="ecom-button">Start a project <ArrowRight className="h-3.5 w-3.5" /></Button></a></div>
       <button className="public-menu-toggle md:hidden" onClick={() => setMenuOpen((value) => !value)} aria-expanded={menuOpen} aria-label={menuOpen ? "Close menu" : "Open menu"}>{menuOpen ? <X /> : <Menu />}</button>
@@ -62,7 +62,7 @@ export default function PublicHome() {
     <section className="public-section public-container" id="faq"><div className="public-section-intro"><p className="public-kicker">05 — Common questions</p><h2>Commercial terms made <em>clear.</em></h2></div><div className="public-faq-list">{faqs.map(([question, answer], index) => <Faq key={question} question={question} answer={answer} index={index} transition={transition} />)}</div></section>
 
     <section className="ecom-enquiry public-container" id="enquiry"><div><p className="public-kicker">Start with the project</p><h2>Bring the catalogue and the context. We will make the next step <em>clear.</em></h2><p>This short enquiry pre-fills the ecommerce onboarding flow. A client record is created only after the required brief and legal acceptance are complete.</p></div><PublicInquiry /></section>
-    <footer className="public-footer public-container"><img src={wordmark} alt="Brand Mint" /><div><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/refund-policy">Refund</Link><Link href="/shipping-policy">Shipping</Link><Link href="/cookies">Cookies</Link></div><Link href="/admin">CEO access</Link></footer>
+    <footer className="public-footer public-container"><BrandMark /><div><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/refund-policy">Refund</Link><Link href="/shipping-policy">Shipping</Link><Link href="/cookies">Cookies</Link></div><Link href="/admin">CEO access</Link></footer>
   </main>;
 }
 
