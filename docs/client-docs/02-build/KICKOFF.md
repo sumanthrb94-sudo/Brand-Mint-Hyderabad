@@ -35,15 +35,26 @@ All decisions come through the Approver. This keeps the project from stalling on
 
 ## What we need from you, and by when
 
+**This same list is already live on your portal**, with the date each item was
+raised and how long it has been outstanding. You can check it whenever you like
+without asking us — that is what it is there for.
+
 | Item | Needed by | Status |
 |---|---|---|
-| Logo and brand files | {{DATE}} | ☐ |
-| Product photographs | {{DATE}} | ☐ |
-| Product names, descriptions, prices | {{DATE}} | ☐ |
-| GST and business details | {{DATE}} | ☐ |
-| Razorpay account activated | {{DATE}} | ☐ |
+| Product photography | {{DATE}} | ☐ |
+| Brand assets — logo, colours, fonts | {{DATE}} | ☐ |
+| Product names, descriptions and prices | {{DATE}} | ☐ |
+| Product data entry — we set up the structure and load a sample set | {{DATE}} | ☐ |
+| Razorpay account activated in your name | {{DATE}} | ☐ |
 | Domain access | {{DATE}} | ☐ |
-| Policy content sign-off | {{DATE}} | ☐ |
+| Business and GST details for invoicing | {{DATE}} | ☐ |
+| Legal policy sign-off — Privacy, Terms, Refund, Shipping | {{DATE}} | ☐ |
+| Testing and sign-off within the 5-day UAT window | {{DATE}} | ☐ |
+
+For the two account items you add **hello@brandmintstudios.in** as a user on
+your own account — we never ask for a password or a key, and you can revoke the
+access at any time. If anyone claiming to be from Brand Mint asks you to send a
+credential, they are not from Brand Mint.
 
 ## Accounts to set up in your name
 
