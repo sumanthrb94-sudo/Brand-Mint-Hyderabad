@@ -1,0 +1,22 @@
+# Brand Mint Studios Agency OS — Project TODO
+
+- [x] Establish a documented data model for clients, contacts, service selections, onboarding briefs, legal acceptances, projects, deliverables, documents, invoices, invoice items, files, and notifications.
+- [x] Build an elegant CEO dashboard displaying active clients, open projects, pending invoices, revenue summary, and high-priority operational actions.
+- [x] Build a guided client onboarding flow for lead capture, service selection, project brief intake, client-profile creation, and pre-activation legal acceptance.
+- [x] Create public Cookie Policy, Privacy Policy, and Terms & Conditions pages, each marked as a working draft for legal review before publication.
+- [x] Build a gated client portal where authenticated clients can access only their own eligible projects, invoices, and signed documents.
+- [x] Implement role-based backend procedures and UI guards for CEO/admin and client roles, including legal-acceptance eligibility checks.
+- [x] Build document records and signing-status workflows for contracts, NDAs, and SOWs, including secure CEO/client download access.
+- [x] Build invoice creation with itemised line items, due dates, payment-status transitions, and downloadable invoice-PDF records.
+- [x] Build a Kanban-style project pipeline with project status, deadlines, delivery items, and assignment visibility.
+- [x] Implement S3-backed file metadata and secure file workflows for documents and invoice PDF records.
+- [x] Build in-app notifications for new onboarding completion, legal acceptance, invoice payment status, and new client actions.
+- [x] Inspect available integrations and present compliant email-delivery options for CEO/client automated alerts before adding an email provider.
+- [x] Add automated tests for authorization, onboarding/legal eligibility, invoice totals/statuses, documents, and primary procedures.
+- [x] Add focused unit coverage for the required legal-acceptance predicate and server-side itemised invoice PDF generation.
+- [x] Document the user-selected provider-independent operating model, including the CEO’s manual email and e-signature responsibilities.
+- [x] Defer any future transactional-email or managed e-signature connection until the user selects and approves a provider account and credentials.
+- [x] Verify responsive UI, accessibility, legal-gate behavior, and key workflows visually before delivery.
+- [ ] Commit and synchronize the completed project to the connected GitHub repository.
+- [x] Connect the CEO KPI cards and onboarding page to the implemented live procedures before confirming the dashboard and onboarding features as complete.
+- [x] Verify the legal policy routes and UI files in the completed project before the final checkpoint.

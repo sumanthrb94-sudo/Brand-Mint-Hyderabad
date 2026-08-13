@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Manrope", sans-serif;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-mono: "DM Mono", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: oklch(0.972 0.012 150);
+  --foreground: oklch(0.23 0.034 158);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.23 0.034 158);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.23 0.034 158);
+  --primary: oklch(0.30 0.072 158);
+  --primary-foreground: oklch(0.99 0.002 145);
+  --secondary: oklch(0.94 0.023 154);
+  --secondary-foreground: oklch(0.30 0.072 158);
+  --muted: oklch(0.95 0.014 150);
+  --muted-foreground: oklch(0.51 0.025 160);
+  --accent: oklch(0.94 0.04 150);
+  --accent-foreground: oklch(0.30 0.072 158);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.89 0.017 154);
+  --input: oklch(0.89 0.017 154);
+  --ring: oklch(0.58 0.12 155);
+  --radius: 0.8rem;
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; }
+  body { @apply bg-background text-foreground font-sans antialiased; }
+  button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
+  button:active, .agency-nav-item:active { transform: scale(0.98); }
+  :focus-visible { outline: 2px solid #0d8855; outline-offset: 3px; }
+}
+
+.font-display { font-family: "Playfair Display", Georgia, serif; }
+.eyebrow { font-family: "DM Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: #0d8855; }
+.agency-app-shell { min-height: 100vh; background: #f6f8f4; }
+.agency-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 20; display: none; width: 244px; flex-direction: column; border-right: 1px solid #dbe9e2; background: rgba(251,253,250,.92); padding: 24px 16px 18px; backdrop-filter: blur(14px); }
+.agency-main { min-height: 100vh; padding: 0 20px 40px; }
+.agency-topbar { display: flex; min-height: 72px; align-items: center; border-bottom: 1px solid #dbe9e2; }
+.agency-nav-item { display: flex; align-items: center; gap: 11px; border-radius: 10px; padding: 10px 11px; color: #6b8279; font-size: 12px; font-weight: 700; transition: background-color 160ms cubic-bezier(.23,1,.32,1), color 160ms cubic-bezier(.23,1,.32,1), transform 160ms cubic-bezier(.23,1,.32,1); }
+.agency-nav-item:hover { background: #eef5f0; color: #1a4636; }
+.agency-nav-item.is-active { background: #e4f8eb; color: #087d4c; }
+.metric-card, .surface-card { border: 1px solid #dbe9e2; border-radius: 18px; background: rgba(255,255,255,.9); padding: 18px; box-shadow: 0 12px 32px rgba(35,75,59,.03); }
+.metric-icon { display: grid; height: 30px; width: 30px; place-items: center; border-radius: 9px; background: #ebf8ef; color: #0d8855; }
+.pipeline-scroll { overflow-x: auto; padding-bottom: 3px; }
+.pipeline-column { min-width: 185px; border-radius: 16px; background: #eef3ef; padding: 12px; }
+.form-heading { margin-top: 12px; font-family: "Playfair Display", Georgia, serif; font-size: 36px; line-height: 1.05; letter-spacing: -0.05em; color: #12362a; }
+.form-description { margin-top: 13px; max-width: 510px; font-size: 14px; line-height: 1.7; color: #668078; }
+
+@media (min-width: 1024px) { .agency-sidebar { display: flex; } .agency-main { margin-left: 244px; padding-left: 42px; padding-right: 42px; } .agency-topbar { min-height: 88px; } }
+@media (min-width: 1280px) { .agency-main { padding-left: 52px; padding-right: 52px; } .metric-card { padding: 20px; } }
+@media (prefers-reduced-motion: no-preference) { .metric-card, .surface-card, .pipeline-column { animation: rise-in 420ms cubic-bezier(.23,1,.32,1) both; } .metric-card:nth-child(2) { animation-delay: 50ms; } .metric-card:nth-child(3) { animation-delay: 100ms; } .metric-card:nth-child(4) { animation-delay: 150ms; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
