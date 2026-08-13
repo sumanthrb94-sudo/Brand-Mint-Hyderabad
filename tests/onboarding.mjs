@@ -116,6 +116,34 @@ function expectedRetainer(c) {
   return c.care ? CARE_PRICE[c.care] : 0;
 }
 
+/**
+ * Is this console error the product's fault, or the sandbox's?
+ *
+ * The suite serves everything from 127.0.0.1 and vendors the Firebase SDK
+ * locally, so a page of ours has no business fetching anything off-box. A
+ * transport-layer failure (bad cert, refused connection) against a REMOTE
+ * origin is therefore this container's TLS-intercepting proxy, not a
+ * regression — but the same failure against OUR OWN origin would be real, and
+ * must never be swallowed.
+ *
+ * So the origin is what decides, not the wording. And the URL is always
+ * carried into the failure message: "Failed to load resource" with no address
+ * is not something anyone can act on later.
+ */
+const TRANSPORT_FAILURE = /ERR_CONNECTION|ERR_CERT_|ERR_NAME_NOT_RESOLVED|ERR_PROXY/;
+
+function isOurProblem(m) {
+  if (m.type() !== "error") return false;
+  const text = m.text();
+  if (/favicon|fonts\.g/.test(text)) return false;
+  const url = m.location()?.url || "";
+  const local = url === "" || url.includes("127.0.0.1") || url.includes("localhost");
+  if (TRANSPORT_FAILURE.test(text) && !local) return false;
+  return true;
+}
+
+const describe = (m) => `${m.text()} <- ${m.location()?.url || "no url"}`;
+
 /* ── emulator plumbing ────────────────────────────────────────────── */
 
 async function clearAll() {
@@ -186,7 +214,7 @@ admin.on("dialog", (d) => d.accept());
 
 const adminErrors = [];
 admin.on("console", (m) => {
-  if (m.type() === "error" && !/ERR_CONNECTION|favicon|fonts\.g/.test(m.text())) adminErrors.push(m.text());
+  if (isOurProblem(m)) adminErrors.push(describe(m));
 });
 
 const onboarded = [];
@@ -289,6 +317,17 @@ try {
       check(invs.length === 0, `a retainer-only engagement raises no build invoices (${invs.length})`);
       check((db.scope[proj?.id] || []).length === 0, "and has no scope, by design");
       check(proj?.mode === "retainer", `and is recorded as a retainer engagement (mode=${proj?.mode})`);
+      /* The New engagement form always has SOME tier selected — it has to
+         default to one — so a retainer-only deal used to arrive carrying
+         `type: "starter"` and be recorded as a Starter Store that was never
+         sold: named after it on every screen, and typed as a build. Caught by
+         this simulation, on the dashboard, reading "Kaveri Clinic — Starter
+         Store" under projects with nothing raised. */
+      check(!proj?.type, `and carries NO tier — a care plan is not a store (type=${proj?.type ?? "null"})`);
+      check(!/store/i.test(proj?.name || ""),
+        `and is not named after a tier nobody bought ("${proj?.name}")`);
+      check((db.milestones[proj?.id] || []).length === 0,
+        "and gets no build schedule stamped on it");
     }
 
     check(org.retainerStatus !== "signed",
@@ -340,7 +379,7 @@ try {
     const cp = await ctx.newPage();
     const cErrors = [];
     cp.on("console", (m) => {
-      if (m.type() === "error" && !/ERR_CONNECTION|favicon|fonts\.g/.test(m.text())) cErrors.push(m.text());
+      if (isOurProblem(m)) cErrors.push(describe(m));
     });
 
     let portal = "";
@@ -395,8 +434,8 @@ try {
       "it names their own organisation");
 
     // Their money, from their side.
-    if (c.price) {
-      const half = Math.round(c.price / 2).toLocaleString("en-IN");
+    if (c.tier) {
+      const half = Math.round(expectedTotal(c) / 2).toLocaleString("en-IN");
       check(portal.includes(half), `they can see the ${half} advance invoice`);
     } else {
       check(/no invoices yet/i.test(portal), "a retainer-only client sees no build invoices, and is told so");
@@ -429,11 +468,30 @@ try {
   /* The two things a freshly onboarded studio is ALWAYS guilty of, and which
      nothing used to mention. Found by running this simulation: six clients
      onboarded perfectly, and the action list had exactly one line on it. */
+  /* This line used to fire for ALL SIX clients: onboarding created a project
+     and nothing was ever asked of the client, which is the portal's whole job
+     switched off. Creating an engagement now raises the client's own list, so
+     the only projects that should still appear here are the retainer-only
+     ones — a care retainer has no build and therefore no intake list, and a
+     retainer with nothing asked for is genuinely just as stalled.
+
+     Asserting the line merely EXISTS would now pass on the retainer clients
+     alone, even if auto-raising broke completely. So it is checked both ways:
+     the retainer-only clients are named, and no tiered build is. */
   check(/nothing raised with the client/i.test(today),
-    "it says which projects have nothing raised — the portal's whole job, switched off");
+    "it still says which projects have nothing raised");
+  const nagged = today.match(/[^.]*nothing raised with the client[^.]*\.[^.]*\./i)?.[0] || "";
+  CLIENTS.filter((c) => c.tier).forEach((c) => {
+    check(!nagged.includes(c.name),
+      `${c.name} is NOT nagged — its intake was raised at creation`, nagged.slice(0, 220));
+  });
+  CLIENTS.filter((c) => !c.tier).forEach((c) => {
+    check(nagged.includes(c.name),
+      `${c.name} IS still nagged — a retainer with nothing asked for is stalled`, nagged.slice(0, 220));
+  });
   check(/proposed but not signed/i.test(today),
     "and that agreed retainers are sitting unsigned and uncounted");
-  const proposedWorth = CLIENTS.filter((c) => c.retainer).reduce((n, c) => n + c.retainer, 0);
+  const proposedWorth = CLIENTS.reduce((n, c) => n + expectedRetainer(c), 0);
   check(today.includes(proposedWorth.toLocaleString("en-IN")),
     `and states what they are worth (Rs ${proposedWorth.toLocaleString("en-IN")}/month)`,
     today.match(/[^.]*proposed but not signed[^.]*/i)?.[0] || "");

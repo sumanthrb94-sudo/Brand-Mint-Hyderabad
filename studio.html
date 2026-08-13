@@ -1070,7 +1070,7 @@
             </div>
 
             <div class="bm-drawer-sec">
-              <h4>Retainer</h4>
+              <h4>Care plan</h4>
               <div class="bm-inline-form">
                 <input type="number" min="0" step="500" id="bm-d-retainer" value="${Number(o.retainer) || 0}" class="bm-mn-narrow" aria-label="Monthly retainer" />
                 <button type="button" class="bm-btn bm-btn--sm" data-org-save="${escapeHtml(o.id)}">Save</button>
@@ -1078,6 +1078,24 @@
                   ${o.retainerStatus === "signed" ? "✓ Signed — counting" : "Proposed — not counted"}
                 </button>` : ""}
               </div>
+              ${(() => {
+                /* Which plan they are on, and what that plan actually covers.
+                   The amount alone does not answer "are they entitled to this
+                   month's small feature", which is the question that decides
+                   whether a request is included work or a change order. */
+                const plan = carePlan(o.carePlan);
+                if (plan) {
+                  return `<p class="bm-hint" style="margin-top:8px;"><strong>${escapeHtml(plan.label)}</strong> —
+                    ${escapeHtml(carePlanIncludes(plan.id).join(" · "))}. Cancel with ${CARE_NOTICE_DAYS} days' notice.</p>`;
+                }
+                /* No plan recorded is NOT "no plan". Retainers predate care
+                   plans entirely, so this says what is unknown rather than
+                   printing a default that would be a guess about a contract. */
+                return Number(o.retainer) > 0
+                  ? `<p class="bm-hint" style="margin-top:8px;">No care plan recorded against this retainer —
+                     it predates them, or was set by hand. The amount is what counts; the plan name is not known.</p>`
+                  : "";
+              })()}
               <p class="bm-hint" style="margin-top:8px;">Status: <strong>${escapeHtml(o.retainerStatus || "none")}</strong>.
                  Only <strong>signed</strong> counts towards break-even.</p>
             </div>

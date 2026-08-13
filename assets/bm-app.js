@@ -804,13 +804,38 @@ export function addOn(id) {
  *    are billed by the provider, not by us, and are set up in the client's
  *    name so the client owns them.
  */
+/* This list is the SAME list as the one in the signed SOW's client
+ * responsibilities clause and in the intake questionnaire's closing section
+ * (docs/client-docs/). It must stay that way: the SOW says the delivery date
+ * extends day for day while any of these is outstanding, and a portal that
+ * chased a different list than the contract names would be chasing things the
+ * client never agreed to — and silently NOT chasing the ones they did.
+ *
+ * THE TWO ACCESS ITEMS ARE THE ONES THAT ACTUALLY STOP LAUNCHES.
+ * Razorpay activation and domain control are outside the studio's reach
+ * entirely, take days of somebody else's KYC, and are the last thing anyone
+ * thinks to start. They are the reason `group: "access"` exists.
+ *
+ * Note how the Razorpay line is phrased. It asks the client to ADD US to their
+ * own account — never to send a key, a password or a dashboard login (§4). If
+ * a client credential ever landed in this database, one breach would become
+ * their breach. Every access request here is worded that way and must stay
+ * worded that way. */
 export const CLIENT_PROVIDES = [
   { label: "Product photography", group: "assets" },
-  { label: "Product descriptions and copy", group: "content" },
-  { label: "Product data entry — we set up the structure and load a sample set", group: "content" },
   { label: "Brand assets — logo, colours, fonts (if existing)", group: "assets" },
+  { label: "Product names, descriptions and prices", group: "content" },
+  { label: "Product data entry — we set up the structure and load a sample set", group: "content" },
+  {
+    label: "Razorpay account activated in your name — add hello@brandmintstudios.in as a team member on your own account",
+    group: "access",
+  },
+  {
+    label: "Domain access — add hello@brandmintstudios.in to your registrar, or tell us to register one for you",
+    group: "access",
+  },
   { label: "Business and GST details for invoicing", group: "decisions" },
-  { label: "Legal policy content sign-off", group: "decisions" },
+  { label: "Legal policy sign-off — Privacy, Terms, Refund, Shipping", group: "decisions" },
   { label: "Testing and sign-off within the 5-day UAT window", group: "decisions" },
 ];
 
@@ -1734,8 +1759,15 @@ export async function createEngagement({
   const clientName = String(name || "").trim();
   if (!clientName) throw new Error("Give the client a name.");
 
-  // A tier supplies price and length; an explicit value still overrides it.
-  const picked = tier(type);
+  /* A tier supplies price and length; an explicit value still overrides it.
+     A tier only means anything on a BUILD. The New engagement form always has
+     some tier selected — it has to default to something — so a retainer-only
+     deal would otherwise arrive carrying `type: "starter"` and be recorded as
+     a Starter Store that was never sold: named after it, typed as it, and
+     counted as a build nobody set up. Ignoring the tier here rather than in
+     the form means no caller can make that mistake, convertLead() included. */
+  const picked = shape.build ? tier(type) : null;
+  const typeId = shape.build ? (type || null) : null;
   const money = Number(price) || picked?.price || 0;
   const wk = Number(weeks) || picked?.weeks || 0;
   if (shape.build && !(money > 0)) throw new Error("Pick a tier, or give the project a price above zero.");
@@ -1766,8 +1798,10 @@ export async function createEngagement({
     orgId,
     // Named after what was sold, so a list of projects reads as a list of
     // engagements rather than of the word "build" repeated.
-    name: picked ? `${clientName} — ${picked.label}` : shape.build ? `${clientName} build` : `${clientName} retainer`,
-    type: type || null,
+    name: picked ? `${clientName} — ${picked.label}`
+      : shape.build ? `${clientName} build`
+      : `${clientName} retainer`,
+    type: typeId,
     dueAt: shape.build ? end : null,
     billable: true,
   });
@@ -1805,8 +1839,8 @@ export async function createEngagement({
     await createInvoice({ orgId, label: "50% to start", amount: half, dueAt: start });
     await createInvoice({ orgId, label: "50% on completion", amount: total - half, dueAt: end });
 
-    if (type && MILESTONE_TEMPLATES[type]) {
-      await applyMilestoneTemplate(projectId, type, start.toISOString().slice(0, 10));
+    if (typeId && MILESTONE_TEMPLATES[typeId]) {
+      await applyMilestoneTemplate(projectId, typeId, start.toISOString().slice(0, 10));
     }
 
     /* Raise the client's own list. This is the portal's reason to exist, and

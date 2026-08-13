@@ -322,11 +322,31 @@ test("the client's own list is real, and every entry lands in a known group", ()
 
 test("nothing we ask the client for is a credential", () => {
   // The one rule that is never negotiable: no field anywhere asks a client for
-  // a password, key, secret or token.
+  // a password, key, secret or token. If one landed in this database, one
+  // breach would become the client's breach.
   const banned = /\b(password|passcode|api key|secret|token|credential|login details)\b/i;
   CLIENT_PROVIDES.forEach((i) => {
     assert.ok(!banned.test(i.label), `"${i.label}" asks for a credential`);
   });
+});
+
+test("every access request asks the client to ADD US, never to send anything", () => {
+  // The correct shape of an access request is "add hello@ as a user on your
+  // own account". Anything else drifts towards asking for a login.
+  CLIENT_PROVIDES.filter((i) => i.group === "access").forEach((i) => {
+    assert.match(i.label, /hello@brandmintstudios\.in/,
+      `"${i.label}" must name the account to add rather than ask for access another way`);
+  });
+});
+
+test("the two things that actually stop a launch are on the list", () => {
+  // Payment activation and domain control are outside the studio's reach, take
+  // days of somebody else's KYC, and are the last thing anyone starts.
+  const joined = CLIENT_PROVIDES.map((i) => i.label).join(" | ").toLowerCase();
+  assert.match(joined, /razorpay/, "Razorpay activation must be raised with the client");
+  assert.match(joined, /domain/, "domain access must be raised with the client");
+  assert.ok(CLIENT_PROVIDES.some((i) => i.group === "access"),
+    "at least one item is an access request");
 });
 
 test("the exclusions match what the services document excludes", () => {

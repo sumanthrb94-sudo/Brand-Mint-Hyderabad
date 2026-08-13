@@ -21,7 +21,7 @@ Two shortcuts worth learning on day one:
 
 ## The whole flow, once
 
-Stranger to money in the bank. Nine steps, four screens. Every one of them is
+Stranger to money in the bank. Thirteen steps, four screens and a folder of paperwork. Every one of them is
 explained properly further down — this is only the order they happen in, because
 the sections below describe each screen well and never put them in a line.
 
@@ -29,18 +29,52 @@ the sections below describe each screen well and never put them in a line.
 |---|---|
 | Pipeline → **New** | Log the lead the moment the enquiry arrives |
 | Pipeline → **Log first response** | The moment you reply. Stamped once, never moves |
+| Send the **Intake Questionnaire** | `docs/client-docs/01-sales/`. Ten minutes of theirs, saves you quoting blind |
 | `/quote` → **Print / save as PDF** | Send them the scope and the price |
+| Both sign the **SOW** | `docs/client-docs/01-sales/SOW-TEMPLATE.md`. Have an advocate review it before its first paid use |
 | Clients → **New engagement** | They said yes. One submit creates everything |
 | Firebase Console, then **Access** | Give them a login. Two halves, both required |
 | Money → **Invoice** | Bill the first 50%. This is the document with your account on it |
-| Delivery | Raise what you need from them · move a scope line when it moves |
-| Money → **Record payment** | The total received, the day it lands |
-| Money → **Invoice** | At launch, the second 50% |
+| Money → **Record payment** | **Work starts when this clears — not when the SOW is signed** |
+| Delivery | Move a scope line when it moves. Their list is already raised and ageing |
+| Staging → **UAT**, 5 working days | `docs/client-docs/02-build/UAT-PLAN.md` |
+| Money → **Invoice**, then **Record payment** | The second 50%, on completion |
+| **Then** go live | `docs/client-docs/03-launch/GO-LIVE-CHECKLIST.md` |
 
 **Nothing exists in the database until New engagement.** Everything above that
 row is selling, and a deal that dies there leaves nothing behind to archive. The
-moment you submit that form the client, the project, the agreed scope line, both
-invoices and the milestone schedule all exist at once.
+moment you submit that form the client, the project, the agreed scope lines,
+both invoices, the milestone schedule and the client's own to-do list all exist
+at once.
+
+### The two payments are gates, not reminders
+
+The order above is deliberate and it is the part most likely to be given away
+under pressure:
+
+- **No work starts until the first payment has cleared.** Not signed — cleared.
+- **The site does not reach their domain until the second has cleared.**
+  Completion means finished, tested and signed off *on staging*. Go-live
+  follows payment.
+
+The store is the leverage. Handing it over and then asking to be paid for it is
+how a studio ends up chasing its own invoice, and the SOW says so in writing at
+clauses 5.1 and 5.3 precisely so it does not have to be argued later.
+
+### The paperwork lives in the repo
+
+`docs/client-docs/` holds fourteen templates covering the whole engagement —
+proposal, SOW, intake questionnaire, kickoff, weekly update, change request,
+UAT plan, go-live checklist, handover, care plan agreement, and three internal
+trackers marked **never send to the client**. Placeholders are `{{LIKE_THIS}}`.
+
+Two things in them are kept deliberately empty:
+
+- **The supplier GSTIN.** Brand Mint is not registered yet, so it stays off the
+  document entirely rather than being filled with a placeholder. Prices are
+  still written as exclusive of 18% GST — that is what the client will owe.
+- **The warranty length on Commerce.** The template defaults to 30 days;
+  Commerce is **60**, and a client who paid for the longer cover should get it.
 
 ### The flow is now on the screen, not just on this page
 
@@ -178,7 +212,7 @@ why it kept getting abandoned halfway.
    client. If that sentence is wrong, fix it before submitting rather than after.
 6. **Create.** One submit makes the client, the project, the agreed scope lines,
    the 50% to start / 50% on completion invoices, the full milestone schedule,
-   and the seven things you need **from them**, dated from today.
+   and the nine things you need **from them**, dated from today.
 
 > **Negotiated a different number?** There is a collapsed *Negotiated a different
 > price or length?* section. Leave it alone and the tier's published price and
@@ -195,9 +229,22 @@ No path through this form marks a retainer signed unless you tick the box.
 ### What the client sees straight away
 
 Creating the engagement raises the client's own list as **intake** — product
-photography, descriptions, brand assets, GST details, policy sign-off, UAT
-sign-off. They appear on their portal under *What we need from you*, dated, and
-they start ageing immediately.
+photography, brand assets, product data, **Razorpay activation**, **domain
+access**, GST details, policy sign-off and UAT sign-off. They appear on their
+portal under *What we need from you*, dated, and they start ageing immediately.
+
+The two access items are the ones that actually stop launches: they are outside
+your reach entirely, take days of somebody else's KYC, and are the last thing
+anyone thinks to start. Both are worded as *add hello@brandmintstudios.in to
+your own account* — **never ask a client for a password or a key**, and tell
+them nobody from Brand Mint ever will.
+
+> This is the same list as the client responsibilities clause in
+> `docs/client-docs/01-sales/SOW-TEMPLATE.md` and the closing section of the
+> intake questionnaire, and it has to stay the same list. The SOW says the
+> delivery date extends day for day while any of them is outstanding, so a
+> portal chasing a different list than the contract names would be chasing
+> things nobody agreed to — and quietly not chasing the ones they did.
 
 That matters more than it looks. The terms say delays in client input extend the
 timeline day for day; the intake list is what makes that clause a visible fact

@@ -337,7 +337,10 @@ try {
 
        Asserting the old headings here would have kept the suite green while
        the screen it describes no longer existed, which is worse than no test. */
-    for (const want of ["Quote & price", "Signed", "Portal login", "Paid", "Retainer", "Updates", "Links"]) {
+    /* "Care plan" rather than "Retainer": the studio now sells three named
+       monthly plans, and the amount alone cannot answer whether a request is
+       included work or a change order. */
+    for (const want of ["Quote & price", "Signed", "Portal login", "Paid", "Care plan", "Updates", "Links"]) {
       check(drawerText.includes(want.toLowerCase()), `the client record shows "${want}"`);
     }
     check(!/onboarding/.test(drawerText),

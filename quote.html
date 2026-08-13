@@ -241,8 +241,10 @@
         const oneOff = chosen.filter((f) => (pricing[f.id] || {}).priceType !== "monthly");
         const monthly = chosen.filter((f) => (pricing[f.id] || {}).priceType === "monthly");
 
-        const baseOneOff = base && !base.recurring ? base.priceFloor : 0;
-        const baseMonthly = base && base.recurring ? base.priceFloor : 0;
+        /* A tier is a FIXED price, never recurring — care plans are the
+           recurring half of the offer and are not quoted from this screen. */
+        const baseOneOff = base ? base.priceFloor : 0;
+        const baseMonthly = 0;
 
         const oneOffTotal = baseOneOff + oneOff.reduce((s, f) => s + (pricing[f.id]?.price || 0), 0);
         const monthlyTotal = baseMonthly + monthly.reduce((s, f) => s + (pricing[f.id]?.price || 0), 0);
@@ -461,7 +463,7 @@
       document.getElementById("bm-base-service").addEventListener("change", () => {
         const base = baseService();
         document.getElementById("bm-base-note").textContent = base
-          ? `Published floor: ${formatINR(base.priceFloor)}${base.recurring ? " / month" : ""}. Verified against the live site and the service catalog.`
+          ? `${escapeHtml(base.label)} — ${formatINR(base.priceFloor)} for ${tier(base.id).weeks}${tier(base.id).weeksNote ? "+" : ""} weeks. This is the published price, not a floor: anything added below is on top of it.`
           : "";
         renderScopeDoc();
       });
