@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
-  "installCommand": "cd agency-os && pnpm install --no-frozen-lockfile",
+  "installCommand": "cd agency-os && pnpm install --frozen-lockfile",
   "buildCommand": "cd agency-os && pnpm vite build",
   "outputDirectory": "agency-os/dist/public",
   "headers": [
