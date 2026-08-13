@@ -24,6 +24,13 @@ Internal. Nothing on this list is optional.
 
 ## Technical
 ☐ Live environment variables set, no test keys anywhere
+
+> **Live keys go into the client's own hosting environment and nowhere else.**
+> Not into a repo, not into a chat, not into the Brand Mint portal, not into a
+> note. Prefer having the client paste them into their own dashboard while you
+> watch. If you do handle one, it exists in exactly one place when you are
+> finished — and if it ever went through a chat or a file, treat it as spent
+> and have it rotated before launch.
 ☐ Razorpay switched from test to live mode
 ☐ Test transaction on live, then refunded
 ☐ SSL active
@@ -39,7 +46,7 @@ Internal. Nothing on this list is optional.
 ## Content
 ☐ Privacy Policy, Terms, Refund Policy, Shipping Policy all published
 ☐ Contact details and business address correct
-☐ GST number displayed where required
+☐ The **client's** GST number displayed where required (theirs, on their store — not ours)
 ☐ No placeholder text or dummy images anywhere
 ☐ Every product has an image and a price
 
@@ -53,7 +60,7 @@ Internal. Nothing on this list is optional.
 ☐ Handover pack sent
 ☐ Walkthrough video recorded and sent
 ☐ Admin training call done
-☐ Warranty start and end dates confirmed in writing
+☐ Warranty start and end dates confirmed in writing — 30 days, or **60 on Commerce**
 ☐ Care Plan offered
 ☐ Testimonial requested — ask now, while they're happy
 ☐ Watch the site for 48 hours
