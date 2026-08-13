@@ -130,7 +130,6 @@
         email,
         phone: (data.get("phone") || "").toString().trim() || null,
         project_type: type,
-        budget: (data.get("budget") || "").toString().trim() || null,
         message: (data.get("message") || "").toString().trim() || null,
         status: "new",
         score: authUser ? 65 : 50,
@@ -161,12 +160,11 @@
             `Email: ${email}`,
             `Company: ${payload.company || "—"}`,
             `Type: ${payload.project_type || "—"}`,
-            `Budget: ${payload.budget || "—"}`,
             "",
             payload.message || "",
           ].join("\n")
         );
-        window.location.href = `mailto:hello@brandmint.studio?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:hello@brandmintstudios.in?subject=${subject}&body=${body}`;
       }
     });
   }
