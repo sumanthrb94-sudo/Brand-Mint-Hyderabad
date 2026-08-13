@@ -1,7 +1,8 @@
 import { startLogin } from "@/const";
+import { firebaseAuth, firebaseLogout } from "@/lib/firebase";
 import { trpc } from "@/lib/trpc";
-import { TRPCClientError } from "@trpc/client";
-import { useCallback, useEffect, useMemo } from "react";
+import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
@@ -9,16 +10,28 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  // Login is started via startLogin() in the effect below, only when we actually
-  // navigate — never during render. startLogin() mints a one-time nonce + writes
-  // the state cookie, so calling it per render would overwrite the cookie and
-  // desync it from an in-flight login's `state`.
   const { redirectOnUnauthenticated = false, redirectPath } = options ?? {};
   const utils = trpc.useUtils();
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(() => firebaseAuth()?.currentUser ?? null);
+  const [firebaseLoading, setFirebaseLoading] = useState(Boolean(firebaseAuth()));
+
+  useEffect(() => {
+    const auth = firebaseAuth();
+    if (!auth) {
+      setFirebaseLoading(false);
+      return;
+    }
+    return onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      setFirebaseLoading(false);
+      void utils.auth.me.invalidate();
+    });
+  }, [utils.auth.me]);
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
+    enabled: Boolean(firebaseUser),
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({
@@ -28,38 +41,18 @@ export function useAuth(options?: UseAuthOptions) {
   });
 
   const logout = useCallback(async () => {
-    try {
-      await logoutMutation.mutateAsync();
-    } catch (error: unknown) {
-      if (
-        error instanceof TRPCClientError &&
-        error.data?.code === "UNAUTHORIZED"
-      ) {
-        return;
-      }
-      throw error;
-    } finally {
-      // Clear the Preview auto-login token mirrored into sessionStorage, so
-      // header-based sessions (Safari ITP / WebView) are logged out too. The
-      // backend cookie is cleared by the logout mutation.
-      try {
-        sessionStorage.removeItem("manus-cookie");
-      } catch {}
-      utils.auth.me.setData(undefined, null);
-      await utils.auth.me.invalidate();
-    }
+    await firebaseLogout();
+    await logoutMutation.mutateAsync().catch(() => undefined);
+    utils.auth.me.setData(undefined, null);
+    await utils.auth.me.invalidate();
   }, [logoutMutation, utils]);
 
   const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
     return {
       user: meQuery.data ?? null,
-      loading: meQuery.isLoading || logoutMutation.isPending,
+      loading: firebaseLoading || (Boolean(firebaseUser) && meQuery.isLoading) || logoutMutation.isPending,
       error: meQuery.error ?? logoutMutation.error ?? null,
-      isAuthenticated: Boolean(meQuery.data),
+      isAuthenticated: Boolean(firebaseUser && meQuery.data),
     };
   }, [
     meQuery.data,
@@ -67,20 +60,21 @@ export function useAuth(options?: UseAuthOptions) {
     meQuery.isLoading,
     logoutMutation.error,
     logoutMutation.isPending,
+    firebaseLoading,
+    firebaseUser,
   ]);
 
   useEffect(() => {
     if (!redirectOnUnauthenticated) return;
-    if (meQuery.isLoading || logoutMutation.isPending) return;
+    if (firebaseLoading || meQuery.isLoading || logoutMutation.isPending) return;
     if (state.user) return;
     if (typeof window === "undefined") return;
     if (redirectPath && window.location.pathname === redirectPath) return;
 
-    // Navigate at this moment only. startLogin() mints the nonce + cookie itself.
     if (redirectPath) {
       window.location.href = redirectPath;
     } else {
-      startLogin();
+      void startLogin();
     }
   }, [
     redirectOnUnauthenticated,
@@ -88,6 +82,7 @@ export function useAuth(options?: UseAuthOptions) {
     logoutMutation.isPending,
     meQuery.isLoading,
     state.user,
+    firebaseLoading,
   ]);
 
   return {
