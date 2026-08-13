@@ -15,10 +15,20 @@ One per project. Tick as you go.
 ☐ CI running — tests, lint, typecheck
 ☐ Staging deployed
 ☐ Kickoff document sent
-☐ Client materials checklist sent
+☐ Client materials — **already raised on their portal**, dated, the moment the
+  engagement was created. Confirm they can see it rather than re-sending a list
 ☐ Risk log started
 
 ## Build
+
+*This is the Starter list. **Growth** adds courier API and live tracking,
+returns and refunds, coupons, abandoned-cart recovery, lifecycle emails, sales
+reporting, inventory alerts, the support inbox, the full Playwright suite,
+analytics and the SEO/Lighthouse pass. **Commerce** adds staff roles, advanced
+reporting and exports, reviews, wishlist, loyalty and CI performance budgets.
+Add those lines when selling those tiers — an unticked box is the only thing
+that reliably stops a deliverable being forgotten.*
+
 ☐ Database schema
 ☐ Auth with phone OTP
 ☐ Design system
