@@ -1097,7 +1097,15 @@
    active nav pill and the dark primary button. currentColor would vanish on
    one of them, so the ring is the mint accent, which is legible on all three
    and is never carrying text. */
-.bm-crm :is(button, a, input, select, summary):focus-visible {
+/* #bm-overlay is a SIBLING of .bm-crm, not a child — the modal, the drawer and
+   the command palette are all mounted into it, so a rule scoped to .bm-crm
+   alone missed every overlay in the app and they fell back to the browser's
+   default 1px ring. A ring existed, so this was never an accessibility
+   failure; it was the designed ring not reaching the surfaces that most need
+   it, including the dark primary button where a default ring is nearly
+   invisible. Measured by tabbing through the New engagement form, not by
+   reading the stylesheet. */
+:is(.bm-crm, #bm-overlay) :is(button, a, input, select, summary, textarea):focus-visible {
   outline: 2px solid var(--mint);
   outline-offset: 2px;
   border-radius: var(--r-sm);
@@ -1168,7 +1176,30 @@
   flex-wrap: wrap;
   width: 100%;
 }
-.bm-seg--wrap button { flex: 1 1 auto; min-height: 40px; }
+/* 44px, not 40. Measured at a 390px viewport: these were the primary controls
+   of the New engagement form and every one of them was 4px under the minimum
+   comfortable tap target. Four pixels sounds like nothing and is the
+   difference between selecting a tier and selecting the one below it. */
+.bm-seg--wrap button { flex: 1 1 auto; min-height: 44px; }
+
+/* The same rule for the two other things a finger has to hit in an overlay.
+   A checkbox is 13x13px in every browser, so the LABEL is the real target —
+   it was 19px tall, which is why this sets the label rather than the input. */
+#bm-overlay label.bm-mn-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+/* Padding, NOT flex. `display: flex` on a <summary> drops the disclosure
+   triangle in Chrome and Safari, which would take the one affordance saying
+   this row opens — a 44px tap target that no longer looks tappable is a worse
+   trade than a 14px one that does. Vertical padding gets the height with the
+   marker intact. */
+#bm-overlay summary {
+  min-height: 44px;
+  padding: 12px 0;
+}
 
 /* A list row on a phone.
    The row is a two-column grid — content, then actions — and on a 390px screen
