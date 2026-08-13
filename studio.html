@@ -193,7 +193,7 @@
         dedupeIntake, resolveUsernameToEmail, logout,
         daysSince, formatDate, formatINR, formatDuration, minutesBetween, minutesSince,
         escapeHtml, safeUrl,
-        BREAK_EVEN_MONTHLY, SERVICE_TYPES, MILESTONE_TEMPLATES,
+        BREAK_EVEN_MONTHLY, SERVICE_TYPES, RETIRED_SERVICE_TYPES, isRetiredType, MILESTONE_TEMPLATES,
         LEAD_STAGES, OPEN_LEAD_STAGES, FUNNEL_TARGETS, LEAD_SOURCES, LOSS_REASONS,
         FAST_RESPONSE_MINUTES, MARKET_MEDIAN_RESPONSE_HOURS,
         SCOPE_STATUS, SCOPE_STATUS_IDS,
@@ -239,7 +239,11 @@
       const GROUP_LABEL = { assets: "Assets", content: "Content", access: "Access", decisions: "Decisions" };
       const STAGE_LABEL = Object.fromEntries(LEAD_STAGES.map((s) => [s.id, s.label]));
       const SOURCE_LABEL = Object.fromEntries(LEAD_SOURCES.map((s) => [s.id, s.label]));
-      const TYPE_LABEL = Object.fromEntries(SERVICE_TYPES.map((t) => [t.id, t.label]));
+      /* Resolves retired ids too, so a project created as a brand or SEO
+         engagement still shows its name rather than a blank. */
+      const TYPE_LABEL = Object.fromEntries(
+        [...SERVICE_TYPES, ...RETIRED_SERVICE_TYPES].map((t) => [t.id, t.label])
+      );
 
       const $ = (id) => document.getElementById(id);
       const inr = (n) => "Rs " + Math.round(n).toLocaleString("en-IN");
@@ -1164,6 +1168,7 @@
                 <select data-pfield="type">
                   <option value="">Type not set</option>
                   ${SERVICE_TYPES.map((t) => `<option value="${escapeHtml(t.id)}" ${p.type === t.id ? "selected" : ""}>${escapeHtml(t.label)}</option>`).join("")}
+                  ${isRetiredType(p.type) ? `<option value="${escapeHtml(p.type)}" selected>${escapeHtml(TYPE_LABEL[p.type])} (retired)</option>` : ""}
                 </select>
                 <input class="bm-mn-narrow" type="date" data-pfield="dueAt" value="${dateInputValue(p.dueAt)}" title="Due date" />
                 <label class="bm-mn-check"><input type="checkbox" data-pfield="billable" ${p.billable ? "checked" : ""} /> Billable</label>

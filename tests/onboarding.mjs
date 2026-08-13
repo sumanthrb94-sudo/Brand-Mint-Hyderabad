@@ -73,7 +73,16 @@ const CLIENTS = [
   { name: "Nalanda Interiors",   user: "nalanda",   deal: "then",     price: 600000, weeks: 10, retainer: 25000, type: "site" },
   { name: "Sarojini Exports",    user: "sarojini",  deal: "oneoff",   price: 400000, weeks: 6,  retainer: 0,     type: "site" },
   { name: "Kaveri Clinic",       user: "kaveri",    deal: "retainer", price: 0,      weeks: 0,  retainer: 12500, type: "" },
-  { name: "Deccan Dental Group", user: "deccan",    deal: "then",     price: 250000, weeks: 4,  retainer: 15000, type: "brand" },
+  /* Was type "brand". That line was retired when the seven service types
+     became two — brand work now ships INSIDE a website build rather than as a
+     headline service, so no new project can be typed "brand" and the New
+     engagement form no longer offers it.
+
+     The engagement is unchanged in every other respect; only the type it is
+     sold under moved. Leaving it as "brand" would have asserted that a service
+     the studio no longer offers still stamps a schedule, which is a test
+     describing a business that does not exist. */
+  { name: "Deccan Dental Group", user: "deccan",    deal: "then",     price: 250000, weeks: 4,  retainer: 15000, type: "site" },
   { name: "Charminar Textiles",  user: "charminar", deal: "oneoff",   price: 180000, weeks: 3,  retainer: 0,     type: "tool" },
   { name: "Golconda Coffee",     user: "golconda",  deal: "retainer", price: 0,      weeks: 0,  retainer: 8000,  type: "" },
 ];

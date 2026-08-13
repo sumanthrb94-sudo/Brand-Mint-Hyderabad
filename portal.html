@@ -137,7 +137,7 @@
         invoiceOutstanding,
         escapeHtml,
         safeUrl,
-        SERVICE_TYPES,
+        serviceTypeLabel,
         mountThemeToggle,
         payInvoice,
         paymentError,
@@ -198,7 +198,7 @@
         // Type pill: show the real service label, or nothing at all. Never
         // invent a status like "In progress" from an unset field.
         const statusPill = document.getElementById("bm-project-status");
-        const typeLabel = SERVICE_TYPES.find((t) => t.id === project.type)?.label;
+        const typeLabel = serviceTypeLabel(project.type);
         if (typeLabel) {
           statusPill.textContent = typeLabel;
           statusPill.hidden = false;

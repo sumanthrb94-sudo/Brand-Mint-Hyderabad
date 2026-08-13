@@ -562,15 +562,68 @@ export const BREAK_EVEN_MONTHLY = 100000;
 // both the live marketing site and brand-mint-admin/03-SERVICE-CATALOG.md
 // exactly, so they are safe to hardcode. Add-on prices are NOT hardcoded —
 // see FEATURE_CATALOG.
+/* TWO SERVICE LINES. It was seven.
+ *
+ * Brand system, Performance media, SEO & content engine, AI integration and
+ * Internal build were retired — not because the work stopped, but because they
+ * were headline CATEGORIES rather than things a buyer asks for. The studio's
+ * own homepage has always said one sentence: custom websites and bespoke
+ * internal tools. The service list now says the same.
+ *
+ * Nothing became unsellable. Every retired line still ships inside one of the
+ * two: brand and SEO are part of a website build, AI and automation are the
+ * high end of an internal tool. The catalog in bm-catalog.js still prices all
+ * 43 features, including the ₹2,00,000 brand system and the ₹1,50,000
+ * internal copilot.
+ *
+ * THE FLOORS CHANGED BECAUSE THE OLD ONES CONTRADICTED THE CATALOG.
+ * A floor exists to stop work that is not worth starting, not to advertise a
+ * price. The old website floor of ₹2,00,000 was 20 days, which is above every
+ * website bundle the catalog can assemble except a full shop — so /quote
+ * priced a brochure site at ₹40,000 while /services claimed ₹2,00,000. The old
+ * internal-tool floor of ₹4,00,000 was 40 days, and nothing in the catalog
+ * reaches it: the largest single tool is the ₹1,50,000 copilot.
+ *
+ * The new floors sit on real catalog bundles at the live ₹10,000 day rate:
+ *   site  ₹80,000  = 8 days  = dynamic site + SEO + images
+ *   tool  ₹1,00,000 = 10 days = CRM / pipeline, the smallest full system
+ */
 export const SERVICE_TYPES = [
-  { id: "site", label: "Custom website", priceFloor: 200000, recurring: false },
-  { id: "tool", label: "Custom internal tool", priceFloor: 400000, recurring: false },
-  { id: "brand", label: "Brand system", priceFloor: 150000, recurring: false },
-  { id: "media", label: "Performance media", priceFloor: 100000, recurring: true },
-  { id: "seo", label: "SEO & content engine", priceFloor: 75000, recurring: true },
-  { id: "ai", label: "AI integration", priceFloor: 200000, recurring: false },
-  { id: "internal", label: "Internal build", priceFloor: 0, recurring: false },
+  { id: "site", label: "Custom website", priceFloor: 80000, recurring: false },
+  { id: "tool", label: "Custom internal tool", priceFloor: 100000, recurring: false },
 ];
+
+/* Retired lines, kept ONLY so a project created under one still renders its
+ * name instead of a blank.
+ *
+ * This is not sentimentality. `project.type` is stored on the document, and
+ * dropping the id would make every historic project show an empty type and —
+ * worse — a type dropdown that silently re-typed it on the next save. A label
+ * that resolves is the difference between "this was a brand engagement" and a
+ * record that quietly lost a fact.
+ *
+ * Never offered in a picker. serviceTypeLabel() is the only way in. */
+export const RETIRED_SERVICE_TYPES = [
+  { id: "brand", label: "Brand system" },
+  { id: "media", label: "Performance media" },
+  { id: "seo", label: "SEO & content engine" },
+  { id: "ai", label: "AI integration" },
+  { id: "internal", label: "Internal build" },
+];
+
+/** The name of a service type, live or retired. Returns null when unset, which
+ *  the UI must render as "not set" rather than as anything else (§4). */
+export function serviceTypeLabel(id) {
+  if (!id) return null;
+  const all = [...SERVICE_TYPES, ...RETIRED_SERVICE_TYPES];
+  return all.find((t) => t.id === id)?.label || null;
+}
+
+/** True when a type is no longer offered. The studio screen uses this to keep
+ *  a retired option visible on the project it belongs to and nowhere else. */
+export function isRetiredType(id) {
+  return RETIRED_SERVICE_TYPES.some((t) => t.id === id);
+}
 
 // Standing commercial terms. Every one of these is stated in the service
 // catalog — none is invented.
