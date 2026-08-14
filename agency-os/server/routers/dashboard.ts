@@ -24,7 +24,7 @@ export const dashboardRouter = router({
   }),
   resetAllData: adminProcedure.input(z.object({ confirm: z.literal(true) })).mutation(async () => {
     const db = getFirestore();
-    const collectionsToDelete = [COLLECTIONS.projects, COLLECTIONS.checklistItems, COLLECTIONS.deliverables, COLLECTIONS.invoices, COLLECTIONS.documents, COLLECTIONS.files];
+    const collectionsToDelete = [COLLECTIONS.projects, COLLECTIONS.checklistItems, COLLECTIONS.deliverables, COLLECTIONS.invoices, COLLECTIONS.documents, COLLECTIONS.storedFiles];
     let totalDeleted = 0;
     for (const collectionName of collectionsToDelete) {
       const snapshot = await getDocs(collection(db, collectionName));

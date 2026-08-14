@@ -39,12 +39,30 @@ export function hasAcceptedAllRequiredPolicies(policyTypes: readonly string[]) {
   return REQUIRED_POLICY_TYPES.every((policy) => accepted.has(policy));
 }
 
+/**
+ * Log invoice records that are missing required fields. Helps identify the
+ * origin of malformed records without cluttering logs with repeated warnings.
+ */
+function logMalformedInvoices(invoices: InvoiceRecord[]) {
+  const malformed = invoices.filter((invoice) => !invoice.invoiceNumber || !Number.isFinite(invoice.totalPaise));
+  malformed.forEach((invoice) => {
+    const issues: string[] = [];
+    if (!invoice.invoiceNumber) issues.push("missing invoiceNumber");
+    if (!Number.isFinite(invoice.totalPaise)) issues.push("totalPaise is not finite");
+    console.warn(`[Invoice ${invoice.id}] Record needs attention: ${issues.join(", ")} — client ${invoice.clientId}, created ${invoice.createdAt}`);
+  });
+}
+
 export async function listClients() { return listRecords<ClientRecord>("clients"); }
 export async function listPublicInquiries() { return listRecords<PublicInquiryRecord>("publicInquiries"); }
 export async function getClient(id: number) { return getRecord<ClientRecord>("clients", id); }
 export async function getProject(id: number) { return getRecord<ProjectRecord>("projects", id); }
 export async function listProjects() { return listRecords<ProjectRecord>("projects"); }
-export async function listInvoices() { return listRecords<InvoiceRecord>("invoices"); }
+export async function listInvoices() {
+  const invoices = await listRecords<InvoiceRecord>("invoices");
+  logMalformedInvoices(invoices);
+  return invoices;
+}
 export async function listDocuments() { return listRecords<DocumentRecord>("documents"); }
 export async function listDeliverables() { return listRecords<DeliverableRecord>("deliverables"); }
 export async function listNotifications() { return listRecords<NotificationRecord>("notifications"); }
@@ -121,7 +139,11 @@ export async function ensureOnboardingProject(clientId: number) {
   if (!client || !newest) return null;
   return addRecord("projects", onboardingProjectDraft({ clientId, companyName: client.companyName, serviceTier: newest.serviceTier }));
 }
-export async function getClientInvoices(clientId: number) { return filterRecords<InvoiceRecord>("invoices", (invoice) => invoice.clientId === clientId); }
+export async function getClientInvoices(clientId: number) {
+  const invoices = await filterRecords<InvoiceRecord>("invoices", (invoice) => invoice.clientId === clientId);
+  logMalformedInvoices(invoices);
+  return invoices;
+}
 export async function getClientDocuments(clientId: number) { return filterRecords<DocumentRecord>("documents", (document) => document.clientId === clientId); }
 export async function getDeliverablesForProject(projectId: number) { return filterRecords<DeliverableRecord>("deliverables", (deliverable) => deliverable.projectId === projectId); }
 export async function getChecklistForProject(projectId: number) { return filterRecords<ChecklistItemRecord>("checklistItems", (item) => item.projectId === projectId); }
