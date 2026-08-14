@@ -68,3 +68,5 @@
 - [x] Add an admin-controlled final-price adjustment for eligible personal projects, with invoice totals and client visibility updated accordingly.
 - [ ] Reproduce the user-reported production failure through an authenticated browser session and resolve it before making any further production claim.
 - [x] Replace separate sign-in/sign-up surfaces with one Google “Sign in” entry point that routes the CEO to Agency OS and all other authenticated users to the client portal.
+- [ ] Resolve the live post-Google-sign-in redirect stall that leaves both CEO and non-CEO accounts on the sign-in page.
+- [ ] Reduce production access to one sign-in screen and one Google button, then verify immediate role-based redirection without intermediary access screens.

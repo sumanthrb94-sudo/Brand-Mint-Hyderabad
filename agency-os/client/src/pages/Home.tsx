@@ -3,7 +3,6 @@ import { BrandMark } from "@/components/BrandMark";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { ArrowUpRight, Bell, ChevronDown, FileSignature, FolderKanban, MoreHorizontal, Plus, ReceiptText, UsersRound } from "lucide-react";
 import { Link } from "wouter";
@@ -32,7 +31,7 @@ export default function Home() {
         </header>
 
         <section className="pt-10 sm:pt-14">
-          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end"><div><p className="eyebrow">CEO dashboard</p><h1 className="mt-3 font-display text-4xl tracking-[-0.06em] text-[#102f25] sm:text-5xl">The studio, in view.</h1><p className="mt-3 max-w-md text-sm leading-6 text-[#668078]">Client relationships, delivery, documents and billing in one operating view.</p></div>{!isAuthenticated ? <Button onClick={() => startLogin()} className="h-11 rounded-full bg-[#103c2e] px-5 text-white hover:bg-[#0b3024]">CEO sign in</Button> : <Link href="/onboarding"><Button className="h-11 gap-2 rounded-full bg-[#103c2e] px-5 text-white hover:bg-[#0b3024]"><Plus className="h-4 w-4" />New client</Button></Link>}</div>
+          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end"><div><p className="eyebrow">CEO dashboard</p><h1 className="mt-3 font-display text-4xl tracking-[-0.06em] text-[#102f25] sm:text-5xl">The studio, in view.</h1><p className="mt-3 max-w-md text-sm leading-6 text-[#668078]">Client relationships, delivery, documents and billing in one operating view.</p></div><Link href="/onboarding"><Button className="h-11 gap-2 rounded-full bg-[#103c2e] px-5 text-white hover:bg-[#0b3024]"><Plus className="h-4 w-4" />New client</Button></Link></div>
 
           <div className="mt-9 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{metrics.map(({ label, value, icon: Icon, note }) => <article key={label} className="metric-card"><div className="flex items-start justify-between"><span className="metric-icon"><Icon className="h-4 w-4" /></span><button className="text-[#9aada5]" aria-label={`Options for ${label}`}><MoreHorizontal className="h-4 w-4" /></button></div><p className="mt-8 text-[11px] font-bold uppercase tracking-[0.12em] text-[#738a81]">{label}</p><p className="mt-1 font-display text-4xl tracking-[-0.055em] text-[#14392d]">{value}</p><p className="mt-3 text-[11px] text-[#8aa096]">{note}</p></article>)}</div>
         </section>

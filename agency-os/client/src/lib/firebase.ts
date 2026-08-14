@@ -3,7 +3,7 @@ import {
   getAuth,
   getRedirectResult,
   GoogleAuthProvider,
-  signInWithRedirect,
+  signInWithPopup,
   signOut,
   type User,
 } from "firebase/auth";
@@ -70,7 +70,7 @@ export async function startFirebaseGoogleLogin(returnTo?: string) {
   saveLoginReturnPath(returnTo);
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
-  return signInWithRedirect(auth, provider);
+  return signInWithPopup(auth, provider);
 }
 
 export async function finishFirebaseRedirectLogin() {
