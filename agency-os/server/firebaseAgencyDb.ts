@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { addRecord, filterRecords, findOne, getRecord, listRecords, updateRecord } from "./firebaseRepository.js";
+import { addRecord, filterRecords, findOne, getRecord, listRecords, recordTime, updateRecord } from "./firebaseRepository.js";
 import { onboardingProjectDraft } from "./projectPricing.js";
 
 export const REQUIRED_POLICY_TYPES = ["terms", "privacy", "cookies", "service_agreement"] as const;
@@ -114,7 +114,7 @@ export async function ensureOnboardingProject(clientId: number) {
     getClient(clientId),
     filterRecords<OnboardingSubmissionRecord>("onboardingSubmissions", (submission) => submission.clientId === clientId && submission.stage === "complete"),
   ]);
-  const newest = submissions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+  const newest = submissions.sort((a, b) => recordTime(b.createdAt) - recordTime(a.createdAt))[0];
   if (!client || !newest) return null;
   return addRecord("projects", onboardingProjectDraft({ clientId, companyName: client.companyName, serviceTier: newest.serviceTier }));
 }

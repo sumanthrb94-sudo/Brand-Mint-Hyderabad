@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { router } from "../_core/trpc.js";
 import { createDocument, createNotification, listDocuments, updateDocument } from "../firebaseAgencyDb.js";
+import { recordTime } from "../firebaseRepository.js";
 import { adminProcedure } from "./access.js";
 
 const documentStatus = z.enum(["draft", "sent", "awaiting_signature", "signed", "declined"]);
 
 export const documentsRouter = router({
-  list: adminProcedure.query(async () => [...await listDocuments()].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())),
+  list: adminProcedure.query(async () => [...await listDocuments()].sort((a, b) => recordTime(b.updatedAt) - recordTime(a.updatedAt))),
   create: adminProcedure.input(z.object({ clientId: z.number().int().positive(), projectId: z.number().int().positive().nullable().optional(), title: z.string().trim().min(1).max(256), documentType: z.enum(["contract", "nda", "sow"]) })).mutation(async ({ input }) => {
     const document = await createDocument({ clientId: input.clientId, projectId: input.projectId ?? null, title: input.title, documentType: input.documentType, status: "draft", signatureRequestedAt: null, signedAt: null, signatureReference: null });
     return { success: true, documentId: document.id };

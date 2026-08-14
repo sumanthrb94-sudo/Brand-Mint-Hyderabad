@@ -14,5 +14,5 @@ export const accessCopy = {
     "Use your Google account to enter Brand Mint. The CEO is routed to Agency OS; every other signed-in account opens the client portal.",
   signedInTitle: "You are signed in.",
   signedInDetail:
-    "This account has client portal access. Use a different Google account only if you need to switch workspaces.",
+    "This account has client portal access, where you can see what we build, the resources we give away free, and the ecommerce essentials. Use a different Google account only if you need to switch workspaces.",
 } as const;

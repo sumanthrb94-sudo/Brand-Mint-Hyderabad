@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { router } from "../_core/trpc.js";
 import { createDeliverable, createProject, getDeliverablesForProject, getProject, listClients, listProjects, updateProject } from "../firebaseAgencyDb.js";
+import { recordTime } from "../firebaseRepository.js";
 import { adminProcedure } from "./access.js";
 
 const projectStatus = z.enum(["discovery", "in_progress", "client_review", "complete"]);
@@ -10,7 +11,7 @@ export const projectsRouter = router({
   list: adminProcedure.query(async () => {
     const [projects, clients] = await Promise.all([listProjects(), listClients()]);
     const clientNames = new Map(clients.map((client) => [client.id, client.companyName]));
-    return Promise.all([...projects].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).map(async (project) => ({
+    return Promise.all([...projects].sort((a, b) => recordTime(b.updatedAt) - recordTime(a.updatedAt)).map(async (project) => ({
       project,
       clientName: clientNames.get(project.clientId) ?? "Client",
       deliverables: await getDeliverablesForProject(project.id),

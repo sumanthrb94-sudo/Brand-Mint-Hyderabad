@@ -29,10 +29,34 @@ function normalize(value: unknown): unknown {
   return value;
 }
 
+/**
+ * Documents written by earlier revisions of this app, imported by hand, or
+ * partially written by a failed request can carry a missing, string, or
+ * numeric timestamp. Every caller sorts on `updatedAt`/`createdAt` and calls
+ * `.getTime()` on them, so coerce to a real Date at the read boundary rather
+ * than letting a single malformed document throw the whole query.
+ */
+export function toDate(value: unknown): Date | null {
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (hasFirestoreDate(value)) return toDate(value.toDate());
+  if (typeof value === "string" || typeof value === "number") return toDate(new Date(value));
+  return null;
+}
+
+export function recordTime(value: unknown): number {
+  return toDate(value)?.getTime() ?? 0;
+}
+
+const EPOCH = new Date(0);
+
 export function fromSnapshot<T extends { id: number }>(snapshot: { id: string; data: () => DocumentData | undefined }): T | undefined {
   const data = snapshot.data();
   if (!data) return undefined;
-  return normalize(data) as T;
+  const record = normalize(data) as Record<string, unknown>;
+  const createdAt = toDate(record.createdAt);
+  record.createdAt = createdAt ?? EPOCH;
+  record.updatedAt = toDate(record.updatedAt) ?? createdAt ?? EPOCH;
+  return record as T;
 }
 
 export async function listRecords<T extends { id: number }>(collection: keyof typeof COLLECTIONS): Promise<T[]> {

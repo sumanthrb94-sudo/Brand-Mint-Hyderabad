@@ -2,24 +2,13 @@ import { PublicInquiry } from "@/components/PublicInquiry";
 import { PublicMotion } from "@/components/PublicMotion";
 import { BrandMark } from "@/components/BrandMark";
 import { Button } from "@/components/ui/button";
+import { carePlans, tiers } from "@/lib/ecommerceOffer";
 import { AnimatePresence, motion, type Transition, useReducedMotion } from "framer-motion";
 import { ArrowRight, Check, ChevronDown, Menu, PackageCheck, ShieldCheck, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
 const rise = { hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } };
-
-const tiers = [
-  { name: "Starter Store", price: "₹99,000", timing: "8 weeks", tone: "standard", intro: "A complete, working online store. Everything needed to take orders and get paid.", groups: [["Foundation", "Database design and setup", "Phone OTP customer accounts", "Deployment, domain connection and SSL"], ["Storefront", "Homepage and design system", "Product listing and detail pages", "Search, category filters and cart"], ["Checkout, orders and admin", "Razorpay online payments and COD", "Order confirmation and customer history", "Products, stock and order management"]] },
-  { name: "Growth Store", price: "₹2,00,000", timing: "12 weeks", tone: "featured", intro: "Everything in Starter, plus the systems that reduce daily manual work.", groups: [["Shipping and returns", "Courier API integration", "Live tracking", "Returns and Razorpay refunds"], ["Selling", "Coupons and discount codes", "Abandoned-cart recovery", "Order lifecycle emails"], ["Quality and data", "Sales reporting and low-stock alerts", "GA4, Meta Pixel and conversion tracking", "Playwright suite, SEO audit and Lighthouse pass"]] },
-  { name: "Commerce Store", price: "₹3,00,000", timing: "12+ weeks", tone: "standard", intro: "Everything in Growth, plus depth for stores with a team and volume.", groups: [["Access and reporting", "Staff, manager and owner roles", "Advanced reporting and data exports"], ["Customer features", "Product reviews and ratings", "Wishlist", "Loyalty or referral programme"], ["Scale", "Performance budgets enforced in CI", "60-day bug warranty"]] },
-];
-
-const carePlans = [
-  ["Care", "₹12,500/mo", "Hosting, SSL, security updates, backups, uptime monitoring and small fixes."],
-  ["Growth", "₹25,000/mo", "Everything in Care, plus content updates, a monthly report and one small feature each month."],
-  ["Managed Commerce", "₹50,000/mo", "Everything in Growth, plus catalogue operations, campaign management and priority support."],
-];
 
 const faqs = [
   ["What is included in every build?", "Every tier includes a fixed scope and price agreed before work begins. The final build is tested, reviewed during a 5-day UAT window, and handed over with documentation and a walkthrough video."],

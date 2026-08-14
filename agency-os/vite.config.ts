@@ -150,10 +150,15 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+// The Manus runtime, its debug collector, and the JSX source-location plugin
+// are authoring tools. They inlined a ~370KB script and shipped a public
+// debug-collector asset into the production build, so they are now scoped to
+// non-production modes only. `mode` is used rather than NODE_ENV because
+// `vite build` sets it deterministically on every host.
+const authoringPlugins = () => [jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
-export default defineConfig({
-  plugins,
+export default defineConfig(({ mode }) => ({
+  plugins: [react(), tailwindcss(), ...(mode === "production" ? [] : authoringPlugins())],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -184,4 +189,4 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
-});
+}));
