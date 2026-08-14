@@ -1,11 +1,8 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
 import {
-  ConfirmationResult,
   getAuth,
   getRedirectResult,
   GoogleAuthProvider,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
   signInWithRedirect,
   signOut,
   type User,
@@ -31,12 +28,7 @@ export function safeReturnPath(candidate?: string | null) {
 
 export function firebaseAuthErrorMessage(error: unknown) {
   const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
-  if (code === "auth/operation-not-allowed") {
-    return "Phone SMS is not enabled for this country. In Firebase Console, open Authentication → Settings → SMS region policy and allow India (+91), then try again.";
-  }
-  if (code === "auth/too-many-requests") {
-    return "Firebase has temporarily limited SMS requests for this number. Please wait before trying again, or use an approved Firebase test number during setup.";
-  }
+  if (code === "auth/account-exists-with-different-credential") return "This email is already associated with another sign-in method for this Firebase project.";
   if (error instanceof Error) return error.message;
   return "Authentication could not be completed. Please try again.";
 }
@@ -85,27 +77,6 @@ export async function finishFirebaseRedirectLogin() {
   const auth = firebaseAuth();
   if (!auth) return null;
   return getRedirectResult(auth);
-}
-
-export function createPhoneRecaptcha(containerId: string) {
-  const auth = firebaseAuth();
-  if (!auth) throw new Error("Firebase authentication is not configured for this deployment");
-  return new RecaptchaVerifier(auth, containerId, { size: "invisible" });
-}
-
-export async function startFirebasePhoneLogin(phoneNumber: string, verifier: RecaptchaVerifier, returnTo?: string) {
-  const auth = firebaseAuth();
-  if (!auth) throw new Error("Firebase authentication is not configured for this deployment");
-  if (!/^\+[1-9]\d{7,14}$/.test(phoneNumber)) {
-    throw new Error("Enter a valid phone number with country code, for example +919876543210");
-  }
-  saveLoginReturnPath(returnTo);
-  return signInWithPhoneNumber(auth, phoneNumber, verifier);
-}
-
-export async function confirmFirebasePhoneLogin(confirmation: ConfirmationResult, code: string) {
-  if (!/^\d{6}$/.test(code)) throw new Error("Enter the 6-digit verification code");
-  return confirmation.confirm(code);
 }
 
 export async function firebaseLogout() {

@@ -16,9 +16,8 @@ describe("safeReturnPath", () => {
 });
 
 describe("firebaseAuthErrorMessage", () => {
-  it("gives a specific recovery step when Firebase has blocked an SMS region", () => {
-    expect(firebaseAuthErrorMessage({ code: "auth/operation-not-allowed" })).toContain("SMS region policy");
-    expect(firebaseAuthErrorMessage({ code: "auth/operation-not-allowed" })).toContain("India (+91)");
+  it("gives a specific recovery step for an account with a different Firebase credential", () => {
+    expect(firebaseAuthErrorMessage({ code: "auth/account-exists-with-different-credential" })).toContain("another sign-in method");
   });
 
   it("preserves ordinary authentication errors", () => {

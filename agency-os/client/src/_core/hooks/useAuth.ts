@@ -29,15 +29,11 @@ export function useAuth(options?: UseAuthOptions) {
         return;
       }
 
-      // The first post-redirect tRPC request must use a freshly minted token.
-      // Invalidating only after that refresh prevents the server profile query
-      // from racing the browser's Firebase redirect state restoration.
-      void user
-        .getIdToken(true)
-        .catch(() => undefined)
-        .finally(() => {
-          void utils.auth.me.invalidate();
-        });
+      // onIdTokenChanged only fires after Firebase has restored a usable
+      // session. Do not force an additional token refresh here: normal Google
+      // sign-in already supplies a valid ID token, while a forced refresh can
+      // fail independently and strand a completed session on the sign-in page.
+      void utils.auth.me.invalidate();
     });
   }, [utils.auth.me]);
 
