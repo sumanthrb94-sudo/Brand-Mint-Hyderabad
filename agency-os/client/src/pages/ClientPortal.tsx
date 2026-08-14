@@ -7,8 +7,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Download, FileText, FolderKanban, LogOut, ReceiptText, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
+import { formatInr as formatInrDefault } from "@/lib/money";
 
-const formatInr = (paise?: number | null) => paise == null ? "Price to be confirmed" : `INR ${(paise / 100).toLocaleString("en-IN")}`;
+const formatInr = (paise?: number | null) => formatInrDefault(paise, "Price to be confirmed");
 const statusLabel = (status: string) => status.replaceAll("_", " ");
 
 function SecureDownload({ fileId }: { fileId: number }) {
