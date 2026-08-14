@@ -50,28 +50,49 @@ function isConfiguredAdmin(email?: string | null) {
   return Boolean(email && configuredEmails.includes(email.toLowerCase()));
 }
 
-export async function resolveFirebaseUser(token: DecodedIdToken): Promise<FirebaseAgencyUser> {
-  const db = firebaseDb();
-  const userRef = db.collection("users").doc(token.uid);
-  const existing = await userRef.get();
+export function firebaseUserFromToken(token: DecodedIdToken): FirebaseAgencyUser {
   const now = new Date();
-  // The Firebase email allowlist is the single source of truth for the CEO
-  // role. A previously persisted admin record must not grant access after an
-  // email is removed from the allowlist.
-  const role: FirebaseAgencyUser["role"] = isConfiguredAdmin(token.email) ? "admin" : "user";
-  const user: FirebaseAgencyUser = {
+  return {
     id: token.uid,
     openId: token.uid,
-    name: token.name ?? existing.data()?.name ?? null,
-    email: token.email ?? existing.data()?.email ?? null,
+    name: token.name ?? null,
+    email: token.email ?? null,
     loginMethod: "firebase",
-    role,
-    createdAt: existing.data()?.createdAt?.toDate?.() ?? now,
+    role: isConfiguredAdmin(token.email) ? "admin" : "user",
+    createdAt: now,
     updatedAt: now,
     lastSignedIn: now,
   };
-  await userRef.set(user, { merge: true });
-  return user;
+}
+
+export async function resolveFirebaseUser(token: DecodedIdToken): Promise<FirebaseAgencyUser> {
+  const fallback = firebaseUserFromToken(token);
+
+  try {
+    const db = firebaseDb();
+    const userRef = db.collection("users").doc(token.uid);
+    const existing = await userRef.get();
+    const now = new Date();
+  // The Firebase email allowlist is the single source of truth for the CEO
+  // role. A previously persisted admin record must not grant access after an
+  // email is removed from the allowlist.
+    const user: FirebaseAgencyUser = {
+      ...fallback,
+      name: token.name ?? existing.data()?.name ?? null,
+      email: token.email ?? existing.data()?.email ?? null,
+      createdAt: existing.data()?.createdAt?.toDate?.() ?? now,
+      updatedAt: now,
+      lastSignedIn: now,
+    };
+    await userRef.set(user, { merge: true });
+    return user;
+  } catch (error) {
+    // A verified Firebase ID token is still authoritative for the signed-in
+    // identity and CEO allowlist. Profile persistence must never turn it into
+    // a client-side redirect loop when Firestore is temporarily unavailable.
+    console.error("[Firebase Profile Sync] Using verified-token fallback", error);
+    return fallback;
+  }
 }
 
 export async function authenticateFirebaseRequest(req: { headers: IncomingHttpHeaders }): Promise<FirebaseAgencyUser | null> {

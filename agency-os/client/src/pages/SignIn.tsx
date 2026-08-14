@@ -11,7 +11,7 @@ import {
   startFirebaseGoogleLogin,
   startFirebasePhoneLogin,
 } from "@/lib/firebase";
-import { onIdTokenChanged, type ConfirmationResult, type RecaptchaVerifier } from "firebase/auth";
+import type { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
 import { ArrowLeft, Loader2, Phone, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -22,7 +22,7 @@ function requestedPath() {
 }
 
 export default function SignIn() {
-  const { isAuthenticated, loading, user } = useAuth();
+  const { isAuthenticated, loading, user, hasFirebaseSession, refresh } = useAuth();
   const [returnTo] = useState(requestedPath);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
@@ -30,7 +30,6 @@ export default function SignIn() {
   const [busy, setBusy] = useState<"google" | "phone" | "verify" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const verifierRef = useRef<RecaptchaVerifier | null>(null);
-  const redirectingRef = useRef(false);
 
   useEffect(() => {
     if (!firebaseAuth() || verifierRef.current) return;
@@ -47,26 +46,15 @@ export default function SignIn() {
   }, []);
 
   useEffect(() => {
-    const auth = firebaseAuth();
-    if (!auth) return;
+    if (loading || !isAuthenticated) return;
+    const destination = user?.role === "admin" ? returnTo : returnTo === "/admin" ? "/portal" : returnTo;
+    window.location.replace(destination);
+  }, [isAuthenticated, loading, returnTo, user?.role]);
 
-    return onIdTokenChanged(auth, (firebaseUser) => {
-      if (!firebaseUser || redirectingRef.current) return;
-      redirectingRef.current = true;
-
-      // Do not wait for Firestore/tRPC role hydration to navigate after a
-      // completed redirect. The destination's guard remains the authority
-      // for the CEO allowlist, while a forced refresh makes the new ID token
-      // available to the first API request on that guarded route.
-      void firebaseUser
-        .getIdToken(true)
-        .catch(() => undefined)
-        .finally(() => {
-          const destination = isAuthenticated && user?.role !== "admin" && returnTo === "/admin" ? "/portal" : returnTo;
-          window.location.replace(destination);
-        });
-    });
-  }, [isAuthenticated, returnTo, user?.role]);
+  useEffect(() => {
+    if (loading || !hasFirebaseSession || isAuthenticated) return;
+    setError("Google sign-in completed, but Agency OS could not confirm server access. Retry the account check once; if it persists, the server Firebase configuration needs attention.");
+  }, [hasFirebaseSession, isAuthenticated, loading]);
 
   const signInWithGoogle = async () => {
     setError(null);
@@ -121,7 +109,7 @@ export default function SignIn() {
         <div className="my-7 flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8ba097]"><span className="h-px flex-1 bg-[#dbe6df]" />or<span className="h-px flex-1 bg-[#dbe6df]" /></div>
         {!confirmation ? <div className="space-y-3"><label className="text-xs font-bold text-[#35564a]" htmlFor="phone-number">Phone number</label><input id="phone-number" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} placeholder="+91 98765 43210" inputMode="tel" autoComplete="tel" className="h-12 w-full rounded-xl border border-[#d6e3dc] bg-white px-4 text-sm outline-none ring-[#a8ffcf] transition focus:ring-2" /><Button onClick={sendPhoneCode} disabled={busy !== null} variant="outline" className="h-12 w-full rounded-full border-[#b9d4c7] text-[#103c2e] hover:bg-[#e9f7ef]">{busy === "phone" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Phone className="h-4 w-4" />}Send SMS code</Button><p className="text-[11px] leading-5 text-[#789087]">Use a country code. Firebase may limit SMS sends while the project is on its current quota.</p></div> : <div className="space-y-3"><label className="text-xs font-bold text-[#35564a]" htmlFor="verification-code">6-digit verification code</label><input id="verification-code" value={verificationCode} onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="123456" inputMode="numeric" autoComplete="one-time-code" className="h-12 w-full rounded-xl border border-[#d6e3dc] bg-white px-4 text-center text-lg tracking-[0.34em] outline-none ring-[#a8ffcf] transition focus:ring-2" /><Button onClick={verifyPhoneCode} disabled={busy !== null} className="h-12 w-full rounded-full bg-[#103c2e] text-white hover:bg-[#0b3024]">{busy === "verify" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify and continue"}</Button><button type="button" className="w-full text-xs font-bold text-[#527267] hover:text-[#103c2e]" onClick={() => { setConfirmation(null); setVerificationCode(""); }}>Use a different number</button></div>}
         <div id="phone-recaptcha" />
-        {error ? <p role="alert" className="mt-5 rounded-xl border border-[#f0c9be] bg-[#fff1ec] px-4 py-3 text-xs leading-5 text-[#9d4431]">{error}</p> : null}
+        {error ? <div role="alert" className="mt-5 rounded-xl border border-[#f0c9be] bg-[#fff1ec] px-4 py-3 text-xs leading-5 text-[#9d4431]"><p>{error}</p>{hasFirebaseSession && !isAuthenticated && !loading ? <button type="button" className="mt-2 font-bold underline underline-offset-2" onClick={() => { setError(null); void refresh(); }}>Retry account check</button> : null}</div> : null}
       </section>
     </main>
   );

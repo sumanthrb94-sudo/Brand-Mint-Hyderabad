@@ -13,7 +13,10 @@ export async function createContext(opts: CreateHTTPContextOptions): Promise<Trp
   try {
     user = await authenticateFirebaseRequest(opts.req);
   } catch (error) {
-    // Authentication is optional for public procedures.
+    // Authentication is optional for public procedures, but never silently
+    // swallow a failed bearer-token verification: doing so makes a completed
+    // Google sign-in look like a redirect loop in the client.
+    console.error("[Firebase Authentication] Bearer-token verification failed", error);
     user = null;
   }
 

@@ -1,7 +1,7 @@
 import { startLogin } from "@/const";
 import { firebaseAuth, firebaseLogout, finishFirebaseRedirectLogin } from "@/lib/firebase";
 import { trpc } from "@/lib/trpc";
-import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
+import { onIdTokenChanged, type User as FirebaseUser } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type UseAuthOptions = {
@@ -21,10 +21,23 @@ export function useAuth(options?: UseAuthOptions) {
       setFirebaseLoading(false);
       return;
     }
-    return onAuthStateChanged(auth, (user) => {
+    return onIdTokenChanged(auth, (user) => {
       setFirebaseUser(user);
       setFirebaseLoading(false);
-      void utils.auth.me.invalidate();
+      if (!user) {
+        void utils.auth.me.invalidate();
+        return;
+      }
+
+      // The first post-redirect tRPC request must use a freshly minted token.
+      // Invalidating only after that refresh prevents the server profile query
+      // from racing the browser's Firebase redirect state restoration.
+      void user
+        .getIdToken(true)
+        .catch(() => undefined)
+        .finally(() => {
+          void utils.auth.me.invalidate();
+        });
     });
   }, [utils.auth.me]);
 
@@ -59,6 +72,7 @@ export function useAuth(options?: UseAuthOptions) {
       loading: firebaseLoading || (Boolean(firebaseUser) && meQuery.isLoading) || logoutMutation.isPending,
       error: meQuery.error ?? logoutMutation.error ?? null,
       isAuthenticated: Boolean(firebaseUser && meQuery.data),
+      hasFirebaseSession: Boolean(firebaseUser),
     };
   }, [
     meQuery.data,
