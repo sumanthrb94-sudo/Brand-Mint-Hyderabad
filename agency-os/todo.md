@@ -70,3 +70,7 @@
 - [x] Replace separate sign-in/sign-up surfaces with one Google “Sign in” entry point that routes the CEO to Agency OS and all other authenticated users to the client portal.
 - [ ] Resolve the live post-Google-sign-in redirect stall that leaves both CEO and non-CEO accounts on the sign-in page.
 - [ ] Reduce production access to one sign-in screen and one Google button, then verify immediate role-based redirection without intermediary access screens.
+- [ ] Promote and verify the direct Google token-and-profile handoff so production no longer returns users to the prior redirect-based sign-in page.
+- [x] Add a visible CEO dashboard sign-out control that clears the Google session and returns the user to the single sign-in screen for account switching.
+- [ ] Verify that an anonymous public name/company/request submission persists and appears in the CEO admin workspace for qualification and follow-up.
+- [ ] Deploy and verify the public enquiry inbox with a real visitor request visible in the CEO admin dashboard.

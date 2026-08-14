@@ -6,6 +6,7 @@ export const REQUIRED_POLICY_TYPES = ["terms", "privacy", "cookies", "service_ag
 export type RequiredPolicyType = (typeof REQUIRED_POLICY_TYPES)[number];
 
 export type ClientRecord = { id: number; publicId: string; companyName: string; status: "lead" | "active" | "archived"; createdAt: Date; updatedAt: Date };
+export type PublicInquiryRecord = { id: number; name: string; companyName: string; email: string; request: string; status: "new" | "reviewing" | "qualified" | "closed"; createdAt: Date; updatedAt: Date };
 export type ClientContactRecord = { id: number; clientId: number; userId?: string; name: string; email: string; phone: string | null; isPrimary: boolean; createdAt: Date; updatedAt: Date };
 export type ProjectRecord = { id: number; clientId: number; title: string; status: "discovery" | "in_progress" | "client_review" | "complete"; deadline: Date | null; assignedTo: string | null; pricingMode?: "package" | "personal"; basePricePaise?: number | null; finalPricePaise?: number | null; createdAt: Date; updatedAt: Date };
 export type DeliverableRecord = { id: number; projectId: number; title: string; status: "planned" | "in_progress" | "client_review" | "complete"; assignedTo: string | null; dueAt: Date | null; createdAt: Date; updatedAt: Date };
@@ -13,7 +14,7 @@ export type DocumentRecord = { id: number; clientId: number; projectId: number |
 export type InvoiceRecord = { id: number; clientId: number; projectId: number | null; invoiceNumber: string; status: "draft" | "issued" | "paid" | "overdue" | "void"; issuedAt: Date | null; dueAt: Date; paidAt: Date | null; subtotalPaise: number; gstPaise: number; totalPaise: number; createdAt: Date; updatedAt: Date };
 export type InvoiceItemRecord = { id: number; invoiceId: number; description: string; quantity: number; unitAmountPaise: number; totalAmountPaise: number; createdAt: Date; updatedAt: Date };
 export type StoredFileRecord = { id: number; clientId: number; documentId: number | null; invoiceId: number | null; fileKind: "document_source" | "signed_document" | "invoice_pdf"; filename: string; contentType: string; storageKey: string; storageUrl: string; createdAt: Date; updatedAt: Date };
-export type NotificationRecord = { id: number; recipientUserId?: string | null; clientId?: number | null; recipientRole: "admin" | "client"; notificationType: "onboarding_complete" | "legal_accepted" | "invoice_paid" | "invoice_issued" | "document_ready" | "document_signed"; title: string; message: string; readAt: Date | null; createdAt: Date; updatedAt: Date };
+export type NotificationRecord = { id: number; recipientUserId?: string | null; clientId?: number | null; recipientRole: "admin" | "client"; notificationType: "public_inquiry" | "onboarding_complete" | "legal_accepted" | "invoice_paid" | "invoice_issued" | "document_ready" | "document_signed"; title: string; message: string; readAt: Date | null; createdAt: Date; updatedAt: Date };
 export type LegalAcceptanceRecord = { id: number; clientId: number; clientContactId: number; policyType: RequiredPolicyType; documentVersion: string; acceptedByName: string; acceptedByEmail: string; acceptedAt: Date; createdAt: Date; updatedAt: Date };
 export type OnboardingSubmissionRecord = { id: number; clientId: number; serviceTier: OnboardingInput["serviceTier"]; stage: "complete"; createdAt: Date; updatedAt: Date };
 
@@ -37,6 +38,7 @@ export function hasAcceptedAllRequiredPolicies(policyTypes: readonly string[]) {
 }
 
 export async function listClients() { return listRecords<ClientRecord>("clients"); }
+export async function listPublicInquiries() { return listRecords<PublicInquiryRecord>("publicInquiries"); }
 export async function getClient(id: number) { return getRecord<ClientRecord>("clients", id); }
 export async function getProject(id: number) { return getRecord<ProjectRecord>("projects", id); }
 export async function listProjects() { return listRecords<ProjectRecord>("projects"); }
@@ -57,6 +59,16 @@ export async function createCompletedOnboarding(input: OnboardingInput) {
   await Promise.all(input.acceptedPolicies.map((policyType) => addRecord("legalAcceptances", { clientId: client.id, clientContactId: contact.id, policyType, documentVersion: "draft-v1", acceptedByName: input.name.trim(), acceptedByEmail: normalizedEmail, acceptedAt: new Date() })));
   const project = await addRecord("projects", onboardingProjectDraft({ clientId: client.id, companyName: input.companyName, serviceTier: input.serviceTier }));
   return { client, contact, project, onboardingPublicId };
+}
+
+export async function createPublicInquiry(input: Pick<PublicInquiryRecord, "name" | "companyName" | "email" | "request">) {
+  return addRecord("publicInquiries", {
+    name: input.name.trim(),
+    companyName: input.companyName.trim(),
+    email: input.email.trim().toLowerCase(),
+    request: input.request.trim(),
+    status: "new" as const,
+  });
 }
 
 export async function getClientContactForUser(userId: string) {

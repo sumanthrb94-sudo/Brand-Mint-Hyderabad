@@ -61,7 +61,7 @@ export default function PublicHome() {
 
     <section className="public-section public-container" id="faq"><div className="public-section-intro"><p className="public-kicker">05 — Common questions</p><h2>Commercial terms made <em>clear.</em></h2></div><div className="public-faq-list">{faqs.map(([question, answer], index) => <Faq key={question} question={question} answer={answer} index={index} transition={transition} />)}</div></section>
 
-    <section className="ecom-enquiry public-container" id="enquiry"><div><p className="public-kicker">Start with the project</p><h2>Bring the catalogue and the context. We will make the next step <em>clear.</em></h2><p>This short enquiry pre-fills the ecommerce onboarding flow. A client record is created only after the required brief and legal acceptance are complete.</p></div><PublicInquiry /></section>
+    <section className="ecom-enquiry public-container" id="enquiry"><div><p className="public-kicker">Start with the project</p><h2>Bring the catalogue and the context. We will make the next step <em>clear.</em></h2><p>Send your request without an account. Your name, company, email, and brief go directly to the Brand Mint CEO workspace for review.</p></div><PublicInquiry /></section>
     <footer className="public-footer public-container"><BrandMark /><div><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/refund-policy">Refund</Link><Link href="/shipping-policy">Shipping</Link><Link href="/cookies">Cookies</Link></div><Link href="/sign-in">Sign in</Link></footer>
   </main>;
 }

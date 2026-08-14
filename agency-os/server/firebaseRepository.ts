@@ -3,6 +3,7 @@ import { firebaseDb, firebaseStorage, makeNumericId } from "./firebase.js";
 
 export const COLLECTIONS = {
   clients: "clients",
+  publicInquiries: "publicInquiries",
   clientContacts: "clientContacts",
   onboardingSubmissions: "onboardingSubmissions",
   legalAcceptances: "legalAcceptances",

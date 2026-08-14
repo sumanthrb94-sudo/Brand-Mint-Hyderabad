@@ -5,6 +5,7 @@ import { dashboardRouter } from "./routers/dashboard.js";
 import { clientsRouter } from "./routers/clients.js";
 import { filesRouter } from "./routers/files.js";
 import { invoicesRouter } from "./routers/invoices.js";
+import { inquiriesRouter } from "./routers/inquiries.js";
 import { onboardingRouter } from "./routers/onboarding.js";
 import { portalRouter } from "./routers/portal.js";
 import { projectsRouter } from "./routers/projects.js";
@@ -26,6 +27,7 @@ export const appRouter = router({
   dashboard: dashboardRouter,
   clients: clientsRouter,
   invoices: invoicesRouter,
+  inquiries: inquiriesRouter,
   files: filesRouter,
 });
 
