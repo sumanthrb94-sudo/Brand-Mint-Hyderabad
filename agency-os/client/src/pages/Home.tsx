@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { formatInr, isAmountPresent } from "@/lib/money";
 import { trpc } from "@/lib/trpc";
-import { ArrowUpRight, FileSignature, FolderKanban, LogOut, MessageSquare, Plus, ReceiptText, UsersRound } from "lucide-react";
+import { ArrowUpRight, FileSignature, FolderKanban, LogOut, MessageSquare, Plus, ReceiptText, RotateCcw, UsersRound } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { toast } from "sonner";
 
 const stages = [
   { key: "discovery", label: "Discovery" },
@@ -27,7 +28,17 @@ export default function Home() {
   const { isAuthenticated, user, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [mobileStage, setMobileStage] = useState<Stage>("discovery");
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const utils = trpc.useUtils();
   const overview = trpc.dashboard.overview.useQuery(undefined, { enabled: isAuthenticated && user?.role === "admin", retry: false });
+  const reset = trpc.dashboard.resetAllData.useMutation({
+    onSuccess: (result) => {
+      toast.success(result.message);
+      utils.dashboard.overview.invalidate();
+      setResetConfirm(false);
+    },
+    onError: (error) => toast.error(error.message),
+  });
   const signOut = async () => {
     await logout();
     setLocation("/sign-in");
@@ -47,7 +58,26 @@ export default function Home() {
           <AgencyMobileNav />
           <div className="flex items-center gap-3 lg:hidden"><BrandMark compact /><span className="text-xs font-bold text-[#305246]">Agency OS</span></div>
           <div className="hidden lg:block"><p className="eyebrow">Operations overview</p><p className="mt-1 text-xs text-[#748b82]">Brand Mint Studios</p></div>
-          <div className="ml-auto flex items-center gap-2 sm:gap-3"><Button type="button" size="sm" variant="outline" onClick={() => void signOut()} className="gap-2 rounded-full border-[#b8c8c0] bg-white text-xs text-[#254b3d] hover:bg-[#f3f7f3]"><LogOut className="h-3.5 w-3.5" />Sign out</Button></div>
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                if (!resetConfirm) {
+                  setResetConfirm(true);
+                } else {
+                  reset.mutate({ confirm: true });
+                }
+              }}
+              disabled={reset.isPending}
+              className={`gap-2 rounded-full border text-xs ${resetConfirm ? "border-[#dc2626] bg-[#fecaca] text-[#991b1b] hover:bg-[#fca5a5]" : "border-[#b8c8c0] bg-white text-[#254b3d] hover:bg-[#f3f7f3]"}`}
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              {resetConfirm ? "Click again to confirm reset" : "Reset all"}
+            </Button>
+            <Button type="button" size="sm" variant="outline" onClick={() => void signOut()} className="gap-2 rounded-full border-[#b8c8c0] bg-white text-xs text-[#254b3d] hover:bg-[#f3f7f3]"><LogOut className="h-3.5 w-3.5" />Sign out</Button>
+          </div>
         </header>
 
         <section className="pt-10 sm:pt-14">
