@@ -9,6 +9,7 @@ import Home from "@/pages/Home";
 import LegalPage from "@/pages/LegalPage";
 import Onboarding from "@/pages/Onboarding";
 import PublicHome from "@/pages/PublicHome";
+import SignIn from "@/pages/SignIn";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -17,6 +18,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={PublicHome} />
+      <Route path="/sign-in" component={SignIn} />
       <Route path="/admin" component={() => <AdminGuard><Home /></AdminGuard>} />
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/portal" component={ClientPortal} />

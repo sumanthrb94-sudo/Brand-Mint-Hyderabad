@@ -1,5 +1,15 @@
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, type User } from "firebase/auth";
+import {
+  ConfirmationResult,
+  getAuth,
+  getRedirectResult,
+  GoogleAuthProvider,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  signInWithRedirect,
+  signOut,
+  type User,
+} from "firebase/auth";
 
 type FirebaseConfig = {
   apiKey: string;
@@ -9,6 +19,27 @@ type FirebaseConfig = {
   messagingSenderId: string;
   appId: string;
 };
+
+const LOGIN_RETURN_PATH_KEY = "brand-mint.login-return-path";
+
+export function safeReturnPath(candidate?: string | null) {
+  if (!candidate || !candidate.startsWith("/") || candidate.startsWith("//") || candidate.startsWith("/sign-in")) {
+    return "/admin";
+  }
+  return candidate;
+}
+
+export function saveLoginReturnPath(path?: string) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(LOGIN_RETURN_PATH_KEY, safeReturnPath(path));
+}
+
+export function consumeLoginReturnPath() {
+  if (typeof window === "undefined") return "/admin";
+  const value = safeReturnPath(window.sessionStorage.getItem(LOGIN_RETURN_PATH_KEY));
+  window.sessionStorage.removeItem(LOGIN_RETURN_PATH_KEY);
+  return value;
+}
 
 function configuredFirebase() {
   const rawConfig = import.meta.env.VITE_FIREBASE_CONFIG;
@@ -29,10 +60,40 @@ export function firebaseAuth() {
   return getAuth(app);
 }
 
-export async function startFirebaseLogin() {
+export async function startFirebaseGoogleLogin(returnTo?: string) {
   const auth = firebaseAuth();
   if (!auth) throw new Error("Firebase authentication is not configured for this deployment");
-  return signInWithPopup(auth, new GoogleAuthProvider());
+  saveLoginReturnPath(returnTo);
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  return signInWithRedirect(auth, provider);
+}
+
+export async function finishFirebaseRedirectLogin() {
+  const auth = firebaseAuth();
+  if (!auth) return null;
+  return getRedirectResult(auth);
+}
+
+export function createPhoneRecaptcha(containerId: string) {
+  const auth = firebaseAuth();
+  if (!auth) throw new Error("Firebase authentication is not configured for this deployment");
+  return new RecaptchaVerifier(auth, containerId, { size: "invisible" });
+}
+
+export async function startFirebasePhoneLogin(phoneNumber: string, verifier: RecaptchaVerifier, returnTo?: string) {
+  const auth = firebaseAuth();
+  if (!auth) throw new Error("Firebase authentication is not configured for this deployment");
+  if (!/^\+[1-9]\d{7,14}$/.test(phoneNumber)) {
+    throw new Error("Enter a valid phone number with country code, for example +919876543210");
+  }
+  saveLoginReturnPath(returnTo);
+  return signInWithPhoneNumber(auth, phoneNumber, verifier);
+}
+
+export async function confirmFirebasePhoneLogin(confirmation: ConfirmationResult, code: string) {
+  if (!/^\d{6}$/.test(code)) throw new Error("Enter the 6-digit verification code");
+  return confirmation.confirm(code);
 }
 
 export async function firebaseLogout() {

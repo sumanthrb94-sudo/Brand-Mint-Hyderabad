@@ -6,7 +6,7 @@ import { BrandMark } from "@/components/BrandMark";
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const { loading, isAuthenticated, user } = useAuth();
   if (loading) return <main className="grid min-h-screen place-items-center bg-[#f6f0e6] px-5"><div className="text-center"><BrandMark /><p className="eyebrow mt-6">Checking CEO access</p></div></main>;
-  if (!isAuthenticated) return <AccessMessage title="CEO sign-in required" detail="Sign in with the Brand Mint Studios CEO/admin account to manage records." action="Sign in" onAction={() => startLogin()} />;
+  if (!isAuthenticated) return <AccessMessage title="CEO sign-in required" detail="Use Google or phone verification. Only the configured Brand Mint CEO email receives administrator access." action="Sign in" onAction={() => startLogin("/admin")} />;
   if (user?.role !== "admin") return <AccessMessage title="CEO access required" detail="This workspace is available only to the Brand Mint Studios CEO/admin role." />;
   return <>{children}</>;
 }

@@ -55,11 +55,10 @@ export async function resolveFirebaseUser(token: DecodedIdToken): Promise<Fireba
   const userRef = db.collection("users").doc(token.uid);
   const existing = await userRef.get();
   const now = new Date();
-  const role: FirebaseAgencyUser["role"] = isConfiguredAdmin(token.email)
-    ? "admin"
-    : existing.data()?.role === "admin"
-      ? "admin"
-      : "user";
+  // The Firebase email allowlist is the single source of truth for the CEO
+  // role. A previously persisted admin record must not grant access after an
+  // email is removed from the allowlist.
+  const role: FirebaseAgencyUser["role"] = isConfiguredAdmin(token.email) ? "admin" : "user";
   const user: FirebaseAgencyUser = {
     id: token.uid,
     openId: token.uid,

@@ -1,5 +1,5 @@
 import { startLogin } from "@/const";
-import { firebaseAuth, firebaseLogout } from "@/lib/firebase";
+import { firebaseAuth, firebaseLogout, finishFirebaseRedirectLogin } from "@/lib/firebase";
 import { trpc } from "@/lib/trpc";
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -27,6 +27,12 @@ export function useAuth(options?: UseAuthOptions) {
       void utils.auth.me.invalidate();
     });
   }, [utils.auth.me]);
+
+  useEffect(() => {
+    void finishFirebaseRedirectLogin().catch((error) => {
+      console.error("[Firebase Redirect Sign-in Error]", error);
+    });
+  }, []);
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,

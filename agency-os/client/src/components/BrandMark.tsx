@@ -1,19 +1,18 @@
 export function BrandMark({ compact = false }: { compact?: boolean }) {
   if (!compact) {
     return (
-      <div className="inline-flex items-center gap-2.5" aria-label="Brand Mint Studios">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#a8ffcf] text-[13px] font-extrabold tracking-[-0.14em] text-[#073428] shadow-[0_2px_10px_rgba(42,238,156,0.28)]">
-          M
-        </span>
-        <span className="font-sans text-[19px] font-bold tracking-[-0.045em] text-[#103c2e]">Brand Mint</span>
-      </div>
+      <img
+        src="/manus-storage/brand-mint-primary-lockup-4k_a88c6eec.svg"
+        alt="Brand Mint Studios, Hyderabad"
+        className="h-9 w-auto max-w-[245px] object-contain object-left"
+      />
     );
   }
   return (
-    <div className="flex items-center gap-2.5" aria-label="Brand Mint Studios">
-      <span className="grid h-8 w-8 place-items-center rounded-full bg-[#a8ffcf] text-[13px] font-extrabold tracking-[-0.14em] text-[#073428] shadow-[0_2px_10px_rgba(42,238,156,0.28)]">
-        M
-      </span>
-    </div>
+    <img
+      src="/manus-storage/brand-mint-app-icon-4k_0c6bd0ac.svg"
+      alt="Brand Mint Studios"
+      className="h-8 w-8 object-contain"
+    />
   );
 }
