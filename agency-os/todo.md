@@ -64,3 +64,5 @@
 - [x] Preserve Google role routing—CEO to Agency OS and approved clients to client portal—while clarifying the appropriate next action for non-admin sessions.
 - [ ] Verify CEO dashboard access using `sumanthbolla97@gmail.com` after the previous non-admin session is signed out.
 - [ ] Define public service-detail, client enquiry/chat, qualification, review, call/meeting, and payment-gated onboarding requirements before implementation.
+- [x] Trace and correct why newly created projects are not appearing in the expected portal project-status view.
+- [x] Add an admin-controlled final-price adjustment for eligible personal projects, with invoice totals and client visibility updated accordingly.

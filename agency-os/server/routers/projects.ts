@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { router } from "../_core/trpc.js";
-import { createDeliverable, createProject, getDeliverablesForProject, listClients, listProjects, updateProject } from "../firebaseAgencyDb.js";
+import { createDeliverable, createProject, getDeliverablesForProject, getProject, listClients, listProjects, updateProject } from "../firebaseAgencyDb.js";
 import { adminProcedure } from "./access.js";
 
 const projectStatus = z.enum(["discovery", "in_progress", "client_review", "complete"]);
+const pricingMode = z.enum(["package", "personal"]);
 
 export const projectsRouter = router({
   list: adminProcedure.query(async () => {
@@ -20,12 +21,22 @@ export const projectsRouter = router({
     title: z.string().trim().min(1).max(256),
     deadlineAt: z.number().int().positive().nullable().optional(),
     assignedTo: z.string().trim().max(256).optional(),
+    pricingMode: pricingMode.default("package"),
+    basePricePaise: z.number().int().nonnegative().nullable().optional(),
+    finalPricePaise: z.number().int().nonnegative().nullable().optional(),
   })).mutation(async ({ input }) => {
-    const project = await createProject({ clientId: input.clientId, title: input.title, status: "discovery", deadline: input.deadlineAt ? new Date(input.deadlineAt) : null, assignedTo: input.assignedTo || null });
+    const project = await createProject({ clientId: input.clientId, title: input.title, status: "discovery", deadline: input.deadlineAt ? new Date(input.deadlineAt) : null, assignedTo: input.assignedTo || null, pricingMode: input.pricingMode, basePricePaise: input.basePricePaise ?? null, finalPricePaise: input.pricingMode === "personal" ? input.finalPricePaise ?? null : null });
     return { success: true, projectId: project.id };
   }),
   setStatus: adminProcedure.input(z.object({ id: z.number().int().positive(), status: projectStatus })).mutation(async ({ input }) => {
     await updateProject(input.id, { status: input.status });
+    return { success: true };
+  }),
+  setFinalPrice: adminProcedure.input(z.object({ id: z.number().int().positive(), finalPricePaise: z.number().int().nonnegative() })).mutation(async ({ input }) => {
+    const project = await getProject(input.id);
+    if (!project) throw new Error("Project not found");
+    if (project.pricingMode !== "personal") throw new Error("Final price can be adjusted only for personal projects");
+    await updateProject(input.id, { finalPricePaise: input.finalPricePaise });
     return { success: true };
   }),
   addDeliverable: adminProcedure.input(z.object({

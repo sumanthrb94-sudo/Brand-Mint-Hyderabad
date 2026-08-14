@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc.js";
-import { bindEligibleClientUser, getClientContactForUser, getClientDocuments, getClientFiles, getClientInvoices, getClientProjects, getClient, getLegalAcceptancesForContact, hasAcceptedAllRequiredPolicies } from "../firebaseAgencyDb.js";
+import { bindEligibleClientUser, ensureOnboardingProject, getClientContactForUser, getClientDocuments, getClientFiles, getClientInvoices, getClientProjects, getClient, getLegalAcceptancesForContact, hasAcceptedAllRequiredPolicies } from "../firebaseAgencyDb.js";
 
 async function getEligibleScope(user: { id: string; email?: string | null }) {
   let contact = await getClientContactForUser(user.id);
@@ -23,7 +23,8 @@ export const portalRouter = router({
   overview: protectedProcedure.query(async ({ ctx }) => {
     if (ctx.user.role === "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Use the CEO dashboard for administrative access" });
     const scope = await getEligibleScope(ctx.user);
-    const [client, projects, invoices, documents, files] = await Promise.all([getClient(scope.clientId), getClientProjects(scope.clientId), getClientInvoices(scope.clientId), getClientDocuments(scope.clientId), getClientFiles(scope.clientId)]);
+    const [client, existingProjects, invoices, documents, files] = await Promise.all([getClient(scope.clientId), getClientProjects(scope.clientId), getClientInvoices(scope.clientId), getClientDocuments(scope.clientId), getClientFiles(scope.clientId)]);
+    const projects = existingProjects.length ? existingProjects : (await ensureOnboardingProject(scope.clientId) ? await getClientProjects(scope.clientId) : existingProjects);
     return { client, projects, invoices, documents, files: files.filter((file) => file.fileKind === "signed_document" || file.fileKind === "invoice_pdf") };
   }),
 });
