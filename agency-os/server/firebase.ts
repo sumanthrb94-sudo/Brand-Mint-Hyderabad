@@ -84,23 +84,58 @@ export function firebaseStorage() {
   return getStorage(firebaseApp()).bucket(process.env.FIREBASE_STORAGE_BUCKET);
 }
 
-function isConfiguredAdmin(email?: string | null) {
-  const configuredEmails = (process.env.FIREBASE_ADMIN_EMAILS ?? "")
+/**
+ * The studio owner. Admin is granted from FIREBASE_ADMIN_EMAILS when that is
+ * set, and falls back to this address when it is blank or missing — a
+ * mis-set variable must never leave the deployment with no owner, and must
+ * never be the reason an unrelated account is treated as one.
+ */
+export const OWNER_EMAIL = "sumanthbolla97@gmail.com";
+
+export function adminAllowlist(raw: string | undefined = process.env.FIREBASE_ADMIN_EMAILS): string[] {
+  const configured = (raw ?? "")
     .split(",")
     .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean);
-  return Boolean(email && configuredEmails.includes(email.toLowerCase()));
+    // An entry with no "@" cannot match a Google account, so it can only be
+    // misconfiguration — including the literal "undefined" that results from
+    // assigning an absent value straight into process.env.
+    .filter((entry) => entry.includes("@"));
+  return configured.length ? configured : [OWNER_EMAIL];
+}
+
+/**
+ * Admin is an exact, case-insensitive match against the allowlist on a
+ * verified email. Google is the only sign-in provider, so a real session
+ * always carries email_verified; an explicit false is refused rather than
+ * trusted.
+ */
+export function isConfiguredAdmin(email?: string | null, emailVerified?: boolean) {
+  if (!email || emailVerified === false) return false;
+  return adminAllowlist().includes(email.trim().toLowerCase());
 }
 
 export function firebaseUserFromToken(token: DecodedIdToken): FirebaseAgencyUser {
   const now = new Date();
+  const isAdmin = isConfiguredAdmin(token.email, token.email_verified);
+
+  if (isAdmin) {
+    // Every admin grant is recorded so the allowlist actually in force on a
+    // deployment can be read off the logs. More than one entry is legitimate
+    // but is called out, because the intended configuration is a single owner.
+    const allowlist = adminAllowlist();
+    console.info(`[Auth] admin granted to ${token.email} — allowlist has ${allowlist.length} entry(s)`);
+    if (allowlist.length > 1) {
+      console.warn(`[Auth] FIREBASE_ADMIN_EMAILS grants admin to ${allowlist.length} accounts: ${allowlist.join(", ")}`);
+    }
+  }
+
   return {
     id: token.uid,
     openId: token.uid,
     name: token.name ?? null,
     email: token.email ?? null,
     loginMethod: "firebase",
-    role: isConfiguredAdmin(token.email) ? "admin" : "user",
+    role: isAdmin ? "admin" : "user",
     createdAt: now,
     updatedAt: now,
     lastSignedIn: now,
