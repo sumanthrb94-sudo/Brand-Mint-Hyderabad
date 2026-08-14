@@ -5,12 +5,13 @@ import {
   confirmFirebasePhoneLogin,
   consumeLoginReturnPath,
   createPhoneRecaptcha,
+  firebaseAuthErrorMessage,
   firebaseAuth,
   safeReturnPath,
   startFirebaseGoogleLogin,
   startFirebasePhoneLogin,
 } from "@/lib/firebase";
-import type { ConfirmationResult, RecaptchaVerifier } from "firebase/auth";
+import { onIdTokenChanged, type ConfirmationResult, type RecaptchaVerifier } from "firebase/auth";
 import { ArrowLeft, Loader2, Phone, ShieldCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -29,6 +30,7 @@ export default function SignIn() {
   const [busy, setBusy] = useState<"google" | "phone" | "verify" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const verifierRef = useRef<RecaptchaVerifier | null>(null);
+  const redirectingRef = useRef(false);
 
   useEffect(() => {
     if (!firebaseAuth() || verifierRef.current) return;
@@ -45,10 +47,26 @@ export default function SignIn() {
   }, []);
 
   useEffect(() => {
-    if (loading || !isAuthenticated) return;
-    const destination = user?.role === "admin" ? returnTo : returnTo === "/admin" ? "/portal" : returnTo;
-    window.location.assign(destination);
-  }, [isAuthenticated, loading, returnTo, user?.role]);
+    const auth = firebaseAuth();
+    if (!auth) return;
+
+    return onIdTokenChanged(auth, (firebaseUser) => {
+      if (!firebaseUser || redirectingRef.current) return;
+      redirectingRef.current = true;
+
+      // Do not wait for Firestore/tRPC role hydration to navigate after a
+      // completed redirect. The destination's guard remains the authority
+      // for the CEO allowlist, while a forced refresh makes the new ID token
+      // available to the first API request on that guarded route.
+      void firebaseUser
+        .getIdToken(true)
+        .catch(() => undefined)
+        .finally(() => {
+          const destination = isAuthenticated && user?.role !== "admin" && returnTo === "/admin" ? "/portal" : returnTo;
+          window.location.replace(destination);
+        });
+    });
+  }, [isAuthenticated, returnTo, user?.role]);
 
   const signInWithGoogle = async () => {
     setError(null);
@@ -57,7 +75,7 @@ export default function SignIn() {
       await startFirebaseGoogleLogin(returnTo);
     } catch (loginError) {
       setBusy(null);
-      setError(loginError instanceof Error ? loginError.message : "Google sign-in could not start");
+      setError(firebaseAuthErrorMessage(loginError));
     }
   };
 
@@ -72,7 +90,7 @@ export default function SignIn() {
       const result = await startFirebasePhoneLogin(phoneNumber.trim(), verifierRef.current, returnTo);
       setConfirmation(result);
     } catch (phoneError) {
-      setError(phoneError instanceof Error ? phoneError.message : "The SMS code could not be sent");
+      setError(firebaseAuthErrorMessage(phoneError));
       verifierRef.current.clear();
       verifierRef.current = createPhoneRecaptcha("phone-recaptcha");
       void verifierRef.current.render();
@@ -88,7 +106,7 @@ export default function SignIn() {
     try {
       await confirmFirebasePhoneLogin(confirmation, verificationCode.trim());
     } catch (verifyError) {
-      setError(verifyError instanceof Error ? verifyError.message : "The verification code was not accepted");
+      setError(firebaseAuthErrorMessage(verifyError));
       setBusy(null);
     }
   };

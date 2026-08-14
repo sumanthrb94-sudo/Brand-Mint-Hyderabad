@@ -29,6 +29,18 @@ export function safeReturnPath(candidate?: string | null) {
   return candidate;
 }
 
+export function firebaseAuthErrorMessage(error: unknown) {
+  const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+  if (code === "auth/operation-not-allowed") {
+    return "Phone SMS is not enabled for this country. In Firebase Console, open Authentication → Settings → SMS region policy and allow India (+91), then try again.";
+  }
+  if (code === "auth/too-many-requests") {
+    return "Firebase has temporarily limited SMS requests for this number. Please wait before trying again, or use an approved Firebase test number during setup.";
+  }
+  if (error instanceof Error) return error.message;
+  return "Authentication could not be completed. Please try again.";
+}
+
 export function saveLoginReturnPath(path?: string) {
   if (typeof window === "undefined") return;
   window.sessionStorage.setItem(LOGIN_RETURN_PATH_KEY, safeReturnPath(path));
