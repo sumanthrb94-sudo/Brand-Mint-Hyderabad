@@ -1,6 +1,7 @@
 import { startLogin } from "@/const";
 import { resolveSessionProfile } from "./authState";
-import { firebaseAuth, firebaseLogout, finishFirebaseRedirectLogin } from "@/lib/firebase";
+import { firebaseAuth, firebaseCurrentUser, firebaseLogout, finishFirebaseRedirectLogin } from "@/lib/firebase";
+import { SIMULATION_ACCOUNT_EVENT, simulationAccount, simulationMode } from "@/lib/simulation";
 import { trpc } from "@/lib/trpc";
 import { onIdTokenChanged, type User as FirebaseUser } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -13,10 +14,31 @@ type UseAuthOptions = {
 export function useAuth(options?: UseAuthOptions) {
   const { redirectOnUnauthenticated = false, redirectPath } = options ?? {};
   const utils = trpc.useUtils();
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(() => firebaseAuth()?.currentUser ?? null);
-  const [firebaseLoading, setFirebaseLoading] = useState(Boolean(firebaseAuth()));
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(() => firebaseCurrentUser());
+  const [firebaseLoading, setFirebaseLoading] = useState(() =>
+    simulationMode() ? Boolean(simulationAccount()) : Boolean(firebaseAuth()),
+  );
 
   useEffect(() => {
+    // Simulation mode has no Firebase session to observe. The chosen account
+    // lives in localStorage instead, and changing it dispatches the event this
+    // listens for — the same "account switched, drop the cached profile"
+    // handling the real listener does below.
+    if (simulationMode()) {
+      const applySimulatedAccount = () => {
+        const account = simulationAccount();
+        setFirebaseUser((previous) => {
+          if (previous?.uid !== account?.uid) utils.auth.me.reset();
+          return firebaseCurrentUser();
+        });
+        setFirebaseLoading(false);
+        void utils.auth.me.invalidate();
+      };
+      applySimulatedAccount();
+      window.addEventListener(SIMULATION_ACCOUNT_EVENT, applySimulatedAccount);
+      return () => window.removeEventListener(SIMULATION_ACCOUNT_EVENT, applySimulatedAccount);
+    }
+
     const auth = firebaseAuth();
     if (!auth) {
       setFirebaseLoading(false);

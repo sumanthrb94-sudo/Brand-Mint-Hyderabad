@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
+import { simulationEnabled } from "../simulation/accounts";
 
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
@@ -13,8 +14,18 @@ export async function setupVite(app: Express, server: Server) {
     allowedHosts: true as const,
   };
 
+  // vite.config.ts exports `defineConfig(({ mode }) => ({ … }))`, which is a
+  // function. Spreading it produces an empty object, so the dev server would
+  // start with none of the project's root, aliases or plugins — `/src/main.tsx`
+  // then resolves against the wrong root, is served as HTML, and the client
+  // never mounts. Resolve it before spreading.
+  const resolvedConfig =
+    typeof viteConfig === "function"
+      ? await viteConfig({ command: "serve", mode: process.env.NODE_ENV ?? "development" })
+      : viteConfig;
+
   const vite = await createViteServer({
-    ...viteConfig,
+    ...resolvedConfig,
     configFile: false,
     server: serverOptions,
     appType: "custom",
@@ -34,10 +45,25 @@ export async function setupVite(app: Express, server: Server) {
 
       // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      // `?t=` is Vite's own cache-busting query for source modules. `?v=` is
+      // reserved for its dependency optimizer: applied to a source file it makes
+      // resolution fail ("Failed to load url /src/main.tsx?v=…"), the entry
+      // module is served as HTML, and the app never mounts in development.
       template = template.replace(
         `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`
+        `src="/src/main.tsx?t=${Date.now()}"`
       );
+
+      // The client needs to know it is simulating before React renders — useAuth
+      // decides on its first pass whether to observe Firebase or the stored
+      // simulation account. A synchronous global is the only signal available
+      // that early, and it is written only when the server is itself simulating.
+      if (simulationEnabled()) {
+        template = template.replace(
+          "<head>",
+          `<head><script>window.__BRAND_MINT_SIMULATION__ = true;</script>`
+        );
+      }
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {

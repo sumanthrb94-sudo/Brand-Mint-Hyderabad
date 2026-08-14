@@ -3,6 +3,8 @@ import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import type { IncomingHttpHeaders } from "node:http";
+import { simulationClaimsFromToken, simulationEnabled } from "./simulation/accounts.js";
+import { simulationFirestore, simulationStorage } from "./simulation/store.js";
 
 export type FirebaseAgencyUser = {
   id: string;
@@ -77,10 +79,15 @@ function firebaseApp() {
 }
 
 export function firebaseDb() {
+  // Simulation mode swaps the managed services for in-memory doubles. Checked
+  // here rather than at import time so the branch cannot survive into a
+  // production process through module-load order.
+  if (simulationEnabled()) return simulationFirestore as unknown as ReturnType<typeof getFirestore>;
   return getFirestore(firebaseApp());
 }
 
 export function firebaseStorage() {
+  if (simulationEnabled()) return simulationStorage as unknown as ReturnType<ReturnType<typeof getStorage>["bucket"]>;
   return getStorage(firebaseApp()).bucket(process.env.FIREBASE_STORAGE_BUCKET);
 }
 
@@ -178,6 +185,16 @@ export async function authenticateFirebaseRequest(req: { headers: IncomingHttpHe
   const authorization = req.headers.authorization;
   const token = authorization?.startsWith("Bearer ") ? authorization.slice(7) : null;
   if (!token) return null;
+
+  // Simulation mode stands in for Google's token verification only. The claims
+  // it produces then run through resolveFirebaseUser unchanged, so the admin
+  // allowlist — not the simulation — still decides who is the CEO.
+  if (simulationEnabled()) {
+    const claims = simulationClaimsFromToken(token);
+    if (claims) return resolveFirebaseUser(claims as unknown as DecodedIdToken);
+    return null;
+  }
+
   const decoded = await getAuth(firebaseApp()).verifyIdToken(token);
   return resolveFirebaseUser(decoded);
 }

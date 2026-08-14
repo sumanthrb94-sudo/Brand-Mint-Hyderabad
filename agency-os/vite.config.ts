@@ -82,6 +82,15 @@ function vitePluginManusDebugCollector(): Plugin {
       if (process.env.NODE_ENV === "production") {
         return html;
       }
+      // Nothing serves this asset — the middleware below only handles
+      // /__manus__/logs — so the request falls through to the SPA and the
+      // browser parses index.html as JavaScript, throwing
+      // "SyntaxError: Unexpected token '<'" on every development page load.
+      // Inject it only if the file is actually present.
+      const collectorPath = path.join(PROJECT_ROOT, "client", "public", "__manus__", "debug-collector.js");
+      if (!fs.existsSync(collectorPath)) {
+        return html;
+      }
       return {
         html,
         tags: [
@@ -157,8 +166,28 @@ function vitePluginManusDebugCollector(): Plugin {
 // `vite build` sets it deterministically on every host.
 const authoringPlugins = () => [jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
+/**
+ * index.html carries an analytics tag templated with %VITE_ANALYTICS_ENDPOINT%.
+ * Vite only substitutes those placeholders when the variable is defined; when it
+ * is not — which is every environment that has not configured analytics — the
+ * literal placeholder ships, the browser requests `/%VITE_ANALYTICS_ENDPOINT%/umami`,
+ * and every page load logs a failed script fetch. Drop the tag instead.
+ */
+function stripUnconfiguredAnalytics(): Plugin {
+  return {
+    name: "strip-unconfigured-analytics",
+    transformIndexHtml: {
+      order: "pre",
+      handler(html) {
+        if (process.env.VITE_ANALYTICS_ENDPOINT) return html;
+        return html.replace(/\s*<script[^>]*%VITE_ANALYTICS_ENDPOINT%[^>]*><\/script>/g, "");
+      },
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), tailwindcss(), ...(mode === "production" ? [] : authoringPlugins())],
+  plugins: [react(), tailwindcss(), stripUnconfiguredAnalytics(), ...(mode === "production" ? [] : authoringPlugins())],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
