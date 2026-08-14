@@ -66,3 +66,5 @@
 - [ ] Define public service-detail, client enquiry/chat, qualification, review, call/meeting, and payment-gated onboarding requirements before implementation.
 - [x] Trace and correct why newly created projects are not appearing in the expected portal project-status view.
 - [x] Add an admin-controlled final-price adjustment for eligible personal projects, with invoice totals and client visibility updated accordingly.
+- [ ] Reproduce the user-reported production failure through an authenticated browser session and resolve it before making any further production claim.
+- [x] Replace separate sign-in/sign-up surfaces with one Google “Sign in” entry point that routes the CEO to Agency OS and all other authenticated users to the client portal.

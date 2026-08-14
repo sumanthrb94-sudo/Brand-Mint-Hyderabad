@@ -11,4 +11,9 @@ describe("destinationForRole", () => {
     expect(destinationForRole("user")).toBe("/portal");
     expect(destinationForRole(null)).toBe("/portal");
   });
+
+  it("uses the one shared sign-in default to route the CEO to Agency OS", () => {
+    expect(destinationForRole("admin")).toBe("/admin");
+    expect(destinationForRole(undefined)).toBe("/portal");
+  });
 });

@@ -38,10 +38,10 @@ export default function PublicHome() {
     <div className="public-noise" aria-hidden="true" />
     <header className="public-nav ecom-nav">
       <Link href="/" className="public-brand" aria-label="Brand Mint home"><BrandMark /><span>Hyderabad</span></Link>
-      <nav className="public-nav-links" aria-label="Primary navigation"><a href="#tiers">Stores</a><a href="#care">Care plans</a><a href="#scope">Scope</a><a href="#faq">FAQ</a><Link href="/portal">Client portal</Link></nav>
-      <div className="hidden items-center gap-3 md:flex"><Link href="/admin" className="public-ceo-link">CEO access</Link><a href="#enquiry"><Button className="ecom-button">Start a project <ArrowRight className="h-3.5 w-3.5" /></Button></a></div>
+      <nav className="public-nav-links" aria-label="Primary navigation"><a href="#tiers">Stores</a><a href="#care">Care plans</a><a href="#scope">Scope</a><a href="#faq">FAQ</a></nav>
+      <div className="hidden items-center gap-3 md:flex"><Link href="/sign-in" className="public-ceo-link">Sign in</Link><a href="#enquiry"><Button className="ecom-button">Start a project <ArrowRight className="h-3.5 w-3.5" /></Button></a></div>
       <button className="public-menu-toggle md:hidden" onClick={() => setMenuOpen((value) => !value)} aria-expanded={menuOpen} aria-label={menuOpen ? "Close menu" : "Open menu"}>{menuOpen ? <X /> : <Menu />}</button>
-      <AnimatePresence>{menuOpen && <motion.nav initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={transition} className="public-mobile-menu" aria-label="Mobile navigation"><a href="#tiers" onClick={() => setMenuOpen(false)}>Stores</a><a href="#care" onClick={() => setMenuOpen(false)}>Care plans</a><a href="#scope" onClick={() => setMenuOpen(false)}>Scope</a><a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a><Link href="/portal" onClick={() => setMenuOpen(false)}>Client portal</Link><Link href="/admin" onClick={() => setMenuOpen(false)}>CEO access</Link><a href="#enquiry" onClick={() => setMenuOpen(false)} className="public-mobile-cta">Start a project <ArrowRight className="h-4 w-4" /></a></motion.nav>}</AnimatePresence>
+      <AnimatePresence>{menuOpen && <motion.nav initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={transition} className="public-mobile-menu" aria-label="Mobile navigation"><a href="#tiers" onClick={() => setMenuOpen(false)}>Stores</a><a href="#care" onClick={() => setMenuOpen(false)}>Care plans</a><a href="#scope" onClick={() => setMenuOpen(false)}>Scope</a><a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a><Link href="/sign-in" onClick={() => setMenuOpen(false)}>Sign in</Link><a href="#enquiry" onClick={() => setMenuOpen(false)} className="public-mobile-cta">Start a project <ArrowRight className="h-4 w-4" /></a></motion.nav>}</AnimatePresence>
     </header>
 
     <section className="ecom-hero public-container">
@@ -62,7 +62,7 @@ export default function PublicHome() {
     <section className="public-section public-container" id="faq"><div className="public-section-intro"><p className="public-kicker">05 — Common questions</p><h2>Commercial terms made <em>clear.</em></h2></div><div className="public-faq-list">{faqs.map(([question, answer], index) => <Faq key={question} question={question} answer={answer} index={index} transition={transition} />)}</div></section>
 
     <section className="ecom-enquiry public-container" id="enquiry"><div><p className="public-kicker">Start with the project</p><h2>Bring the catalogue and the context. We will make the next step <em>clear.</em></h2><p>This short enquiry pre-fills the ecommerce onboarding flow. A client record is created only after the required brief and legal acceptance are complete.</p></div><PublicInquiry /></section>
-    <footer className="public-footer public-container"><BrandMark /><div><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/refund-policy">Refund</Link><Link href="/shipping-policy">Shipping</Link><Link href="/cookies">Cookies</Link></div><Link href="/admin">CEO access</Link></footer>
+    <footer className="public-footer public-container"><BrandMark /><div><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/refund-policy">Refund</Link><Link href="/shipping-policy">Shipping</Link><Link href="/cookies">Cookies</Link></div><Link href="/sign-in">Sign in</Link></footer>
   </main>;
 }
 

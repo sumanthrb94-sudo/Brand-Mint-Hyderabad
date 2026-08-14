@@ -1,19 +1,18 @@
 export type AgencyRole = "admin" | "client" | "user" | null | undefined;
 
 /**
- * The public entry point is shared, but internal destinations remain role-safe.
- * Admins can continue to the requested protected workspace; all other approved
- * accounts are directed to the existing client portal.
+ * Every account begins through the same Google Sign in screen. The server role
+ * decides the destination after token verification; UI labels do not grant access.
  */
 export function destinationForRole(role: AgencyRole, requestedPath: string = "/admin") {
   return role === "admin" ? requestedPath : "/portal";
 }
 
 export const accessCopy = {
-  signedOutTitle: "Log in to know more.",
+  signedOutTitle: "Sign in to Brand Mint.",
   signedOutDetail:
-    "Use Google to access your Brand Mint client workspace. New to Brand Mint? Explore our ecommerce services and start a project conversation.",
-  signedInTitle: "Your Brand Mint access is ready.",
+    "Use your Google account to enter Brand Mint. The CEO is routed to Agency OS; every other signed-in account opens the client portal.",
+  signedInTitle: "You are signed in.",
   signedInDetail:
-    "Open your client portal to view eligible project information, documents and invoices. Need to use another Google account? Switch accounts below.",
+    "This account has client portal access. Use a different Google account only if you need to switch workspaces.",
 } as const;
