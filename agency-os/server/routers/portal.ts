@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { protectedProcedure, router } from "../_core/trpc";
-import { bindEligibleClientUser, getClientContactForUser, getClientDocuments, getClientFiles, getClientInvoices, getClientProjects, getClient, getLegalAcceptancesForContact, hasAcceptedAllRequiredPolicies } from "../firebaseAgencyDb";
+import { protectedProcedure, router } from "../_core/trpc.js";
+import { bindEligibleClientUser, getClientContactForUser, getClientDocuments, getClientFiles, getClientInvoices, getClientProjects, getClient, getLegalAcceptancesForContact, hasAcceptedAllRequiredPolicies } from "../firebaseAgencyDb.js";
 
 async function getEligibleScope(user: { id: string; email?: string | null }) {
   let contact = await getClientContactForUser(user.id);

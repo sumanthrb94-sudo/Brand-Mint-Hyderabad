@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { router } from "../_core/trpc";
-import { createDeliverable, createProject, getDeliverablesForProject, listClients, listProjects, updateProject } from "../firebaseAgencyDb";
-import { adminProcedure } from "./access";
+import { router } from "../_core/trpc.js";
+import { createDeliverable, createProject, getDeliverablesForProject, listClients, listProjects, updateProject } from "../firebaseAgencyDb.js";
+import { adminProcedure } from "./access.js";
 
 const projectStatus = z.enum(["discovery", "in_progress", "client_review", "complete"]);
 

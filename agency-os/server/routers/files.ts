@@ -1,9 +1,9 @@
 import { nanoid } from "nanoid";
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
-import { createStoredFile, getClientContactForUser, getDocument, getInvoice, getStoredFile } from "../firebaseAgencyDb";
-import { getSignedFileUrl, storeFile } from "../firebaseRepository";
-import { adminProcedure } from "./access";
+import { protectedProcedure, router } from "../_core/trpc.js";
+import { createStoredFile, getClientContactForUser, getDocument, getInvoice, getStoredFile } from "../firebaseAgencyDb.js";
+import { getSignedFileUrl, storeFile } from "../firebaseRepository.js";
+import { adminProcedure } from "./access.js";
 
 const fileKind = z.enum(["document_source", "signed_document", "invoice_pdf"]);
 

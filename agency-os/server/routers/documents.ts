@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { router } from "../_core/trpc";
-import { createDocument, createNotification, listDocuments, updateDocument } from "../firebaseAgencyDb";
-import { adminProcedure } from "./access";
+import { router } from "../_core/trpc.js";
+import { createDocument, createNotification, listDocuments, updateDocument } from "../firebaseAgencyDb.js";
+import { adminProcedure } from "./access.js";
 
 const documentStatus = z.enum(["draft", "sent", "awaiting_signature", "signed", "declined"]);
 

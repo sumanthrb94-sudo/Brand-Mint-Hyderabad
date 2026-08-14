@@ -10,10 +10,13 @@ describe("Vercel routing", () => {
     ]);
   });
 
-  it("uses CommonJS serverless packaging so Vercel resolves the backend module graph without ESM directory imports", () => {
+  it("uses ESM serverless packaging with file-explicit API imports", () => {
     const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+    const apiEntrypoint = readFileSync(new URL("../api/trpc.ts", import.meta.url), "utf8");
 
-    expect(packageJson.type).toBe("commonjs");
-    expect(packageJson.scripts.build).toContain("--format=cjs");
+    expect(packageJson.type).toBe("module");
+    expect(packageJson.scripts.build).toContain("--format=esm");
+    expect(apiEntrypoint).toContain('from "../server/routers.js"');
+    expect(apiEntrypoint).toContain('from "../server/_core/context.js"');
   });
 });

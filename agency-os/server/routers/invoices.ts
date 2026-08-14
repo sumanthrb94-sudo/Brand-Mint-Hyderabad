@@ -1,11 +1,11 @@
 import { nanoid } from "nanoid";
 import { z } from "zod";
-import { router } from "../_core/trpc";
-import { createInvoice, createInvoiceItem, createNotification, createStoredFile, getClient, updateInvoice } from "../firebaseAgencyDb";
-import { generateInvoicePdf } from "../invoicePdf";
-import { calculateInvoiceTotals } from "../invoiceTotals";
-import { storeFile } from "../firebaseRepository";
-import { adminProcedure } from "./access";
+import { router } from "../_core/trpc.js";
+import { createInvoice, createInvoiceItem, createNotification, createStoredFile, getClient, updateInvoice } from "../firebaseAgencyDb.js";
+import { generateInvoicePdf } from "../invoicePdf.js";
+import { calculateInvoiceTotals } from "../invoiceTotals.js";
+import { storeFile } from "../firebaseRepository.js";
+import { adminProcedure } from "./access.js";
 
 const itemSchema = z.object({ description: z.string().trim().min(1).max(512), quantity: z.number().int().positive(), unitAmountPaise: z.number().int().nonnegative() });
 

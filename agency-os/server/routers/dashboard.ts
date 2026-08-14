@@ -1,6 +1,6 @@
-import { router } from "../_core/trpc";
-import { listClients, listInvoices, listNotifications, listProjects } from "../firebaseAgencyDb";
-import { adminProcedure } from "./access";
+import { router } from "../_core/trpc.js";
+import { listClients, listInvoices, listNotifications, listProjects } from "../firebaseAgencyDb.js";
+import { adminProcedure } from "./access.js";
 
 export const dashboardRouter = router({
   overview: adminProcedure.query(async () => {

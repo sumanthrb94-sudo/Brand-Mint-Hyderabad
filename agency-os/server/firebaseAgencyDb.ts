@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { addRecord, filterRecords, findOne, getRecord, listRecords, updateRecord } from "./firebaseRepository";
+import { addRecord, filterRecords, findOne, getRecord, listRecords, updateRecord } from "./firebaseRepository.js";
 
 export const REQUIRED_POLICY_TYPES = ["terms", "privacy", "cookies", "service_agreement"] as const;
 export type RequiredPolicyType = (typeof REQUIRED_POLICY_TYPES)[number];

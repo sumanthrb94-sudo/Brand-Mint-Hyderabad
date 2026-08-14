@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
-import { createCompletedOnboarding, createNotification, REQUIRED_POLICY_TYPES } from "../firebaseAgencyDb";
+import { publicProcedure, router } from "../_core/trpc.js";
+import { createCompletedOnboarding, createNotification, REQUIRED_POLICY_TYPES } from "../firebaseAgencyDb.js";
 
 export const onboardingSchema = z.object({
   name: z.string().trim().min(1).max(256),

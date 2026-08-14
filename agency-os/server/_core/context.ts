@@ -1,5 +1,5 @@
 import type { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
-import { authenticateFirebaseRequest, type FirebaseAgencyUser } from "../firebase";
+import { authenticateFirebaseRequest, type FirebaseAgencyUser } from "../firebase.js";
 
 export type TrpcContext = {
   req: CreateHTTPContextOptions["req"];

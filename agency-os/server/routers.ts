@@ -1,13 +1,13 @@
-import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
-import { documentsRouter } from "./routers/documents";
-import { dashboardRouter } from "./routers/dashboard";
-import { clientsRouter } from "./routers/clients";
-import { filesRouter } from "./routers/files";
-import { invoicesRouter } from "./routers/invoices";
-import { onboardingRouter } from "./routers/onboarding";
-import { portalRouter } from "./routers/portal";
-import { projectsRouter } from "./routers/projects";
+import { systemRouter } from "./_core/systemRouter.js";
+import { publicProcedure, router } from "./_core/trpc.js";
+import { documentsRouter } from "./routers/documents.js";
+import { dashboardRouter } from "./routers/dashboard.js";
+import { clientsRouter } from "./routers/clients.js";
+import { filesRouter } from "./routers/files.js";
+import { invoicesRouter } from "./routers/invoices.js";
+import { onboardingRouter } from "./routers/onboarding.js";
+import { portalRouter } from "./routers/portal.js";
+import { projectsRouter } from "./routers/projects.js";
 
 export const appRouter = router({
   system: systemRouter,

@@ -1,5 +1,5 @@
 import type { DocumentData, QueryDocumentSnapshot } from "firebase-admin/firestore";
-import { firebaseDb, firebaseStorage, makeNumericId } from "./firebase";
+import { firebaseDb, firebaseStorage, makeNumericId } from "./firebase.js";
 
 export const COLLECTIONS = {
   clients: "clients",
