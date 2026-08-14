@@ -55,3 +55,12 @@
 - [ ] Commit and push the final ecommerce-aligned Agency OS update to `manus/brand-mint-agency-os` for user-controlled production testing.
 - [x] Repair Vercel’s nested tRPC procedure routing and verify the Firebase Google-sign-in profile handshake before requesting another CEO test.
 - [ ] Diagnose and resolve the post-Google-sign-in server confirmation failure reported on production, then verify CEO dashboard access.
+- [x] Rotate the malformed Firebase service-account key and securely update `FIREBASE_SERVICE_ACCOUNT_JSON` in the existing Vercel project before final CEO authentication verification.
+- [ ] Validate and install the newly supplied Firebase service-account JSON in Vercel for both Preview and Production environments, then retest the authenticated CEO profile handshake.
+- [x] Correct Vercel’s serialized `FIREBASE_SERVICE_ACCOUNT_JSON` value after the refreshed deployment reported invalid JSON during Firebase Admin initialization.
+- [x] Promote commit `b19c996` so production uses the Firebase private-key normalization logic required by the correctly stored replacement credential.
+- [x] Add a prominent Google sign-out and account-switch action to the CEO-access-required screen and sign-in flow.
+- [x] Replace non-admin CEO-access wording with a lead-friendly “Log in to know more” experience that guides visitors to services and enquiries while preserving dashboard authorization.
+- [x] Preserve Google role routing—CEO to Agency OS and approved clients to client portal—while clarifying the appropriate next action for non-admin sessions.
+- [ ] Verify CEO dashboard access using `sumanthbolla97@gmail.com` after the previous non-admin session is signed out.
+- [ ] Define public service-detail, client enquiry/chat, qualification, review, call/meeting, and payment-gated onboarding requirements before implementation.

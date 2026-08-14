@@ -1,4 +1,4 @@
-import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { cert, getApps, initializeApp, type ServiceAccount } from "firebase-admin/app";
 import { getAuth, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
@@ -18,7 +18,8 @@ export type FirebaseAgencyUser = {
 
 type FirebaseServiceAccount = {
   project_id?: string;
-  private_key?: unknown;
+  client_email?: string;
+  private_key?: string;
   [key: string]: unknown;
 };
 
@@ -58,7 +59,11 @@ function firebaseApp() {
   try {
     return initializeApp({
       ...sharedOptions,
-      credential: cert(serviceAccount),
+      credential: cert({
+        projectId: serviceAccount.project_id,
+        clientEmail: serviceAccount.client_email,
+        privateKey: serviceAccount.private_key,
+      } satisfies ServiceAccount),
     });
   } catch (error) {
     if (!serviceAccount.project_id) throw error;
