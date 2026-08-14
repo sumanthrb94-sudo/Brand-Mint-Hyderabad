@@ -9,6 +9,7 @@ export const COLLECTIONS = {
   legalAcceptances: "legalAcceptances",
   projects: "projects",
   deliverables: "deliverables",
+  checklistItems: "checklistItems",
   documents: "documents",
   invoices: "invoices",
   invoiceItems: "invoiceItems",

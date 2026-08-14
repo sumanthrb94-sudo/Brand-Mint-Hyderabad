@@ -4,11 +4,6 @@ import { getEligibleClientScope } from "../clientScope.js";
 import { ensureOnboardingProject, getClient, getClientDocuments, getClientFiles, getClientInvoices, getClientProjects } from "../firebaseAgencyDb.js";
 
 export const portalRouter = router({
-  activate: protectedProcedure.mutation(async ({ ctx }) => {
-    if (ctx.user.role === "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Client portal activation is not required for an admin account" });
-    const scope = await getEligibleClientScope(ctx.user);
-    return { active: true, clientId: scope.clientId };
-  }),
   overview: protectedProcedure.query(async ({ ctx }) => {
     if (ctx.user.role === "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Use the CEO dashboard for administrative access" });
     const scope = await getEligibleClientScope(ctx.user);

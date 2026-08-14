@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import { addRecord, filterRecords, findOne, getRecord, listRecords, recordTime, updateRecord } from "./firebaseRepository.js";
 import { onboardingProjectDraft } from "./projectPricing.js";
+import { sopTemplate } from "./projectSop.js";
 
 export const REQUIRED_POLICY_TYPES = ["terms", "privacy", "cookies", "service_agreement"] as const;
 export type RequiredPolicyType = (typeof REQUIRED_POLICY_TYPES)[number];
@@ -10,6 +11,7 @@ export type PublicInquiryRecord = { id: number; name: string; companyName: strin
 export type ClientContactRecord = { id: number; clientId: number; userId?: string; name: string; email: string; phone: string | null; isPrimary: boolean; createdAt: Date; updatedAt: Date };
 export type ProjectRecord = { id: number; clientId: number; title: string; status: "discovery" | "in_progress" | "client_review" | "complete"; deadline: Date | null; assignedTo: string | null; pricingMode?: "package" | "personal"; basePricePaise?: number | null; finalPricePaise?: number | null; createdAt: Date; updatedAt: Date };
 export type DeliverableRecord = { id: number; projectId: number; title: string; status: "planned" | "in_progress" | "client_review" | "complete"; assignedTo: string | null; dueAt: Date | null; createdAt: Date; updatedAt: Date };
+export type ChecklistItemRecord = { id: number; projectId: number; stage: ProjectRecord["status"]; title: string; required: boolean; done: boolean; doneAt: Date | null; doneBy: string | null; createdAt: Date; updatedAt: Date };
 export type DocumentRecord = { id: number; clientId: number; projectId: number | null; documentType: "contract" | "nda" | "sow"; title: string; status: "draft" | "sent" | "awaiting_signature" | "signed" | "declined"; signatureRequestedAt: Date | null; signedAt: Date | null; signatureReference: string | null; createdAt: Date; updatedAt: Date };
 export type InvoiceRecord = { id: number; clientId: number; projectId: number | null; invoiceNumber: string; status: "draft" | "issued" | "paid" | "overdue" | "void"; issuedAt: Date | null; dueAt: Date; paidAt: Date | null; subtotalPaise: number; gstPaise: number; totalPaise: number; createdAt: Date; updatedAt: Date };
 export type InvoiceItemRecord = { id: number; invoiceId: number; description: string; quantity: number; unitAmountPaise: number; totalAmountPaise: number; createdAt: Date; updatedAt: Date };
@@ -58,6 +60,7 @@ export async function createCompletedOnboarding(input: OnboardingInput) {
   await addRecord("onboardingSubmissions", { publicId: onboardingPublicId, clientId: client.id, clientContactId: contact.id, serviceType: input.serviceType, serviceTier: input.serviceTier, selectedAddons: input.selectedAddons ?? [], preferredTimeline: input.preferredTimeline?.trim() || null, projectBrief: input.projectBrief.trim(), deliverables: input.deliverables?.trim() || null, stage: "complete", completedAt: new Date() });
   await Promise.all(input.acceptedPolicies.map((policyType) => addRecord("legalAcceptances", { clientId: client.id, clientContactId: contact.id, policyType, documentVersion: "draft-v1", acceptedByName: input.name.trim(), acceptedByEmail: normalizedEmail, acceptedAt: new Date() })));
   const project = await addRecord("projects", onboardingProjectDraft({ clientId: client.id, companyName: input.companyName, serviceTier: input.serviceTier }));
+  await ensureProjectChecklist(project.id);
   return { client, contact, project, onboardingPublicId };
 }
 
@@ -121,3 +124,18 @@ export async function ensureOnboardingProject(clientId: number) {
 export async function getClientInvoices(clientId: number) { return filterRecords<InvoiceRecord>("invoices", (invoice) => invoice.clientId === clientId); }
 export async function getClientDocuments(clientId: number) { return filterRecords<DocumentRecord>("documents", (document) => document.clientId === clientId); }
 export async function getDeliverablesForProject(projectId: number) { return filterRecords<DeliverableRecord>("deliverables", (deliverable) => deliverable.projectId === projectId); }
+export async function getChecklistForProject(projectId: number) { return filterRecords<ChecklistItemRecord>("checklistItems", (item) => item.projectId === projectId); }
+export async function updateChecklistItem(id: number, values: Partial<ChecklistItemRecord>) { return updateRecord<ChecklistItemRecord>("checklistItems", id, values); }
+export async function createChecklistItem(input: Omit<ChecklistItemRecord, "id" | "createdAt" | "updatedAt">) { return addRecord("checklistItems", input); }
+
+/**
+ * Writes the standing SOP onto a project. Called when a project is created and
+ * again lazily on first read, so projects that predate the checklist pick it up
+ * without a migration — the same approach ensureOnboardingProject takes.
+ */
+export async function ensureProjectChecklist(projectId: number) {
+  const existing = await getChecklistForProject(projectId);
+  if (existing.length) return existing;
+  const created = await Promise.all(sopTemplate().map((item) => addRecord("checklistItems", { projectId, stage: item.stage, title: item.title, required: item.required, done: false, doneAt: null, doneBy: null })));
+  return created as ChecklistItemRecord[];
+}

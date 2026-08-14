@@ -181,15 +181,38 @@ describe("Brand Mint journey — visitor to paid client", () => {
     for (const title of ["Catalogue import — 400 SKUs", "Razorpay + COD checkout", "Courier API and tracking"]) {
       await ceo.caller.projects.addDeliverable({ projectId: project.id, title, dueAt: fixedNow + 21 * DAY });
     }
-    await ceo.caller.projects.setStatus({ id: project.id, status: "in_progress" });
-    step("CEO", "3 deliverables added, project moved discovery → in_progress");
+    // The SOP gates the move out of discovery.
+    const refused = await ceo.caller.projects.setStatus({ id: project.id, status: "in_progress" });
+    expect(refused.success).toBe(false);
+    expect(refused.outstanding).toContain("50% advance invoice issued and paid");
+    step("SOP", `move to in_progress refused — ${refused.outstanding.length} required steps still open`);
+
+    const detail = await ceo.caller.projects.detail({ id: project.id });
+    for (const item of detail.checklist.filter((entry) => entry.stage === "discovery" && entry.required)) {
+      await ceo.caller.projects.setChecklistItem({ id: item.id, done: true });
+    }
+    const allowed = await ceo.caller.projects.setStatus({ id: project.id, status: "in_progress" });
+    expect(allowed.success).toBe(true);
+    step("CEO", "kickoff checklist completed → project moved discovery → in_progress");
 
     const aditya = callerFor("uid-aditya", "aditya@kesarisilks.in", "Aditya Rao");
     const portal = await aditya.caller.portal.overview();
     expect(portal.projects[0]!.status).toBe("in_progress");
     step("client", "portal reflects in_progress on the client's next load");
 
-    await ceo.caller.projects.setStatus({ id: project.id, status: "client_review" });
+    // Going backwards is never gated — a project can always be pulled back.
+    const back = await ceo.caller.projects.setStatus({ id: project.id, status: "discovery" });
+    expect(back.success).toBe(true);
+    step("SOP", "moving a project back to discovery is always allowed");
+    await ceo.caller.projects.setStatus({ id: project.id, status: "in_progress" });
+
+    // The CEO can override the gate; the override is recorded rather than silent.
+    const forced = await ceo.caller.projects.setStatus({ id: project.id, status: "client_review", force: true });
+    expect(forced.success).toBe(true);
+    const overrides = [...collection("notifications").values()].filter((notice) => notice.title === "Stage advanced with steps outstanding");
+    expect(overrides).toHaveLength(1);
+    step("SOP", "CEO override permitted, and logged as a notification rather than silent");
+
     const refreshed = await aditya.caller.portal.overview();
     expect(refreshed.projects[0]!.status).toBe("client_review");
     step("client", "portal reflects client_review — this is the live project-update channel");

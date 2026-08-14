@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import ClientPortal from "@/pages/ClientPortal";
 import AdminWorkspace from "@/pages/AdminWorkspace";
+import ProjectDetail from "@/pages/ProjectDetail";
 import Deliverables from "@/pages/Deliverables";
 import { AdminGuard } from "@/components/AdminGuard";
 import Home from "@/pages/Home";
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/admin" component={() => <AdminGuard><Home /></AdminGuard>} />
       <Route path="/onboarding" component={Onboarding} />
       <Route path="/portal" component={ClientPortal} />
+      <Route path="/projects/:id" component={() => <AdminGuard><ProjectDetail /></AdminGuard>} />
       <Route path="/operations" component={() => <AdminGuard><AdminWorkspace /></AdminGuard>} />
       <Route path="/deliverables" component={() => <AdminGuard><Deliverables /></AdminGuard>} />
       <Route path="/terms" component={() => <LegalPage type="terms" />} />
