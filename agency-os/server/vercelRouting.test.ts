@@ -9,4 +9,11 @@ describe("Vercel routing", () => {
       { source: "/((?!api/).*)", destination: "/index.html" },
     ]);
   });
+
+  it("uses CommonJS serverless packaging so Vercel resolves the backend module graph without ESM directory imports", () => {
+    const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+
+    expect(packageJson.type).toBe("commonjs");
+    expect(packageJson.scripts.build).toContain("--format=cjs");
+  });
 });
