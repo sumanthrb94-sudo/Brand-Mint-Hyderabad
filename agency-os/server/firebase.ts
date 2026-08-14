@@ -16,22 +16,59 @@ export type FirebaseAgencyUser = {
   lastSignedIn: Date;
 };
 
-function readServiceAccount() {
+type FirebaseServiceAccount = {
+  project_id?: string;
+  private_key?: unknown;
+  [key: string]: unknown;
+};
+
+function readServiceAccount(): FirebaseServiceAccount {
   const value = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
   if (!value) throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is required for Firebase-backed operations");
   try {
-    return JSON.parse(value);
+    const serviceAccount = JSON.parse(value) as FirebaseServiceAccount;
+    if (typeof serviceAccount.private_key !== "string") {
+      throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON must include a private_key string");
+    }
+    serviceAccount.private_key = normalizeFirebasePrivateKey(serviceAccount.private_key);
+    return serviceAccount;
   } catch {
     throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON must be valid JSON");
   }
 }
 
+/**
+ * Vercel environment values are frequently stored with literal `\\n` escape
+ * sequences or wrapped quotes. Firebase Admin needs actual PEM line breaks.
+ */
+export function normalizeFirebasePrivateKey(value: string) {
+  return value
+    .trim()
+    .replace(/^['"]|['"]$/g, "")
+    .replace(/\\n/g, "\n")
+    .replace(/\r\n/g, "\n")
+    .trim();
+}
+
 function firebaseApp() {
   if (getApps().length) return getApps()[0]!;
-  return initializeApp({
-    credential: cert(readServiceAccount()),
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  });
+  const serviceAccount = readServiceAccount();
+  const sharedOptions = { storageBucket: process.env.FIREBASE_STORAGE_BUCKET };
+
+  try {
+    return initializeApp({
+      ...sharedOptions,
+      credential: cert(serviceAccount),
+    });
+  } catch (error) {
+    if (!serviceAccount.project_id) throw error;
+
+    // Firebase ID tokens are verified against Firebase's public signing keys
+    // and the explicitly configured project ID. This preserves secure sign-in
+    // while a malformed Admin private key prevents Firestore/Storage writes.
+    console.error("[Firebase Admin] Invalid service-account credential; using token-verification-only fallback", error);
+    return initializeApp({ ...sharedOptions, projectId: serviceAccount.project_id });
+  }
 }
 
 export function firebaseDb() {
