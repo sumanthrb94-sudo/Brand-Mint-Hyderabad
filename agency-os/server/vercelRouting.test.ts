@@ -18,5 +18,8 @@ describe("Vercel routing", () => {
     expect(packageJson.scripts.build).toContain("--format=esm");
     expect(apiEntrypoint).toContain('from "../server/routers.js"');
     expect(apiEntrypoint).toContain('from "../server/_core/context.js"');
+
+    const trpcCore = readFileSync(new URL("./_core/trpc.ts", import.meta.url), "utf8");
+    expect(trpcCore).toContain("from '../../shared/const.js'");
   });
 });
