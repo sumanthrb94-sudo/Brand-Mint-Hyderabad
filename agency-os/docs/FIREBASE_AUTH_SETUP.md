@@ -15,6 +15,10 @@ In **Firebase Console → Authentication → Settings → Authorised domains**, 
 
 For any deployment with a temporary Vercel URL, use the stable branch-preview domain above rather than adding individual deployment URLs.
 
+### Confirmed console state — 14 August 2026
+
+The Firebase project is `brandmintstudios-a5eb7`. Google and Phone providers are enabled. The following domains were confirmed in the Firebase authorised-domain list: `brandmintstudios.in`, `www.brandmintstudios.in`, the prior Claude branch preview domain, and `brand-mint-sdmk-git-manus-bra-30cf5f-sumanthrb94-3803s-projects.vercel.app`. Firebase reported a current SMS daily quota of **10 sends per day** for the project.
+
 ## Provider configuration
 
 Google sign-in must be enabled with the project support email configured in Firebase. Phone sign-in must be enabled and is protected by Firebase reCAPTCHA. Phone users should enter their number in E.164 form, such as `+919876543210`.
