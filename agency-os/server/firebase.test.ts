@@ -15,6 +15,15 @@ describe("Firebase serverless foundations", () => {
     expect(new Set(identifiers).size).toBeGreaterThan(1);
   });
 
+  it("never repeats an id within a burst written in the same millisecond", () => {
+    // These become Firestore document ids and are written with set(), so a
+    // duplicate silently overwrites — the four legal acceptances of one
+    // onboarding are created in exactly this pattern.
+    const burst = Array.from({ length: 1000 }, () => makeNumericId());
+    expect(new Set(burst).size).toBe(burst.length);
+    expect(burst.every((identifier) => Number.isSafeInteger(identifier))).toBe(true);
+  });
+
   it("derives an allowlisted CEO profile from a verified Firebase token without requiring Firestore persistence", () => {
     const previous = process.env.FIREBASE_ADMIN_EMAILS;
     process.env.FIREBASE_ADMIN_EMAILS = "sumanthbolla97@gmail.com";

@@ -5,7 +5,16 @@ import { bindEligibleClientUser, ensureOnboardingProject, getClientContactForUse
 async function getEligibleScope(user: { id: string; email?: string | null }) {
   let contact = await getClientContactForUser(user.id);
   if (!contact) {
-    await bindEligibleClientUser({ userId: user.id, email: user.email });
+    try {
+      await bindEligibleClientUser({ userId: user.id, email: user.email });
+    } catch {
+      // Every signed-in Google account is routed here, so "not a client yet"
+      // is the ordinary case rather than a server fault. bindEligibleClientUser
+      // signals it with a plain Error, which would otherwise surface as a 500
+      // on each new visitor. Refuse cleanly so the portal renders the member
+      // view instead of an error.
+      throw new TRPCError({ code: "FORBIDDEN", message: "Client portal access is not available for this account" });
+    }
     contact = await getClientContactForUser(user.id);
   }
   if (!contact) throw new TRPCError({ code: "FORBIDDEN", message: "Client portal access is not available for this account" });

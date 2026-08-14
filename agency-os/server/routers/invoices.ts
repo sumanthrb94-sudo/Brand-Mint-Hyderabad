@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { router } from "../_core/trpc.js";
-import { createInvoice, createInvoiceItem, createNotification, createStoredFile, getClient, updateInvoice } from "../firebaseAgencyDb.js";
+import { createInvoice, createInvoiceItem, createNotification, createStoredFile, getClient, updateClient, updateInvoice } from "../firebaseAgencyDb.js";
 import { generateInvoicePdf } from "../invoicePdf.js";
 import { calculateInvoiceTotals } from "../invoiceTotals.js";
 import { storeFile } from "../firebaseRepository.js";
@@ -26,7 +26,14 @@ export const invoicesRouter = router({
   }),
   setPaymentStatus: adminProcedure.input(z.object({ id: z.number().int().positive(), clientId: z.number().int().positive(), status: z.enum(["issued", "paid", "overdue", "void"]) })).mutation(async ({ input }) => {
     await updateInvoice(input.id, { status: input.status, paidAt: input.status === "paid" ? new Date() : null });
-    if (input.status === "paid") await createNotification({ recipientRole: "admin", notificationType: "invoice_paid", title: "Invoice payment marked paid", message: "An invoice payment status was marked as paid.", clientId: input.clientId });
+    if (input.status === "paid") {
+      // Onboarding writes every client as a "lead" and nothing else ever moved
+      // them on, so the CEO's "Active clients" tile was pinned at zero however
+      // much work was in flight. A paid invoice is the point the relationship
+      // is real, so it is what promotes the record.
+      await updateClient(input.clientId, { status: "active" });
+      await createNotification({ recipientRole: "admin", notificationType: "invoice_paid", title: "Invoice payment marked paid", message: "An invoice payment status was marked as paid.", clientId: input.clientId });
+    }
     return { success: true };
   }),
 });

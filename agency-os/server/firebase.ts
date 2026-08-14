@@ -180,6 +180,23 @@ export async function authenticateFirebaseRequest(req: { headers: IncomingHttpHe
   return resolveFirebaseUser(decoded);
 }
 
+// Seeded randomly per process so two concurrent lambdas do not march in
+// lockstep, then incremented so records written inside one process in the same
+// millisecond can never share an id.
+let idSequence = Math.floor(Math.random() * 1000);
+
+/**
+ * addRecord uses this as the Firestore document id and writes with set(), so a
+ * duplicate silently overwrites the earlier record rather than failing. A purely
+ * random suffix collided on roughly 0.6% of four-record bursts — and the four
+ * legal acceptances of a single onboarding are written in exactly one burst, via
+ * Promise.all. Losing one of those permanently blocks that client's portal,
+ * because access requires all four to be present.
+ *
+ * Three digits is the most that fits: Date.now() is 13 digits and 17 would
+ * exceed Number.MAX_SAFE_INTEGER.
+ */
 export function makeNumericId() {
-  return Number(`${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`);
+  idSequence = (idSequence + 1) % 1000;
+  return Number(`${Date.now()}${idSequence.toString().padStart(3, "0")}`);
 }
