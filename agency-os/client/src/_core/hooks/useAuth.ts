@@ -1,4 +1,5 @@
 import { startLogin } from "@/const";
+import { resolveSessionProfile } from "./authState";
 import { firebaseAuth, firebaseLogout, finishFirebaseRedirectLogin } from "@/lib/firebase";
 import { trpc } from "@/lib/trpc";
 import { onIdTokenChanged, type User as FirebaseUser } from "firebase/auth";
@@ -22,7 +23,13 @@ export function useAuth(options?: UseAuthOptions) {
       return;
     }
     return onIdTokenChanged(auth, (user) => {
-      setFirebaseUser(user);
+      setFirebaseUser((previous) => {
+        // auth.me is cached under one key for every account, so a profile left
+        // by the previous session would otherwise be served to this one until
+        // the refetch lands. Drop it outright whenever the account changes.
+        if (previous?.uid !== user?.uid) utils.auth.me.reset();
+        return user;
+      });
       setFirebaseLoading(false);
       if (!user) {
         void utils.auth.me.invalidate();
@@ -63,17 +70,22 @@ export function useAuth(options?: UseAuthOptions) {
   }, [logoutMutation, utils]);
 
   const state = useMemo(() => {
+    // Never honour a profile belonging to a different account than the one
+    // Firebase currently holds.
+    const profile = resolveSessionProfile(firebaseUser?.uid, meQuery.data);
+    const awaitingOwnProfile = Boolean(firebaseUser) && !profile;
     return {
-      user: meQuery.data ?? null,
-      loading: firebaseLoading || (Boolean(firebaseUser) && meQuery.isLoading) || logoutMutation.isPending,
+      user: profile,
+      loading: firebaseLoading || (awaitingOwnProfile && (meQuery.isLoading || meQuery.isFetching)) || logoutMutation.isPending,
       error: meQuery.error ?? logoutMutation.error ?? null,
-      isAuthenticated: Boolean(firebaseUser && meQuery.data),
+      isAuthenticated: Boolean(profile),
       hasFirebaseSession: Boolean(firebaseUser),
     };
   }, [
     meQuery.data,
     meQuery.error,
     meQuery.isLoading,
+    meQuery.isFetching,
     logoutMutation.error,
     logoutMutation.isPending,
     firebaseLoading,

@@ -118,12 +118,14 @@ export function firebaseUserFromToken(token: DecodedIdToken): FirebaseAgencyUser
   const now = new Date();
   const isAdmin = isConfiguredAdmin(token.email, token.email_verified);
 
+  // Every resolution is recorded, not only the admin ones — a log that speaks
+  // up solely for admins cannot distinguish "a client signed in" from "nobody
+  // signed in", which is exactly the question worth answering when accounts
+  // appear to be getting the wrong screen. uid is included because that is what
+  // the browser session is keyed on.
+  console.info(`[Auth] ${token.email ?? "no-email"} uid=${token.uid} → ${isAdmin ? "ADMIN" : "user"}`);
   if (isAdmin) {
-    // Every admin grant is recorded so the allowlist actually in force on a
-    // deployment can be read off the logs. More than one entry is legitimate
-    // but is called out, because the intended configuration is a single owner.
     const allowlist = adminAllowlist();
-    console.info(`[Auth] admin granted to ${token.email} — allowlist has ${allowlist.length} entry(s)`);
     if (allowlist.length > 1) {
       console.warn(`[Auth] FIREBASE_ADMIN_EMAILS grants admin to ${allowlist.length} accounts: ${allowlist.join(", ")}`);
     }
