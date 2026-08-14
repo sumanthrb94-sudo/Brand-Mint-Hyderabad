@@ -53,3 +53,4 @@
 - [x] Do not add a Selected work section because the client-confirmed scope authorizes ecommerce services only and does not approve case-study content for this page.
 - [x] Add a direct project-enquiry capture section to the public homepage and revalidate it at desktop and mobile breakpoints.
 - [ ] Commit and push the final ecommerce-aligned Agency OS update to `manus/brand-mint-agency-os` for user-controlled production testing.
+- [x] Repair Vercel’s nested tRPC procedure routing and verify the Firebase Google-sign-in profile handshake before requesting another CEO test.
