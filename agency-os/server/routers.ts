@@ -7,6 +7,7 @@ import { filesRouter } from "./routers/files.js";
 import { invoicesRouter } from "./routers/invoices.js";
 import { inquiriesRouter } from "./routers/inquiries.js";
 import { onboardingRouter } from "./routers/onboarding.js";
+import { paymentsRouter } from "./routers/payments.js";
 import { portalRouter } from "./routers/portal.js";
 import { projectsRouter } from "./routers/projects.js";
 
@@ -28,6 +29,7 @@ export const appRouter = router({
   clients: clientsRouter,
   invoices: invoicesRouter,
   inquiries: inquiriesRouter,
+  payments: paymentsRouter,
   files: filesRouter,
 });
 

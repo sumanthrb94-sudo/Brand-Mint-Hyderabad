@@ -286,21 +286,109 @@ describe("Brand Mint journey — visitor to paid client", () => {
     step("guard", "same override on a package project → refused");
   });
 
+  // --------------------------- 7. a second client, paying online via Razorpay --
+
+  it("takes a second lead through onboarding and collects payment through Razorpay", async () => {
+    process.env.RAZORPAY_KEY_ID = "rzp_test_simulation";
+    process.env.RAZORPAY_KEY_SECRET = "simulation-secret";
+
+    // Razorpay's Orders API is stubbed — the simulation never calls out.
+    const orderRequests: { amount: number; notes: unknown }[] = [];
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = (async (_url: string, init: { body: string }) => {
+      const sent = JSON.parse(init.body);
+      orderRequests.push(sent);
+      return { ok: true, json: async () => ({ id: "order_SIM123", amount: sent.amount, currency: "INR", receipt: sent.receipt, status: "created" }) };
+    }) as never;
+
+    try {
+      await anonymous.onboarding.submit({
+        name: "Nadia Fernandes", companyName: "Bombay Baked", email: "nadia@bombaybaked.com",
+        serviceType: "ecommerce", serviceTier: "starter_store",
+        projectBrief: "A bakery taking orders on WhatsApp today. Needs a cart and same-day delivery slots.",
+        acceptedPolicies: ["terms", "privacy", "cookies", "service_agreement"],
+      });
+      step("visitor", "Nadia completes onboarding — second lead becomes a client");
+
+      const bombay = (await ceo.caller.clients.list()).find((client) => client.companyName === "Bombay Baked")!;
+      const invoice = await ceo.caller.invoices.create({
+        clientId: bombay.id, dueAt: fixedNow + 7 * DAY, gstPercent: 18,
+        items: [{ description: "Starter Store build", quantity: 1, unitAmountPaise: ECOMMERCE_TIER_PRICING.starter_store.amountPaise }],
+      });
+      step("CEO", `invoice ${invoice.invoiceNumber} issued to Bombay Baked — ${rupees(11_682_000)} incl. GST`);
+
+      // The client starts checkout from their own portal.
+      const nadia = callerFor("uid-nadia", "nadia@bombaybaked.com", "Nadia Fernandes");
+      const checkout = await nadia.caller.payments.checkout({ invoiceId: invoice.invoiceId });
+      expect(checkout.orderId).toBe("order_SIM123");
+      expect(checkout.amountPaise).toBe(11_682_000);
+      expect(orderRequests[0]!.amount).toBe(11_682_000);
+      // The invoice reference travels in the order notes, not the browser.
+      expect((orderRequests[0]!.notes as Record<string, string>).brandMintInvoiceId).toBe(String(invoice.invoiceId));
+      step("client", `Nadia opens checkout → Razorpay order ${checkout.orderId} for ${rupees(checkout.amountPaise)}`);
+
+      // Checkout alone must not mark anything paid.
+      const midway = await ceo.caller.dashboard.overview();
+      expect(midway.invoices.find((entry) => entry.id === invoice.invoiceId)!.status).toBe("issued");
+      step("guard", "order created but invoice still 'issued' — the browser cannot mark itself paid");
+
+      // Another client cannot pay, or even see, an invoice that is not theirs.
+      const aditya = callerFor("uid-aditya", "aditya@kesarisilks.in", "Aditya Rao");
+      await expect(aditya.caller.payments.checkout({ invoiceId: invoice.invoiceId })).rejects.toMatchObject({ code: "FORBIDDEN" });
+      step("guard", "another client checking out that invoice → FORBIDDEN");
+
+      // Only the signed webhook moves the invoice to paid.
+      const { applyCapturedPayment } = await import("./routers/payments.js");
+      const applied = await applyCapturedPayment(invoice.invoiceId);
+      expect(applied.applied).toBe(true);
+
+      const after = await ceo.caller.dashboard.overview();
+      expect(after.invoices.find((entry) => entry.id === invoice.invoiceId)!.status).toBe("paid");
+      expect(after.metrics.activeClients).toBe(2);
+      step("system", `verified webhook captures payment → invoice paid, active clients ${after.metrics.activeClients}`);
+
+      // Razorpay retries until it gets a 2xx, so a repeat must be a no-op.
+      const repeat = await applyCapturedPayment(invoice.invoiceId);
+      expect(repeat.applied).toBe(false);
+      expect(repeat.reason).toBe("already-paid");
+      // Counted against the store rather than dashboard.overview, which slices
+      // to the six most recent and ties on same-millisecond timestamps.
+      const paidNotices = [...collection("notifications").values()].filter((notice) => notice.title === "Invoice paid online");
+      expect(paidNotices).toHaveLength(1);
+      step("guard", "webhook replayed → no double-notify, no double-count");
+    } finally {
+      globalThis.fetch = realFetch;
+      delete process.env.RAZORPAY_KEY_ID;
+      delete process.env.RAZORPAY_KEY_SECRET;
+    }
+  });
+
+  it("refuses checkout entirely while Razorpay is unconfigured", async () => {
+    const nadia = callerFor("uid-nadia", "nadia@bombaybaked.com", "Nadia Fernandes");
+    await expect(nadia.caller.payments.checkout({ invoiceId: 1 })).rejects.toMatchObject({ code: "PRECONDITION_FAILED" });
+    step("guard", "no Razorpay keys → checkout refused rather than faked");
+  });
+
   // ------------------------------------------------------------ the report --
 
   it("prints the journey and what is still missing", async () => {
     console.log(["", "  BRAND MINT — END-TO-END JOURNEY", "  " + "─".repeat(74), ...log, "  " + "─".repeat(74)].join("\n"));
 
     console.log([
-      "  STILL MISSING — needs a decision or credentials, not just code",
-      "  1. Razorpay collects nothing. The public copy promises online payments and COD,",
-      "     and invoices/PDFs are real, but invoices.setPaymentStatus is a manual CEO",
-      "     toggle. No order creation, no checkout, no webhook reconciliation. Wiring it",
-      "     needs live keys and an explicit go-ahead — it moves real money.",
-      "  2. Portal access is granted on email match alone (bindEligibleClientUser), so",
-      "     whoever controls that Google address inherits the client's records. Fine for",
-      "     a studio with a handful of clients; worth revisiting before it scales.",
-      "  3. Nothing expires or revokes a client binding once made.",
+      "  STILL NEEDED FROM YOU",
+      "  1. Razorpay keys. The full path is built and covered — order creation, a",
+      "     client-scoped checkout, signed webhook capture, idempotent replay — but it",
+      "     stays refused until RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET and",
+      "     RAZORPAY_WEBHOOK_SECRET are set in Vercel. Nothing here has moved real money.",
+      "  2. Point the Razorpay dashboard webhook at /api/razorpay-webhook and subscribe",
+      "     it to payment.captured.",
+      "",
+      "  KNOWN LIMITS — worth a decision, not urgent",
+      "  · Portal access is granted on email match alone (bindEligibleClientUser), so",
+      "    whoever controls that Google address inherits the client's records. Fine for",
+      "    a studio with a handful of clients; revisit before it scales.",
+      "  · Nothing expires or revokes a client binding once made.",
+      "  · COD is named in the public copy but has no order flow behind it.",
       "",
     ].join("\n"));
   });
