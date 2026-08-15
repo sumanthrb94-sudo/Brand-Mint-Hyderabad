@@ -57,7 +57,7 @@ Trim long tails unless the tail is deliberately holding atmosphere.
 Levels that have worked across the campaign:
 
 ```
-voice          1.0, ducked to -1.5 dBFS peak before the mix
+voice          1.0, ducked to -3 dBFS peak before the mix
 impacts        0.50 – 0.62
 whooshes       0.30 – 0.36
 accents/ticks  0.20 – 0.26
