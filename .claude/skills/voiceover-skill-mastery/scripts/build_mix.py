@@ -9,11 +9,16 @@ out/cues.json:
 
     {
       "vo": "vo.wav",
+      "duration": 33.9,
       "cues": [
         {"sfx": "elec_blip", "t": 5.13, "gain": 0.22},
         {"sfx": "bd_tek",    "t": 7.17, "gain": 0.52}
       ]
     }
+
+`duration` is the length of the finished film, which is longer than the read
+whenever there is an outro. Set it, or `amix` ends the track on the voice's last
+sample and every cue in the outro is silently discarded.
 
 `t` is absolute seconds in the finished film — place each cue at
 `scene_start + element_delay` so a tick lands with the row it belongs to, rather
@@ -79,8 +84,14 @@ def main():
         vo = os.path.join(out, vo) if os.path.exists(os.path.join(out, vo)) else vo
     cues = sorted(spec.get("cues", []), key=lambda c: c["t"])
 
+    # The film outlasts the read whenever there is an outro. Pad the voice to
+    # the full length first — amix's duration=first then covers the whole film
+    # instead of cutting every outro cue.
+    film = spec.get("duration")
+    pad = f",apad=whole_dur={film}" if film else ""
+
     inputs = ["-i", vo]
-    parts = ["[0:a]aformat=sample_fmts=fltp:channel_layouts=stereo,volume=1.0[vo]"]
+    parts = [f"[0:a]aformat=sample_fmts=fltp:channel_layouts=stereo,volume=1.0{pad}[vo]"]
     labels = ["[vo]"]
 
     for i, c in enumerate(cues, start=1):

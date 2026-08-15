@@ -1,8 +1,8 @@
-<title>Eight Weeks, In Writing</title>
+<title>Brand Mint — campaign film</title>
 <style>
   :root{
-    --ink:#0A2117; --ink-2:#0F2E20; --ink-3:#16402D; --line:rgba(255,255,255,.13);
-    --mint:#7BF2A8; --mint-2:#3FC97A; --cream:#F4EFE4; --muted:#87A296;
+    --ink:#0A2117; --ink-2:#0F2E20; --line:rgba(255,255,255,.13);
+    --mint:#7BF2A8; --mint-2:#3FC97A; --cream:#F4EFE4; --muted:#87A296; --red:#E0483C;
     --page:#EEF2ED; --page-ink:#14342A; --page-muted:#5F7A6E; --page-line:#D2DFD5; --page-card:#fff;
   }
   @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --page:#0C1A15;--page-ink:#E4F0E8;--page-muted:#8FA79A;--page-line:#1F3A2E;--page-card:#11241C; } }
@@ -12,6 +12,8 @@
   .wrap{min-height:100vh;display:grid;gap:22px;align-content:start;justify-items:center;padding:22px 16px 40px}
   @media (min-width:900px){.wrap{grid-template-columns:auto minmax(280px,360px);align-content:center;justify-items:start;gap:40px}}
 
+  /* The stage is a container, so every internal size is cqw. vw would be
+     measured against the browser window and overflow the fixed 1080 render. */
   .stage{position:relative;width:min(94vw,420px);aspect-ratio:9/16;max-height:86vh;overflow:hidden;border-radius:26px;
     background:var(--ink);color:var(--cream);box-shadow:0 30px 70px rgba(9,30,22,.34);isolation:isolate;user-select:none;container-type:inline-size}
   .aura{position:absolute;inset:-25%;z-index:0;opacity:.55;background:radial-gradient(closest-side,rgba(123,242,168,.22),transparent 70%)}
@@ -24,14 +26,13 @@
   body.render .panel,body.render .gate{display:none}
   body.render .stage{width:1080px;height:1920px;max-height:none;aspect-ratio:auto;border-radius:0;box-shadow:none}
 
-  /* One hairline of progress. Quieter than segmented bars. */
   .prog{position:absolute;left:0;right:0;top:0;height:.34cqw;z-index:42;background:rgba(255,255,255,.12)}
   .prog b{display:block;height:100%;width:0;background:var(--mint)}
 
   .scene{position:absolute;inset:0;display:grid;align-content:center;justify-items:start;gap:3cqw;
     padding:14cqw 8cqw 46cqw;opacity:0;visibility:hidden;z-index:5}
-  /* A scene with no captions must not reserve the space for them — that left a
-     dead lower third under the hero type. */
+  /* A scene with no captions must not reserve the space for them — that leaves
+     a dead lower third under the hero type. */
   .scene[data-mode="type"]{padding-bottom:16cqw}
   .scene.is-live{visibility:visible;z-index:6}
   .scene.center{justify-items:center;text-align:center}
@@ -40,8 +41,8 @@
   .kicker{font-size:2.3cqw;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:2cqw;white-space:nowrap}
   .kicker::before{content:"";width:3.2cqw;height:1px;background:var(--mint);opacity:.8}
   .scene.center .kicker{justify-content:center}
+  .flash .kicker{color:#0A2117}.flash .kicker::before{background:#0A2117}
 
-  /* Hero type is revealed by a mask per line, the way a motion designer would. */
   .h1{font-family:Georgia,"Times New Roman",serif;font-size:12.4cqw;line-height:1.0;letter-spacing:-.04em;margin:0;text-wrap:balance}
   .h1 .ln{display:block;overflow:hidden}
   .h1 .ln i{display:block;font-style:normal}
@@ -62,11 +63,16 @@
   .r b{font-weight:800;color:var(--cream);font-variant-numeric:tabular-nums}
   .r .tick{width:3.4cqw;height:3.4cqw;border-radius:50%;background:var(--mint);color:#06251A;display:grid;place-items:center;font-size:2cqw;font-weight:900;flex:none}
   .r .lbl{font-size:2.1cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .r.debit b{color:#FFB3AC}
+  .r.total{border-top:.34cqw solid var(--mint);margin-top:1cqw;padding-top:3.2cqw}
+  .r.total .lbl{color:var(--mint)}
+  .r.total b{font-size:4.6cqw;color:var(--mint)}
+  .r.blank b{color:var(--muted);letter-spacing:.3em}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:2.2cqw;width:100%}
   .cell{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:2.4cqw;padding:3.2cqw;display:grid;gap:1.2cqw}
   .cell u{text-decoration:none;font-size:1.95cqw;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:800}
-  .cell b{font-size:3.4cqw;font-weight:800;color:#E6F3EC}
+  .cell b{font-size:3.1cqw;font-weight:800;color:#E6F3EC;line-height:1.25}
 
   .pills{display:flex;flex-wrap:wrap;gap:1.8cqw;width:100%}
   .pill{background:rgba(123,242,168,.12);border:1px solid rgba(123,242,168,.45);color:var(--mint);border-radius:999px;padding:2.1cqw 3.2cqw;font-size:3cqw;font-weight:800;white-space:nowrap}
@@ -79,14 +85,27 @@
 
   .nos{display:grid;gap:3cqw;width:100%}
   .no{display:flex;align-items:center;gap:3cqw;font-size:7.2cqw;font-weight:900;color:#6F8A7D;position:relative}
-  .no .x{width:5cqw;height:5cqw;border-radius:50%;border:.45cqw solid #E0483C;display:grid;place-items:center;color:#E0483C;font-size:2.8cqw;font-weight:900;flex:none}
+  .no .x{width:5cqw;height:5cqw;border-radius:50%;border:.45cqw solid var(--red);display:grid;place-items:center;color:var(--red);font-size:2.8cqw;font-weight:900;flex:none}
   .no .txt{position:relative}
-  .no .txt s{text-decoration:none}
-  .no .txt::after{content:"";position:absolute;left:-1%;top:52%;height:.5cqw;width:var(--w,0%);background:#E0483C;border-radius:1cqw}
+  .no .txt::after{content:"";position:absolute;left:-1%;top:52%;height:.5cqw;width:var(--w,0%);background:var(--red);border-radius:1cqw}
 
+  /* The peak. Full bleed, mint ground, one number. */
   .flash{background:var(--mint);color:#06251A}
-  .flash .kicker{color:#0A2117}.flash .kicker::before{background:#0A2117}
-  .live{font-size:26cqw;font-weight:900;letter-spacing:-.06em;line-height:.82;margin:0}
+  .slam{font-size:24cqw;font-weight:900;letter-spacing:-.06em;line-height:.84;margin:0;font-variant-numeric:tabular-nums}
+  .slamnote{font-size:2.9cqw;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:rgba(6,37,26,.68);margin:0}
+
+  /* Pictorial beat — shapes only, never words. A words-free scene is the one
+     place captions can carry the line without repeating what is drawn. */
+  .glyph{position:relative;width:100%;height:44cqw;display:grid;place-items:center}
+  .parcel{position:relative;width:38cqw;height:28cqw;border-radius:1.6cqw;background:linear-gradient(160deg,#C8A97E,#A8875C);
+    box-shadow:0 6cqw 14cqw rgba(0,0,0,.42)}
+  .parcel::before{content:"";position:absolute;left:0;right:0;top:38%;height:3.4cqw;background:rgba(244,239,228,.72)}
+  .parcel::after{content:"";position:absolute;top:0;bottom:0;left:44%;width:3.4cqw;background:rgba(244,239,228,.5)}
+  .slash{position:absolute;left:6%;top:50%;height:1.1cqw;width:0;background:var(--red);border-radius:1cqw;transform:rotate(-19deg);transform-origin:left center;
+    box-shadow:0 0 3cqw rgba(224,72,60,.7)}
+  .doorway{position:absolute;right:4cqw;top:2cqw;bottom:2cqw;width:16cqw;border-radius:1.4cqw 1.4cqw 0 0;
+    background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.02));border:.5cqw solid rgba(255,255,255,.16)}
+  .doorway::after{content:"";position:absolute;left:2cqw;top:52%;width:1.5cqw;height:1.5cqw;border-radius:50%;background:var(--muted)}
 
   /* Outro */
   .lock{display:grid;gap:1.6cqw;justify-items:center}
@@ -114,6 +133,11 @@
     text-shadow:0 .5cqw 2.6cqw rgba(0,0,0,.72);display:inline-block}
   .cap-word.spoken{opacity:1}
   .cap-word.active{color:var(--mint)}
+  /* On the mint ground mint-on-mint is invisible; ink text on a white
+     highlighter reads instead. */
+  .on-flash .cap-word{color:#06251A;text-shadow:none;opacity:.34}
+  .on-flash .cap-word.spoken{opacity:1}
+  .on-flash .cap-word.active{color:#06251A;box-shadow:0 0 0 .9cqw #fff;background:#fff;border-radius:.6cqw}
 
   .gate{position:absolute;inset:0;z-index:50;display:grid;place-content:center;justify-items:center;gap:16px;
     background:linear-gradient(180deg,rgba(10,33,23,.6),rgba(10,33,23,.93));border:0;width:100%;cursor:pointer;color:var(--cream);font:inherit;text-align:center;padding:24px}
@@ -138,120 +162,9 @@
   <div class="stage" id="stage">
     <div class="aura" id="aura"></div>
     <div class="prog"><b id="progFill"></b></div>
-
     <div class="rail" id="rail"><b id="railFill"></b></div>
 
-    <!-- 0 · type -->
-    <section class="scene" data-scene="0" data-mode="type">
-      <p class="kicker" data-a="fade" data-d="0">Part two</p>
-      <h1 class="h1"><span class="ln" data-a="mask" data-d=".12"><i>So you</i></span><span class="ln" data-a="mask" data-d=".22"><i>commented <em>STORE.</em></i></span></h1>
-    </section>
-
-    <!-- 1 · type -->
-    <section class="scene" data-scene="1" data-mode="type">
-      <p class="kicker" data-a="fade" data-d="0">No surprises</p>
-      <h1 class="h1"><span class="ln" data-a="mask" data-d=".1"><i>Here is exactly</i></span><span class="ln" data-a="mask" data-d=".2"><i>what <em>happens next.</em></i></span></h1>
-    </section>
-
-    <!-- 2 · support -->
-    <section class="scene rail-on" data-scene="2" data-mode="support">
-      <p class="kicker" data-a="fade" data-d="0">Your scope</p>
-      <div class="card">
-        <div class="r" data-a="row" data-d=".14"><span class="lbl">Deliverables</span><b>Listed</b></div>
-        <div class="r" data-a="row" data-d=".26"><span class="lbl">Milestones</span><b>Dated</b></div>
-        <div class="r" data-a="row" data-d=".38"><span class="lbl">Sign-off</span><b>Yours</b></div>
-      </div>
-    </section>
-
-    <!-- 3 · support -->
-    <section class="scene rail-on" data-scene="3" data-mode="support">
-      <p class="kicker" data-a="fade" data-d="0">Before anything starts</p>
-      <div class="card">
-        <div class="r" data-a="row" data-d=".16"><span class="lbl">Price</span><b>Fixed</b></div>
-        <div class="r" data-a="row" data-d=".34"><span class="lbl">Timeline</span><b>Fixed</b></div>
-        <div class="r" data-a="row" data-d=".52"><span class="lbl">Agreement</span><i class="tick">✓</i></div>
-      </div>
-    </section>
-
-    <!-- 4 · support -->
-    <section class="scene rail-on" data-scene="4" data-mode="support">
-      <p class="kicker" data-a="fade" data-d="0">Loaded in</p>
-      <div class="grid2">
-        <div class="cell" data-a="pop" data-d=".12"><u>SKUs</u><b>Yours</b></div>
-        <div class="cell" data-a="pop" data-d=".22"><u>Images</u><b>Yours</b></div>
-        <div class="cell" data-a="pop" data-d=".32"><u>Variants</u><b>Mapped</b></div>
-        <div class="cell" data-a="pop" data-d=".42"><u>Categories</u><b>Built</b></div>
-      </div>
-    </section>
-
-    <!-- 5 · footage -->
-    <section class="scene" data-scene="5" data-mode="support"></section>
-
-    <!-- 6 · support -->
-    <section class="scene rail-on" data-scene="6" data-mode="support">
-      <p class="kicker" data-a="fade" data-d="0">Staging</p>
-      <div class="card">
-        <div class="r" data-a="row" data-d=".16"><span class="lbl">You place</span><b>A real order</b></div>
-        <div class="r" data-a="row" data-d=".32"><span class="lbl">On</span><b>Your phone</b></div>
-        <div class="r" data-a="row" data-d=".48"><span class="lbl">Before</span><b>Anyone else</b></div>
-      </div>
-    </section>
-
-    <!-- 7 · footage -->
-    <section class="scene" data-scene="7" data-mode="support"></section>
-
-    <!-- 8 · type, the peak -->
-    <section class="scene center flash" data-scene="8" data-mode="type">
-      <p class="kicker" data-a="fade" data-d="0">Week eight</p>
-      <p class="live" data-a="live" data-d=".06">LIVE</p>
-    </section>
-
-    <!-- 9 · support -->
-    <section class="scene" data-scene="9" data-mode="support">
-      <p class="kicker" data-a="fade" data-d="0">Transferred to you</p>
-      <div class="card">
-        <div class="r" data-a="row" data-d=".2"><span>Source code</span><i class="tick">✓</i></div>
-        <div class="r" data-a="row" data-d=".44"><span>Design files</span><i class="tick">✓</i></div>
-        <div class="r" data-a="row" data-d=".68"><span>Domain &amp; hosting</span><i class="tick">✓</i></div>
-        <div class="r" data-a="row" data-d=".92"><span>Payment gateway</span><i class="tick">✓</i></div>
-      </div>
-    </section>
-
-    <!-- 10 · support -->
-    <section class="scene" data-scene="10" data-mode="support">
-      <p class="kicker" data-a="fade" data-d="0">Payment</p>
-      <div class="bar5050">
-        <div class="track"><div class="a" data-a="grow-l" data-d=".14">50%</div><div class="b" data-a="grow-r" data-d=".28">50%</div></div>
-        <div class="legend" data-a="fade" data-d=".5"><span>To start</span><span>When live</span></div>
-      </div>
-    </section>
-
-    <!-- 11 · type -->
-    <section class="scene" data-scene="11" data-mode="type">
-      <div class="nos">
-        <div class="no" data-a="strike" data-d=".08"><span class="x">✕</span><span class="txt">Retainer</span></div>
-        <div class="no" data-a="strike" data-d=".38"><span class="x">✕</span><span class="txt">Lock-in</span></div>
-      </div>
-    </section>
-
-    <!-- 12 · outro A -->
-    <section class="scene center" data-scene="12" data-mode="type">
-      <div class="lock">
-        <span class="word" data-a="mask" data-d=".05"><i>Brand <em>Mint</em></i></span>
-        <div class="rule" data-a="rule" data-d=".34"></div>
-        <div class="city" data-a="fade" data-d=".52">Hyderabad</div>
-      </div>
-    </section>
-
-    <!-- 13 · outro B -->
-    <section class="scene center" data-scene="13" data-mode="type">
-      <div class="endcta">
-        <p class="kicker" data-a="fade" data-d="0">One word in the comments</p>
-        <div class="box" data-a="pop" data-d=".14">Comment <span style="font-weight:900">“SCOPE”</span></div>
-        <div class="hint" data-a="fade" data-d=".4">Yours comes back the same day.</div>
-        <div class="endstrip" data-a="fade" data-d=".58"><span>8 weeks</span><span>Fixed price</span><span>@brandmint.studios</span></div>
-      </div>
-    </section>
+    <div id="scenes"></div>
 
     <img class="brollFrame" id="brollFrame" alt="" />
     <video id="broll" class="broll" muted playsinline preload="auto" src="__VIDEO_SRC__"></video>
@@ -262,13 +175,13 @@
 
     <button class="gate" id="gate" type="button" aria-label="Play with sound">
       <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-      <span class="t">Comment SCOPE</span><span class="s">Tap for sound · 41s</span>
+      <span class="t" id="gateTitle">Play</span><span class="s" id="gateSub">Tap for sound</span>
     </button>
   </div>
 
   <div class="panel">
-    <h1>Part two</h1>
-    <p>Cut to your ElevenLabs read — 86 words, transcribed back and aligned individually. Every element is animated from its own scene clock, so each rendered frame is a real in-between rather than a held pose.</p>
+    <h1 id="panelTitle">Campaign film</h1>
+    <p id="panelNote">Cut to the recording. Every word is transcribed back and aligned individually, and every element animates from its own scene clock — so each rendered frame is a true in-between rather than a held pose.</p>
     <div class="controls">
       <button class="btn btn--primary" id="replay" type="button">Play from start</button>
       <button class="btn" id="toggle" type="button">Pause</button>
@@ -282,33 +195,171 @@
 (() => {
   "use strict";
   const WORDS = __WORDS_JSON__;
-  const SCENE_WORDS = [[0,3],[4,9],[10,15],[16,21],[22,27],[28,33],[34,41],[42,47],[48,52],[53,61],[62,69],[70,74],[75,77],[78,85]];
-  const PHRASES = SCENE_WORDS.map(([a,b]) => [WORDS[a].s, WORDS[b].e]);
+  const SPEC  = __SCENES_JSON__;
   const DURATION = __DURATION__;
-  const B_ROLL = { 5: 0.10, 7: 3.40 };
-  const RAIL_SCENES = [2,3,4,6];
-  const NODES = [{at:2,label:"Day 1"},{at:3,label:"Week 1"},{at:6,label:"Week 4"},{at:8,label:"Week 8"}];
+
+  const SCENES = SPEC.scenes;
+  const SCENE_WORDS = SCENES.map(s => s.words || null);
+  // A scene runs until the NEXT scene's first word. Ending a scene on its own
+  // last word leaves its caption on screen while the next phrase is speaking.
+  // A scene with no words — an outro after the read ends — declares "at".
+  const PHRASES = SCENES.map(s => s.at != null
+    ? [s.at, s.at + 2]
+    : [WORDS[s.words[0]].s, WORDS[s.words[1]].e]);
+  const B_ROLL = {};
+  SCENES.forEach((s,i) => { if (s.mode === "broll") B_ROLL[i] = s.clipStart || 0; });
+  const RAIL = SPEC.rail || null;
 
   const $ = (id) => document.getElementById(id);
   const stage=$("stage"), vo=$("vo"), cap=$("cap"), gate=$("gate"), aura=$("aura"),
         rail=$("rail"), railFill=$("railFill"), progFill=$("progFill"),
         broll=$("broll"), brollFrame=$("brollFrame"), bgrade=$("bgrade");
-  const scenes=[...document.querySelectorAll(".scene")];
   const RENDER = new URLSearchParams(location.search).get("render")==="1";
   if (RENDER) document.body.classList.add("render");
 
-  NODES.forEach((n,i) => {
-    const el=document.createElement("i");
-    el.className="node"; el.style.top=(i/(NODES.length-1)*100)+"%";
-    el.innerHTML=`<em>${n.label}</em>`;
-    rail.appendChild(el);
-  });
-  const nodeEls=[...rail.querySelectorAll(".node")];
+  if (SPEC.title) { document.title = SPEC.title; $("panelTitle").textContent = SPEC.title; }
+  if (SPEC.gate)  { $("gateTitle").textContent = SPEC.gate; }
+  $("gateSub").textContent = `Tap for sound · ${Math.round(DURATION)}s`;
 
+  /* ── build the scenes from the spec ─────────────────────────────────────
+     The director writes scenes.json; nothing here is film-specific. */
+  const el = (tag, cls, html) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+  const anim = (n, kind, delay) => { n.dataset.a = kind; n.dataset.d = String(delay); return n; };
+
+  function buildBlock(s) {
+    if (s.h1) {
+      const h = el("h1", "h1");
+      s.h1.forEach((line, k) => {
+        const ln = anim(el("span", "ln"), "mask", .10 + k * .10);
+        ln.appendChild(el("i", null, line));
+        h.appendChild(ln);
+      });
+      return h;
+    }
+    if (s.rows) {
+      const c = el("div", "card");
+      s.rows.forEach((r, k) => {
+        const [label, value, delay, flag] = r;
+        const row = anim(el("div", "r" + (flag ? " " + flag : "")), "row",
+                         delay != null ? delay : .14 + k * .12);
+        row.appendChild(el("span", "lbl", label));
+        row.appendChild(value === "✓" ? el("i", "tick", "✓") : el("b", null, value));
+        c.appendChild(row);
+      });
+      return c;
+    }
+    if (s.cells) {
+      const g = el("div", "grid2");
+      s.cells.forEach(([u, b], k) => {
+        const cell = anim(el("div", "cell"), "pop", .12 + k * .11);
+        cell.appendChild(el("u", null, u));
+        cell.appendChild(el("b", null, b));
+        g.appendChild(cell);
+      });
+      return g;
+    }
+    if (s.pills) {
+      const p = el("div", "pills");
+      s.pills.forEach((t, k) => p.appendChild(anim(el("span", "pill", t), "pop", .1 + k * .09)));
+      return p;
+    }
+    if (s.number) {
+      const g = el("div", "endcta");
+      const v = anim(el("p", "slam", s.number.value), "count", .06);
+      v.dataset.to = s.number.value;
+      g.appendChild(v);
+      if (s.number.note) g.appendChild(anim(el("p", "slamnote", s.number.note), "fade", .5));
+      return g;
+    }
+    if (s.split) {
+      const w = el("div", "bar5050");
+      const track = el("div", "track");
+      track.appendChild(anim(el("div", "a", s.split.a[1]), "grow-l", .14));
+      track.appendChild(anim(el("div", "b", s.split.b[1]), "grow-r", .28));
+      const legend = anim(el("div", "legend"), "fade", .5);
+      legend.appendChild(el("span", null, s.split.a[0]));
+      legend.appendChild(el("span", null, s.split.b[0]));
+      w.appendChild(track); w.appendChild(legend);
+      return w;
+    }
+    if (s.strikes) {
+      const w = el("div", "nos");
+      s.strikes.forEach((t, k) => {
+        const n = anim(el("div", "no"), "strike", .08 + k * .3);
+        n.appendChild(el("span", "x", "✕"));
+        n.appendChild(el("span", "txt", t));
+        w.appendChild(n);
+      });
+      return w;
+    }
+    if (s.glyph) {
+      const w = el("div", "glyph");
+      const p = anim(el("div", "parcel"), "parcel", .05);
+      p.appendChild(el("i", "slash"));
+      w.appendChild(p);
+      if (s.glyph === "parcel-refused") w.appendChild(anim(el("div", "doorway"), "fade", .0));
+      return w;
+    }
+    if (s.lockup) {
+      const w = el("div", "lock");
+      const word = anim(el("span", "word"), "mask", .05);
+      word.appendChild(el("i", null, s.lockup.word || "Brand <em>Mint</em>"));
+      w.appendChild(word);
+      w.appendChild(anim(el("div", "rule"), "rule", .34));
+      if (s.lockup.city) w.appendChild(anim(el("div", "city", s.lockup.city), "fade", .52));
+      return w;
+    }
+    if (s.endcard) {
+      const w = el("div", "endcta");
+      w.appendChild(anim(el("div", "box", s.endcard.cta), "pop", .14));
+      if (s.endcard.hint) w.appendChild(anim(el("div", "hint", s.endcard.hint), "fade", .4));
+      if (s.endcard.strip) {
+        const st = anim(el("div", "endstrip"), "fade", .58);
+        s.endcard.strip.forEach(t => st.appendChild(el("span", null, t)));
+        w.appendChild(st);
+      }
+      return w;
+    }
+    return null;
+  }
+
+  const host = $("scenes");
+  SCENES.forEach((s, i) => {
+    const sec = el("section", "scene");
+    sec.dataset.scene = i;
+    sec.dataset.mode = s.mode;
+    if (s.center || s.number || s.lockup || s.endcard || s.glyph) sec.classList.add("center");
+    if (s.flash || s.number) sec.classList.add("flash");
+    if (RAIL && RAIL.scenes.includes(i)) sec.classList.add("rail-on");
+    if (s.kicker) sec.appendChild(anim(el("p", "kicker", s.kicker), "fade", 0));
+    const block = buildBlock(s);
+    if (block) sec.appendChild(block);
+    if (s.sub) sec.appendChild(anim(el("p", "sub", s.sub), "fade", .46));
+    host.appendChild(sec);
+  });
+  const scenes = [...host.querySelectorAll(".scene")];
+
+  let nodeEls = [];
+  if (RAIL) {
+    RAIL.nodes.forEach((label, i) => {
+      const n = el("i", "node");
+      n.style.top = (i / Math.max(1, RAIL.nodes.length - 1) * 100) + "%";
+      n.appendChild(el("em", null, label));
+      rail.appendChild(n);
+    });
+    nodeEls = [...rail.querySelectorAll(".node")];
+  }
+
+  /* ── animation ──────────────────────────────────────────────────────── */
   const clamp=(v)=>v<0?0:v>1?1:v;
   // Expo-out: fast departure, long settle. The standard motion-design curve.
   const expo =(p)=>p>=1?1:1-Math.pow(2,-10*p);
-  const back =(p)=>{const c=1.70158+1;return 1+ (c+1)*Math.pow(p-1,3)+c*Math.pow(p-1,2);};
+  const back =(p)=>{const c=1.70158+1;return 1+(c+1)*Math.pow(p-1,3)+c*Math.pow(p-1,2);};
 
   /* Every element animates from the scene's own clock, so any frame — live or
      rendered — is a true in-between. Nothing is simply switched on. */
@@ -320,16 +371,39 @@
       case "mask":  el.firstElementChild.style.transform=`translateY(${(1-e)*104}%)`; el.style.opacity=p>0?1:0; break;
       case "row":   el.style.opacity=e; el.style.transform=`translateX(${(1-e)*26}px)`; break;
       case "pop":   el.style.opacity=e; el.style.transform=`scale(${.9+.1*back(clamp(p))})`; break;
-      case "live":  el.style.opacity=e; el.style.transform=`scale(${.62+.38*back(clamp(p))})`; break;
       case "grow-l":el.style.flexBasis=(e*50)+"%"; el.style.opacity=e; break;
       case "grow-r":el.style.flexBasis=(e*50)+"%"; el.style.opacity=e; break;
       case "rule":  el.style.width=(e*46)+"%"; break;
+      case "count": {
+        // Slam in, and run the digits up underneath it. The number arrives
+        // before it is legible, which is what makes it feel like a hit.
+        el.style.opacity=e;
+        el.style.transform=`scale(${.62+.38*back(clamp(p))})`;
+        const to = el.dataset.to || "";
+        const digits = to.replace(/[^0-9]/g, "");
+        if (digits) {
+          const cp = expo(clamp((tl - delay) / (dur * 1.9)));
+          const n = Math.round(parseInt(digits, 10) * cp);
+          el.textContent = to.replace(digits, String(n));
+        }
+        break;
+      }
       case "strike": {
         // The word arrives, then the line is drawn through it a beat later.
         el.style.opacity = clamp(p * 2.2);
         el.style.transform = `translateX(${(1-e)*22}px)`;
         const sp = expo(clamp((tl - delay - 0.26) / 0.34));
         el.querySelector(".txt").style.setProperty("--w", (sp * 104) + "%");
+        break;
+      }
+      case "parcel": {
+        // Lands, is struck through, then leaves the frame the wrong way.
+        el.style.opacity = clamp(p * 2.4);
+        const away = expo(clamp((tl - delay - 1.15) / 0.85));
+        el.style.transform = `scale(${.86+.14*back(clamp(p))}) translateX(${away*104}%) rotate(${away*7}deg)`;
+        const sl = expo(clamp((tl - delay - 0.5) / 0.42));
+        const s = el.querySelector(".slash");
+        if (s) s.style.width = (sl * 96) + "%";
         break;
       }
     }
@@ -356,9 +430,12 @@
   function paintCaption(i,t) {
     const mode = scenes[i]?.dataset.mode;
     // Captions only where the visual is not already carrying the same words.
-    if (mode !== "support") { if (cap.childElementCount) cap.innerHTML=""; renderedKey=""; return; }
+    if ((mode !== "support" && mode !== "broll") || !SCENE_WORDS[i]) {
+      if (cap.childElementCount) cap.innerHTML=""; renderedKey=""; return;
+    }
     const [a,b]=SCENE_WORDS[i];
     const ws=WORDS.slice(a,b+1);
+    // Three or four words at a time. A whole phrase at this size is a wall.
     const groups=[]; let run=[];
     for (const w of ws) {
       const chars=run.reduce((s,x)=>s+x.w.length+1,0)+w.w.length;
@@ -391,14 +468,14 @@
 
     progFill.style.width=(clamp(t/DURATION)*100).toFixed(2)+"%";
 
-    const onRail = RAIL_SCENES.includes(i);
+    const onRail = RAIL && RAIL.scenes.includes(i);
     rail.style.opacity = onRail ? 1 : 0;
     if (onRail) {
-      const from=PHRASES[RAIL_SCENES[0]][0], to=PHRASES[8][0];
+      const from=PHRASES[RAIL.scenes[0]][0], to=PHRASES[RAIL.scenes[RAIL.scenes.length-1]][1];
       railFill.style.height=(clamp((t-from)/(to-from))*100).toFixed(2)+"%";
-      let reached=-1; NODES.forEach((n,k)=>{ if(i>=n.at) reached=k; });
+      const reached = RAIL.scenes.filter(s => i >= s).length - 1;
       nodeEls.forEach((n,k)=>{ n.classList.toggle("on",k<=reached); n.classList.toggle("now",k===reached);
-        n.querySelector("em").style.opacity = k===reached ? 1 : 0; });
+        const em=n.querySelector("em"); if(em) em.style.opacity = k===reached ? 1 : 0; });
     }
 
     const onB = i in B_ROLL;
@@ -421,7 +498,7 @@
 
   window.__seek=(t,src)=>{ if(src!==undefined) brollFrame.src=src||""; paint(t);
     return { scene:current, caption:cap.textContent, active:[...cap.querySelectorAll(".cap-word.active")].map(n=>n.textContent) }; };
-  window.__meta={ words:WORDS, phrases:PHRASES, bRoll:B_ROLL, duration:DURATION };
+  window.__meta={ words:WORDS, phrases:PHRASES, bRoll:B_ROLL, duration:DURATION, scenes:SCENES.length };
 
   function frame(){ paint(vo.currentTime); if(!vo.paused) requestAnimationFrame(frame); }
   function play(){ gate.hidden=true; vo.play().then(()=>requestAnimationFrame(frame)).catch(()=>{gate.hidden=false;}); }
