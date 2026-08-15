@@ -78,6 +78,10 @@
      because every row is already on screen by the time the new one lands. */
   .r.now b{color:var(--mint)}
   .r.now .lbl{color:#DCEFE4}
+  /* A value that is withheld rather than absent. The text is still there and
+     still sets the bar's width — it is simply not yours to read. */
+  .r.redact b{color:transparent;background:rgba(255,255,255,.17);border-radius:.6cqw;
+    padding:0 1cqw;box-shadow:0 0 0 .25cqw rgba(255,255,255,.05)}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:2.2cqw;width:100%}
   .cell{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:2.4cqw;padding:3.2cqw;display:grid;gap:1.2cqw}
@@ -99,8 +103,12 @@
   .no .txt{position:relative}
   .no .txt::after{content:"";position:absolute;left:-1%;top:52%;height:.5cqw;width:var(--w,0%);background:var(--red);border-radius:1cqw}
 
-  /* The peak. Full bleed, mint ground, one number. */
+  /* The peak. Full bleed, mint ground — a number, or a sentence. */
   .flash{background:var(--mint);color:#06251A}
+  /* Mint type on mint is invisible, so on the flash ground the accent inverts:
+     the emphasis is solid ink and everything else steps back. */
+  .flash .h1{color:rgba(6,37,26,.46)}
+  .flash .h1 em{color:#06251A;font-style:italic}
   .slam{font-size:24cqw;font-weight:900;letter-spacing:-.06em;line-height:.84;margin:0;font-variant-numeric:tabular-nums}
   /* A bare figure is meaningless in a screenshot. The unit rides with it. */
   .slam u{text-decoration:none;font-size:7.4cqw;letter-spacing:-.01em;margin-left:1.6cqw}
@@ -122,6 +130,28 @@
   .parcel::after{content:"";position:absolute;top:0;bottom:0;left:44%;width:3.4cqw;background:rgba(244,239,228,.5)}
   .slash{position:absolute;left:4%;top:50%;height:1.1cqw;width:0;background:var(--red);border-radius:1cqw;transform:rotate(-19deg);transform-origin:left center;
     box-shadow:0 0 3cqw rgba(224,72,60,.7)}
+
+  /* The monogram, drawn rather than placed. */
+  .mark{width:24cqw;opacity:0}
+  .mark svg{display:block;width:100%;height:auto;overflow:visible}
+  .lock .mark{width:15cqw;margin-bottom:1.4cqw}
+
+  /* Forty identical things. The point is that none of them is distinguishable,
+     so nothing here may be styled to stand out. */
+  .crowd{display:grid;grid-template-columns:repeat(8,1fr);gap:1.5cqw;width:100%;position:relative}
+  .crowd i{display:block;aspect-ratio:1;border-radius:1cqw;background:rgba(255,255,255,.13);
+    border:1px solid rgba(255,255,255,.07);opacity:0}
+  .crowd u{position:absolute;top:-2cqw;bottom:-2cqw;width:14cqw;left:0;text-decoration:none;opacity:0;
+    background:linear-gradient(90deg,transparent,rgba(123,242,168,.30),transparent);pointer-events:none}
+
+  /* One-way traffic. Things leave past the gate and the lane ends empty. */
+  .lane{position:relative;width:100%;height:26cqw;overflow:hidden}
+  .lane .gate{position:absolute;left:74%;top:6%;bottom:6%;width:.6cqw;border-radius:1cqw;
+    background:linear-gradient(180deg,rgba(123,242,168,0),rgba(123,242,168,.5),rgba(123,242,168,0))}
+  .lane i{position:absolute;top:50%;width:9cqw;height:7cqw;margin-top:-3.5cqw;border-radius:1.2cqw;
+    background:linear-gradient(160deg,#C8A97E,#A8875C);box-shadow:0 2cqw 6cqw rgba(0,0,0,.4)}
+  .lane b{position:absolute;right:26%;top:76%;height:.6cqw;width:0;margin-top:-.25cqw;border-radius:1cqw;
+    background:linear-gradient(270deg,rgba(224,72,60,.95),rgba(224,72,60,0))}
 
   /* Outro */
   .lock{display:grid;gap:1.6cqw;justify-items:center}
@@ -254,6 +284,8 @@
 
   /* ── build the scenes from the spec ─────────────────────────────────────
      The director writes scenes.json; nothing here is film-specific. */
+  const MARK_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs><circle class="disc" cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="m" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+
   const el = (tag, cls, html) => {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -332,6 +364,23 @@
       });
       return w;
     }
+    if (s.glyph === "crowd") {
+      // Forty identical records. A mint scan crosses them and finds nothing,
+      // because there is nothing to find.
+      const w = anim(el("div", "crowd"), "crowd", 0);
+      for (let k = 0; k < 40; k++) w.appendChild(el("i"));
+      w.appendChild(el("u"));
+      return w;
+    }
+    if (s.glyph === "one-way") {
+      // Traffic that only goes one way. The lane ends empty; the red return
+      // stroke starts, stalls, and dies.
+      const w = anim(el("div", "lane"), "lane", 0);
+      w.appendChild(el("span", "gate"));
+      for (let k = 0; k < 6; k++) w.appendChild(el("i"));
+      w.appendChild(el("b"));
+      return w;
+    }
     if (s.glyph) {
       const w = el("div", "glyph");
       const p = anim(el("div", "parcel"), "parcel", .05);
@@ -340,17 +389,23 @@
       if (s.glyph === "parcel-refused") w.appendChild(anim(el("div", "doorway"), "fade", .0));
       return w;
     }
+    if (s.mark) {
+      const w = anim(el("div", "mark", MARK_SVG), "mark", s.mark.delay || 0);
+      return w;
+    }
     if (s.lockup) {
       const w = el("div", "lock");
-      const word = anim(el("span", "word"), "mask", .05);
+      if (s.lockup.mark) w.appendChild(anim(el("div", "mark", MARK_SVG), "mark", 0));
+      const word = anim(el("span", "word"), "mask", s.lockup.mark ? .34 : .05);
       word.appendChild(el("i", null, s.lockup.word || "Brand <em>Mint</em>"));
       w.appendChild(word);
-      w.appendChild(anim(el("div", "rule"), "rule", .34));
-      if (s.lockup.city) w.appendChild(anim(el("div", "city", s.lockup.city), "fade", .52));
+      const d0 = s.lockup.mark ? .30 : 0;
+      w.appendChild(anim(el("div", "rule"), "rule", .34 + d0));
+      if (s.lockup.city) w.appendChild(anim(el("div", "city", s.lockup.city), "fade", .52 + d0));
       if (s.lockup.follow) {
-        w.appendChild(anim(el("div", "followline", s.lockup.follow.text || "Follow to know more"), "fade", .70));
+        w.appendChild(anim(el("div", "followline", s.lockup.follow.text || "Follow to know more"), "fade", .70 + d0));
         if (s.lockup.follow.handle) {
-          const f = anim(el("div", "follow"), "pop", .84);
+          const f = anim(el("div", "follow"), "pop", .84 + d0);
           f.appendChild(el("b", null, s.lockup.follow.handle));
           w.appendChild(f);
         }
@@ -376,7 +431,7 @@
     const sec = el("section", "scene");
     sec.dataset.scene = i;
     sec.dataset.mode = s.mode;
-    if (s.center || s.number || s.lockup || s.endcard || s.glyph) sec.classList.add("center");
+    if (s.center || s.number || s.lockup || s.endcard || s.glyph || s.mark) sec.classList.add("center");
     if (s.bg) sec.classList.add("over-bg");
     if (s.flash || s.number) sec.classList.add("flash");
     if (RAIL && RAIL.scenes.includes(i)) sec.classList.add("rail-on");
@@ -439,6 +494,57 @@
         el.style.transform = `translateX(${(1-e)*22}px)`;
         const sp = expo(clamp((tl - delay - 0.26) / 0.34));
         el.querySelector(".txt").style.setProperty("--w", (sp * 104) + "%");
+        break;
+      }
+      case "mark": {
+        // The monogram draws itself: the disc lands, then the M is stroked on.
+        el.style.opacity = clamp(p * 2.2);
+        el.style.transform = `scale(${.62 + .38 * back(clamp(p))})`;
+        const path = el.querySelector("path.m");
+        if (path) {
+          const L = 90;                                   // the M path is ~85 units
+          path.style.strokeDasharray = L;
+          path.style.strokeDashoffset = L * (1 - expo(clamp((tl - delay - .20) / (dur * 1.25))));
+        }
+        break;
+      }
+      case "crowd": {
+        // Every chip arrives on its own beat, then one mint sweep crosses the
+        // grid. Nothing lights up, because none of them is yours.
+        const chips = el.querySelectorAll("i");
+        for (let k = 0; k < chips.length; k++) {
+          const ck = expo(clamp((tl - delay - k * 0.012) / 0.42));
+          chips[k].style.opacity = ck * 0.9;
+          chips[k].style.transform = `scale(${.72 + .28 * ck})`;
+        }
+        const sweep = el.querySelector("u");
+        if (sweep) {
+          const sp = clamp((tl - delay - 0.30) / 0.85);
+          sweep.style.opacity = sp > 0 && sp < 1 ? 1 : 0;
+          sweep.style.transform = `translateX(${sp * 780}%)`;
+        }
+        break;
+      }
+      case "lane": {
+        // Six parcels cross the gate and leave. The red stroke tries to come
+        // back, stalls a third of the way, and fades. Nothing returns.
+        // Chip 0 is furthest right, so they cross the gate one after another
+        // and the lane is empty just as the line lands.
+        const chips = el.querySelectorAll("i");
+        const travel = ((tl - delay) / 3.0) * 150;
+        for (let k = 0; k < chips.length; k++) {
+          const x = 40 - k * 17 + travel;
+          chips[k].style.left = x + "%";
+          chips[k].style.opacity = (x > 96 || x < -22) ? 0 : 1;
+          chips[k].style.transform = `rotate(${Math.sin((x + k * 30) / 26) * 3}deg)`;
+        }
+        const back_ = el.querySelector("b");
+        if (back_) {
+          // Reaches back from the gate, stalls a third of the way, dies.
+          const bp = clamp((tl - delay - 1.35) / 0.55);
+          back_.style.width = (expo(bp) * 24) + "%";
+          back_.style.opacity = (1 - clamp((tl - delay - 2.05) / 0.5)) * clamp(bp * 3);
+        }
         break;
       }
       case "parcel": {

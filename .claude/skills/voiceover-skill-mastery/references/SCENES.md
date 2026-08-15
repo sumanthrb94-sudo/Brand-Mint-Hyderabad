@@ -72,7 +72,8 @@ One per scene.
 | `number` | `{"value":"₹440","note":"gone."}` | Full-bleed slam on mint, digits counting up underneath. **The peak — use once.** |
 | `split` | `{"a":["To start","50%"],"b":["When live","50%"]}` | Two-part bar, grows from both ends. |
 | `strikes` | `["Retainer","Lock-in"]` | Struck through a beat after each lands. |
-| `glyph` | `"parcel-refused"` | A pictorial beat, shapes only. |
+| `glyph` | `"parcel-refused"`, `"crowd"`, `"one-way"` | A pictorial beat, shapes only. |
+| `mark` | `{}` or `{"delay":0.1}` | The monogram, drawn on. Use once, and not in the same film as a `lockup.mark`. |
 | `lockup` | `{"word":"Brand <em>Mint</em>","city":"Hyderabad","follow":{"text":"Follow to know more","handle":"@brandmint.studios"}}` | Wordmark, rule sweep, city, and the follow ask. |
 | `endcard` | `{"cta":"Comment “RTO”","hint":"…","strip":["8 weeks","@handle"]}` | The ask. |
 
@@ -83,8 +84,14 @@ One per scene.
 - `delay` overrides the automatic `.14 + .12k` stagger. Set earlier rows to `0`
   and only the new one to a real delay, and a ledger reads as *accumulating*
   across scenes rather than rebuilding itself each time.
-- `class` is `debit` (red value), `total` (mint, ruled off above) or `blank`
-  (muted, letter-spaced — for a figure deliberately not shown).
+- `class` is `debit` (red value), `total` (mint, ruled off above), `now` (mint —
+  the row that just arrived), `blank` (muted, letter-spaced — a figure that does
+  not exist) or `redact` (the value renders as a solid bar).
+- **`blank` and `redact` are different arguments.** `blank` is *nobody measures
+  this*. `redact` is *somebody measures this and it is not you* — so write the
+  real value in the spec (`"Aarav Sharma"`) and let it set the bar's width. The
+  text is never visible; it is there to make the bar the right size and to keep
+  the row honest.
 - A value of `"✓"` renders as a mint tick.
 
 ### The outro
@@ -105,6 +112,25 @@ the captions carry the line and the picture carries the feeling.
 
 `parcel-refused` — a parcel lands, a red line is struck through it, and it
 leaves the frame the wrong way past a closed door.
+
+`crowd` — forty identical chips arrive on staggered beats, then one mint sweep
+crosses them. Nothing lights up, because nothing there is distinguishable. Do
+not be tempted to highlight one: the absence of a highlight is the whole point.
+
+`one-way` — six parcels cross a gate and leave, right to left in index order so
+the lane empties just as the line lands. A red stroke reaches back from the
+gate, stalls a third of the way, and dies. Nothing returns.
+
+### The mark
+
+`mark` draws the monogram rather than placing it: the disc lands with a back
+ease, then the M is stroked on with `stroke-dashoffset`. Set `lockup.mark: true`
+to head the outro with it — the wordmark and everything below shift later
+automatically, so the mark leads and the name follows.
+
+A film with no footage needs this. Three of the fourteen scenes in a normal film
+are carried by real clips; without them the animation has to earn those beats
+itself, and a drawn mark plus two pictorial glyphs is what replaces them.
 
 ## The spine
 
