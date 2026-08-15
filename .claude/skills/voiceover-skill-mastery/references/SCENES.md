@@ -39,6 +39,7 @@ spec is missing a field.
 | `at` | Absolute seconds, for a scene with no words — an outro after the read ends. Use instead of `words`. `hold` sets how long it stays. |
 | `mode` | `type`, `support` or `broll`. Decides whether captions show. |
 | `clip` | `A`, `B` or `C`. Required on `broll`; frames are read from `out/clip<A>/`. |
+| `bg` | Same, but the footage runs *behind* this scene's content instead of replacing it. Use for an outro over film, or wherever the graphics are the payoff and must not be given up. The scene gets its own scrim so type stays legible. |
 | `clipStart` | Seconds into the clip to begin. Default 0. |
 | `kicker` | Small uppercase label above the content. |
 | `sub` | A quiet line under the block. |

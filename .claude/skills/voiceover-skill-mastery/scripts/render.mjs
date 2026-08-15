@@ -77,7 +77,8 @@ fs.mkdirSync(path.join(OUT, 'frames'), { recursive: true });
 // Which scenes carry footage, and how far into each clip they start.
 const bRoll = {};
 spec.scenes.forEach((s, i) => {
-  if (s.mode === 'broll') bRoll[i] = { start: s.clipStart || 0, dir: path.join(OUT, 'clip' + s.clip) };
+  const clip = s.clip || s.bg;          // `bg` runs footage behind the scene's content
+  if (clip) bRoll[i] = { start: s.clipStart || 0, dir: path.join(OUT, 'clip' + clip) };
 });
 const clipFrames = {};
 for (const [i, v] of Object.entries(bRoll)) {

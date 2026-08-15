@@ -35,6 +35,12 @@
      a dead lower third under the hero type. */
   .scene[data-mode="type"]{padding-bottom:16cqw}
   .scene.is-live{visibility:visible;z-index:6}
+  /* A scene using footage as a backdrop rather than replacing itself with it.
+     Lifts above the clip and its grade, but stays under the captions. */
+  .scene.is-live.over-bg{z-index:24}
+  /* Its own scrim, so type stays legible over unpredictable footage. Behind the
+     scene's content but above the clip, because the scene owns this stack. */
+  .scene.over-bg::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(10,33,23,.62)}
   .scene.center{justify-items:center;text-align:center}
   .scene.rail-on{padding-left:17cqw}
 
@@ -147,7 +153,11 @@
   .bgrade{position:absolute;inset:0;z-index:22;pointer-events:none;opacity:0;visibility:hidden;
     background:linear-gradient(180deg,rgba(10,33,23,.55) 0%,rgba(10,33,23,0) 26%,rgba(10,33,23,0) 38%,rgba(10,33,23,.9) 92%)}
 
-  .captions{position:absolute;left:0;right:0;bottom:10cqw;z-index:30;padding:0 7cqw;text-align:center;pointer-events:none}
+  /* 24cqw, not 10. Two reasons: the brand badge composited over the
+     generator's watermark occupies the bottom-right corner from ~87% down, and
+     Instagram's own reel UI overlays roughly the bottom 13% — captions sitting
+     lower than this get covered by the platform, not just by us. */
+  .captions{position:absolute;left:0;right:0;bottom:24cqw;z-index:30;padding:0 7cqw;text-align:center;pointer-events:none}
   .cap-line{display:flex;flex-wrap:wrap;justify-content:center;gap:1.2cqw 2cqw}
   .cap-word{font-size:6.4cqw;font-weight:900;line-height:1.12;letter-spacing:-.02em;color:#fff;opacity:.26;
     text-shadow:0 .5cqw 2.6cqw rgba(0,0,0,.72);display:inline-block}
@@ -227,7 +237,8 @@
     ? [s.at, s.at + 2]
     : [WORDS[s.words[0]].s, WORDS[s.words[1]].e]);
   const B_ROLL = {};
-  SCENES.forEach((s,i) => { if (s.mode === "broll") B_ROLL[i] = s.clipStart || 0; });
+  // `clip` replaces the scene with footage; `bg` runs footage behind its content.
+  SCENES.forEach((s,i) => { if (s.clip || s.bg) B_ROLL[i] = s.clipStart || 0; });
   const RAIL = SPEC.rail || null;
 
   const $ = (id) => document.getElementById(id);
@@ -366,6 +377,7 @@
     sec.dataset.scene = i;
     sec.dataset.mode = s.mode;
     if (s.center || s.number || s.lockup || s.endcard || s.glyph) sec.classList.add("center");
+    if (s.bg) sec.classList.add("over-bg");
     if (s.flash || s.number) sec.classList.add("flash");
     if (RAIL && RAIL.scenes.includes(i)) sec.classList.add("rail-on");
     if (s.kicker) sec.appendChild(anim(el("p", "kicker", s.kicker), "fade", 0));

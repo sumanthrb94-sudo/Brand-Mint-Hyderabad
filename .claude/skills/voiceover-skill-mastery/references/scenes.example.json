@@ -1,10 +1,10 @@
 {
- "title": "The ₹1,000 order that made you nothing",
- "gate": "Comment RTO",
- "duration": 34.8,
+ "title": "The order you typed five times",
+ "gate": "Comment TOOLS",
+ "duration": 31.2,
  "clipSlots": {
-  "A": 1,
-  "B": 6,
+  "A": 0,
+  "B": 9,
   "C": 13
  },
  "scenes": [
@@ -13,12 +13,9 @@
     0,
     4
    ],
-   "mode": "type",
-   "kicker": "Today",
-   "h1": [
-    "You made",
-    "a <em>sale</em> today."
-   ]
+   "mode": "broll",
+   "clip": "A",
+   "clipStart": 0.0
   },
   {
    "words": [
@@ -27,177 +24,184 @@
    ],
    "mode": "type",
    "h1": [
-    "And <em>lost money</em>",
-    "on it."
+    "You typed it",
+    "<em>five times.</em>"
    ]
   },
   {
    "words": [
     10,
-    15
+    12
    ],
    "mode": "type",
-   "kicker": "The order",
+   "kicker": "Where it goes",
    "rows": [
     [
-     "Order value",
-     "₹1,000",
-     0.14
+     "WhatsApp",
+     "1",
+     0.0,
+     "now"
     ],
     [
-     "Payment",
-     "Cash on delivery",
-     0.42
+     "Spreadsheet",
+     "2",
+     0.78,
+     "now"
+    ],
+    [
+     "Tally",
+     "3",
+     1.78,
+     "now"
     ]
    ]
   },
   {
    "words": [
-    16,
-    18
+    13,
+    14
    ],
    "mode": "type",
-   "kicker": "What it costs you",
+   "kicker": "Where it goes",
    "rows": [
     [
-     "Order value",
-     "₹1,000",
+     "WhatsApp",
+     "1",
      0
     ],
     [
-     "Shipping",
-     "−₹200",
-     0.3,
-     "debit"
-    ]
-   ]
-  },
-  {
-   "words": [
-    19,
-    20
-   ],
-   "mode": "type",
-   "kicker": "What it costs you",
-   "rows": [
-    [
-     "Order value",
-     "₹1,000",
+     "Spreadsheet",
+     "2",
      0
     ],
     [
-     "Shipping",
-     "−₹200",
-     0,
-     "debit"
+     "Tally",
+     "3",
+     0
     ],
     [
-     "Packing",
-     "−₹40",
-     0.26,
-     "debit"
+     "Courier panel",
+     "4",
+     0.06,
+     "now"
     ]
    ]
   },
   {
    "words": [
-    21,
+    15,
+    19
+   ],
+   "mode": "type",
+   "kicker": "Where it goes",
+   "rows": [
+    [
+     "WhatsApp",
+     "1",
+     0
+    ],
+    [
+     "Spreadsheet",
+     "2",
+     0
+    ],
+    [
+     "Tally",
+     "3",
+     0
+    ],
+    [
+     "Courier panel",
+     "4",
+     0
+    ],
+    [
+     "Customer update",
+     "5",
+     0.84,
+     "now"
+    ]
+   ]
+  },
+  {
+   "words": [
+    20,
+    23
+   ],
+   "mode": "type",
+   "kicker": "The maths",
+   "rows": [
+    [
+     "Per order",
+     "5 minutes",
+     0.1,
+     "now"
+    ]
+   ]
+  },
+  {
+   "words": [
+    24,
     27
    ],
-   "mode": "support",
-   "glyph": "parcel-refused"
+   "mode": "type",
+   "kicker": "The maths",
+   "rows": [
+    [
+     "Per order",
+     "5 minutes",
+     0
+    ],
+    [
+     "Orders a day",
+     "40",
+     0.12,
+     "now"
+    ]
+   ]
   },
   {
    "words": [
     28,
-    32
-   ],
-   "mode": "type",
-   "kicker": "And back again",
-   "rows": [
-    [
-     "Order value",
-     "₹1,000",
-     0
-    ],
-    [
-     "Shipping",
-     "−₹200",
-     0,
-     "debit"
-    ],
-    [
-     "Packing",
-     "−₹40",
-     0,
-     "debit"
-    ],
-    [
-     "Return shipping",
-     "−₹200",
-     0.3,
-     "debit"
-    ]
-   ]
-  },
-  {
-   "words": [
-    33,
-    41
+    37
    ],
    "mode": "type",
    "number": {
-    "value": "₹440",
-    "note": "gone. On one refused parcel."
+    "value": "80",
+    "unit": "hours",
+    "note": "a month. Retyping what you already knew."
    }
   },
   {
    "words": [
-    42,
-    44
+    38,
+    42
    ],
    "mode": "type",
    "kicker": "It has a name",
    "h1": [
-    "This is",
-    "<em>RTO.</em>"
+    "They call it",
+    "<em>swivel-chair work.</em>"
    ]
   },
   {
    "words": [
-    45,
-    50
+    43,
+    49
    ],
-   "mode": "support",
-   "kicker": "On most dashboards",
-   "rows": [
-    [
-     "Revenue",
-     "Tracked",
-     0.12
-    ],
-    [
-     "Ad spend",
-     "Tracked",
-     0.26
-    ],
-    [
-     "RTO rate",
-     "— — —",
-     0.44,
-     "blank"
-    ]
-   ]
+   "mode": "broll",
+   "clip": "B",
+   "clipStart": 0.6
   },
   {
    "words": [
-    51,
+    50,
     55
    ],
    "mode": "type",
    "h1": [
-    "Do you know",
-    "<em>your number?</em>"
+    "What are you",
+    "still <em>typing twice?</em>"
    ]
   },
   {
@@ -207,39 +211,39 @@
    ],
    "mode": "type",
    "endcard": {
-    "cta": "Comment “RTO”",
-    "hint": "One word. That's all it takes."
+    "cta": "Comment “TOOLS”",
+    "hint": "One word. I'll send the list."
    }
   },
   {
    "words": [
     58,
-    65
+    64
    ],
    "mode": "support",
-   "kicker": "The four fixes",
+   "kicker": "The four we automate first",
    "cells": [
     [
      "01",
-     "Prepaid nudges"
+     "Order intake"
     ],
     [
      "02",
-     "Address checks"
+     "Invoice + GST"
     ],
     [
      "03",
-     "Order confirmation"
+     "Courier + AWB"
     ],
     [
      "04",
-     "COD limits"
+     "Status updates"
     ]
    ]
   },
   {
-   "at": 31.5,
-   "hold": 3.3,
+   "at": 27.85,
+   "hold": 3.35,
    "mode": "type",
    "lockup": {
     "word": "Brand <em>Mint</em>",
@@ -248,7 +252,9 @@
      "text": "Follow to know more",
      "handle": "@brandmint.studios"
     }
-   }
+   },
+   "bg": "C",
+   "clipStart": 0.8
   }
  ]
 }

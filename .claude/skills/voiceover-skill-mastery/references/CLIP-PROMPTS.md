@@ -26,25 +26,32 @@ Generated clips come back with a **watermark burned into the bottom-right
 corner** — Gemini and Veo stamp a solid sparkle there. No wording in the prompt
 removes it; it is applied after generation. Assume every supplied clip has one.
 
-`scripts/prep_clip.sh` handles it: it crops the bottom 13% away before scaling to
-1080×1920, which takes the mark with it. The cost is the bottom edge of the
-frame and 13% of the width, which is why the shots are framed with room around
-the subject.
+On a 1080×1920 frame it measures roughly **x 848–935, y 1703–1781**. Re-measure
+if a generator moves it.
+
+`scripts/prep_clip.sh` lays the Brand Mint monogram over that exact spot while
+extracting frames. This covers the mark *and* brands the footage in one move,
+and it beats cropping: a crop costs the bottom of the frame plus 13% of the
+width to a heavier upscale, for no gain.
 
 ```bash
-bash scripts/prep_clip.sh clip1.mp4 out/clipA      # crops
-bash scripts/prep_clip.sh own.mp4  out/clipA 0     # your own footage, no crop
+bash scripts/prep_clip.sh clip1.mp4 out/clipA       # badge, full frame kept
+BADGE= bash scripts/prep_clip.sh own.mp4 out/clipA  # your own footage, no badge
+CROP=13 bash scripts/prep_clip.sh clip1.mp4 out/clipA   # crop instead
 ```
 
-Do **not** rely on the `.bgrade` gradient to hide it. The grade is
-semi-transparent and the mark is solid — it shows straight through. And look at
-a processed frame's corner before building; this is cheap to check and expensive
-to miss.
+Two things this forces, both of which are improvements anyway:
+
+- **Captions sit at 24cqw**, not 10. They have to clear the badge, and lower
+  than that Instagram's own reel UI covers them regardless.
+- **Assert the coverage.** Sample the watermark box on a processed frame and
+  confirm it is all badge pixels. Do not eyeball it, and never rely on the
+  `.bgrade` gradient — the grade is semi-transparent and the mark is solid.
 
 Two other things worth knowing about supplied clips:
 
-- **They arrive at 720×1280**, not 1080×1920. After the watermark crop that is a
-  1.7× upscale. Acceptable for a 2–3 second cut, but do not plan a long one.
+- **They arrive at 720×1280**, not 1080×1920 — a 1.5× upscale. Fine for a 2–3
+  second cut; do not plan a long one.
 - **Brand marks on props** — a laptop lid, a phone, a courier bag — are not
   removable either. Flag them and let the client decide; a visible third-party
   logo in a paid ad is their call, not yours.
