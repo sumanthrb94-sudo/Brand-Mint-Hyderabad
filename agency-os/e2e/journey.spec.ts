@@ -435,6 +435,46 @@ test.describe("Whole-surface checks", () => {
     expect(failedRequests, `same-origin requests failed: ${failedRequests.join(" | ")}`).toHaveLength(0);
   });
 
+  test("29 every form control is named by a label", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await signIn(page, CEO, "/operations");
+
+    const unnamed: string[] = [];
+    for (const [route, tabs] of [
+      ["/operations", ["Projects", "Documents", "Invoices"]],
+      ["/deliverables", []],
+      ["/onboarding", []],
+    ] as [string, string[]][]) {
+      await page.goto(route);
+      await page.waitForLoadState("networkidle");
+      for (const tab of tabs.length ? tabs : [null]) {
+        if (tab) {
+          await page.getByRole("tab", { name: tab }).click();
+          await page.waitForTimeout(400);
+        }
+        unnamed.push(
+          ...(await page.evaluate(() => {
+            const controls = Array.from(
+              document.querySelectorAll('input:not([type="hidden"]):not([type="file"]), textarea, [role="combobox"]'),
+            );
+            return controls
+              .filter((element) => {
+                if (element.getAttribute("aria-label") || element.getAttribute("aria-labelledby")) return false;
+                if (element.id && document.querySelector(`label[for="${CSS.escape(element.id)}"]`)) return false;
+                // A control wrapped in its own label is named implicitly.
+                return !element.closest("label");
+              })
+              .map((element) => `${location.pathname}: ${element.outerHTML.slice(0, 90)}`);
+          })),
+        );
+      }
+    }
+
+    // An input with no label is announced as an unnamed textbox, and clicking
+    // its caption does not focus it.
+    expect(unnamed, `controls with no accessible name:\n${unnamed.join("\n")}`).toHaveLength(0);
+  });
+
   test("28 keyboard navigation reaches the controls", async ({ page }) => {
     await page.setViewportSize(DESKTOP);
     await signIn(page, CEO, "/admin");

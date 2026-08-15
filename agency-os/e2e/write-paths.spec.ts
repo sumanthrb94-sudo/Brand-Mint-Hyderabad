@@ -64,6 +64,18 @@ async function chooseOption(scope: Page | Locator, page: Page, label: string, op
   await page.getByRole("option", { name: option }).click();
 }
 
+/** The smallest structurally valid PDF, so the upload path gets a real file. */
+function minimalPdf() {
+  return Buffer.from(
+    "%PDF-1.4\n" +
+      "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n" +
+      "2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n" +
+      "3 0 obj<</Type/Page/MediaBox[0 0 200 200]/Parent 2 0 R>>endobj\n" +
+      "trailer<</Root 1 0 R>>\n%%EOF\n",
+    "utf-8",
+  );
+}
+
 test.describe("A — a visitor becomes a lead", () => {
   test("A1 the public enquiry form submits and reaches the CEO inbox", async ({ page }) => {
     await page.goto("/");
@@ -246,6 +258,24 @@ test.describe("C — the CEO builds the engagement", () => {
     await shot(page, "43-document-signed", false);
   });
 
+  test("C5b store a PDF against the document", async ({ page }) => {
+    await signIn(page, CEO, "/operations");
+    await page.getByRole("tab", { name: "Documents" }).click();
+
+    const record = page.locator("div.rounded-xl", { hasText: DOCUMENT_TITLE }).first();
+    await record.scrollIntoViewIfNeeded();
+    // The input is visually hidden behind a "Store PDF" label, which is the
+    // normal pattern; setInputFiles reaches it regardless.
+    await record.locator('input[type="file"]').setInputFiles({
+      name: "nilgiri-service-agreement.pdf",
+      mimeType: "application/pdf",
+      buffer: minimalPdf(),
+    });
+
+    await expect(page.getByText("PDF stored securely")).toBeVisible({ timeout: 30_000 });
+    await shot(page, "43b-pdf-stored", false);
+  });
+
   test("C6 issue an invoice, and the GST is the server's arithmetic", async ({ page }) => {
     await signIn(page, CEO, "/operations");
     await page.getByRole("tab", { name: "Invoices" }).click();
@@ -317,6 +347,26 @@ test.describe("D — the client they just created", () => {
     // issued through the form.
     await expect(downloads.getByText(/\.pdf$/).first()).toBeVisible({ timeout: 25_000 });
     await shot(page, "49-client-downloads", false);
+  });
+
+  test("D2b the download button actually returns the file", async ({ page }) => {
+    await signIn(page, NEW_CLIENT_EMAIL, "/portal");
+    const downloads = page.locator("section", { hasText: "Available downloads" }).first();
+    await downloads.scrollIntoViewIfNeeded();
+
+    // SecureDownload opens the signed URL in a new tab, so the popup is the
+    // evidence the mutation resolved to a real, fetchable file.
+    const [popup] = await Promise.all([
+      page.waitForEvent("popup", { timeout: 30_000 }),
+      downloads.getByRole("button", { name: /download/i }).first().click(),
+    ]);
+    await popup.waitForLoadState("domcontentloaded").catch(() => undefined);
+    expect(popup.url()).toContain("/api/simulation/files/");
+
+    const response = await page.request.get(popup.url());
+    expect(response.status(), "the stored invoice PDF did not come back").toBe(200);
+    expect(response.headers()["content-type"]).toContain("application/pdf");
+    await popup.close();
   });
 
   test("D3 payment is refused cleanly while Razorpay is unconfigured", async ({ page }) => {
