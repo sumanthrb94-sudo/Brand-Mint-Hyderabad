@@ -57,6 +57,30 @@ STEPS = [
     ("26-mobile-client-portal", "The portal on a phone", "Horizontal overflow asserted at 0px. This is the check that caught the header not wrapping — 13px of overflow, since fixed."),
     ("27-deliverables", "Deliverables", "The last of the four admin routes walked while watching for uncaught errors and failed same-origin requests."),
     ("28-keyboard-focus", "Keyboard navigation", "Tab from a cold load reaches a real control, with a visible focus ring."),
+
+    # --- Part two: every write path, driven by filling and submitting the form.
+    ("29-enquiry-form-filled", "The public enquiry form", "Filled in the browser. Part one seeded its leads through the API; from here nothing is seeded — every record below is created by clicking."),
+    ("30-enquiry-submitted", "Request received", "The form swaps itself for a confirmation once inquiries.submit returns."),
+    ("31-lead-in-inbox", "The lead reaches the CEO", "The same enquiry, now in the lead inbox with its email. Submitted in one browser session and read back in another."),
+    ("32-onboarding-contact", "Onboarding — contact", "Step 1 of 4. This is the lead-to-client conversion."),
+    ("33-onboarding-tier", "Onboarding — tier and add-ons", "Growth Store selected, with the additional payment gateway add-on ticked."),
+    ("34-onboarding-legal", "Onboarding — legal acceptance", "Complete review is asserted disabled until the acceptance box is ticked, then asserted enabled. All four policies are recorded."),
+    ("35-onboarding-complete", "Onboarding recorded", "The client, contact, four legal acceptances and a discovery project are created. The CEO is offered Back to Agency OS — not the client portal, which was the old dead end."),
+    ("36-new-project-sop", "The new project already has its SOP", "0/8 on discovery. The checklist is written at creation, so a project is never without one."),
+    ("37-create-project-form", "Create project", "A personally priced project at Rs.1,45,000, entered through the form."),
+    ("38-project-created", "The project record", "Rs.1,45,000, personal. Only personal-pricing projects expose an adjustable final price."),
+    ("39-final-price-adjusted", "Negotiating the price down", "Final price changed to Rs.1,38,000 through the inline control."),
+    ("40-checklist-step-added", "A project-specific SOP step", "Added to the current stage and ticked. Added steps are optional, so they record without blocking."),
+    ("41-deliverable-added", "A deliverable", "Created against the project with an owner and a due date."),
+    ("42-document-awaiting-signature", "Document — signature requested", "Created as a draft, then moved to awaiting signature."),
+    ("43-document-signed", "Document — signed", "The full document lifecycle, driven by its buttons."),
+    ("44-issue-invoice-form", "Issue invoice", "Choosing the project pre-fills the line item and the amount with Rs.1,38,000 — the adjusted price, not the Rs.1,45,000 the project was created at. Asserted, because an invoice drifting from the record is the expensive kind of bug."),
+    ("45-invoice-issued", "The invoice", "Rs.1,38,000 + 18% GST = Rs.1,62,840. Computed by calculateInvoiceTotals; the test only checks the figure."),
+    ("46-invoice-paid", "Marked paid", "The payment status change that also promotes the client from lead to active."),
+    ("47-dashboard-after-payment", "The dashboard afterwards", "Revenue and active-client figures reflect the invoice that was just paid through the interface."),
+    ("48-new-client-portal", "The new client's portal", "Signed in as the account onboarded a few steps earlier. Asserted to contain neither Green Basket nor Urban Thread."),
+    ("49-client-downloads", "Available downloads", "The invoice PDF written by the real generator when the invoice was issued through the form."),
+    ("50-signed-out", "Signed out", "Sign out returns to a signed-out state, and /admin no longer opens."),
 ]
 
 
@@ -209,10 +233,12 @@ def main():
 
     results = [
         ["Screenshots captured", f"{len(present)} of {len(STEPS)}"],
+        ["Checks", "39 — 25 reading and navigating, 14 creating"],
         ["Headline scenario", "Green Basket — Rs.95,000, invoiced at Rs.1,26,850"],
+        ["Created by clicking", "Nilgiri Tea Room — lead to paid, entirely through forms"],
         ["Viewports exercised", "390 x 844, 768 x 1024, 1440 x 900"],
-        ["Accounts exercised", "1 CEO, 2 clients, 1 account with no record"],
-        ["Seeded by", "the app's own tRPC procedures"],
+        ["Accounts exercised", "1 CEO, 3 clients, 1 account with no record"],
+        ["Write paths covered", "13 of 13 reachable from the UI"],
     ]
 
     findings = [

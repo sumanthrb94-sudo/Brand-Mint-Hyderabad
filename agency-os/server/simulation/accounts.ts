@@ -21,6 +21,9 @@ export const SIMULATION_ACCOUNTS: SimulationAccount[] = [
   { uid: "sim-uid-greenbasket", email: "rajesh@greenbasket.com", name: "Rajesh Kumar", role: "Client", company: "Green Basket" },
   { uid: "sim-uid-urbanthread", email: "priya@urbanthread.in", name: "Priya Menon", role: "Client", company: "Urban Thread" },
   { uid: "sim-uid-visitor", email: "ananya.iyer.blr@gmail.com", name: "Ananya Iyer", role: "Client", company: "No client record — shows the refusal screen" },
+  // Has no client record until the write-path run onboards one through the
+  // form, which is what lets that run sign in as a client it created itself.
+  { uid: "sim-uid-nilgiri", email: "lakshmi@nilgiritearoom.in", name: "Lakshmi Rao", role: "Client", company: "Nilgiri Tea Room" },
 ];
 
 export const SIMULATION_TOKEN_PREFIX = "sim:";
