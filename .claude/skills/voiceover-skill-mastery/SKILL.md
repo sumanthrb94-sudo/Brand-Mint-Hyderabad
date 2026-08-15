@@ -142,12 +142,16 @@ G  caption over a type scene         must be 0 frames
 
 If any check fails, fix it and re-render. Do not ship with a caveat on these.
 
-## Assets
+## Assets and sound
 
 Sound effects are CC0, from Sonic Pi's sample library (public domain, cleared
 for commercial use). `scripts/fetch_sfx.sh` pulls them. Cue them to each
 element's own animation delay, not to the scene start — a tick should land with
 the row it belongs to.
+
+`references/SOUND.md` has the rest: which sample family suits which beat, the
+levels that have worked across the campaign, the mixing rules, and why these
+films deliberately use no trending audio. Read it before designing a bed.
 
 ## Failure modes seen in production
 
@@ -155,8 +159,9 @@ the row it belongs to.
   ffmpeg and composite those; never rely on a `<video>` element rendering.
   `scripts/prep_clip.sh` does this.
 - **Generated clips carry a watermark** in the bottom-right that no prompt
-  removes. `prep_clip.sh` crops the bottom 13% to take it out. The grade will not
-  hide it — the grade is semi-transparent and the mark is solid.
+  removes. `prep_clip.sh` lays the brand monogram over it, which covers the mark
+  and brands the footage without giving up any frame. The grade will not hide it
+  — the grade is semi-transparent and the mark is solid. Assert the coverage.
 - **TTS voice arrives at 0 dBFS**, leaving no headroom for the effects bed, so
   the master rides the limiter and risks clipping once AAC adds inter-sample
   peaks. `build_mix.py` measures the voice peak and ducks it to −1.5 dBFS. It

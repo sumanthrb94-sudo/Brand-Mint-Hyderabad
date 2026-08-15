@@ -85,7 +85,11 @@ Everything runs offline; no API keys.
   Deterministic and reproducible.
 - **Sound** — CC0 samples from Sonic Pi's library
   (`sonic-pi-net/sonic-pi/etc/samples`, public domain per its README). Mix with
-  `adelay` + `amix` + `alimiter`.
+  `adelay` + `amix` + `alimiter`. One primary effect per beat, cued to the
+  element's own animation delay rather than the scene start. No trending audio:
+  the film is voice-led, and a music bed fights the read. Never ship an effect
+  bed you have not heard on phone speakers — if an effect is the first thing you
+  notice instead of the message, it is too loud.
 
 ## Traps that will cost you a day
 
@@ -93,8 +97,11 @@ Everything runs offline; no API keys.
   `<video>` element rendering. Extract each clip to JPEG frames with ffmpeg and
   composite those per render frame.
 - **Generated clips have a watermark burned into the bottom-right corner.** No
-  prompt wording removes it. Crop the bottom ~13% away when extracting frames,
-  and do not expect a semi-transparent grade to cover a solid mark.
+  prompt wording removes it. Composite the client's own mark over that spot when
+  extracting frames — it covers the watermark and brands the footage, where a
+  crop costs the bottom of every frame and a heavier upscale. Do not expect a
+  semi-transparent grade to cover a solid mark, and assert the coverage rather
+  than eyeballing it.
 - **TTS output is normalised to 0 dBFS**, so there is no headroom for the sound
   bed and the master ends up riding the limiter. Measure the voice peak and duck
   it to about −1.5 dBFS before mixing; only ever attenuate, never boost.
