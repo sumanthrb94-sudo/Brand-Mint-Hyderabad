@@ -1,260 +1,51 @@
 {
- "title": "The order you typed five times",
- "gate": "Comment TOOLS",
- "duration": 31.2,
- "clipSlots": {
-  "A": 0,
-  "B": 9,
-  "C": 13
- },
- "scenes": [
-  {
-   "words": [
-    0,
-    4
-   ],
-   "mode": "broll",
-   "clip": "A",
-   "clipStart": 0.0
-  },
-  {
-   "words": [
-    5,
-    9
-   ],
-   "mode": "type",
-   "h1": [
-    "You typed it",
-    "<em>five times.</em>"
-   ]
-  },
-  {
-   "words": [
-    10,
-    12
-   ],
-   "mode": "type",
-   "kicker": "Where it goes",
-   "rows": [
-    [
-     "WhatsApp",
-     "1",
-     0.0,
-     "now"
-    ],
-    [
-     "Spreadsheet",
-     "2",
-     0.78,
-     "now"
-    ],
-    [
-     "Tally",
-     "3",
-     1.78,
-     "now"
-    ]
-   ]
-  },
-  {
-   "words": [
-    13,
-    14
-   ],
-   "mode": "type",
-   "kicker": "Where it goes",
-   "rows": [
-    [
-     "WhatsApp",
-     "1",
-     0
-    ],
-    [
-     "Spreadsheet",
-     "2",
-     0
-    ],
-    [
-     "Tally",
-     "3",
-     0
-    ],
-    [
-     "Courier panel",
-     "4",
-     0.06,
-     "now"
-    ]
-   ]
-  },
-  {
-   "words": [
-    15,
-    19
-   ],
-   "mode": "type",
-   "kicker": "Where it goes",
-   "rows": [
-    [
-     "WhatsApp",
-     "1",
-     0
-    ],
-    [
-     "Spreadsheet",
-     "2",
-     0
-    ],
-    [
-     "Tally",
-     "3",
-     0
-    ],
-    [
-     "Courier panel",
-     "4",
-     0
-    ],
-    [
-     "Customer update",
-     "5",
-     0.84,
-     "now"
-    ]
-   ]
-  },
-  {
-   "words": [
-    20,
-    23
-   ],
-   "mode": "type",
-   "kicker": "The maths",
-   "rows": [
-    [
-     "Per order",
-     "5 minutes",
-     0.1,
-     "now"
-    ]
-   ]
-  },
-  {
-   "words": [
-    24,
-    27
-   ],
-   "mode": "type",
-   "kicker": "The maths",
-   "rows": [
-    [
-     "Per order",
-     "5 minutes",
-     0
-    ],
-    [
-     "Orders a day",
-     "40",
-     0.12,
-     "now"
-    ]
-   ]
-  },
-  {
-   "words": [
-    28,
-    37
-   ],
-   "mode": "type",
-   "number": {
-    "value": "80",
-    "unit": "hours",
-    "note": "a month. Retyping what you already knew."
-   }
-  },
-  {
-   "words": [
-    38,
-    42
-   ],
-   "mode": "type",
-   "kicker": "It has a name",
-   "h1": [
-    "They call it",
-    "<em>swivel-chair work.</em>"
-   ]
-  },
-  {
-   "words": [
-    43,
-    49
-   ],
-   "mode": "broll",
-   "clip": "B",
-   "clipStart": 0.6
-  },
-  {
-   "words": [
-    50,
-    55
-   ],
-   "mode": "type",
-   "h1": [
-    "What are you",
-    "still <em>typing twice?</em>"
-   ]
-  },
-  {
-   "words": [
-    56,
-    57
-   ],
-   "mode": "type",
-   "endcard": {
-    "cta": "Comment “TOOLS”",
-    "hint": "One word. I'll send the list."
-   }
-  },
-  {
-   "words": [
-    58,
-    64
-   ],
-   "mode": "support",
-   "kicker": "The four we automate first",
-   "cells": [
-    [
-     "01",
-     "Order intake"
-    ],
-    [
-     "02",
-     "Invoice + GST"
-    ],
-    [
-     "03",
-     "Courier + AWB"
-    ],
-    [
-     "04",
-     "Status updates"
-    ]
-   ]
-  },
-  {
-   "at": 27.85,
-   "hold": 3.35,
-   "mode": "type",
-   "lockup": {
-    "word": "Brand <em>Mint</em>",
-    "city": "Hyderabad",
-    "follow": {
-     "text": "Follow to know more",
-     "handle": "@brandmint.studios"
-    }
-   },
-   "bg": "C",
-   "clipStart": 0.8
-  }
- ]
+  "title": "Name one",
+  "gate": "Comment OWN",
+  "duration": 30.4,
+  "scenes": [
+    { "words": [0, 4], "mode": "type", "kicker": "Your customers",
+      "h1": ["You have", "<em>four thousand</em>", "customers."] },
+
+    { "words": [5, 6], "mode": "type", "center": true,
+      "h1": ["Name one."] },
+
+    { "words": [7, 8], "mode": "support", "glyph": "crowd" },
+
+    { "words": [9, 13], "mode": "type", "kicker": "What the marketplace has",
+      "rows": [["Name", "Aarav Sharma", 0.12, "redact"]] },
+
+    { "words": [14, 15], "mode": "type", "kicker": "What the marketplace has",
+      "rows": [["Name", "Aarav Sharma", 0, "redact"],
+               ["Phone", "+91 98xxx xxxxx", 0.06, "redact"]] },
+
+    { "words": [16, 19], "mode": "type", "kicker": "What the marketplace has",
+      "rows": [["Name", "Aarav Sharma", 0, "redact"],
+               ["Phone", "+91 98xxx xxxxx", 0, "redact"],
+               ["Last order", "24 March · repeat", 0.14, "redact"]] },
+
+    { "words": [20, 26], "mode": "type", "kicker": "What you get",
+      "rows": [["Payout", "✓", 0.12], ["Rating", "✓", 0.44]] },
+
+    { "words": [27, 35], "mode": "support", "glyph": "one-way" },
+
+    { "words": [36, 43], "mode": "type", "flash": true, "center": true,
+      "h1": ["Every sale you make", "builds someone", "<em>else's asset.</em>"] },
+
+    { "words": [44, 48], "mode": "type", "kicker": "It has a name",
+      "h1": ["They call it", "<em>renting demand.</em>"] },
+
+    { "words": [49, 57], "mode": "type",
+      "h1": ["How many of your", "customers could you", "<em>email tomorrow?</em>"] },
+
+    { "words": [58, 59], "mode": "type",
+      "endcard": { "cta": "Comment “OWN”", "hint": "One word. I'll send the list." } },
+
+    { "words": [60, 67], "mode": "support", "kicker": "The four things to move first",
+      "cells": [["01", "Your own storefront"], ["02", "Your customer list"],
+                ["03", "Email + WhatsApp"], ["04", "Repeat-purchase data"]] },
+
+    { "at": 27.0, "hold": 3.4, "mode": "type",
+      "lockup": { "mark": true, "word": "Brand <em>Mint</em>", "city": "Hyderabad",
+                  "follow": { "text": "Follow to know more", "handle": "@brandmint.studios" } } }
+  ]
 }

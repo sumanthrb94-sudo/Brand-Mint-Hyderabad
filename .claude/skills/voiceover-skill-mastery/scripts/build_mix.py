@@ -42,7 +42,13 @@ LIMITER = "alimiter=limit=0.94:level=disabled"
 # TTS services hand back audio normalised to full scale, which leaves no room
 # for the effects bed to sit on top. Duck the voice to this before mixing.
 # Never raise a quiet voice — that would amplify its noise floor too.
-VOICE_PEAK_TARGET_DB = -1.5
+#
+# -3 dB, not -1.5. At -1.5 the voice sits at 0.84 of full scale and the limiter
+# ceiling is 0.94, so a cue landing on a loud syllable sums past it and the
+# limiter starts working — which is exactly what it is not for. -3 dB leaves
+# roughly twice the room and costs nothing: the platforms normalise loudness on
+# playback, so a master peaking at -2 dBFS plays back identically to one at -0.5.
+VOICE_PEAK_TARGET_DB = -3.0
 
 
 def ff():

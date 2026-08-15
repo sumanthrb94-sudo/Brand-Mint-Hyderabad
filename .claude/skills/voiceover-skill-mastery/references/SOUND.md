@@ -64,7 +64,11 @@ accents/ticks  0.20 – 0.26
 ```
 
 - **Duck the voice, do not raise the bed.** TTS comes back at 0 dBFS with no room
-  for anything. `build_mix.py` measures and attenuates; it never boosts.
+  for anything. `build_mix.py` measures and attenuates; it never boosts. The
+  target is **−3 dBFS**, not −1.5: at −1.5 the voice sits at 0.84 of full scale
+  against a 0.94 ceiling, so a cue landing on a loud syllable sums past it and
+  the limiter starts working. −3 leaves twice the room and costs nothing, because
+  the platforms normalise loudness on playback.
 - **Keep the master under 0 dBFS true peak.** −1 dBFS or lower, or AAC's
   inter-sample peaks clip what looked clean in PCM.
 - **The limiter is a safety net, not a mixing tool.** If it is engaging on more
