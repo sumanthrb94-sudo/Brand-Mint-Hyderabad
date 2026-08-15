@@ -1,0 +1,160 @@
+{
+ "title": "The ₹1,000 order that made you nothing",
+ "clips": {
+  "A": 1,
+  "B": 2,
+  "C": 3
+ },
+ "rail": null,
+ "scenes": [
+  {
+   "words": [
+    0,
+    4
+   ],
+   "mode": "broll",
+   "clip": "A"
+  },
+  {
+   "words": [
+    5,
+    9
+   ],
+   "mode": "type",
+   "kicker": "The maths",
+   "h1": [
+    "You made a sale.",
+    "And <em>lost money</em> on it."
+   ]
+  },
+  {
+   "words": [
+    10,
+    15
+   ],
+   "mode": "support",
+   "kicker": "The order",
+   "rows": [
+    [
+     "Order value",
+     "₹1,000"
+    ],
+    [
+     "Payment",
+     "Cash on delivery"
+    ]
+   ]
+  },
+  {
+   "words": [
+    16,
+    20
+   ],
+   "mode": "support",
+   "kicker": "Costs",
+   "rows": [
+    [
+     "Shipping",
+     "₹200"
+    ],
+    [
+     "Packing",
+     "₹40"
+    ]
+   ]
+  },
+  {
+   "words": [
+    21,
+    27
+   ],
+   "mode": "broll",
+   "clip": "B"
+  },
+  {
+   "words": [
+    28,
+    32
+   ],
+   "mode": "support",
+   "kicker": "And back again",
+   "rows": [
+    [
+     "Return shipping",
+     "₹200"
+    ]
+   ]
+  },
+  {
+   "words": [
+    33,
+    41
+   ],
+   "mode": "type",
+   "number": {
+    "value": "₹440",
+    "note": "cost of one refused parcel"
+   }
+  },
+  {
+   "words": [
+    42,
+    44
+   ],
+   "mode": "type",
+   "kicker": "It has a name",
+   "h1": [
+    "This is <em>RTO.</em>"
+   ]
+  },
+  {
+   "words": [
+    45,
+    50
+   ],
+   "mode": "support",
+   "kicker": "Nobody measures it",
+   "rows": [
+    [
+     "Your RTO rate",
+     "—"
+    ]
+   ]
+  },
+  {
+   "words": [
+    51,
+    55
+   ],
+   "mode": "type",
+   "h1": [
+    "Do you know",
+    "<em>your number?</em>"
+   ]
+  },
+  {
+   "words": [
+    56,
+    60
+   ],
+   "mode": "broll",
+   "clip": "C"
+  },
+  {
+   "words": [
+    61,
+    65
+   ],
+   "mode": "type",
+   "endcard": {
+    "cta": "Comment “RTO”",
+    "hint": "I'll send the four fixes.",
+    "strip": [
+     "8 weeks",
+     "Fixed price",
+     "@brandmint.studios"
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,435 @@
+<title>Eight Weeks, In Writing</title>
+<style>
+  :root{
+    --ink:#0A2117; --ink-2:#0F2E20; --ink-3:#16402D; --line:rgba(255,255,255,.13);
+    --mint:#7BF2A8; --mint-2:#3FC97A; --cream:#F4EFE4; --muted:#87A296;
+    --page:#EEF2ED; --page-ink:#14342A; --page-muted:#5F7A6E; --page-line:#D2DFD5; --page-card:#fff;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --page:#0C1A15;--page-ink:#E4F0E8;--page-muted:#8FA79A;--page-line:#1F3A2E;--page-card:#11241C; } }
+  :root[data-theme="dark"]{ --page:#0C1A15;--page-ink:#E4F0E8;--page-muted:#8FA79A;--page-line:#1F3A2E;--page-card:#11241C; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--page-ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{min-height:100vh;display:grid;gap:22px;align-content:start;justify-items:center;padding:22px 16px 40px}
+  @media (min-width:900px){.wrap{grid-template-columns:auto minmax(280px,360px);align-content:center;justify-items:start;gap:40px}}
+
+  .stage{position:relative;width:min(94vw,420px);aspect-ratio:9/16;max-height:86vh;overflow:hidden;border-radius:26px;
+    background:var(--ink);color:var(--cream);box-shadow:0 30px 70px rgba(9,30,22,.34);isolation:isolate;user-select:none;container-type:inline-size}
+  .aura{position:absolute;inset:-25%;z-index:0;opacity:.55;background:radial-gradient(closest-side,rgba(123,242,168,.22),transparent 70%)}
+  .grain{position:absolute;inset:0;z-index:46;pointer-events:none;opacity:.2;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+  .vig{position:absolute;inset:0;z-index:45;pointer-events:none;background:radial-gradient(120% 80% at 50% 45%,transparent 55%,rgba(0,0,0,.34) 100%)}
+
+  body.render{background:transparent;padding:0}
+  body.render .wrap{padding:0;display:block}
+  body.render .panel,body.render .gate{display:none}
+  body.render .stage{width:1080px;height:1920px;max-height:none;aspect-ratio:auto;border-radius:0;box-shadow:none}
+
+  /* One hairline of progress. Quieter than segmented bars. */
+  .prog{position:absolute;left:0;right:0;top:0;height:.34cqw;z-index:42;background:rgba(255,255,255,.12)}
+  .prog b{display:block;height:100%;width:0;background:var(--mint)}
+
+  .scene{position:absolute;inset:0;display:grid;align-content:center;justify-items:start;gap:3cqw;
+    padding:14cqw 8cqw 46cqw;opacity:0;visibility:hidden;z-index:5}
+  /* A scene with no captions must not reserve the space for them — that left a
+     dead lower third under the hero type. */
+  .scene[data-mode="type"]{padding-bottom:16cqw}
+  .scene.is-live{visibility:visible;z-index:6}
+  .scene.center{justify-items:center;text-align:center}
+  .scene.rail-on{padding-left:17cqw}
+
+  .kicker{font-size:2.3cqw;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:2cqw;white-space:nowrap}
+  .kicker::before{content:"";width:3.2cqw;height:1px;background:var(--mint);opacity:.8}
+  .scene.center .kicker{justify-content:center}
+
+  /* Hero type is revealed by a mask per line, the way a motion designer would. */
+  .h1{font-family:Georgia,"Times New Roman",serif;font-size:12.4cqw;line-height:1.0;letter-spacing:-.04em;margin:0;text-wrap:balance}
+  .h1 .ln{display:block;overflow:hidden}
+  .h1 .ln i{display:block;font-style:normal}
+  .h1 em{font-style:italic;color:var(--mint)}
+  .sub{font-size:3.3cqw;line-height:1.6;color:#B7D0C3;margin:0;max-width:30ch}
+
+  .rail{position:absolute;left:8cqw;top:24cqw;bottom:42cqw;width:.55cqw;z-index:3;background:rgba(255,255,255,.12);border-radius:1cqw;opacity:0}
+  .rail b{position:absolute;top:0;left:0;right:0;height:0;background:linear-gradient(180deg,var(--mint),var(--mint-2));border-radius:1cqw;display:block}
+  .rail .node{position:absolute;left:50%;width:2.2cqw;height:2.2cqw;margin-left:-1.1cqw;border-radius:50%;background:var(--ink-2);border:.4cqw solid rgba(255,255,255,.24)}
+  .rail .node.on{background:var(--mint);border-color:var(--mint)}
+  .rail .node em{position:absolute;left:3.4cqw;top:50%;transform:translateY(-50%);font-style:normal;font-size:1.95cqw;letter-spacing:.2em;
+    text-transform:uppercase;font-weight:800;color:var(--muted);white-space:nowrap;opacity:0}
+  .rail .node.now em{color:var(--mint)}
+
+  .card{width:100%;border:1px solid var(--line);border-radius:3cqw;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.015));padding:4.4cqw;display:grid;gap:0}
+  .r{display:flex;align-items:center;justify-content:space-between;gap:3cqw;font-size:3.1cqw;color:#C3DACE;padding:2.6cqw 0}
+  .r + .r{border-top:1px solid rgba(255,255,255,.09)}
+  .r b{font-weight:800;color:var(--cream);font-variant-numeric:tabular-nums}
+  .r .tick{width:3.4cqw;height:3.4cqw;border-radius:50%;background:var(--mint);color:#06251A;display:grid;place-items:center;font-size:2cqw;font-weight:900;flex:none}
+  .r .lbl{font-size:2.1cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:2.2cqw;width:100%}
+  .cell{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:2.4cqw;padding:3.2cqw;display:grid;gap:1.2cqw}
+  .cell u{text-decoration:none;font-size:1.95cqw;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .cell b{font-size:3.4cqw;font-weight:800;color:#E6F3EC}
+
+  .pills{display:flex;flex-wrap:wrap;gap:1.8cqw;width:100%}
+  .pill{background:rgba(123,242,168,.12);border:1px solid rgba(123,242,168,.45);color:var(--mint);border-radius:999px;padding:2.1cqw 3.2cqw;font-size:3cqw;font-weight:800;white-space:nowrap}
+
+  .bar5050{width:100%;display:grid;gap:2cqw}
+  .bar5050 .track{display:flex;height:9cqw;border-radius:2cqw;overflow:hidden;border:1px solid var(--line)}
+  .bar5050 .a{background:rgba(255,255,255,.1);display:grid;place-items:center;font-weight:900;font-size:3.6cqw}
+  .bar5050 .b{background:var(--mint);color:#06251A;display:grid;place-items:center;font-weight:900;font-size:3.6cqw}
+  .bar5050 .legend{display:flex;justify-content:space-between;font-size:2.2cqw;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:800}
+
+  .nos{display:grid;gap:3cqw;width:100%}
+  .no{display:flex;align-items:center;gap:3cqw;font-size:7.2cqw;font-weight:900;color:#6F8A7D;position:relative}
+  .no .x{width:5cqw;height:5cqw;border-radius:50%;border:.45cqw solid #E0483C;display:grid;place-items:center;color:#E0483C;font-size:2.8cqw;font-weight:900;flex:none}
+  .no .txt{position:relative}
+  .no .txt s{text-decoration:none}
+  .no .txt::after{content:"";position:absolute;left:-1%;top:52%;height:.5cqw;width:var(--w,0%);background:#E0483C;border-radius:1cqw}
+
+  .flash{background:var(--mint);color:#06251A}
+  .flash .kicker{color:#0A2117}.flash .kicker::before{background:#0A2117}
+  .live{font-size:26cqw;font-weight:900;letter-spacing:-.06em;line-height:.82;margin:0}
+
+  /* Outro */
+  .lock{display:grid;gap:1.6cqw;justify-items:center}
+  .lock .word{font-family:Georgia,serif;font-size:14cqw;line-height:1;letter-spacing:-.045em;overflow:hidden;display:block}
+  .lock .word i{display:block;font-style:normal}
+  .lock .word em{font-style:italic;color:var(--mint)}
+  .lock .rule{height:.42cqw;background:var(--mint);width:0;border-radius:1cqw}
+  .lock .city{font-size:2.3cqw;letter-spacing:.42em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .endcta{display:grid;gap:2.4cqw;justify-items:center;width:100%}
+  .endcta .box{display:flex;align-items:center;justify-content:center;gap:2.4cqw;width:100%;background:var(--mint);color:#06251A;
+    border-radius:999px;padding:3.6cqw;font-size:5cqw;font-weight:900;letter-spacing:.02em}
+  .endcta .hint{font-size:2.6cqw;color:var(--muted);letter-spacing:.06em}
+  .endstrip{display:flex;gap:2.4cqw;justify-content:center;flex-wrap:wrap;font-size:2.2cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .endstrip span{display:flex;align-items:center;gap:2.4cqw}
+  .endstrip span::after{content:"";width:.5cqw;height:.5cqw;border-radius:50%;background:var(--mint);opacity:.7}
+  .endstrip span:last-child::after{display:none}
+
+  .broll,.brollFrame{position:absolute;inset:0;z-index:20;width:100%;height:100%;object-fit:cover;opacity:0;visibility:hidden}
+  .bgrade{position:absolute;inset:0;z-index:22;pointer-events:none;opacity:0;visibility:hidden;
+    background:linear-gradient(180deg,rgba(10,33,23,.55) 0%,rgba(10,33,23,0) 26%,rgba(10,33,23,0) 38%,rgba(10,33,23,.9) 92%)}
+
+  .captions{position:absolute;left:0;right:0;bottom:10cqw;z-index:30;padding:0 7cqw;text-align:center;pointer-events:none}
+  .cap-line{display:flex;flex-wrap:wrap;justify-content:center;gap:1.2cqw 2cqw}
+  .cap-word{font-size:6.4cqw;font-weight:900;line-height:1.12;letter-spacing:-.02em;color:#fff;opacity:.26;
+    text-shadow:0 .5cqw 2.6cqw rgba(0,0,0,.72);display:inline-block}
+  .cap-word.spoken{opacity:1}
+  .cap-word.active{color:var(--mint)}
+
+  .gate{position:absolute;inset:0;z-index:50;display:grid;place-content:center;justify-items:center;gap:16px;
+    background:linear-gradient(180deg,rgba(10,33,23,.6),rgba(10,33,23,.93));border:0;width:100%;cursor:pointer;color:var(--cream);font:inherit;text-align:center;padding:24px}
+  .gate[hidden]{display:none}
+  .gate .play{width:76px;height:76px;border-radius:50%;background:var(--mint);color:#06251A;display:grid;place-items:center}
+  .gate .play svg{width:30px;height:30px;margin-left:4px}
+  .gate .t{font-family:Georgia,serif;font-size:26px;letter-spacing:-.02em}
+  .gate .s{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mint);font-weight:700}
+  .gate:focus-visible{outline:3px solid var(--mint);outline-offset:-6px}
+
+  .panel{width:min(94vw,420px);display:grid;gap:14px}
+  @media (min-width:900px){.panel{width:auto;max-width:360px}}
+  .panel h1{font-family:Georgia,serif;font-size:27px;letter-spacing:-.03em;margin:0;line-height:1.05}
+  .panel p{margin:0;font-size:13.5px;line-height:1.6;color:var(--page-muted)}
+  .controls{display:flex;flex-wrap:wrap;gap:8px}
+  .btn{font:inherit;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--page-line);background:var(--page-card);color:var(--page-ink);padding:9px 15px;border-radius:999px}
+  .btn--primary{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+  .btn:focus-visible{outline:2px solid var(--mint-2);outline-offset:2px}
+</style>
+
+<div class="wrap">
+  <div class="stage" id="stage">
+    <div class="aura" id="aura"></div>
+    <div class="prog"><b id="progFill"></b></div>
+
+    <div class="rail" id="rail"><b id="railFill"></b></div>
+
+    <!-- 0 · type -->
+    <section class="scene" data-scene="0" data-mode="type">
+      <p class="kicker" data-a="fade" data-d="0">Part two</p>
+      <h1 class="h1"><span class="ln" data-a="mask" data-d=".12"><i>So you</i></span><span class="ln" data-a="mask" data-d=".22"><i>commented <em>STORE.</em></i></span></h1>
+    </section>
+
+    <!-- 1 · type -->
+    <section class="scene" data-scene="1" data-mode="type">
+      <p class="kicker" data-a="fade" data-d="0">No surprises</p>
+      <h1 class="h1"><span class="ln" data-a="mask" data-d=".1"><i>Here is exactly</i></span><span class="ln" data-a="mask" data-d=".2"><i>what <em>happens next.</em></i></span></h1>
+    </section>
+
+    <!-- 2 · support -->
+    <section class="scene rail-on" data-scene="2" data-mode="support">
+      <p class="kicker" data-a="fade" data-d="0">Your scope</p>
+      <div class="card">
+        <div class="r" data-a="row" data-d=".14"><span class="lbl">Deliverables</span><b>Listed</b></div>
+        <div class="r" data-a="row" data-d=".26"><span class="lbl">Milestones</span><b>Dated</b></div>
+        <div class="r" data-a="row" data-d=".38"><span class="lbl">Sign-off</span><b>Yours</b></div>
+      </div>
+    </section>
+
+    <!-- 3 · support -->
+    <section class="scene rail-on" data-scene="3" data-mode="support">
+      <p class="kicker" data-a="fade" data-d="0">Before anything starts</p>
+      <div class="card">
+        <div class="r" data-a="row" data-d=".16"><span class="lbl">Price</span><b>Fixed</b></div>
+        <div class="r" data-a="row" data-d=".34"><span class="lbl">Timeline</span><b>Fixed</b></div>
+        <div class="r" data-a="row" data-d=".52"><span class="lbl">Agreement</span><i class="tick">✓</i></div>
+      </div>
+    </section>
+
+    <!-- 4 · support -->
+    <section class="scene rail-on" data-scene="4" data-mode="support">
+      <p class="kicker" data-a="fade" data-d="0">Loaded in</p>
+      <div class="grid2">
+        <div class="cell" data-a="pop" data-d=".12"><u>SKUs</u><b>Yours</b></div>
+        <div class="cell" data-a="pop" data-d=".22"><u>Images</u><b>Yours</b></div>
+        <div class="cell" data-a="pop" data-d=".32"><u>Variants</u><b>Mapped</b></div>
+        <div class="cell" data-a="pop" data-d=".42"><u>Categories</u><b>Built</b></div>
+      </div>
+    </section>
+
+    <!-- 5 · footage -->
+    <section class="scene" data-scene="5" data-mode="support"></section>
+
+    <!-- 6 · support -->
+    <section class="scene rail-on" data-scene="6" data-mode="support">
+      <p class="kicker" data-a="fade" data-d="0">Staging</p>
+      <div class="card">
+        <div class="r" data-a="row" data-d=".16"><span class="lbl">You place</span><b>A real order</b></div>
+        <div class="r" data-a="row" data-d=".32"><span class="lbl">On</span><b>Your phone</b></div>
+        <div class="r" data-a="row" data-d=".48"><span class="lbl">Before</span><b>Anyone else</b></div>
+      </div>
+    </section>
+
+    <!-- 7 · footage -->
+    <section class="scene" data-scene="7" data-mode="support"></section>
+
+    <!-- 8 · type, the peak -->
+    <section class="scene center flash" data-scene="8" data-mode="type">
+      <p class="kicker" data-a="fade" data-d="0">Week eight</p>
+      <p class="live" data-a="live" data-d=".06">LIVE</p>
+    </section>
+
+    <!-- 9 · support -->
+    <section class="scene" data-scene="9" data-mode="support">
+      <p class="kicker" data-a="fade" data-d="0">Transferred to you</p>
+      <div class="card">
+        <div class="r" data-a="row" data-d=".2"><span>Source code</span><i class="tick">✓</i></div>
+        <div class="r" data-a="row" data-d=".44"><span>Design files</span><i class="tick">✓</i></div>
+        <div class="r" data-a="row" data-d=".68"><span>Domain &amp; hosting</span><i class="tick">✓</i></div>
+        <div class="r" data-a="row" data-d=".92"><span>Payment gateway</span><i class="tick">✓</i></div>
+      </div>
+    </section>
+
+    <!-- 10 · support -->
+    <section class="scene" data-scene="10" data-mode="support">
+      <p class="kicker" data-a="fade" data-d="0">Payment</p>
+      <div class="bar5050">
+        <div class="track"><div class="a" data-a="grow-l" data-d=".14">50%</div><div class="b" data-a="grow-r" data-d=".28">50%</div></div>
+        <div class="legend" data-a="fade" data-d=".5"><span>To start</span><span>When live</span></div>
+      </div>
+    </section>
+
+    <!-- 11 · type -->
+    <section class="scene" data-scene="11" data-mode="type">
+      <div class="nos">
+        <div class="no" data-a="strike" data-d=".08"><span class="x">✕</span><span class="txt">Retainer</span></div>
+        <div class="no" data-a="strike" data-d=".38"><span class="x">✕</span><span class="txt">Lock-in</span></div>
+      </div>
+    </section>
+
+    <!-- 12 · outro A -->
+    <section class="scene center" data-scene="12" data-mode="type">
+      <div class="lock">
+        <span class="word" data-a="mask" data-d=".05"><i>Brand <em>Mint</em></i></span>
+        <div class="rule" data-a="rule" data-d=".34"></div>
+        <div class="city" data-a="fade" data-d=".52">Hyderabad</div>
+      </div>
+    </section>
+
+    <!-- 13 · outro B -->
+    <section class="scene center" data-scene="13" data-mode="type">
+      <div class="endcta">
+        <p class="kicker" data-a="fade" data-d="0">One word in the comments</p>
+        <div class="box" data-a="pop" data-d=".14">Comment <span style="font-weight:900">“SCOPE”</span></div>
+        <div class="hint" data-a="fade" data-d=".4">Yours comes back the same day.</div>
+        <div class="endstrip" data-a="fade" data-d=".58"><span>8 weeks</span><span>Fixed price</span><span>@brandmint.studios</span></div>
+      </div>
+    </section>
+
+    <img class="brollFrame" id="brollFrame" alt="" />
+    <video id="broll" class="broll" muted playsinline preload="auto" src="__VIDEO_SRC__"></video>
+    <div class="bgrade" id="bgrade"></div>
+
+    <div class="captions"><div class="cap-line" id="cap"></div></div>
+    <div class="vig"></div><div class="grain"></div>
+
+    <button class="gate" id="gate" type="button" aria-label="Play with sound">
+      <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+      <span class="t">Comment SCOPE</span><span class="s">Tap for sound · 41s</span>
+    </button>
+  </div>
+
+  <div class="panel">
+    <h1>Part two</h1>
+    <p>Cut to your ElevenLabs read — 86 words, transcribed back and aligned individually. Every element is animated from its own scene clock, so each rendered frame is a real in-between rather than a held pose.</p>
+    <div class="controls">
+      <button class="btn btn--primary" id="replay" type="button">Play from start</button>
+      <button class="btn" id="toggle" type="button">Pause</button>
+    </div>
+  </div>
+</div>
+
+<audio id="vo" preload="auto" src="__AUDIO_SRC__"></audio>
+<script>/*__MOTION__*/</script>
+<script>
+(() => {
+  "use strict";
+  const WORDS = __WORDS_JSON__;
+  const SCENE_WORDS = [[0,3],[4,9],[10,15],[16,21],[22,27],[28,33],[34,41],[42,47],[48,52],[53,61],[62,69],[70,74],[75,77],[78,85]];
+  const PHRASES = SCENE_WORDS.map(([a,b]) => [WORDS[a].s, WORDS[b].e]);
+  const DURATION = __DURATION__;
+  const B_ROLL = { 5: 0.10, 7: 3.40 };
+  const RAIL_SCENES = [2,3,4,6];
+  const NODES = [{at:2,label:"Day 1"},{at:3,label:"Week 1"},{at:6,label:"Week 4"},{at:8,label:"Week 8"}];
+
+  const $ = (id) => document.getElementById(id);
+  const stage=$("stage"), vo=$("vo"), cap=$("cap"), gate=$("gate"), aura=$("aura"),
+        rail=$("rail"), railFill=$("railFill"), progFill=$("progFill"),
+        broll=$("broll"), brollFrame=$("brollFrame"), bgrade=$("bgrade");
+  const scenes=[...document.querySelectorAll(".scene")];
+  const RENDER = new URLSearchParams(location.search).get("render")==="1";
+  if (RENDER) document.body.classList.add("render");
+
+  NODES.forEach((n,i) => {
+    const el=document.createElement("i");
+    el.className="node"; el.style.top=(i/(NODES.length-1)*100)+"%";
+    el.innerHTML=`<em>${n.label}</em>`;
+    rail.appendChild(el);
+  });
+  const nodeEls=[...rail.querySelectorAll(".node")];
+
+  const clamp=(v)=>v<0?0:v>1?1:v;
+  // Expo-out: fast departure, long settle. The standard motion-design curve.
+  const expo =(p)=>p>=1?1:1-Math.pow(2,-10*p);
+  const back =(p)=>{const c=1.70158+1;return 1+ (c+1)*Math.pow(p-1,3)+c*Math.pow(p-1,2);};
+
+  /* Every element animates from the scene's own clock, so any frame — live or
+     rendered — is a true in-between. Nothing is simply switched on. */
+  function applyAnim(el, kind, delay, tl, dur) {
+    const p = clamp((tl - delay) / dur);
+    const e = expo(p);
+    switch (kind) {
+      case "fade":  el.style.opacity=e; el.style.transform=`translateY(${(1-e)*14}px)`; break;
+      case "mask":  el.firstElementChild.style.transform=`translateY(${(1-e)*104}%)`; el.style.opacity=p>0?1:0; break;
+      case "row":   el.style.opacity=e; el.style.transform=`translateX(${(1-e)*26}px)`; break;
+      case "pop":   el.style.opacity=e; el.style.transform=`scale(${.9+.1*back(clamp(p))})`; break;
+      case "live":  el.style.opacity=e; el.style.transform=`scale(${.62+.38*back(clamp(p))})`; break;
+      case "grow-l":el.style.flexBasis=(e*50)+"%"; el.style.opacity=e; break;
+      case "grow-r":el.style.flexBasis=(e*50)+"%"; el.style.opacity=e; break;
+      case "rule":  el.style.width=(e*46)+"%"; break;
+      case "strike": {
+        // The word arrives, then the line is drawn through it a beat later.
+        el.style.opacity = clamp(p * 2.2);
+        el.style.transform = `translateX(${(1-e)*22}px)`;
+        const sp = expo(clamp((tl - delay - 0.26) / 0.34));
+        el.querySelector(".txt").style.setProperty("--w", (sp * 104) + "%");
+        break;
+      }
+    }
+  }
+
+  const SCENE_ANIM_DUR = .68;
+  function animateScene(i, tl) {
+    const el = scenes[i]; if (!el) return;
+    el.style.opacity = 1;
+    el.querySelectorAll("[data-a]").forEach(node => {
+      applyAnim(node, node.dataset.a, parseFloat(node.dataset.d || 0), tl, SCENE_ANIM_DUR);
+    });
+  }
+
+  let current=-1;
+  function setScene(i) {
+    if (i===current) return;
+    scenes.forEach((s,k)=>s.classList.toggle("is-live",k===i));
+    stage.classList.toggle("on-flash", !!scenes[i]?.classList.contains("flash"));
+    current=i;
+  }
+
+  let renderedKey="";
+  function paintCaption(i,t) {
+    const mode = scenes[i]?.dataset.mode;
+    // Captions only where the visual is not already carrying the same words.
+    if (mode !== "support") { if (cap.childElementCount) cap.innerHTML=""; renderedKey=""; return; }
+    const [a,b]=SCENE_WORDS[i];
+    const ws=WORDS.slice(a,b+1);
+    const groups=[]; let run=[];
+    for (const w of ws) {
+      const chars=run.reduce((s,x)=>s+x.w.length+1,0)+w.w.length;
+      if (run.length && (run.length>=4 || chars>26)) { groups.push(run); run=[]; }
+      run.push(w);
+    }
+    if (run.length) groups.push(run);
+    let gi=groups.findIndex(g=>t>=g[0].s && t<g[g.length-1].e);
+    if (gi===-1) gi = t<groups[0][0].s ? 0 : groups.length-1;
+    const key=i+":"+gi;
+    if (key!==renderedKey) {
+      cap.innerHTML="";
+      groups[gi].forEach(w=>{const s=document.createElement("span");s.className="cap-word";s.textContent=w.w;cap.appendChild(s);});
+      renderedKey=key;
+    }
+    groups[gi].forEach((w,k)=>{
+      const n=cap.children[k]; if(!n) return;
+      n.classList.toggle("spoken", t>=w.s);
+      n.classList.toggle("active", t>=w.s && t<w.e);
+    });
+  }
+
+  function sceneAt(t){ for(let i=PHRASES.length-1;i>=1;i--) if(t>=PHRASES[i][0]) return i; return 0; }
+
+  function paint(t) {
+    const i=sceneAt(t);
+    setScene(i);
+    animateScene(i, t - PHRASES[i][0]);
+    paintCaption(i,t);
+
+    progFill.style.width=(clamp(t/DURATION)*100).toFixed(2)+"%";
+
+    const onRail = RAIL_SCENES.includes(i);
+    rail.style.opacity = onRail ? 1 : 0;
+    if (onRail) {
+      const from=PHRASES[RAIL_SCENES[0]][0], to=PHRASES[8][0];
+      railFill.style.height=(clamp((t-from)/(to-from))*100).toFixed(2)+"%";
+      let reached=-1; NODES.forEach((n,k)=>{ if(i>=n.at) reached=k; });
+      nodeEls.forEach((n,k)=>{ n.classList.toggle("on",k<=reached); n.classList.toggle("now",k===reached);
+        n.querySelector("em").style.opacity = k===reached ? 1 : 0; });
+    }
+
+    const onB = i in B_ROLL;
+    brollFrame.style.visibility = onB && RENDER ? "visible" : "hidden";
+    brollFrame.style.opacity = onB && RENDER ? 1 : 0;
+    if (!RENDER) {
+      if (onB) {
+        broll.style.visibility="visible";
+        if (Math.abs(broll.currentTime - (B_ROLL[i] + (t-PHRASES[i][0]))) > .4) { try{ broll.currentTime=B_ROLL[i]+(t-PHRASES[i][0]); }catch(_){} }
+        if (broll.paused) broll.play().catch(()=>{});
+        broll.style.opacity = broll.videoWidth>0 ? 1 : 0;
+      } else { broll.pause(); broll.style.opacity=0; broll.style.visibility="hidden"; }
+    }
+    const showGrade = onB && (RENDER || broll.videoWidth>0);
+    bgrade.style.visibility = showGrade ? "visible" : "hidden";
+    bgrade.style.opacity = showGrade ? 1 : 0;
+
+    aura.style.transform=`translate(${Math.sin(t*.45)*5}%, ${Math.cos(t*.33)*6-8}%)`;
+  }
+
+  window.__seek=(t,src)=>{ if(src!==undefined) brollFrame.src=src||""; paint(t);
+    return { scene:current, caption:cap.textContent, active:[...cap.querySelectorAll(".cap-word.active")].map(n=>n.textContent) }; };
+  window.__meta={ words:WORDS, phrases:PHRASES, bRoll:B_ROLL, duration:DURATION };
+
+  function frame(){ paint(vo.currentTime); if(!vo.paused) requestAnimationFrame(frame); }
+  function play(){ gate.hidden=true; vo.play().then(()=>requestAnimationFrame(frame)).catch(()=>{gate.hidden=false;}); }
+  gate.addEventListener("click",play);
+  $("replay").addEventListener("click",()=>{vo.currentTime=0;current=-1;renderedKey="";play();});
+  const tg=$("toggle");
+  tg.addEventListener("click",()=>{ if(vo.paused){vo.play();requestAnimationFrame(frame);tg.textContent="Pause";} else {vo.pause();broll.pause();tg.textContent="Play";} });
+  vo.addEventListener("ended",()=>{tg.textContent="Play";gate.hidden=false;gate.querySelector(".t").textContent="Watch again";});
+  if (RENDER) paint(0);
+})();
+</script>
