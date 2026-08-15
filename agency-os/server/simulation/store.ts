@@ -39,6 +39,9 @@ export const simulationFirestore = {
         const previous = options?.merge ? (collectionMap(name).get(id) ?? {}) : {};
         collectionMap(name).set(id, { ...previous, ...value });
       },
+      delete: async () => {
+        collectionMap(name).delete(id);
+      },
     }),
   }),
 };

@@ -16,7 +16,9 @@ export default defineConfig({
   // Serial: the tests share one seeded database and several of them write to it.
   workers: 1,
   reporter: [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
-  timeout: 90_000,
+  // The walkthrough's steps drive two browsers and tick whole checklists, so
+  // they need more headroom than a single-page assertion.
+  timeout: 180_000,
   expect: { timeout: 15_000 },
   use: {
     baseURL: "http://localhost:3000",

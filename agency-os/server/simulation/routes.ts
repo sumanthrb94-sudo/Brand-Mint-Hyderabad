@@ -38,4 +38,18 @@ export function registerSimulationRoutes(app: Express) {
     resetSimulationStore();
     res.json({ success: true });
   });
+
+  // Puts the standard seeded studio back. The walkthrough empties the database
+  // on purpose, so without this a second run — against a server left running
+  // from the first — would find nothing to assert on.
+  app.post("/api/simulation/reseed", async (_req, res) => {
+    try {
+      resetSimulationStore();
+      const { seedSimulation } = await import("./seed.js");
+      await seedSimulation();
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error instanceof Error ? error.message : String(error) });
+    }
+  });
 }

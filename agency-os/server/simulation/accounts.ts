@@ -24,6 +24,9 @@ export const SIMULATION_ACCOUNTS: SimulationAccount[] = [
   // Has no client record until the write-path run onboards one through the
   // form, which is what lets that run sign in as a client it created itself.
   { uid: "sim-uid-nilgiri", email: "lakshmi@nilgiritearoom.in", name: "Lakshmi Rao", role: "Client", company: "Nilgiri Tea Room" },
+  // The single client of the side-by-side walkthrough, which runs against an
+  // emptied database so the process can be read without other records in view.
+  { uid: "sim-uid-deccanbloom", email: "arjun@deccanbloom.in", name: "Arjun Varma", role: "Client", company: "Deccan Bloom" },
 ];
 
 export const SIMULATION_TOKEN_PREFIX = "sim:";

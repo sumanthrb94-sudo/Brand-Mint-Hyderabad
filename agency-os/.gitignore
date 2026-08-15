@@ -122,3 +122,5 @@ playwright-report/
 test-results/
 agency-os/e2e/.artifacts/
 e2e/.artifacts/
+agency-os/e2e/walkthrough/pairs/
+e2e/walkthrough/pairs/

@@ -1,9 +1,8 @@
 import { router } from "../_core/trpc.js";
 import { listClients, listInvoices, listNotifications, listProjects, listPublicInquiries } from "../firebaseAgencyDb.js";
-import { recordTime, COLLECTIONS } from "../firebaseRepository.js";
+import { clearCollection, recordTime } from "../firebaseRepository.js";
 import { adminProcedure } from "./access.js";
 import { z } from "zod";
-import { getFirestore, collection, getDocs, deleteDoc } from "firebase/firestore";
 
 export const dashboardRouter = router({
   overview: adminProcedure.query(async () => {
@@ -23,15 +22,12 @@ export const dashboardRouter = router({
     };
   }),
   resetAllData: adminProcedure.input(z.object({ confirm: z.literal(true) })).mutation(async () => {
-    const db = getFirestore();
-    const collectionsToDelete = [COLLECTIONS.projects, COLLECTIONS.checklistItems, COLLECTIONS.deliverables, COLLECTIONS.invoices, COLLECTIONS.documents, COLLECTIONS.storedFiles];
+    // Deliberately leaves clients, contacts, onboarding submissions and legal
+    // acceptances alone: this clears the delivery record, not the relationship.
+    const collectionsToDelete = ["projects", "checklistItems", "deliverables", "invoices", "invoiceItems", "documents", "storedFiles"] as const;
     let totalDeleted = 0;
-    for (const collectionName of collectionsToDelete) {
-      const snapshot = await getDocs(collection(db, collectionName));
-      for (const doc of snapshot.docs) {
-        await deleteDoc(doc.ref);
-        totalDeleted++;
-      }
+    for (const name of collectionsToDelete) {
+      totalDeleted += await clearCollection(name);
     }
     return { success: true, deletedCount: totalDeleted, message: `Reset complete. Deleted ${totalDeleted} documents across all collections.` };
   }),

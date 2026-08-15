@@ -82,6 +82,23 @@ export async function updateRecord<T extends Record<string, unknown>>(collection
   await firebaseDb().collection(COLLECTIONS[collection]).doc(String(id)).set({ ...values, updatedAt: new Date() }, { merge: true });
 }
 
+/**
+ * Deletes every document in a collection, through the same Firestore handle
+ * every other function here uses.
+ *
+ * Written because the reset procedure reached for the browser Firebase SDK
+ * (`firebase/firestore`) instead: on the server there is no client app to
+ * initialise, so `getFirestore()` threw and the reset silently never ran.
+ */
+export async function clearCollection(collection: keyof typeof COLLECTIONS): Promise<number> {
+  const snapshot = await firebaseDb().collection(COLLECTIONS[collection]).get();
+  const ids = snapshot.docs.map((document: QueryDocumentSnapshot<DocumentData>) => document.id);
+  for (const id of ids) {
+    await firebaseDb().collection(COLLECTIONS[collection]).doc(id).delete();
+  }
+  return ids.length;
+}
+
 export async function findOne<T extends { id: number }>(collection: keyof typeof COLLECTIONS, predicate: (record: T) => boolean): Promise<T | undefined> {
   return (await listRecords<T>(collection)).find(predicate);
 }
