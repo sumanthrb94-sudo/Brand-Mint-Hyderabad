@@ -103,6 +103,8 @@ See `references/PIPELINE.md` for exact commands and `references/DESIGN.md` for
 the visual system. In short:
 
 ```bash
+bash    scripts/setup.sh                             # once per environment
+python3 scripts/doctor.py                            # confirms it; non-zero if not
 python3 scripts/transcribe_align.py <vo.wav> "<script text>" out/
 node    scripts/render.mjs           out/            # 1080×1920 PNG sequence
 python3 scripts/build_mix.py         out/            # voice + SFX bed
@@ -141,8 +143,12 @@ the row it belongs to.
 
 - **Chromium here cannot decode H.264.** Extract the clips to JPEG frames with
   ffmpeg and composite those; never rely on a `<video>` element rendering.
-- **`alimiter` delays audio by its 5 ms lookahead.** Trim 240 samples at 48 kHz
-  after it, or the voice drifts off the captions.
+- **`alimiter` delays audio by about its 5 ms lookahead** and the voice drifts
+  off the captions. Trim it back — but *measure* the delay, do not compute it:
+  5 ms at 48 kHz is 240 samples and ffmpeg 7.0 delays 239. `build_mix.py`
+  measures it each run.
+- **Check the offset at 48 kHz, not lower.** At 24 kHz a one-sample error rounds
+  to zero and the report reads clean when it is not.
 - **Whisper caps at 30 s.** Chunk on silence for longer reads.
 - **`vw` units inside the fixed stage overflow.** Use `cqw` — the stage is a
   container.

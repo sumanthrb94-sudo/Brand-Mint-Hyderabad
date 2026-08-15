@@ -42,13 +42,15 @@ def main():
     by_frame = {r["i"]: r for r in log}
     fails = []
 
-    # A · the voice must sit exactly where it did in the source
-    src_wav = os.path.join(out, "vo24k.wav")
+    # A · the voice must sit exactly where it did in the source.
+    # Compare at the delivery rate, 48 kHz. Measuring at 24 kHz halves the
+    # resolution and quietly rounds a one-sample error away to zero.
+    src_wav = os.path.join(out, "vo48k.wav")
     subprocess.run([ff(), "-y", "-v", "error", "-i", sys.argv[2] if len(sys.argv) > 2 else
-                    os.path.join(out, "vo.wav"), "-ac", "1", "-ar", "24000",
+                    os.path.join(out, "vo.wav"), "-ac", "1", "-ar", "48000",
                     "-sample_fmt", "s16", src_wav], check=True)
     got_wav = os.path.join(out, "mp4-audio.wav")
-    subprocess.run([ff(), "-y", "-v", "error", "-i", mp4, "-ac", "1", "-ar", "24000",
+    subprocess.run([ff(), "-y", "-v", "error", "-i", mp4, "-ac", "1", "-ar", "48000",
                     "-sample_fmt", "s16", got_wav], check=True)
     src, sr = load(src_wav)
     got, _ = load(got_wav)

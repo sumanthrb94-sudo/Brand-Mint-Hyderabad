@@ -5,20 +5,13 @@ Every step runs offline. Nothing here needs an API key.
 ## One-time setup
 
 ```bash
-pip install --quiet imageio-ffmpeg sherpa-onnx pillow numpy
-npm  install motion@13                      # Framer Motion's engine, UMD build
-
-# ASR models — GitHub is reachable, Hugging Face usually is not.
-mkdir -p models && cd models
-curl -sSL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2
-tar xjf sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2
-# Optional, for reading an unknown script back:
-curl -sSL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-small.en.tar.bz2
-tar xjf sherpa-onnx-whisper-small.en.tar.bz2
+bash    scripts/setup.sh      # python + node packages, ASR model, sound effects
+python3 scripts/doctor.py     # confirms all of it, exits non-zero if not
 ```
 
-`ffmpeg` comes from `imageio_ffmpeg.get_ffmpeg_exe()` — a static binary, no
-system install.
+See `SETUP.md` for what that installs, what it costs in disk, and what is
+deliberately *not* needed — there is no TTS and no API key anywhere, because the
+voice arrives as a file.
 
 ## 1 · Transcribe and align
 
@@ -68,16 +61,18 @@ verifier reads.
 ## 5 · Sound
 
 ```bash
-bash    scripts/fetch_sfx.sh            # CC0 samples, once
-python3 scripts/build_mix.py out/       # cue sheet → mixed WAV
+python3 scripts/build_mix.py out/       # out/cues.json → out/mix.wav
 ```
 
 Cues are placed at `scene_start + element_delay`, so a tick lands with its own
 row. Voice sits at 1.0; effects between 0.2 and 0.75.
 
-`alimiter` protects the peak but delays everything by its 5 ms lookahead —
-`atrim=start_sample=240` after it puts the voice back. Skip that and the whole
-film drifts 5 ms off the captions.
+`alimiter` protects the peak but delays everything by about its 5 ms lookahead,
+and an `atrim` after it puts the voice back. **Do not hard-code that trim.** 5 ms
+at 48 kHz is 240 samples, but ffmpeg 7.0's limiter actually delays 239 — so
+`build_mix.py` measures it by pushing noise through the filter and
+cross-correlating. Assume the number and the film sits one sample late, which
+is inaudible but will fail the offset check, as it should.
 
 ## 6 · Encode
 
@@ -95,7 +90,9 @@ python3 scripts/verify.py out/
 ```
 
 Measures the encoded file, not the sources. Cross-correlates the MP4's audio
-against the original voiceover for offset, compares decoded frames against the
-rendered PNGs, and replays the render log against the word timings.
+against the original voiceover for offset **at 48 kHz** — measuring at a lower
+rate rounds a small error to zero, which is how the one-sample limiter drift
+went unnoticed — compares decoded frames against the rendered PNGs, and replays
+the render log against the word timings.
 
 Ship only on a clean report.

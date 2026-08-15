@@ -47,6 +47,26 @@ The only inputs that change are the script and the three clips.
    counts. Transcribe the real audio.
 5. **Verify the delivered file, not the sources.**
 
+## What to install
+
+Everything is a public package or a GitHub release. No account, no key, no paid
+service — the voice is supplied from outside, so nothing here synthesises speech.
+
+```bash
+pip install imageio-ffmpeg sherpa-onnx pillow numpy   # ffmpeg ships inside the first
+npm install playwright motion@13
+npx playwright install chromium                       # ~450 MB; skip if the image has one
+
+mkdir -p models && cd models                          # ~310 MB, required
+curl -sSL -O https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2
+tar xjf sherpa-onnx-zipformer-gigaspeech-2023-12-12.tar.bz2
+```
+
+Budget ~1.2 GB of disk. Hugging Face is **not** needed and is blocked on many
+managed runners; every model here comes from GitHub releases, deliberately. Ship
+a `doctor` script that checks each of these and exits non-zero, and run it before
+the first build in any new environment.
+
 ## Pipeline
 
 Everything runs offline; no API keys.
@@ -72,9 +92,12 @@ Everything runs offline; no API keys.
 - **Containerised Chromium usually cannot decode H.264.** Do not rely on a
   `<video>` element rendering. Extract each clip to JPEG frames with ffmpeg and
   composite those per render frame.
-- **`alimiter` delays audio by its 5 ms lookahead.** Follow it with
-  `atrim=start_sample=240` at 48 kHz or the whole film drifts off the captions.
-  Measure the offset by cross-correlation; it must be 0 samples.
+- **`alimiter` delays audio by roughly its 5 ms lookahead** and the whole film
+  drifts off the captions. Follow it with an `atrim`, but **measure the delay
+  rather than computing it** — 5 ms at 48 kHz is 240 samples and ffmpeg 7.0
+  actually delays 239. Push noise through the filter alone, cross-correlate, use
+  that number. And run the final offset check at the delivery rate: at 24 kHz a
+  one-sample error rounds to zero and the report lies to you.
 - **Whisper caps at 30 seconds** and transducers can crash on long input. Chunk
   on silence for anything longer.
 - **`vw` units inside a fixed-width stage overflow.** Use container queries
