@@ -17,6 +17,11 @@
  *   MOTION        path to motion UMD bundle  (optional; inlined if present)
  *   CHROMIUM_PATH chromium executable        (default: playwright's own)
  *   FPS           frames per second          (default: 30)
+ *   SCENES        re-render only these scenes, e.g. "5" or "5,9" — the rest of
+ *                 the frames and their log entries are kept. Rendering is
+ *                 deterministic, so untouched frames are already correct and
+ *                 re-shooting them is pure cost. Only valid when a full render
+ *                 already exists.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -95,10 +100,27 @@ await page.waitForTimeout(300);
 const phrases = (await page.evaluate(() => window.__meta)).phrases;
 const sceneAt = (t) => { for (let k = phrases.length - 1; k >= 1; k--) if (t >= phrases[k][0]) return k; return 0; };
 
-const log = [];
+// Re-rendering a single scene: keep the existing log and replace only the
+// frames that scene owns.
+const only = process.env.SCENES
+  ? new Set(process.env.SCENES.split(',').map(s => Number(s.trim())))
+  : null;
+let log = [];
+if (only) {
+  const prev = path.join(OUT, 'render-log.json');
+  if (!fs.existsSync(prev)) {
+    console.error('SCENES= needs a completed full render to update; none found');
+    process.exit(1);
+  }
+  log = JSON.parse(fs.readFileSync(prev, 'utf8'));
+  console.log(`updating scenes ${[...only].join(', ')} only`);
+}
+
+let shot = 0;
 for (let i = 0; i < N; i++) {
   const t = i / FPS;
   const scene = sceneAt(t);
+  if (only && !only.has(scene)) continue;
   let frameSrc = '';
   if (bRoll[scene] && clipFrames[scene]?.length) {
     const into = bRoll[scene].start + (t - phrases[scene][0]);
@@ -107,12 +129,18 @@ for (let i = 0; i < N; i++) {
   }
   const state = await page.evaluate(([tt, src]) => window.__seek(tt, src), [t, frameSrc]);
   await page.screenshot({ path: path.join(OUT, 'frames', String(i).padStart(5, '0') + '.png') });
-  if (i % 60 === 0) {
+  shot++;
+  if (shot % 60 === 1) {
     console.log(`frame ${i}/${N}  t=${t.toFixed(2)}  scene=${state.scene}  ${JSON.stringify(state.active)}`);
   }
-  log.push({ i, t: +t.toFixed(3), scene: state.scene, caption: state.caption, active: state.active });
+  const entry = { i, t: +t.toFixed(3), scene: state.scene, caption: state.caption, active: state.active };
+  if (only) log[i] = entry; else log.push(entry);
 }
 
+if (log.length !== N || log.some(r => !r)) {
+  console.error(`render log has ${log.filter(Boolean).length} of ${N} frames — refusing to write a partial log`);
+  process.exit(1);
+}
 fs.writeFileSync(path.join(OUT, 'render-log.json'), JSON.stringify(log));
-console.log(`rendered ${N} frames over ${duration.toFixed(2)}s`);
+console.log(`shot ${shot} frames of ${N} over ${duration.toFixed(2)}s`);
 await browser.close();

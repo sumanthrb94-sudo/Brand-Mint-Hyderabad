@@ -96,16 +96,20 @@
 
   /* Pictorial beat — shapes only, never words. A words-free scene is the one
      place captions can carry the line without repeating what is drawn. */
-  .glyph{position:relative;width:100%;height:44cqw;display:grid;place-items:center}
-  .parcel{position:relative;width:38cqw;height:28cqw;border-radius:1.6cqw;background:linear-gradient(160deg,#C8A97E,#A8875C);
-    box-shadow:0 6cqw 14cqw rgba(0,0,0,.42)}
+  .glyph{position:relative;width:100%;height:46cqw;overflow:hidden}
+  /* The door is shut and stays shut. It sits behind the parcel — a translucent
+     door drawn over the box reads as glass, not as a doorway. */
+  .doorway{position:absolute;right:9cqw;top:1cqw;bottom:1cqw;width:22cqw;z-index:1;border-radius:1.6cqw 1.6cqw 0 0;
+    background:linear-gradient(180deg,#0d2a1e,#091d15);border:.5cqw solid rgba(255,255,255,.14);
+    box-shadow:inset 0 0 6cqw rgba(0,0,0,.5)}
+  .doorway::before{content:"";position:absolute;inset:2.4cqw;border:.34cqw solid rgba(255,255,255,.08);border-radius:.8cqw}
+  .doorway::after{content:"";position:absolute;left:2.2cqw;top:52%;width:1.5cqw;height:1.5cqw;border-radius:50%;background:var(--muted)}
+  .parcel{position:absolute;z-index:2;left:16cqw;top:50%;width:36cqw;height:26cqw;margin-top:-13cqw;
+    border-radius:1.6cqw;background:linear-gradient(160deg,#C8A97E,#A8875C);box-shadow:0 5cqw 12cqw rgba(0,0,0,.45)}
   .parcel::before{content:"";position:absolute;left:0;right:0;top:38%;height:3.4cqw;background:rgba(244,239,228,.72)}
   .parcel::after{content:"";position:absolute;top:0;bottom:0;left:44%;width:3.4cqw;background:rgba(244,239,228,.5)}
-  .slash{position:absolute;left:6%;top:50%;height:1.1cqw;width:0;background:var(--red);border-radius:1cqw;transform:rotate(-19deg);transform-origin:left center;
+  .slash{position:absolute;left:4%;top:50%;height:1.1cqw;width:0;background:var(--red);border-radius:1cqw;transform:rotate(-19deg);transform-origin:left center;
     box-shadow:0 0 3cqw rgba(224,72,60,.7)}
-  .doorway{position:absolute;right:4cqw;top:2cqw;bottom:2cqw;width:16cqw;border-radius:1.4cqw 1.4cqw 0 0;
-    background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.02));border:.5cqw solid rgba(255,255,255,.16)}
-  .doorway::after{content:"";position:absolute;left:2cqw;top:52%;width:1.5cqw;height:1.5cqw;border-radius:50%;background:var(--muted)}
 
   /* Outro */
   .lock{display:grid;gap:1.6cqw;justify-items:center}
@@ -397,10 +401,13 @@
         break;
       }
       case "parcel": {
-        // Lands, is struck through, then leaves the frame the wrong way.
-        el.style.opacity = clamp(p * 2.4);
-        const away = expo(clamp((tl - delay - 1.15) / 0.85));
-        el.style.transform = `scale(${.86+.14*back(clamp(p))}) translateX(${away*104}%) rotate(${away*7}deg)`;
+        // Lands at the door, is struck through, then goes back the way it came.
+        // Leaving to the right would carry it through the door, which is the
+        // one direction the shot must not imply.
+        const away = expo(clamp((tl - delay - 1.15) / 0.95));
+        el.style.opacity = clamp(p * 2.4) * (1 - away * 0.5);
+        el.style.transform =
+          `translateX(${-away*150}%) rotate(${-away*9}deg) scale(${.86+.14*back(clamp(p))})`;
         const sl = expo(clamp((tl - delay - 0.5) / 0.42));
         const s = el.querySelector(".slash");
         if (s) s.style.width = (sl * 96) + "%";
