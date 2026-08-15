@@ -148,8 +148,13 @@ Blank lines are scene cuts.
 
 ## Writing the three clip prompts
 
-Every prompt ends with: `1080×1920 vertical, 5 seconds, no people, no faces, no
-hands, no text, no logos, no readable screens.` Objects and spaces only.
+Every prompt ends with, verbatim: `1080×1920 vertical, 5 seconds. No people, no
+faces, no hands. No text of any kind anywhere in the frame — no text overlay, no
+captions, no subtitles, no watermarks, no logos, no signage, no labels on
+packaging, no readable screens, no handwriting, no numbers. Objects and spaces
+only.` Spell out every form of it: the animation layer owns all the typography,
+so a clip that arrives with its own text collides with the captions and must be
+regenerated. Check each clip before it goes in.
 
 Append the same palette line to all three so they cut together, and state the
 camera move explicitly — "cinematic" is not a camera move.

@@ -5,10 +5,23 @@ them fresh for each script — the *slots* are fixed, the *subjects* change.
 
 ## The constant
 
-Ends every prompt, unchanged:
+Ends every prompt, unchanged. Do not paraphrase it and do not shorten it — the
+text clause is long on purpose, because generators reliably add a caption, a
+watermark or a label unless every form of it is named:
 
-> 1080×1920 vertical, 5 seconds, no people, no faces, no hands, no text, no
-> logos, no readable screens.
+> 1080×1920 vertical, 5 seconds. No people, no faces, no hands. **No text of any
+> kind anywhere in the frame** — no text overlay, no captions, no subtitles, no
+> watermarks, no logos, no signage, no labels on packaging, no readable screens,
+> no handwriting, no numbers. Objects and spaces only.
+
+**Why this matters more than it looks.** The animation layer owns every word in
+this format: captions sit at the lower third and hero type fills the middle. A
+clip that arrives with its own text puts two typographic systems on screen at
+once — which is the same duplication failure as a caption over a `type` scene,
+except it cannot be fixed in the spec. The clip has to be regenerated.
+
+Check each clip before it goes in the film. A watermark in the corner is the
+common one, and it survives all the way to the delivered MP4 if nobody looks.
 
 And this palette line, so the three cut together and match the graphics:
 

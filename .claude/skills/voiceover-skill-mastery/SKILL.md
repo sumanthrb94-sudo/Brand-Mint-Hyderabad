@@ -85,8 +85,18 @@ Blank lines in the script are scene cuts. Keep them.
 
 ## Writing the three clip prompts
 
-Always: `1080×1920 vertical, 5 seconds, no people, no faces, no hands, no text,
-no logos, no readable screens.` Objects and spaces only.
+Every prompt ends with this, verbatim:
+
+```
+1080×1920 vertical, 5 seconds. No people, no faces, no hands. No text of any
+kind anywhere in the frame — no text overlay, no captions, no subtitles, no
+watermarks, no logos, no signage, no labels on packaging, no readable screens,
+no handwriting, no numbers. Objects and spaces only.
+```
+
+The text clause is long deliberately. The animation layer owns every word on
+screen, so a clip carrying its own text collides with the captions and has to be
+regenerated — spell out every form of it, and check each clip before using it.
 
 Append this palette line to all three so they cut together:
 
