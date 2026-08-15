@@ -39,11 +39,40 @@ import wave
 
 SR = 48000
 LIMITER = "alimiter=limit=0.94:level=disabled"
+# TTS services hand back audio normalised to full scale, which leaves no room
+# for the effects bed to sit on top. Duck the voice to this before mixing.
+# Never raise a quiet voice — that would amplify its noise floor too.
+VOICE_PEAK_TARGET_DB = -1.5
 
 
 def ff():
     import imageio_ffmpeg
     return imageio_ffmpeg.get_ffmpeg_exe()
+
+
+def voice_gain(vo, tmp):
+    """How much to duck the voice so the effects bed has somewhere to sit.
+
+    ElevenLabs returns audio peaking at 0 dBFS. Mixed against that, every cue
+    pushes the sum into the limiter, and a master riding the ceiling clips once
+    AAC's inter-sample peaks are added. Measure, and only ever attenuate.
+    """
+    import numpy as np
+    probe = os.path.join(tmp, "_peak.wav")
+    subprocess.run([ff(), "-y", "-v", "error", "-i", vo, "-ac", "1",
+                    "-ar", str(SR), "-sample_fmt", "s16", probe], check=True)
+    w = wave.open(probe)
+    a = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float64) / 32768.0
+    os.remove(probe)
+    peak = float(np.abs(a).max())
+    if peak <= 0:
+        return 1.0
+    target = 10 ** (VOICE_PEAK_TARGET_DB / 20)
+    gain = min(1.0, target / peak)
+    if gain < 1.0:
+        print(f"voice peaks at {20 * __import__('math').log10(peak):.2f} dBFS — "
+              f"ducking {20 * __import__('math').log10(gain):.2f} dB for headroom")
+    return gain
 
 
 def limiter_delay(tmp):
@@ -90,8 +119,11 @@ def main():
     film = spec.get("duration")
     pad = f",apad=whole_dur={film}" if film else ""
 
+    gain = spec.get("voiceGain")
+    if gain is None:
+        gain = voice_gain(vo, out)
     inputs = ["-i", vo]
-    parts = [f"[0:a]aformat=sample_fmts=fltp:channel_layouts=stereo,volume=1.0{pad}[vo]"]
+    parts = [f"[0:a]aformat=sample_fmts=fltp:channel_layouts=stereo,volume={gain:.4f}{pad}[vo]"]
     labels = ["[vo]"]
 
     for i, c in enumerate(cues, start=1):

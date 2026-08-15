@@ -153,6 +153,14 @@ the row it belongs to.
 
 - **Chromium here cannot decode H.264.** Extract the clips to JPEG frames with
   ffmpeg and composite those; never rely on a `<video>` element rendering.
+  `scripts/prep_clip.sh` does this.
+- **Generated clips carry a watermark** in the bottom-right that no prompt
+  removes. `prep_clip.sh` crops the bottom 13% to take it out. The grade will not
+  hide it — the grade is semi-transparent and the mark is solid.
+- **TTS voice arrives at 0 dBFS**, leaving no headroom for the effects bed, so
+  the master rides the limiter and risks clipping once AAC adds inter-sample
+  peaks. `build_mix.py` measures the voice peak and ducks it to −1.5 dBFS. It
+  only ever attenuates.
 - **`alimiter` delays audio by about its 5 ms lookahead** and the voice drifts
   off the captions. Trim it back — but *measure* the delay, do not compute it:
   5 ms at 48 kHz is 240 samples and ffmpeg 7.0 delays 239. `build_mix.py`

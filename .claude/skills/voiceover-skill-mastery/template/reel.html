@@ -68,6 +68,10 @@
   .r.total .lbl{color:var(--mint)}
   .r.total b{font-size:4.6cqw;color:var(--mint)}
   .r.blank b{color:var(--muted);letter-spacing:.3em}
+  /* The row that just arrived. Without it an accumulating card looks static,
+     because every row is already on screen by the time the new one lands. */
+  .r.now b{color:var(--mint)}
+  .r.now .lbl{color:#DCEFE4}
 
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:2.2cqw;width:100%}
   .cell{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:2.4cqw;padding:3.2cqw;display:grid;gap:1.2cqw}
@@ -92,6 +96,8 @@
   /* The peak. Full bleed, mint ground, one number. */
   .flash{background:var(--mint);color:#06251A}
   .slam{font-size:24cqw;font-weight:900;letter-spacing:-.06em;line-height:.84;margin:0;font-variant-numeric:tabular-nums}
+  /* A bare figure is meaningless in a screenshot. The unit rides with it. */
+  .slam u{text-decoration:none;font-size:7.4cqw;letter-spacing:-.01em;margin-left:1.6cqw}
   .slamnote{font-size:2.9cqw;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:rgba(6,37,26,.68);margin:0}
 
   /* Pictorial beat — shapes only, never words. A words-free scene is the one
@@ -284,8 +290,12 @@
     }
     if (s.number) {
       const g = el("div", "endcta");
-      const v = anim(el("p", "slam", s.number.value), "count", .06);
+      const v = anim(el("p", "slam"), "count", .06);
       v.dataset.to = s.number.value;
+      // The figure lives in its own node so the count-up can rewrite it
+      // without wiping the unit beside it.
+      v.appendChild(el("i", "num", s.number.value));
+      if (s.number.unit) v.appendChild(el("u", null, s.number.unit));
       g.appendChild(v);
       if (s.number.note) g.appendChild(anim(el("p", "slamnote", s.number.note), "fade", .5));
       return g;
@@ -403,10 +413,11 @@
         el.style.transform=`scale(${.62+.38*back(clamp(p))})`;
         const to = el.dataset.to || "";
         const digits = to.replace(/[^0-9]/g, "");
-        if (digits) {
+        const num = el.querySelector(".num");
+        if (digits && num) {
           const cp = expo(clamp((tl - delay) / (dur * 1.9)));
           const n = Math.round(parseInt(digits, 10) * cp);
-          el.textContent = to.replace(digits, String(n));
+          num.textContent = to.replace(digits, String(n));
         }
         break;
       }

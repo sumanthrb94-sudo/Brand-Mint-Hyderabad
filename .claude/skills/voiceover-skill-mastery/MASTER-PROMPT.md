@@ -92,6 +92,12 @@ Everything runs offline; no API keys.
 - **Containerised Chromium usually cannot decode H.264.** Do not rely on a
   `<video>` element rendering. Extract each clip to JPEG frames with ffmpeg and
   composite those per render frame.
+- **Generated clips have a watermark burned into the bottom-right corner.** No
+  prompt wording removes it. Crop the bottom ~13% away when extracting frames,
+  and do not expect a semi-transparent grade to cover a solid mark.
+- **TTS output is normalised to 0 dBFS**, so there is no headroom for the sound
+  bed and the master ends up riding the limiter. Measure the voice peak and duck
+  it to about −1.5 dBFS before mixing; only ever attenuate, never boost.
 - **`alimiter` delays audio by roughly its 5 ms lookahead** and the whole film
   drifts off the captions. Follow it with an `atrim`, but **measure the delay
   rather than computing it** — 5 ms at 48 kHz is 240 samples and ffmpeg 7.0
