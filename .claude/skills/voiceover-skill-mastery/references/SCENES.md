@@ -72,7 +72,7 @@ One per scene.
 | `split` | `{"a":["To start","50%"],"b":["When live","50%"]}` | Two-part bar, grows from both ends. |
 | `strikes` | `["Retainer","Lock-in"]` | Struck through a beat after each lands. |
 | `glyph` | `"parcel-refused"` | A pictorial beat, shapes only. |
-| `lockup` | `{"word":"Brand <em>Mint</em>","city":"Hyderabad"}` | Wordmark, rule sweep, city. |
+| `lockup` | `{"word":"Brand <em>Mint</em>","city":"Hyderabad","follow":{"text":"Follow to know more","handle":"@brandmint.studios"}}` | Wordmark, rule sweep, city, and the follow ask. |
 | `endcard` | `{"cta":"Comment “RTO”","hint":"…","strip":["8 weeks","@handle"]}` | The ask. |
 
 ### Rows
@@ -85,6 +85,16 @@ One per scene.
 - `class` is `debit` (red value), `total` (mint, ruled off above) or `blank`
   (muted, letter-spaced — for a figure deliberately not shown).
 - A value of `"✓"` renders as a mint tick.
+
+### The outro
+
+Always give `lockup` a `follow`. A wordmark alone tells them who you are and
+gives them nothing to do about it — the invitation and the handle are what turn
+a view into a follower. The text sits above a pill holding the handle by itself;
+putting both inside one chip makes it wider than the wordmark and it wraps.
+
+Budget about 3.3 s of `hold` when there is a follow line. 2.4 s ends the film
+before a handle can be read.
 
 ### Glyphs
 

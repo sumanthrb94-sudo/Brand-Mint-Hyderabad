@@ -1,52 +1,254 @@
 {
-  "title": "The ₹1,000 order that made you nothing",
-  "gate": "Comment RTO",
-  "duration": 33.9,
-  "clipSlots": { "A": 1, "B": 6, "C": 13 },
-  "scenes": [
-    { "words": [0, 4], "mode": "type", "kicker": "Today",
-      "h1": ["You made", "a <em>sale</em> today."] },
-
-    { "words": [5, 9], "mode": "type",
-      "h1": ["And <em>lost money</em>", "on it."] },
-
-    { "words": [10, 15], "mode": "type", "kicker": "The order",
-      "rows": [["Order value", "₹1,000", 0.14], ["Payment", "Cash on delivery", 0.42]] },
-
-    { "words": [16, 18], "mode": "type", "kicker": "What it costs you",
-      "rows": [["Order value", "₹1,000", 0], ["Shipping", "−₹200", 0.3, "debit"]] },
-
-    { "words": [19, 20], "mode": "type", "kicker": "What it costs you",
-      "rows": [["Order value", "₹1,000", 0], ["Shipping", "−₹200", 0, "debit"],
-               ["Packing", "−₹40", 0.26, "debit"]] },
-
-    { "words": [21, 27], "mode": "support", "glyph": "parcel-refused" },
-
-    { "words": [28, 32], "mode": "type", "kicker": "And back again",
-      "rows": [["Order value", "₹1,000", 0], ["Shipping", "−₹200", 0, "debit"],
-               ["Packing", "−₹40", 0, "debit"], ["Return shipping", "−₹200", 0.3, "debit"]] },
-
-    { "words": [33, 41], "mode": "type",
-      "number": { "value": "₹440", "note": "gone. On one refused parcel." } },
-
-    { "words": [42, 44], "mode": "type", "kicker": "It has a name",
-      "h1": ["This is", "<em>RTO.</em>"] },
-
-    { "words": [45, 50], "mode": "support", "kicker": "On most dashboards",
-      "rows": [["Revenue", "Tracked", 0.12], ["Ad spend", "Tracked", 0.26],
-               ["RTO rate", "— — —", 0.44, "blank"]] },
-
-    { "words": [51, 55], "mode": "type",
-      "h1": ["Do you know", "<em>your number?</em>"] },
-
-    { "words": [56, 57], "mode": "type",
-      "endcard": { "cta": "Comment “RTO”", "hint": "One word. That's all it takes." } },
-
-    { "words": [58, 65], "mode": "support", "kicker": "The four fixes",
-      "cells": [["01", "Prepaid nudges"], ["02", "Address checks"],
-                ["03", "Order confirmation"], ["04", "COD limits"]] },
-
-    { "at": 31.5, "hold": 2.4, "mode": "type",
-      "lockup": { "word": "Brand <em>Mint</em>", "city": "Hyderabad" } }
-  ]
+ "title": "The ₹1,000 order that made you nothing",
+ "gate": "Comment RTO",
+ "duration": 34.8,
+ "clipSlots": {
+  "A": 1,
+  "B": 6,
+  "C": 13
+ },
+ "scenes": [
+  {
+   "words": [
+    0,
+    4
+   ],
+   "mode": "type",
+   "kicker": "Today",
+   "h1": [
+    "You made",
+    "a <em>sale</em> today."
+   ]
+  },
+  {
+   "words": [
+    5,
+    9
+   ],
+   "mode": "type",
+   "h1": [
+    "And <em>lost money</em>",
+    "on it."
+   ]
+  },
+  {
+   "words": [
+    10,
+    15
+   ],
+   "mode": "type",
+   "kicker": "The order",
+   "rows": [
+    [
+     "Order value",
+     "₹1,000",
+     0.14
+    ],
+    [
+     "Payment",
+     "Cash on delivery",
+     0.42
+    ]
+   ]
+  },
+  {
+   "words": [
+    16,
+    18
+   ],
+   "mode": "type",
+   "kicker": "What it costs you",
+   "rows": [
+    [
+     "Order value",
+     "₹1,000",
+     0
+    ],
+    [
+     "Shipping",
+     "−₹200",
+     0.3,
+     "debit"
+    ]
+   ]
+  },
+  {
+   "words": [
+    19,
+    20
+   ],
+   "mode": "type",
+   "kicker": "What it costs you",
+   "rows": [
+    [
+     "Order value",
+     "₹1,000",
+     0
+    ],
+    [
+     "Shipping",
+     "−₹200",
+     0,
+     "debit"
+    ],
+    [
+     "Packing",
+     "−₹40",
+     0.26,
+     "debit"
+    ]
+   ]
+  },
+  {
+   "words": [
+    21,
+    27
+   ],
+   "mode": "support",
+   "glyph": "parcel-refused"
+  },
+  {
+   "words": [
+    28,
+    32
+   ],
+   "mode": "type",
+   "kicker": "And back again",
+   "rows": [
+    [
+     "Order value",
+     "₹1,000",
+     0
+    ],
+    [
+     "Shipping",
+     "−₹200",
+     0,
+     "debit"
+    ],
+    [
+     "Packing",
+     "−₹40",
+     0,
+     "debit"
+    ],
+    [
+     "Return shipping",
+     "−₹200",
+     0.3,
+     "debit"
+    ]
+   ]
+  },
+  {
+   "words": [
+    33,
+    41
+   ],
+   "mode": "type",
+   "number": {
+    "value": "₹440",
+    "note": "gone. On one refused parcel."
+   }
+  },
+  {
+   "words": [
+    42,
+    44
+   ],
+   "mode": "type",
+   "kicker": "It has a name",
+   "h1": [
+    "This is",
+    "<em>RTO.</em>"
+   ]
+  },
+  {
+   "words": [
+    45,
+    50
+   ],
+   "mode": "support",
+   "kicker": "On most dashboards",
+   "rows": [
+    [
+     "Revenue",
+     "Tracked",
+     0.12
+    ],
+    [
+     "Ad spend",
+     "Tracked",
+     0.26
+    ],
+    [
+     "RTO rate",
+     "— — —",
+     0.44,
+     "blank"
+    ]
+   ]
+  },
+  {
+   "words": [
+    51,
+    55
+   ],
+   "mode": "type",
+   "h1": [
+    "Do you know",
+    "<em>your number?</em>"
+   ]
+  },
+  {
+   "words": [
+    56,
+    57
+   ],
+   "mode": "type",
+   "endcard": {
+    "cta": "Comment “RTO”",
+    "hint": "One word. That's all it takes."
+   }
+  },
+  {
+   "words": [
+    58,
+    65
+   ],
+   "mode": "support",
+   "kicker": "The four fixes",
+   "cells": [
+    [
+     "01",
+     "Prepaid nudges"
+    ],
+    [
+     "02",
+     "Address checks"
+    ],
+    [
+     "03",
+     "Order confirmation"
+    ],
+    [
+     "04",
+     "COD limits"
+    ]
+   ]
+  },
+  {
+   "at": 31.5,
+   "hold": 3.3,
+   "mode": "type",
+   "lockup": {
+    "word": "Brand <em>Mint</em>",
+    "city": "Hyderabad",
+    "follow": {
+     "text": "Follow to know more",
+     "handle": "@brandmint.studios"
+    }
+   }
+  }
+ ]
 }
