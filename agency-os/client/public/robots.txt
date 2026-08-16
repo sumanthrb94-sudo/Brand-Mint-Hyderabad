@@ -1,0 +1,15 @@
+# Brand Mint — https://brand-mint-sdmk.vercel.app
+User-agent: *
+Allow: /
+
+# Signed-in surfaces. Nothing here is useful in an index and some of it is a
+# client's private project data.
+Disallow: /admin
+Disallow: /operations
+Disallow: /deliverables
+Disallow: /portal
+Disallow: /projects/
+Disallow: /onboarding
+Disallow: /sign-in
+
+Sitemap: https://brand-mint-sdmk.vercel.app/sitemap.xml

@@ -1,3 +1,4 @@
+import { Testimonials } from "@/components/Testimonials";
 import { PublicInquiry } from "@/components/PublicInquiry";
 import { PublicMotion } from "@/components/PublicMotion";
 import { BrandMark } from "@/components/BrandMark";
@@ -49,6 +50,8 @@ export default function PublicHome() {
     <section className="ecom-process public-container"><div className="public-section-intro"><p className="public-kicker">04 — Delivery terms</p><h2>Built, tested, signed off, then <em>live.</em></h2></div><div className="ecom-process-grid"><div><span>01</span><h3>Agree</h3><p>Scope, price and the required client inputs are confirmed before work starts.</p></div><div><span>02</span><h3>Build</h3><p>Timelines run from signed scope and receipt of client assets. Delays move the date day for day.</p></div><div><span>03</span><h3>Test</h3><p>UAT covers defects against the agreed scope during a five-day staging review window.</p></div><div><span>04</span><h3>Handover</h3><p>Go-live follows final payment; all code, design files and accounts transfer to the client.</p></div></div></section>
 
     <section className="public-section public-container" id="faq"><div className="public-section-intro"><p className="public-kicker">05 — Common questions</p><h2>Commercial terms made <em>clear.</em></h2></div><div className="public-faq-list">{faqs.map(([question, answer], index) => <Faq key={question} question={question} answer={answer} index={index} transition={transition} />)}</div></section>
+
+    <Testimonials />
 
     <section className="ecom-enquiry public-container" id="enquiry"><div><p className="public-kicker">Start with the project</p><h2>Bring the catalogue and the context. We will make the next step <em>clear.</em></h2><p>Send your request without an account. Your name, company, email, and brief go directly to the Brand Mint CEO workspace for review.</p></div><PublicInquiry /></section>
     <footer className="public-footer public-container"><BrandMark /><div><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link><Link href="/refund-policy">Refund</Link><Link href="/shipping-policy">Shipping</Link><Link href="/cookies">Cookies</Link></div><Link href="/sign-in">Sign in</Link></footer>

@@ -175,12 +175,21 @@ const authoringPlugins = () => [jsxLocPlugin(), vitePluginManusRuntime(), vitePl
  */
 function stripUnconfiguredAnalytics(): Plugin {
   return {
-    name: "strip-unconfigured-analytics",
+    name: "strip-unconfigured-tags",
     transformIndexHtml: {
       order: "pre",
       handler(html) {
-        if (process.env.VITE_ANALYTICS_ENDPOINT) return html;
-        return html.replace(/\s*<script[^>]*%VITE_ANALYTICS_ENDPOINT%[^>]*><\/script>/g, "");
+        let out = html;
+        if (!process.env.VITE_ANALYTICS_ENDPOINT) {
+          out = out.replace(/\s*<script[^>]*%VITE_ANALYTICS_ENDPOINT%[^>]*><\/script>/g, "");
+        }
+        // Same reasoning for the Search Console tag: an unsubstituted
+        // placeholder in a meta content attribute is worse than no meta at all,
+        // because Google reads it and reports the property as unverified.
+        if (!process.env.VITE_GSC_VERIFICATION) {
+          out = out.replace(/\s*<meta[^>]*google-site-verification[^>]*>/g, "");
+        }
+        return out;
       },
     },
   };

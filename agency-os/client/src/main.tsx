@@ -1,3 +1,5 @@
+import { initAnalytics, initInteractionTracking } from "@/lib/analytics";
+import { initWebVitals } from "@/lib/webVitals";
 import { trpc } from "@/lib/trpc";
 import { firebaseIdToken } from "@/lib/firebase";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,6 +8,12 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import "./index.css";
+
+// Tags load before the tree renders so a page view is not missed on a fast
+// first paint. Both are no-ops when nothing is configured.
+initAnalytics();
+initWebVitals();
+addEventListener("DOMContentLoaded", initInteractionTracking);
 
 const queryClient = new QueryClient();
 
