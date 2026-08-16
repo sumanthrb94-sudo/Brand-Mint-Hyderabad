@@ -51,7 +51,10 @@
 
   .h1{font-family:Georgia,"Times New Roman",serif;font-size:12.4cqw;line-height:1.0;letter-spacing:-.04em;margin:0;text-wrap:balance}
   .h1 .ln{display:block;overflow:hidden}
-  .h1 .ln i{display:block;font-style:normal}
+  /* The authored line breaks are the design. Letting the browser re-wrap a line
+     inside .ln — which clips — produces breaks nobody chose. Hold each line on
+     one line and shrink the face instead; see the fit pass below. */
+  .h1 .ln i{display:block;font-style:normal;white-space:nowrap}
   .h1 em{font-style:italic;color:var(--mint)}
   .sub{font-size:3.3cqw;line-height:1.6;color:#B7D0C3;margin:0;max-width:30ch}
 
@@ -441,6 +444,21 @@
     if (s.sub) sec.appendChild(anim(el("p", "sub", s.sub), "fade", .46));
     host.appendChild(sec);
   });
+  /* Fit hero type to the stage.
+
+     12.4cqw holds about fourteen characters. A longer line used to wrap and get
+     clipped by .ln's overflow. Rather than ask whoever writes the scenes to
+     count characters, measure: step the size down until the widest authored
+     line fits. Runs once, before any frame is drawn, so every frame agrees. */
+  host.querySelectorAll(".h1").forEach(h => {
+    const lines = [...h.querySelectorAll(".ln i")];
+    const wide = () => lines.some(i => i.scrollWidth > i.parentElement.clientWidth + 1);
+    for (let size = 12.4; wide() && size > 5.6; ) {
+      size -= 0.3;
+      h.style.fontSize = size.toFixed(2) + "cqw";
+    }
+  });
+
   const scenes = [...host.querySelectorAll(".scene")];
 
   let nodeEls = [];
