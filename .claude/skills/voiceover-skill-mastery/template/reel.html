@@ -94,6 +94,52 @@
   .pills{display:flex;flex-wrap:wrap;gap:1.8cqw;width:100%}
   .pill{background:rgba(123,242,168,.12);border:1px solid rgba(123,242,168,.45);color:var(--mint);border-radius:999px;padding:2.1cqw 3.2cqw;font-size:3cqw;font-weight:800;white-space:nowrap}
 
+  /* The line's own subject, drawn large above it and stroked on as it is said.
+     This is what stops a type scene being a subtitle: the same words, but the
+     frame now shows the thing they are about. */
+  .art{width:30cqw;height:30cqw;color:var(--mint);margin-bottom:5cqw;position:relative;flex:none;
+    display:grid;place-items:center}
+  /* A lit ground behind the subject. Without it the stroke floats on the
+     gradient and reads as a bullet point rather than as the frame's subject. */
+  .art::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+    background:radial-gradient(circle at 50% 45%,rgba(123,242,168,.16),rgba(123,242,168,0) 68%)}
+  .art svg{width:100%;height:100%;display:block;overflow:visible}
+  .art svg path{fill:none;stroke:currentColor;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+  /* A subject the read denies. The stroke is drawn, then struck through. */
+  .art.no::after{content:"";position:absolute;left:-6%;top:48%;height:.9cqw;width:var(--slash,0%);
+    background:var(--red);border-radius:1cqw;transform:rotate(-24deg);transform-origin:left center}
+  .scene[data-mode] .art{align-self:flex-start}
+  .scene.center .art{align-self:center}
+
+  /* Icon tiles. A named thing gets a drawn thing beside it — a list of words in
+     boxes is still a list of words. Strokes only, one weight, so twenty of them
+     across thirty films still look like one hand drew them. */
+  .icons{display:grid;grid-template-columns:repeat(3,1fr);gap:2.2cqw;width:100%}
+  .icons.two{grid-template-columns:repeat(2,1fr)}
+  .tile{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:2.6cqw;
+    padding:3.4cqw 2.4cqw;display:grid;justify-items:center;gap:1.8cqw;text-align:center}
+  .tile svg{width:9cqw;height:9cqw;color:var(--mint);flex:none}
+  .tile svg *{vector-effect:non-scaling-stroke}
+  .tile b{font-size:2.5cqw;font-weight:800;color:#DCEFE4;line-height:1.25;letter-spacing:.01em}
+  /* The one that is ours. Exactly one tile per scene may carry it. */
+  .tile.on{background:rgba(123,242,168,.13);border-color:rgba(123,242,168,.5)}
+
+  /* Depth, honestly obtained: a real perspective transform on a real element,
+     not a picture of a phone. It rotates as it lands, so the plane reads as a
+     plane rather than as a rectangle with a gradient. */
+  .dev{width:100%;display:grid;place-items:center;perspective:120cqw}
+  .devbody{width:52cqw;border-radius:5cqw;padding:3cqw 2.6cqw;transform-style:preserve-3d;
+    background:linear-gradient(165deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.17);
+    box-shadow:0 6cqw 14cqw rgba(0,0,0,.5), inset 0 .2cqw 0 rgba(255,255,255,.14)}
+  .devbody .notch{width:16cqw;height:1.5cqw;border-radius:1cqw;background:rgba(255,255,255,.2);margin:0 auto 2.6cqw}
+  .devbody .dr{display:flex;align-items:center;gap:2.2cqw;padding:2.4cqw 2.6cqw;margin-bottom:1.6cqw;
+    border-radius:2cqw;background:rgba(255,255,255,.06);border:1px solid var(--line);
+    font-size:2.7cqw;font-weight:800;color:#DCEFE4}
+  .devbody .dr:last-child{margin-bottom:0}
+  .devbody .dr svg{width:5.4cqw;height:5.4cqw;color:var(--mint);flex:none}
+  .devbody .dr.on{background:rgba(123,242,168,.15);border-color:rgba(123,242,168,.5);color:var(--mint)}
+
   .bar5050{width:100%;display:grid;gap:2cqw}
   .bar5050 .track{display:flex;height:9cqw;border-radius:2cqw;overflow:hidden;border:1px solid var(--line)}
   .bar5050 .a{background:rgba(255,255,255,.1);display:grid;place-items:center;font-weight:900;font-size:3.6cqw}
@@ -297,7 +343,67 @@
   };
   const anim = (n, kind, delay) => { n.dataset.a = kind; n.dataset.d = String(delay); return n; };
 
+  /* One stroke weight, one grid, one language. Everything a film can point at
+     is drawn here rather than fetched, so a film has no assets to lose. */
+  const ICON = {
+    cart:"M3 4h2.1l2.2 10.2a2 2 0 0 0 2 1.6h7.4a2 2 0 0 0 2-1.55L20.5 8H6.2M10 20.2a1.3 1.3 0 1 0 0-.1M17.4 20.2a1.3 1.3 0 1 0 0-.1",
+    box:"M12 3 4 7v10l8 4 8-4V7ZM4 7l8 4 8-4M12 11v10",
+    truck:"M3 6h11v9H3zM14 9h3.7l3.3 3.2V15h-7zM7 18.3a1.3 1.3 0 1 0 0-.1M17.5 18.3a1.3 1.3 0 1 0 0-.1",
+    rupee:"M7 4.5h10M7 8.5h10M15.4 4.5c0 3.2-2.3 4-5.6 4H7l8.4 11",
+    card:"M3 6h18v12H3zM3 10.2h18M6.4 14.4h4",
+    search:"M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0ZM20.6 20.6l-4.4-4.4",
+    tag:"M4 4h7.2l8.8 8.8-7.2 7.2L4 11.2ZM8.3 8.3h.1",
+    chart:"M3 20.4h18M6.6 17.4v-5.2M11.6 17.4V6.6M16.6 17.4V9.8",
+    phone:"M7 2.4h10v19.2H7zM10.6 18.7h2.8",
+    clock:"M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0ZM12 7.1v5.4l3.4 2",
+    shield:"M12 3.1 19 6v6c0 4.4-3 7.4-7 8.9-4-1.5-7-4.5-7-8.9V6ZM8.9 12.1l2.2 2.2 4.1-4.3",
+    warehouse:"M3 10.2 12 5l9 5.2v10.2H3ZM8 20.4v-6.2h8v6.2",
+    refresh:"M20 12a8 8 0 1 1-2.5-5.8M20.4 3.9v4.2h-4.2",
+    user:"M15.5 8.6a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0ZM5 20.4c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6",
+    chat:"M4 5h16v11H9.4l-5.4 4.2Z",
+    star:"m12 3.2 2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.2 6.1-.8Z",
+    check:"M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0ZM8.1 12.1l2.8 2.8 5.5-5.8",
+    doc:"M6 3h8l4 4v14H6ZM14 3v4h4M9 12.4h6M9 16.2h4.4",
+    bell:"M6 17.2v-6a6 6 0 0 1 12 0v6l1.5 2.4h-15ZM10 20.2a2 2 0 0 0 4 0",
+    pin:"M12 21.2s7-6.3 7-11.1a7 7 0 1 0-14 0c0 4.8 7 11.1 7 11.1ZM14.6 10a2.6 2.6 0 1 1-5.2 0 2.6 2.6 0 0 1 5.2 0Z",
+    code:"m8.2 8-4.2 4 4.2 4M15.8 8l4.2 4-4.2 4M13.6 5.6l-3.2 12.8",
+    layers:"m12 3.1 9 4.5-9 4.5-9-4.5ZM3 12.4l9 4.5 9-4.5M3 16.6l9 4.5 9-4.5",
+    store:"M4.4 8h15.2l-1 3H5.4ZM5.4 11v9.4h13.2V11M4.4 8 6 4h12l1.6 4",
+    lock:"M6.8 11h10.4v9.4H6.8ZM9.4 11V8.2a2.6 2.6 0 0 1 5.2 0V11",
+    mail:"M3 6h18v12H3zM3 6.4l9 6.8 9-6.8",
+    filter:"M3.4 5h17.2l-6.6 7.8v6.4l-4 1.6v-8Z",
+    upload:"M12 16.4V4.6M8.2 8.4 12 4.6l3.8 3.8M4 16.4v3.4h16v-3.4",
+  };
+  const icon = key => {
+    const d = ICON[key] || ICON.check;
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55"
+      stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+  };
+
   function buildBlock(s) {
+    if (s.icons) {
+      const g = el("div", "icons" + (s.icons.length <= 4 ? " two" : ""));
+      s.icons.forEach(([key, label, on], k) => {
+        const t = anim(el("div", "tile" + (on ? " on" : "")), "pop", .12 + k * .11);
+        t.innerHTML = icon(key);
+        t.appendChild(el("b", null, label));
+        g.appendChild(t);
+      });
+      return g;
+    }
+    if (s.device) {
+      const d = el("div", "dev");
+      const b = anim(el("div", "devbody"), "tilt", .06);
+      b.appendChild(el("div", "notch"));
+      (s.device.rows || []).forEach(([key, label, on], k) => {
+        const r = anim(el("div", "dr" + (on ? " on" : "")), "row", .22 + k * .13);
+        r.innerHTML = icon(key);
+        r.appendChild(el("span", null, label));
+        b.appendChild(r);
+      });
+      d.appendChild(b);
+      return d;
+    }
     if (s.h1) {
       const h = el("h1", "h1");
       s.h1.forEach((line, k) => {
@@ -434,11 +540,18 @@
     const sec = el("section", "scene");
     sec.dataset.scene = i;
     sec.dataset.mode = s.mode;
-    if (s.center || s.number || s.lockup || s.endcard || s.glyph || s.mark) sec.classList.add("center");
+    if (s.center || s.number || s.lockup || s.endcard || s.glyph || s.mark
+        || s.icons || s.device) sec.classList.add("center");
     if (s.bg) sec.classList.add("over-bg");
     if (s.flash || s.number) sec.classList.add("flash");
     if (RAIL && RAIL.scenes.includes(i)) sec.classList.add("rail-on");
     if (s.kicker) sec.appendChild(anim(el("p", "kicker", s.kicker), "fade", 0));
+    if (s.art) {
+      const [key, mod] = Array.isArray(s.art) ? s.art : [s.art, null];
+      const a = anim(el("div", "art" + (mod === "no" ? " no" : "")), "draw", .04);
+      a.innerHTML = `<svg viewBox="0 0 24 24"><path d="${ICON[key] || ICON.check}"/></svg>`;
+      sec.appendChild(a);
+    }
     const block = buildBlock(s);
     if (block) sec.appendChild(block);
     if (s.sub) sec.appendChild(anim(el("p", "sub", s.sub), "fade", .46));
@@ -450,6 +563,13 @@
      clipped by .ln's overflow. Rather than ask whoever writes the scenes to
      count characters, measure: step the size down until the widest authored
      line fits. Runs once, before any frame is drawn, so every frame agrees. */
+  /* Measure each drawn subject once. getTotalLength is exact and the icons
+     differ in length by a factor of three, so a shared guess would have some
+     drawing instantly and others never finishing. */
+  host.querySelectorAll(".art path").forEach(p => {
+    p.dataset.len = String(Math.ceil(p.getTotalLength()));
+  });
+
   host.querySelectorAll(".h1").forEach(h => {
     const lines = [...h.querySelectorAll(".ln i")];
     const wide = () => lines.some(i => i.scrollWidth > i.parentElement.clientWidth + 1);
@@ -491,6 +611,27 @@
       case "grow-l":el.style.flexBasis=(e*50)+"%"; el.style.opacity=e; break;
       case "grow-r":el.style.flexBasis=(e*50)+"%"; el.style.opacity=e; break;
       case "rule":  el.style.width=(e*46)+"%"; break;
+      // The plane swings towards the viewer and settles short of flat, so it
+      // keeps a face and an edge. Ending at 0 would collapse it to a rectangle.
+      // The subject strokes itself on, then — if the read denies it — the slash
+      // is drawn through. Measured length, so every icon draws at one speed.
+      case "draw": {
+        el.style.opacity = clamp(p * 2.4);
+        const path = el.querySelector("path");
+        if (path) {
+          const L = Number(path.dataset.len || 100);
+          path.style.strokeDasharray = L;
+          path.style.strokeDashoffset = L * (1 - expo(clamp((tl - delay) / (dur * 1.5))));
+        }
+        if (el.classList.contains("no")) {
+          const sp = expo(clamp((tl - delay - .40) / .34));
+          el.style.setProperty("--slash", (sp * 112) + "%");
+        }
+        break;
+      }
+      case "tilt":  el.style.opacity=e;
+                    el.style.transform=`rotateY(${-26+12*e}deg) rotateX(${7-3*e}deg) translateY(${(1-e)*30}px)`;
+                    break;
       case "count": {
         // Slam in, and run the digits up underneath it. The number arrives
         // before it is legible, which is what makes it feel like a hit.
