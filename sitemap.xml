@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- One URL, on purpose. The sitemap lists canonical, indexable pages and this
+     site has exactly one: the app pages are noindexed, and /home-v2
+     canonicalises to /. Padding a sitemap with URLs that then report
+     "noindexed" or "duplicate" in Search Console reads as a site that does not
+     know its own shape. Add real marketing pages here as they are written. -->
+<urlset xmlns="http://www.sitemaps.org/schema/sitemap/0.9">
+  <url>
+    <loc>https://www.brandmintstudios.in/</loc>
+  </url>
+</urlset>

@@ -1,0 +1,15 @@
+# Brand Mint Studios — https://www.brandmintstudios.in
+#
+# The app pages (/portal, /studio, /login, /quote, ...) are DELIBERATELY NOT
+# disallowed here, even though none of them should rank. They carry
+# <meta name="robots" content="noindex"> instead, and a crawler can only obey
+# a noindex it is allowed to fetch — Disallow would hide the very tag that
+# keeps them out of the index, and blocked-but-linked URLs can still appear in
+# results as bare links. /api/ is the exception: those are serverless payment
+# endpoints, not pages, and there is no HTML there to carry a tag.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://www.brandmintstudios.in/sitemap.xml

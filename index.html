@@ -4,33 +4,44 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <meta name="theme-color" content="#0b1f1a" />
-    <title>Brand Mint — Hyderabad's premium digital studio for ambitious brands</title>
+<!-- SEO: the title is written for what a buyer actually types — "ecommerce
+     website development hyderabad" — not for what the studio calls itself.
+     Nobody searches "premium digital studio".
+
+     The canonical MUST be www.brandmintstudios.in. It used to point at the
+     brand-mint-sdmk.vercel.app preview domain, which told Google the real home
+     of this content was a Vercel subdomain — every signal the page earned was
+     credited there instead of to the studio's own domain. If the serving
+     domain ever changes, this line changes with it or rankings quietly drain
+     to the wrong host again. -->
+    <title>Ecommerce Website Development in Hyderabad | Brand Mint</title>
     <meta
       name="description"
-      content="Brand Mint is a digital studio in Hyderabad building custom ecommerce stores end to end. Three tiers from ₹99,000, fixed scope and fixed price agreed before work starts."
+      content="Custom ecommerce stores built end to end in Hyderabad. Fixed-price tiers from ₹99,000 — catalogue, checkout, Razorpay with COD, orders and admin. Live in 8 weeks."
     />
-    <link rel="canonical" href="https://brand-mint-sdmk.vercel.app/" />
+    <link rel="canonical" href="https://www.brandmintstudios.in/" />
     <meta property="og:site_name" content="Brand Mint" />
-    <meta property="og:title" content="Brand Mint — Hyderabad's premium digital studio" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:title" content="Ecommerce Website Development in Hyderabad | Brand Mint" />
     <meta
       property="og:description"
-      content="A senior studio in Hyderabad. We mint brands that compound — custom websites and bespoke tools for India's most ambitious teams."
+      content="A complete online store, live in 8 weeks. Fixed-price tiers from ₹99,000 — catalogue, checkout, Razorpay with COD, orders and the admin you run the business from."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://brand-mint-sdmk.vercel.app/" />
-    <meta property="og:image" content="https://brand-mint-sdmk.vercel.app/og-image.png" />
+    <meta property="og:url" content="https://www.brandmintstudios.in/" />
+    <meta property="og:image" content="https://www.brandmintstudios.in/og-image.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Brand Mint — Hyderabad's premium digital studio." />
+    <meta property="og:image:alt" content="Brand Mint — custom ecommerce stores, built in Hyderabad." />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Brand Mint — Hyderabad's premium digital studio" />
+    <meta name="twitter:title" content="Ecommerce Website Development in Hyderabad | Brand Mint" />
     <meta
       name="twitter:description"
-      content="We mint brands that compound — custom websites and bespoke tools, made in Hyderabad."
+      content="A complete online store, live in 8 weeks. Fixed-price tiers from ₹99,000 — checkout, Razorpay with COD, orders and admin included."
     />
-    <meta name="twitter:image" content="https://brand-mint-sdmk.vercel.app/og-image.png" />
-    <meta name="twitter:image:alt" content="Brand Mint — Hyderabad's premium digital studio." />
+    <meta name="twitter:image" content="https://www.brandmintstudios.in/og-image.png" />
+    <meta name="twitter:image:alt" content="Brand Mint — custom ecommerce stores, built in Hyderabad." />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,6 +50,103 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css?v=auth3" />
+
+    <!-- Structured data. Two rules govern everything in these blocks:
+         1. Only facts that are visible on this page, word for word where
+            Google requires it (the FAQ block must mirror the on-page FAQ).
+         2. Nothing invented — no phone number we have not published, no street
+            address, and NEVER a rating or review count. Fabricated review
+            markup is the fastest way to a manual penalty, and §4 forbids
+            plausible-looking fake data everywhere, not just in the app. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "@id": "https://www.brandmintstudios.in/#studio",
+      "name": "Brand Mint Studios",
+      "url": "https://www.brandmintstudios.in/",
+      "email": "hello@brandmintstudios.in",
+      "image": "https://www.brandmintstudios.in/og-image.png",
+      "description": "Custom ecommerce stores built end to end — catalogue, cart, checkout, Razorpay with COD, orders and admin. Fixed scope and fixed price, agreed before work starts.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Hyderabad",
+        "addressRegion": "Telangana",
+        "addressCountry": "IN"
+      },
+      "areaServed": "IN",
+      "priceRange": "₹99,000 – ₹3,00,000",
+      "knowsAbout": ["ecommerce website development", "Razorpay integration", "online store development", "Shopify alternative custom store"],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Ecommerce store tiers",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "name": "Starter Store",
+            "price": "99000",
+            "priceCurrency": "INR",
+            "description": "A complete, working online store in 8 weeks. Catalogue, cart, checkout, Razorpay with COD, orders, admin, legal pages, SEO setup and a 30-day bug warranty. Price exclusive of 18% GST.",
+            "itemOffered": { "@type": "Service", "name": "Starter Store — custom ecommerce build" }
+          },
+          {
+            "@type": "Offer",
+            "name": "Growth Store",
+            "price": "200000",
+            "priceCurrency": "INR",
+            "description": "Everything in Starter plus courier API integration, live tracking, returns and refunds, coupons, abandoned-cart recovery, sales reporting and analytics. 12 weeks. Price exclusive of 18% GST.",
+            "itemOffered": { "@type": "Service", "name": "Growth Store — custom ecommerce build" }
+          },
+          {
+            "@type": "Offer",
+            "name": "Commerce Store",
+            "price": "300000",
+            "priceCurrency": "INR",
+            "description": "Everything in Growth plus role-based staff access, advanced reporting and exports, reviews, wishlist, loyalty and a 60-day bug warranty. 12+ weeks. Price exclusive of 18% GST.",
+            "itemOffered": { "@type": "Service", "name": "Commerce Store — custom ecommerce build" }
+          }
+        ]
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What does a store cost?",
+          "acceptedAnswer": { "@type": "Answer", "text": "There are three prices and they are on this page: ₹99,000 for Starter, ₹2,00,000 for Growth, ₹3,00,000 for Commerce. Add-ons are published too. The scope is fixed and agreed in writing before any work starts, so the number you are quoted is the number you pay — change orders are quoted before we begin them, never after. All prices exclusive of 18% GST." }
+        },
+        {
+          "@type": "Question",
+          "name": "How fast can you start?",
+          "acceptedAnswer": { "@type": "Answer", "text": "We hold one or two slots open each month. From signed SOW to kick-off is usually under two weeks. Rush slots happen — ask." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you work with in-house teams?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Often. We slot in next to in-house design, marketing, or eng teams as a force multiplier — not a replacement. We use your tools and your conventions." }
+        },
+        {
+          "@type": "Question",
+          "name": "What stack do you use?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Razorpay for payments, Shiprocket or Delhivery for shipping from Growth upwards, and a store built to run on cloud hosting in your own name. Playwright tests ship with every tier, so a change does not quietly break checkout. We pick boring tech on purpose." }
+        },
+        {
+          "@type": "Question",
+          "name": "Can we meet the team in person?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes — our studio is in HITEC City, Hyderabad. We host kickoff workshops in person and run weekly demos on video. Travel to Bengaluru, Mumbai, and the Gulf is on us for Commerce engagements." }
+        },
+        {
+          "@type": "Question",
+          "name": "Who owns the work?",
+          "acceptedAnswer": { "@type": "Answer", "text": "You do — code, design files, copy, accounts, and dashboards. We hand over a clean repo, a Notion playbook, and a Loom walkthrough." }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div class="grain" aria-hidden="true"></div>
