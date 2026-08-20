@@ -1,0 +1,26 @@
+# Brand Mint — "What we build", ~45s
+#
+# Every claim below is checkable against assets/bm-app.js. Nothing here states
+# a client result, a customer count or a conversion rate, because none of those
+# are numbers this studio can stand behind yet.
+
+[shot: logo-settle]
+still: og-image.png
+say:   Brand Mint Studios. We build custom ecommerce stores, end to end.
+
+[shot: store-push]
+still: og-image.png
+say:   Catalogue, cart, checkout, Razorpay with cash on delivery, orders, and an admin you actually run the business from.
+
+[shot: product-turn]
+still: og-image.png
+say:   Ninety nine thousand rupees for a Starter Store. Eight weeks. Fixed scope and fixed price, agreed in writing before anything starts.
+
+[shot: desk-ambient]
+still: og-image.png
+say:   Half to start, half on completion. You test it on staging before you pay the balance.
+
+[shot: logo-settle]
+still: og-image.png
+hold:  true
+say:   Brand Mint Studios, Hyderabad. brandmintstudios dot in.
