@@ -27,6 +27,23 @@ ui-debug.log
 serviceAccountKey.json
 firebase-adminsdk-*.json
 *-firebase-adminsdk-*.json
+
+# Hugging Face and other API tokens. tools/brand-video.py reads HF_TOKEN from
+# the environment on purpose (see its header) — these lines exist so that the
+# usual shortcut, a .env or a token file sitting next to the script, cannot be
+# committed by accident. tests/secrets.test.mjs is the second line of defence
+# and scans every tracked file for token-shaped strings.
+.env
+.env.*
+!.env.example
+*.token
+hf_token*
+huggingface_token*
+
+# Working files from tools/brand-video.py. The prepared JPEG is a temp file;
+# the mp4s and posters ARE brand assets and are committed deliberately, so this
+# ignores only the scratch input.
+assets/video/_input.jpg
 .vscode/
 .idea/
 dist/
