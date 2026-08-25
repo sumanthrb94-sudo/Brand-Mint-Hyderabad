@@ -180,6 +180,20 @@ const schedule = (q.schedule || []).map((s, i, arr) => {
    What survives either way is the definition of completion, because that is the
    sentence that stops a client expecting a live store before the final payment
    clears. */
+/* The one sentence that keeps the package-name guard honest on the page.
+   The naming collision is solved by calling this something else; this line
+   says WHY it costs less, in a form a small shop owner cares about. The full
+   tier table was dropped — a jeweller doing thirty orders a month does not
+   need to read about a ₹3,00,000 package, and listing it reads as showing off
+   rather than as an explanation. */
+const starter = TIERS.find((t) => t.id === "starter");
+const smallerThanNote =
+  `This is a smaller build than our standard ${starter.label} `
+  + `(${money(starter.price)}, ${starter.weeks} weeks), which adds customer `
+  + `accounts, OTP sign-in and automated email. You have told us you would `
+  + `rather answer customers on WhatsApp, so we have left those out — and you `
+  + `can add any of them later without rebuilding the shop.`;
+
 const isStandardSplit = (q.schedule || []).length === 2
   && q.schedule.every((s) => Number(s.pct) === 50);
 const completionNote = isStandardSplit
@@ -246,23 +260,16 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
   </div>
   ${q.packageNote ? `<div class="callout"><strong>About this package</strong>${esc(q.packageNote)}</div>` : ""}
 
-  <h3>How this compares to our published tiers</h3>
-  <p class="note">Our standard offer is three fixed-price tiers, published on
-     brandmintstudios.in. This engagement is deliberately smaller than the
-     smallest of them, which is why it is priced below and named differently.</p>
-  <table>
-    <thead><tr><th>Package</th><th class="r">Price</th><th class="r">Weeks</th></tr></thead>
-    <tbody>
-      <tr><td><strong>${esc(q.package)}</strong> — this quotation</td>
-          <td class="r"><strong>${money(q.price)}</strong></td><td class="r"><strong>${q.weeks}</strong></td></tr>
-      ${TIERS.map((t) => `<tr><td>${esc(t.label)}${t.id === "starter" ? " — our smallest published tier" : ""}</td>
-        <td class="r">${money(t.price)}</td><td class="r">${t.weeks}${t.weeksNote ? "+" : ""}</td></tr>`).join("")}
-    </tbody>
-  </table>
-  <p class="note">The published tiers include customer accounts with phone OTP
-     sign-in, automated transactional email and a full test suite. This package
-     leaves those out by agreement — you run the shop from WhatsApp — and each
-     is available later at the prices on the add-ons page.</p>
+  <h3>What you get</h3>
+  <ul>
+    <li>A live jewellery store your customers can browse, choose from and pay for.</li>
+    <li>A private dashboard at <strong>/admin</strong> that works on your phone —
+        add pieces, set stock and prices, move orders, record returns.</li>
+    <li>Every order handed to you on WhatsApp with the message already written.</li>
+    <li>Four ways to pay: UPI, cards, netbanking, and cash on delivery.</li>
+  </ul>
+
+  <p class="note">${esc(smallerThanNote)}</p>
   <div class="foot"><span>${esc(q.client)} · Scope &amp; Deliverables</span><span>1</span></div>
 </section>
 
@@ -283,12 +290,10 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
     </tbody>
   </table>
 
-  <div class="callout">
-    <strong>${esc(SCOPE_TERMS.gst)}</strong>
-    All amounts in this document are exclusive of GST. GST is charged at 18% and
-    is billed separately once our registration completes; until then no tax is
-    added and no tax invoice is issued.
-  </div>
+  <p class="note"><strong>${money(q.price)} is what you pay.</strong>
+     We are not GST registered, so no tax is added and no tax invoice is issued.
+     If our registration completes while your project is running, we will tell
+     you before it affects any invoice.</p>
 
   <h3>Payment schedule</h3>
   <table>
@@ -328,9 +333,12 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
         work starts, never an invoice after it.</li>
   </ul>
 
-  <h3>Available as add-ons</h3>
+  <h3>When you outgrow WhatsApp</h3>
+  <p class="note">Each of these bolts onto the shop you already have. Nothing
+     gets rebuilt, and there is no rush — most shops run happily on WhatsApp
+     for a long time before they need any of it.</p>
   <table>
-    <thead><tr><th>Not in this package</th><th class="r">To add later</th></tr></thead>
+    <thead><tr><th>What it adds</th><th class="r">Price</th></tr></thead>
     <tbody>
       ${q.addOns.map((a) => `<tr><td>${esc(a.label)}<div class="note">${esc(a.note)}</div></td>
         <td class="r">${money(a.amount)}</td></tr>`).join("")}
