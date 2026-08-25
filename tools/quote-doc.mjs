@@ -203,62 +203,178 @@ const completionNote = isStandardSplit
 
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
 <title>${esc(q.client)} — Scope &amp; Deliverables</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
+  /* The studio's own palette, so a quotation looks like it came from the same
+     place as the website. Not a generic document template with a logo on it. */
+  :root {
+    --ink: #0b1f1a; --ink-2: #294a40; --muted: #5d7368;
+    --bg: #f5f7f4; --line: #d8e0d4; --cream: #fbfaf2;
+    --mint: #10b981; --mint-2: #7cf6c8; --mint-3: #064e3b;
+    --gold: #c9a961; --gold-2: #e8d49c;
+  }
   @page { size: A4; margin: 0; }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: "DejaVu Sans", system-ui, sans-serif;
-         color: #0b1f1a; font-size: 9.6pt; line-height: 1.5; }
-  .page { padding: 18mm 16mm 20mm; page-break-after: always; position: relative; min-height: 297mm; }
+  body {
+    margin: 0; color: var(--ink); background: #fff;
+    font-family: Inter, "DejaVu Sans", system-ui, sans-serif;
+    font-size: 9.4pt; line-height: 1.58;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { padding: 20mm 18mm 22mm; page-break-after: always; position: relative; min-height: 297mm; }
   .page:last-child { page-break-after: auto; }
-  .rule { height: 1px; background: #d8e2dc; margin: 14px 0; }
-  .eyebrow { font-size: 7.2pt; letter-spacing: .18em; text-transform: uppercase; color: #5d7368; }
-  h1 { font-size: 26pt; line-height: 1.12; margin: 6px 0 10px; font-weight: 700; }
-  h2 { font-size: 15pt; margin: 0 0 4px; font-weight: 700; }
-  h3 { font-size: 10.5pt; margin: 16px 0 6px; font-weight: 700; }
+
+  /* ── the cover ──────────────────────────────────────────────────
+     Full-bleed ink. A quotation is the first thing this studio hands a
+     client who has never seen its work; the cover is doing the job a
+     portfolio would. */
+  .cover {
+    background: var(--ink); color: var(--cream);
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  /* A single hairline of gold, the one flourish in the document. Sits directly
+     under the wordmark rather than floating at a fixed offset — absolutely
+     positioned it landed in dead space, which reads as a stray rule instead of
+     a deliberate one. */
+  .hairline {
+    height: 1px; margin-top: 12px;
+    background: linear-gradient(90deg, var(--gold), rgba(201,169,97,0));
+  }
+  .mark {
+    display: flex; align-items: center; gap: 9px;
+    font-weight: 700; font-size: 11pt; letter-spacing: -0.01em;
+  }
+  .mark i {
+    width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center;
+    background: var(--mint); color: var(--ink); font-style: normal;
+    font-weight: 700; font-size: 11pt;
+  }
+  .mark span { color: var(--mint-2); font-weight: 500; font-size: 8.4pt; letter-spacing: .06em; }
+  .cover h1 {
+    font-family: "Instrument Serif", "DejaVu Serif", Georgia, serif;
+    font-weight: 400; font-size: 40pt; line-height: 1.04;
+    margin: 0 0 14px; letter-spacing: -0.015em;
+  }
+  .cover h1 em { font-style: italic; color: var(--mint-2); }
+  .cover .lede { color: #a9c4b8; font-size: 11.5pt; max-width: 118mm; margin: 0; line-height: 1.5; }
+  .cover .kv { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px 20px; margin-top: 4mm; }
+  .cover .k { font-size: 6.8pt; letter-spacing: .2em; text-transform: uppercase; color: #7d9a8d; margin-bottom: 3px; }
+  .cover .v { font-size: 11pt; font-weight: 600; color: var(--cream); }
+  .cover .v small { display: block; font-weight: 400; font-size: 8pt; color: #a9c4b8; margin-top: 2px; }
+
+  /* The price, treated as the moment it is. */
+  .price-block { border-top: 1px solid rgba(251,250,242,.18); padding-top: 7mm; margin-top: 7mm; }
+  .price {
+    font-family: "Instrument Serif", "DejaVu Serif", Georgia, serif;
+    font-size: 34pt; font-weight: 400; line-height: 1; color: var(--mint-2);
+  }
+  .price s { color: #6d8a7e; font-size: 17pt; margin-right: 10px; text-decoration-thickness: 1px; }
+  .price-note { color: #a9c4b8; font-size: 8.6pt; margin-top: 6px; }
+
+  /* ── interior pages ─────────────────────────────────────────── */
+  .eyebrow {
+    font-size: 6.8pt; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--mint-3); font-weight: 600; display: block; margin-bottom: 5px;
+  }
+  h2 {
+    font-family: "Instrument Serif", "DejaVu Serif", Georgia, serif;
+    font-weight: 400; font-size: 22pt; line-height: 1.12;
+    margin: 0 0 6px; letter-spacing: -0.01em;
+  }
+  h3 {
+    font-size: 10pt; margin: 20px 0 7px; font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  h3::before {
+    content: ""; display: inline-block; width: 12px; height: 2px;
+    background: var(--mint); vertical-align: middle; margin-right: 8px;
+    position: relative; top: -1px;
+  }
   p { margin: 0 0 9px; }
-  .lede { color: #3d5249; font-size: 10.4pt; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .kv { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin-top: 18px; }
-  .kv .k { font-size: 7.2pt; letter-spacing: .16em; text-transform: uppercase; color: #5d7368; }
-  .kv .v { font-size: 12.5pt; font-weight: 700; }
-  .strike { text-decoration: line-through; color: #93a69e; font-weight: 500; }
-  table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; }
-  th { text-align: left; font-size: 7.2pt; letter-spacing: .14em; text-transform: uppercase;
-       color: #5d7368; border-bottom: 1px solid #0b1f1a; padding: 0 0 5px; font-weight: 600; }
-  td { padding: 7px 0; border-bottom: 1px solid #e6ece9; vertical-align: top; }
+  .lede { color: var(--ink-2); font-size: 10.6pt; line-height: 1.55; }
+  .note { color: var(--muted); font-size: 8.5pt; line-height: 1.55; }
+  ul { margin: 0 0 10px; padding-left: 0; list-style: none; }
+  li { margin-bottom: 6px; padding-left: 16px; position: relative; }
+  li::before {
+    content: ""; position: absolute; left: 0; top: 7px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--mint);
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; }
+  th {
+    text-align: left; font-size: 6.8pt; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--ink); padding: 0 0 6px; font-weight: 600;
+  }
+  td { padding: 9px 0; border-bottom: 1px solid #eaefe9; vertical-align: top; }
   td.r, th.r { text-align: right; white-space: nowrap; }
-  .note { color: #5d7368; font-size: 8.4pt; }
-  .total td { border-top: 1.5px solid #0b1f1a; border-bottom: none; font-weight: 700; font-size: 11.5pt; padding-top: 9px; }
-  .disc td { color: #0f7a52; }
-  ul { margin: 0 0 9px; padding-left: 15px; }
-  li { margin-bottom: 3px; }
-  .card { border: 1px solid #d8e2dc; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
-  .card h4 { margin: 0 0 5px; font-size: 8pt; letter-spacing: .14em; text-transform: uppercase; color: #5d7368; font-weight: 600; }
-  .foot { position: absolute; bottom: 12mm; left: 16mm; right: 16mm;
-          font-size: 7.4pt; color: #7b8f86; display: flex; justify-content: space-between;
-          border-top: 1px solid #e6ece9; padding-top: 6px; }
-  .callout { background: #f2f7f4; border-left: 3px solid #10b981; padding: 11px 14px; margin: 12px 0; }
-  .callout strong { display: block; margin-bottom: 4px; }
-  .sig { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 34px; }
-  .sig div { border-top: 1px solid #0b1f1a; padding-top: 7px; font-size: 8pt; color: #5d7368; }
+  .amt { font-family: "JetBrains Mono", "DejaVu Sans Mono", monospace; font-size: 9pt; }
+  .sub td { font-weight: 600; }
+  .disc td { color: var(--mint-3); }
+  .total td {
+    border-top: 1.5px solid var(--ink); border-bottom: none;
+    font-weight: 700; font-size: 13pt; padding-top: 11px;
+  }
+  .total td.r { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; font-size: 19pt; }
+
+  .callout {
+    background: #f2f7f4; border-left: 2px solid var(--mint);
+    padding: 12px 15px; margin: 14px 0; font-size: 9pt;
+  }
+  .callout strong { display: block; margin-bottom: 3px; }
+  .paybox {
+    border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+    background: linear-gradient(180deg, #fbfcfb, #f4f7f4); margin: 12px 0 16px;
+  }
+  .paybox .row { display: flex; justify-content: space-between; padding: 6px 0; }
+  .paybox .row + .row { border-top: 1px solid #e6ece9; }
+  .paybox .row b { font-family: "JetBrains Mono", "DejaVu Sans Mono", monospace; font-weight: 500; }
+
+  .foot {
+    position: absolute; bottom: 13mm; left: 18mm; right: 18mm;
+    font-size: 7pt; color: #8fa298; display: flex; justify-content: space-between;
+    border-top: 1px solid #eaefe9; padding-top: 7px; letter-spacing: .04em;
+  }
+  .sig { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin-top: 30px; }
+  .sig div { border-top: 1px solid var(--ink); padding-top: 8px; font-size: 7.8pt; color: var(--muted); }
+  .closer {
+    font-family: "Instrument Serif", "DejaVu Serif", Georgia, serif;
+    font-size: 14pt; line-height: 1.4; color: var(--ink); margin: 4px 0 0;
+  }
 </style></head><body>
 
-<section class="page">
-  <span class="eyebrow">Scope of work &amp; deliverables</span>
-  <h1>${esc(q.title)}</h1>
-  <p class="lede">${esc(q.subtitle)}</p>
-  <div class="rule"></div>
+<section class="page cover">
+  <div>
+    <div class="mark"><i>B</i>Brand Mint <span>— Hyderabad</span></div>
+    <div class="hairline"></div>
+  </div>
+
+  <div>
+    <span class="eyebrow" style="color:var(--mint-2);">Scope of work &amp; deliverables</span>
+    <h1>${esc(q.title.replace(/&/g, "and"))}<br /><em>for ${esc(q.client)}</em></h1>
+    <p class="lede">${esc(q.subtitle)}</p>
+
+    <div class="price-block">
+      <div class="price">${q.listPrice !== q.price ? `<s>${money(q.listPrice)}</s>` : ""}${money(q.price)}</div>
+      <div class="price-note">${esc(q.discountLabel || "")} · ${q.weeks} weeks from kick-off · no GST added</div>
+    </div>
+  </div>
+
   <div class="kv">
     <div><div class="k">Prepared for</div><div class="v">${esc(q.client)}</div></div>
     <div><div class="k">Package</div><div class="v">${esc(q.package)}</div></div>
-    <div><div class="k">Investment</div><div class="v">
-      ${q.listPrice !== q.price ? `<span class="strike">${money(q.listPrice)}</span> ` : ""}${money(q.price)}
-    </div></div>
-    <div><div class="k">Delivery</div><div class="v">${q.weeks} weeks from kick-off</div></div>
-    <div><div class="k">Quotation valid</div><div class="v">${q.validDays} days from issue</div></div>
-    <div><div class="k">Document</div><div class="v">${esc(q.docId)}</div></div>
+    <div><div class="k">Document</div><div class="v">${esc(q.docId)}<small>Valid ${q.validDays} days from issue</small></div></div>
   </div>
-  ${q.packageNote ? `<div class="callout"><strong>About this package</strong>${esc(q.packageNote)}</div>` : ""}
+</section>
+
+<section class="page">
+  <span class="eyebrow">The project</span>
+  <h2>A store that sells, and a phone that runs it</h2>
+  <p class="lede">You get a complete, live jewellery store — browse, choose, pay —
+     plus a private dashboard where you manage products and orders yourself.
+     Everything after the sale happens where your customers already are.</p>
 
   <h3>What you get</h3>
   <ul>
@@ -270,7 +386,21 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
   </ul>
 
   <p class="note">${esc(smallerThanNote)}</p>
-  <div class="foot"><span>${esc(q.client)} · Scope &amp; Deliverables</span><span>1</span></div>
+
+  <h3>How an order actually moves</h3>
+  <ul>
+    <li><strong>They order and pay.</strong> Razorpay handles UPI, cards and netbanking.
+        Money lands in your account. If they would rather talk first, they reserve
+        the piece and you send a payment link.</li>
+    <li><strong>You confirm on WhatsApp.</strong> The order page hands the customer a
+        pre-written message with the pieces, sizes, total, address and gift note.
+        One tap and it is in your inbox.</li>
+    <li><strong>You pack, ship and close it out.</strong> Add the courier and tracking
+        number; their order page updates immediately. Returns and refunds are
+        recorded on the same screen.</li>
+  </ul>
+
+  <div class="foot"><span>${esc(q.client)} · Scope &amp; Deliverables</span><span>02</span></div>
 </section>
 
 <section class="page">
@@ -282,10 +412,10 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
     <thead><tr><th>Line item</th><th class="r">Amount</th></tr></thead>
     <tbody>
       ${q.lineItems.map((l) => `<tr><td>${esc(l.label)}<div class="note">${esc(l.note)}</div></td>
-        <td class="r">${money(l.amount)}</td></tr>`).join("")}
-      <tr><td><strong>Subtotal</strong></td><td class="r"><strong>${money(q.listPrice)}</strong></td></tr>
+        <td class="r amt">${money(l.amount)}</td></tr>`).join("")}
+      <tr class="sub"><td>Subtotal</td><td class="r amt">${money(q.listPrice)}</td></tr>
       ${discount > 0 ? `<tr class="disc"><td>${esc(q.discountLabel || "Discount")}</td>
-        <td class="r">−${money(discount)}</td></tr>` : ""}
+        <td class="r amt">−${money(discount)}</td></tr>` : ""}
       <tr class="total"><td>Payable</td><td class="r">${money(q.price)}</td></tr>
     </tbody>
   </table>
@@ -296,56 +426,48 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
      you before it affects any invoice.</p>
 
   <h3>Payment schedule</h3>
-  <table>
-    <tbody>
-      ${schedule.map((s) => `<tr><td>${esc(s.label)} (${s.pct}%)</td>
-        <td class="r">${money(s.amount)}</td></tr>`).join("")}
-    </tbody>
-  </table>
+  <div class="paybox">
+    ${schedule.map((s) => `<div class="row"><span>${esc(s.label)} <span class="note">(${s.pct}%)</span></span>
+      <b>${money(s.amount)}</b></div>`).join("")}
+  </div>
   <p class="note">${esc(completionNote)}</p>
 
-  <h3>Delivery — ${q.weeks} weeks, in ${q.stages.length} stages</h3>
-  <p class="note">The clock starts when your material reaches us, not on the day
-     the invoice is paid.</p>
+  <h3>Delivery — ${q.weeks} weeks</h3>
   <table>
-    <thead><tr><th>Stage</th><th>What happens</th><th class="r">Working days</th></tr></thead>
+    <thead><tr><th>Stage</th><th>What happens</th><th class="r">Days</th></tr></thead>
     <tbody>
-      ${q.stages.map((s) => `<tr><td style="width:70px;"><strong>${esc(s.name)}</strong></td>
-        <td>${esc(s.what)}</td><td class="r">${esc(s.days)}</td></tr>`).join("")}
+      ${q.stages.map((s) => `<tr><td style="width:66px;"><strong>${esc(s.name)}</strong></td>
+        <td>${esc(s.what)}</td><td class="r note">${esc(s.days)}</td></tr>`).join("")}
     </tbody>
   </table>
   <p class="note">${esc(SCOPE_TERMS.timelineRule)}</p>
-  <div class="foot"><span>${esc(q.client)} · Scope &amp; Deliverables</span><span>2</span></div>
+  <div class="foot"><span>${esc(q.client)} · Scope &amp; Deliverables</span><span>03</span></div>
 </section>
 
 <section class="page">
-  <span class="eyebrow">After launch &amp; boundaries</span>
-  <h2>Support, add-ons and what is not included</h2>
-
-  <h3>Support after launch</h3>
-  <ul>
-    <li><strong>${SCOPE_TERMS.warrantyDays} days of free fixes</strong> — anything that does not work as described in this document.</li>
-    <li>A recorded walkthrough of the dashboard, plus a written guide you keep.</li>
-    ${care ? `<li>Optional <strong>${esc(care.label)} plan at ${money(care.monthly)} a month</strong> —
-      ${esc((care.adds || []).join(", ").toLowerCase())}. Cancel with ${CARE_NOTICE_DAYS} days' notice.</li>` : ""}
-    <li>Work beyond the warranty is quoted as a fixed scope before it begins.
-        <strong>We do not bill by the hour</strong> — you get a price before the
-        work starts, never an invoice after it.</li>
-  </ul>
-
-  <h3>When you outgrow WhatsApp</h3>
-  <p class="note">Each of these bolts onto the shop you already have. Nothing
+  <span class="eyebrow">After launch</span>
+  <h2>When you outgrow WhatsApp</h2>
+  <p class="lede">Each of these bolts onto the shop you already have. Nothing
      gets rebuilt, and there is no rush — most shops run happily on WhatsApp
      for a long time before they need any of it.</p>
   <table>
     <thead><tr><th>What it adds</th><th class="r">Price</th></tr></thead>
     <tbody>
       ${q.addOns.map((a) => `<tr><td>${esc(a.label)}<div class="note">${esc(a.note)}</div></td>
-        <td class="r">${money(a.amount)}</td></tr>`).join("")}
+        <td class="r amt">${money(a.amount)}</td></tr>`).join("")}
     </tbody>
   </table>
 
-  <h3>Outside the engagement entirely</h3>
+  <h3>Support after launch</h3>
+  <ul>
+    <li><strong>${SCOPE_TERMS.warrantyDays} days of free fixes</strong> — anything that does not work as described here.</li>
+    <li>A recorded walkthrough of the dashboard, plus a written guide you keep.</li>
+    ${care ? `<li>Optional <strong>${esc(care.label)} plan at ${money(care.monthly)} a month</strong>. Cancel with ${CARE_NOTICE_DAYS} days' notice.</li>` : ""}
+    <li>Work beyond the warranty is quoted as a fixed scope before it begins.
+        We do not bill by the hour.</li>
+  </ul>
+
+  <h3>Outside this engagement</h3>
   <div class="grid2">
     <ul>${q.notIncluded.slice(0, Math.ceil(q.notIncluded.length / 2)).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
     <ul>${q.notIncluded.slice(Math.ceil(q.notIncluded.length / 2)).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
@@ -353,28 +475,30 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8" />
 
   <div class="callout">
     <strong>Policies and compliance are yours</strong>
-    We build, style and publish your terms of use, privacy, returns, refund and
-    shipping pages, and tell you what headings each needs — but the wording, its
-    accuracy and its compliance with the Consumer Protection (E-Commerce) Rules,
-    the IT Rules, GST and any other applicable law rest with you. We are a
-    development studio, not a law firm, and nothing here is legal advice.
+    We build, style and publish your terms, privacy, returns, refund and shipping
+    pages, and tell you what headings each needs — but the wording and its
+    compliance with the Consumer Protection (E-Commerce) Rules, the IT Rules and
+    GST rest with you. We are a development studio, not a law firm.
   </div>
 
   <h3>Terms</h3>
   <ul>
     <li>This quotation is valid ${q.validDays} days from issue.</li>
-    <li>Two rounds of revisions are included at the design stage; further rounds are quoted separately.</li>
+    <li>Two rounds of revisions are included at the design stage.</li>
     <li>${esc(SCOPE_TERMS.uatRule)}</li>
     <li>${esc(SCOPE_TERMS.ownershipRule)}</li>
     <li>Hosting, domain and gateway accounts are created in your name, not ours.</li>
-    <li>We may show the finished store in our portfolio unless you ask us not to.</li>
   </ul>
+
+  <p class="closer">A live store your customers can buy from, a dashboard you can
+     run from your phone, and every order handled on WhatsApp — for
+     ${money(q.price)}, in ${q.weeks} weeks.</p>
 
   <div class="sig">
     <div>For ${esc(q.client)} — name, signature, date</div>
     <div>For Brand Mint Studios — name, signature, date</div>
   </div>
-  <div class="foot"><span>${esc(q.client)} · ${esc(q.docId)}</span><span>3</span></div>
+  <div class="foot"><span>${esc(q.client)} · ${esc(q.docId)}</span><span>04</span></div>
 </section>
 
 </body></html>`;
@@ -387,7 +511,11 @@ if (process.env.BM_QUOTE_HTML) fs.writeFileSync(process.env.BM_QUOTE_HTML, html)
 
 const browser = await chromium.launch({ executablePath: CHROME });
 const page = await browser.newPage();
-await page.setContent(html, { waitUntil: "load" });
+await page.setContent(html, { waitUntil: "networkidle" });
+// Web fonts load over the network. Printing before they arrive silently falls
+// back to DejaVu and the document loses the typography it was designed around,
+// with nothing in the output to say why.
+await page.evaluate(() => document.fonts.ready);
 await page.pdf({ path: out, format: "A4", printBackground: true,
                  margin: { top: 0, bottom: 0, left: 0, right: 0 } });
 await browser.close();
