@@ -1,0 +1,94 @@
+{
+  "docId": "NIR-SOW-03",
+  "client": "The House of Niraava",
+  "title": "E-commerce Store & Admin Dashboard",
+  "subtitle": "A complete online jewellery store, with orders, payments and returns run from a phone.",
+
+  "_comment_package": [
+    "RENAMED from 'Starter Store'. That name is a PUBLISHED TIER at ₹99,000 for",
+    "8 weeks, declared in the site's structured data, and this engagement is a",
+    "deliberately smaller product at a lower price. Two different things cannot",
+    "share a name: a client who searches the studio mid-negotiation would find",
+    "the same package at 2.5x the price. tools/quote-doc.mjs refuses to render",
+    "a quote whose package name collides with a tier, so this cannot regress."
+  ],
+  "package": "Shop Starter",
+  "packageNote": "A smaller build than our published Starter Store — see the comparison overleaf.",
+
+  "_comment_price": [
+    "₹39,999 over 15 working days was ₹2,666/day: 27% of the ₹10,000 day rate",
+    "and 33% of the ₹8,000 floor. The renderer prints the implied day rate and",
+    "warns when it falls under the floor, so this is visible before the PDF is",
+    "sent rather than after the work is done.",
+    "",
+    "Two numbers moved, not one. Price up, AND the timeline out to 5 weeks —",
+    "ten page types, an admin dashboard, Razorpay, a returns workflow, nine",
+    "message templates, six policy pages, catalogue load, staging review and",
+    "training is not fifteen days of work, and a date that slips is worse than",
+    "a date that was honest."
+  ],
+  "listPrice": 89999,
+  "price": 74999,
+  "discountLabel": "Launch offer — first jewellery client",
+  "weeks": 5,
+  "validDays": 30,
+
+  "lineItems": [
+    { "label": "Design system & responsive UI", "note": "Palette, typography, components and every screen at three widths", "amount": 16000 },
+    { "label": "Storefront build", "note": "Ten page types, search, bag, wishlist, filters, policy pages", "amount": 24000 },
+    { "label": "Hosted database & order persistence", "note": "Catalogue and orders stored server-side, in your account", "amount": 9000 },
+    { "label": "Checkout & Razorpay integration", "note": "UPI, cards, netbanking, COD, server-side signature verification", "amount": 11000 },
+    { "label": "Admin dashboard", "note": "Products, orders, customers, discounts, settings", "amount": 16000 },
+    { "label": "WhatsApp order desk & returns workflow", "note": "Nine pre-composed messages, return and refund handling", "amount": 6500 },
+    { "label": "Technical SEO, deployment, handover & training", "note": "Domain and hosting setup, walkthrough session, written guide", "amount": 7499 }
+  ],
+
+  "schedule": [
+    { "label": "On acceptance, to begin", "pct": 40 },
+    { "label": "On approval of staging", "pct": 40 },
+    { "label": "On go-live and handover", "pct": 20 }
+  ],
+
+  "stages": [
+    { "name": "Kick-off", "what": "We collect your product list, photographs, descriptions, WhatsApp number and business details. You get the checklist overleaf; nothing else is needed from you until stage three.", "days": "Days 1–2" },
+    { "name": "Design", "what": "Home, product and checkout screens for your approval. Two rounds of revisions are included at this stage — this is where changes are cheap.", "days": "Days 3–8" },
+    { "name": "Build", "what": "Storefront, admin dashboard, database and payment integration. Your catalogue loaded with real photographs, descriptions, prices and stock.", "days": "Days 9–19" },
+    { "name": "Review", "what": "A private staging link. You place test orders, we fix what you find, and we walk you through the dashboard on a call.", "days": "Days 20–23" },
+    { "name": "Launch", "what": "Domain pointed, payment keys switched to live, sample data cleared. The shop is open.", "days": "Days 24–25" }
+  ],
+
+  "_comment_carePlan": [
+    "Was ₹2,500/mo. Care is a PUBLISHED plan at ₹12,500/mo and the renderer",
+    "reads that number out of bm-app.js rather than accepting one typed here.",
+    "A 5x gap on a named product, in writing, is the same class of error as",
+    "the package name."
+  ],
+  "carePlan": "care",
+
+  "_comment_hourly": [
+    "The hourly rate is GONE. The SOW template says the studio does not bill by",
+    "the hour, and ₹900/hr was ₹7,200/day — under the floor again."
+  ],
+
+  "notIncluded": [
+    "Product photography, styling and retouching",
+    "Writing your product descriptions",
+    "Drafting or reviewing your legal policies",
+    "Paid advertising and campaign management",
+    "Social media and influencer work",
+    "iOS and Android apps",
+    "Marketplace sync — Amazon, Myntra, Nykaa",
+    "Multi-currency and international shipping"
+  ],
+
+  "addOns": [
+    { "label": "Customer accounts & order history", "note": "Sign-in, saved addresses, past orders in one place", "amount": 12000 },
+    { "label": "OTP login & automated SMS", "note": "Order and shipping messages; needs DLT registration", "amount": 9000 },
+    { "label": "Automated transactional email", "note": "Order confirmation, shipping and abandoned-bag messages", "amount": 6000 },
+    { "label": "Courier API integration", "note": "Shiprocket or Delhivery — automatic labels and live tracking", "amount": 8000 },
+    { "label": "WhatsApp Business API", "note": "Automatic order messages instead of one-tap manual sends", "amount": 9000 },
+    { "label": "Blog or lookbook", "note": "A content section you edit yourself", "amount": 7000 },
+    { "label": "Analytics & ad tracking setup", "note": "Google Analytics, Meta Pixel and conversion events installed", "amount": 4000 },
+    { "label": "Multi-user admin with roles", "note": "Separate logins for staff, with limited permissions", "amount": 6000 }
+  ]
+}
