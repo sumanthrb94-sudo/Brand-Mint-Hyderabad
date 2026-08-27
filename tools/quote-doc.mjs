@@ -104,21 +104,50 @@ const money = (n) => "₹" + Math.round(Number(n) || 0).toLocaleString("en-IN");
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-/* GUARD 1 — a quote may not reuse a published tier's name.
-   This is the one that actually happened. A smaller, cheaper product sold
-   under a tier's name is a contradiction a client can find with one search,
-   and it destroys the fixed-price promise the tiers exist to make. */
-const clash = TIERS.find(
+/* GUARD 1 — a quote may reuse a published tier's name ONLY at that tier's
+   published list price and published length.
+
+   The failure this exists to stop is a SMALLER, CHEAPER product sold under a
+   tier's name: the site declares each tier's price in structured data, so a
+   client finds the contradiction with one search and the fixed-price promise
+   is gone.
+
+   A DISCOUNT is not that failure, and blocking it was too blunt. Anchoring on
+   the real ₹49,999 and showing "launch offer −₹10,000, payable ₹39,999" is
+   both honest and stronger than inventing a ₹59,999 list price that appears
+   nowhere on the site — an invented anchor is a false statement about the
+   studio's own pricing, which is the same class of thing §4 forbids on an
+   invoice. So: listPrice and weeks must MATCH the published tier exactly, and
+   `price` may sit below listPrice. It may never sit above it.
+
+   Weeks are bounded on ONE side only, for the same reason. Delivering sooner
+   than published is not a contradiction a client can be hurt by; quoting
+   twelve weeks under the name of a four-week tier is. So weeks may be shorter
+   and may never be longer. */
+const named = TIERS.find(
   (t) => t.label.toLowerCase() === String(q.package || "").trim().toLowerCase()
 );
-if (clash) {
-  die(
-    `"${q.package}" is a PUBLISHED TIER: ${money(clash.price)} over ${clash.weeks} weeks.\n` +
-    `  This quote prices it at ${money(q.price)} over ${q.weeks} weeks.\n\n` +
-    `  Give the package its own name, or quote the tier at its published price.\n` +
-    `  Two different products cannot share a name — the site declares this one\n` +
-    `  in structured data, and a client will find the contradiction.`
-  );
+if (named) {
+  const wrong = [];
+  if (Number(q.listPrice) !== Number(named.price)) {
+    wrong.push(`listPrice is ${money(q.listPrice)}, published is ${money(named.price)}`);
+  }
+  if (Number(q.weeks) > Number(named.weeks)) {
+    wrong.push(`weeks is ${q.weeks}, LONGER than the published ${named.weeks}`);
+  }
+  if (Number(q.price) > Number(q.listPrice)) {
+    wrong.push(`price ${money(q.price)} is ABOVE listPrice ${money(q.listPrice)}`);
+  }
+  if (wrong.length) {
+    die(
+      `"${q.package}" is a PUBLISHED TIER: ${money(named.price)} over ${named.weeks} weeks.\n` +
+      wrong.map((w) => `    - ${w}`).join("\n") + "\n\n" +
+      `  A quote may use a tier's name only at its published list price and\n` +
+      `  length, discounted from there. Otherwise give the package its own name.\n` +
+      `  The site declares this tier in structured data and a client will find\n` +
+      `  the contradiction.`
+    );
+  }
 }
 
 /* GUARD 2 — the care plan is read from bm-app.js, never from the manifest.

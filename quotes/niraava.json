@@ -4,56 +4,75 @@
   "title": "E-commerce Store & Admin Dashboard",
   "subtitle": "A complete online jewellery store, with orders, payments and returns run from a phone.",
   "_comment_package": [
-    "RENAMED from 'Starter Store'. That name is a PUBLISHED TIER at ₹99,000 over",
-    "8 weeks, declared in the site's structured data, and this is a deliberately",
-    "smaller product at a lower price. Two different things cannot share a name:",
-    "a client who searched the studio mid-negotiation would find the same package",
-    "at 2.5x the price. tools/quote-doc.mjs refuses to render a quote whose",
-    "package name collides with a tier, so this cannot regress.",
+    "It is 'WhatsApp Store' again, and this time that is CORRECT rather than a",
+    "regression. It was renamed to 'Shop Starter' when the only published tier",
+    "near it was Starter Store at ₹99,000 — a 2.5x contradiction a client could",
+    "find with one search. The published tier list now opens at WhatsApp Store,",
+    "₹49,999 over 4 weeks, and that tier IS this product: storefront, checkout,",
+    "Razorpay with COD, orders, admin, and the WhatsApp desk as the back office.",
+    "Customer accounts and OTP sit in this quote's add-ons for the same reason",
+    "they sit in Starter — they are the operations layer, one tier up.",
     "",
-    "packageNote removed: it pointed at a tier-comparison table that has been",
-    "dropped, and repeated what the paragraph under 'What you get' already says."
+    "So the quote and the site now agree by construction instead of by luck,",
+    "which is the entire point of the tiers. tools/quote-doc.mjs enforces the",
+    "terms of that reuse: published list price exactly, never longer than the",
+    "published length, and the payable price at or below list."
   ],
-  "package": "Shop Starter",
+  "package": "WhatsApp Store",
   "_comment_price": [
-    "PRICE AND ANCHOR SET BY SUMANTH, deliberately, with the floor argument heard",
-    "and overruled. ₹39,999 over 15 working days is ₹2,666/day against a ₹8,000",
+    "PRICE SET BY SUMANTH, deliberately, with the floor argument heard and",
+    "overruled. ₹39,999 over 15 working days is ₹2,666/day against a ₹8,000",
     "floor. The reasons are commercial and they are his to weigh: the studio is",
     "short of leads, this is cash now, and the add-ons page is the way back in.",
     "",
-    "Anchor moved ₹89,999 -> ₹59,999. A ₹50,000 strike-through on a ₹39,999 job",
-    "reads as invented; ₹20,000 reads as a real discount someone decided to give."
+    "ANCHOR CHANGED ₹59,999 -> ₹49,999, and the discount is therefore ₹10,000",
+    "rather than ₹20,000. ₹59,999 was a number that appeared nowhere — not on",
+    "the site, not in bm-app.js, not in any structured data. An invented list",
+    "price on a document sent to a client is a false statement about the",
+    "studio's own pricing, which is the same class of thing §4 forbids on an",
+    "invoice. ₹49,999 is published, and a client who checks finds it and sees a",
+    "real discount. A smaller anchor that survives being checked is worth more",
+    "than a larger one that does not.",
+    "",
+    "To restore the bigger strike-through, raise listPrice — but the tool will",
+    "then require the package to carry its own name again."
   ],
-  "listPrice": 59999,
+  "listPrice": 49999,
   "price": 39999,
   "discountLabel": "Launch offer — first jewellery client",
   "weeks": 3,
   "validDays": 30,
+  "_comment_lineItems": [
+    "Rebalanced to sum to the ₹49,999 list price, not the old ₹59,999. The tool",
+    "refuses to render a quote whose own arithmetic does not add up, and a",
+    "client adds the column up. The proportions are unchanged; ₹10,000 came off",
+    "across the build lines rather than out of any single one."
+  ],
   "lineItems": [
     {
       "label": "Design system & responsive UI",
       "note": "Palette, typography, components and every screen at three widths",
-      "amount": 11000
+      "amount": 9000
     },
     {
       "label": "Storefront build",
       "note": "Ten page types, search, bag, wishlist, filters, policy pages",
-      "amount": 17000
+      "amount": 14000
     },
     {
       "label": "Hosted database & order persistence",
       "note": "Catalogue and orders stored server-side, in your account",
-      "amount": 7000
+      "amount": 6000
     },
     {
       "label": "Checkout & Razorpay integration",
       "note": "UPI, cards, netbanking, COD, server-side signature verification",
-      "amount": 8000
+      "amount": 7000
     },
     {
       "label": "Admin dashboard",
       "note": "Products, orders, customers, discounts, settings",
-      "amount": 11000
+      "amount": 9000
     },
     {
       "label": "WhatsApp order desk & returns workflow",
@@ -63,7 +82,7 @@
     {
       "label": "Technical SEO, deployment, handover & training",
       "note": "Domain and hosting setup, walkthrough session, written guide",
-      "amount": 2999
+      "amount": 1999
     }
   ],
   "schedule": [
