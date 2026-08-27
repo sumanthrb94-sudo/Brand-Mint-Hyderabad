@@ -16,7 +16,27 @@ export type Tier = {
 };
 
 export const tiers: Tier[] = [
-  { name: "Starter Store", price: "₹99,000", timing: "8 weeks", tone: "standard", intro: "A complete, working online store. Everything needed to take orders and get paid.", groups: [["Foundation", "Database design and setup", "Phone OTP customer accounts", "Deployment, domain connection and SSL"], ["Storefront", "Homepage and design system", "Product listing and detail pages", "Search, category filters and cart"], ["Checkout, orders and admin", "Razorpay online payments and COD", "Order confirmation and customer history", "Products, stock and order management"]] },
+  /*
+   * THE ENTRY TIER, AND THE POINT OF IT.
+   *
+   * The expensive part of an ecommerce build is never the shop — it is the
+   * operations software behind it: accounts, OTP, transactional email, an
+   * invoice generator. This tier leaves that out and puts a person on
+   * WhatsApp in its place. Orders, returns and questions arrive as messages
+   * and are answered by hand.
+   *
+   * That omission is what makes ₹49,999 an HONEST price rather than a
+   * discounted one. It is not a cheaper Starter Store; it is a smaller
+   * product, and the difference is stated rather than hidden.
+   */
+  { name: "WhatsApp Store", price: "₹49,999", timing: "4 weeks", tone: "standard", intro: "A complete store you run from your phone. Orders, returns and customers all handled on WhatsApp — no operations software to pay for or learn.", groups: [["Foundation", "Database design and setup", "Deployment, domain connection and SSL"], ["Storefront", "Homepage and design system", "Product listing and detail pages", "Search, category filters and cart"], ["Checkout and the WhatsApp desk", "Razorpay online payments and COD", "Orders arrive on your phone, on WhatsApp", "Returns and refunds handled by message", "Products, stock and order management"]] },
+  /*
+   * Starter is now the DELTA over the WhatsApp Store, not a restatement of
+   * it. Listing the shared items again in both would guarantee that one day
+   * they stop matching — the same reason the static site's TIERS uses an
+   * `inherits` chain instead of duplicated lists.
+   */
+  { name: "Starter Store", price: "₹99,000", timing: "8 weeks", tone: "standard", intro: "Everything in the WhatsApp Store, plus the operations layer — so the shop stops depending on you answering it.", groups: [["Customer accounts", "Phone OTP login and signup", "Customer order history"], ["Automation", "Order confirmation emails to the customer", "GST tax invoice PDF"], ["Quality", "Automated smoke tests (Playwright)", "5-day client testing window (UAT) before launch"]] },
   { name: "Growth Store", price: "₹2,00,000", timing: "12 weeks", tone: "featured", intro: "Everything in Starter, plus the systems that reduce daily manual work.", groups: [["Shipping and returns", "Courier API integration", "Live tracking", "Returns and Razorpay refunds"], ["Selling", "Coupons and discount codes", "Abandoned-cart recovery", "Order lifecycle emails"], ["Quality and data", "Sales reporting and low-stock alerts", "GA4, Meta Pixel and conversion tracking", "Playwright suite, SEO audit and Lighthouse pass"]] },
   { name: "Commerce Store", price: "₹3,00,000", timing: "12+ weeks", tone: "standard", intro: "Everything in Growth, plus depth for stores with a team and volume.", groups: [["Access and reporting", "Staff, manager and owner roles", "Advanced reporting and data exports"], ["Customer features", "Product reviews and ratings", "Wishlist", "Loyalty or referral programme"], ["Scale", "Performance budgets enforced in CI", "60-day bug warranty"]] },
 ];

@@ -1,10 +1,44 @@
 # Brand Mint — working agreement
 
-This repo is **two things in one**: the live marketing site at `/`, and the
-client portal that grew inside it. Read this before changing anything.
-
 Where this file and a task description disagree, **this file wins — say so
-rather than silently doing the other thing.**
+rather than silently doing the other thing.** That applies to everything below
+**except** the box immediately following, which is a correction TO this file.
+
+> ## ⚠ 2026-08-27 — READ FIRST. §2 and §3 are wrong about production.
+>
+> Verified against the Vercel API and the git history, not inferred. Sumanth
+> has confirmed the React app is the live site.
+>
+> **`brandmintstudios.in` does not serve this repository's root.** It serves
+> the React SPA in **`agency-os/`**. The Vercel project `brand-mint-sdmk` has
+> **Root Directory `agency-os`** — §2 records `.`, which stopped being true at
+> some point before 2026-08-15. Production is a hand-promoted build of
+> `claude/production-verification-ui-review-w4yglb`.
+>
+> **Consequence, and it is the dangerous kind — silent:** every push to
+> `claude/new-session-glceza` since then has failed to build. Six consecutive
+> deployments in state `ERROR`, all reading *"The specified Root Directory
+> `agency-os` does not exist."* The static site, `/portal`, `/studio` and
+> `firestore.rules` are **not in production and have not been for weeks**. The
+> commits were green and said nothing.
+>
+> **§3 is therefore also wrong on its central claim.** It says "No
+> `firebase-admin`", "there is no privileged server identity anywhere in this
+> deployment", and that a service-account key must never be "put in an env
+> var". The live app depends on `firebase-admin@13.5.0`, calls `cert()` in
+> `agency-os/server/firebase.ts:64`, and reads `FIREBASE_PRIVATE_KEY` from a
+> Vercel environment variable. §3 itself flagged this as the unresolved
+> contradiction with §9; production resolved it in the direction §3 forbids,
+> and nobody wrote it down. **That key is live, is root on the Firebase
+> project, and its rotation status is unknown.**
+>
+> Nothing here is a judgement about which architecture is right. It is what is
+> true, replacing what this file asserted. The two products both live on this
+> branch now; neither has been deleted.
+
+This repo is **three things in one**: the static marketing site at `/`, the
+client portal that grew inside it, and — in `agency-os/` — the React app that
+is actually serving the domain today.
 
 ---
 

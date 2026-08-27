@@ -89,6 +89,40 @@ const PATTERNS = [
   { name: "service-account private_key", re: /"private_key"\s*:\s*"-----BEGIN/ },
 ];
 
+/* A PEM header with a body that is obviously not a key.
+ *
+ * agency-os/server/firebase.test.ts asserts that a Vercel-escaped PEM is
+ * un-escaped correctly, and to do that it has to write a PEM out. Its body is
+ * the literal string "key-body". Deleting that test to satisfy this scan would
+ * remove a real check on the code path that parses the production private key
+ * — strictly worse for security than the string it is objecting to.
+ *
+ * So the exemption is narrow, and it is about SHAPE, not location: the body
+ * between the BEGIN and END markers must be short and must not look like
+ * base64. A real key body is hundreds of base64 characters, so nothing that
+ * matches this could be one. It is deliberately NOT a per-file allowlist —
+ * a genuine key pasted into that same test file still fails the suite. */
+const ANY_PEM =
+  /-----BEGIN (?:RSA |EC |OPENSSH |PGP )?PRIVATE KEY-----([\s\S]{0,4096}?)-----END/g;
+
+/* Returns the 1-based line of the first PEM in `text` whose body is NOT an
+ * obvious placeholder, or null if every PEM present is one.
+ *
+ * EACH occurrence is judged on its own. An earlier version asked "does this
+ * file contain a placeholder PEM?" and skipped the whole file if so — which
+ * meant a real key pasted into the same file was hidden by the dummy sitting
+ * above it. The test below plants exactly that and requires it to fail. */
+function realPemLine(text) {
+  ANY_PEM.lastIndex = 0;
+  let m;
+  while ((m = ANY_PEM.exec(text)) !== null) {
+    const body = m[1].replace(/\\n/g, "").replace(/\s+/g, "");
+    const placeholder = body.length > 0 && body.length <= 40 && !/^[A-Za-z0-9+/=]{40,}$/.test(body);
+    if (!placeholder) return text.slice(0, m.index).split("\n").length;
+  }
+  return null;
+}
+
 test("no credential-shaped string is committed anywhere", () => {
   const hits = [];
   for (const rel of files) {
@@ -100,6 +134,11 @@ test("no credential-shaped string is committed anywhere", () => {
     }
     if (text.includes("\0")) continue;
     for (const p of PATTERNS) {
+      if (p.name === "PEM private key") {
+        const line = realPemLine(text);
+        if (line !== null) hits.push(`${rel}:${line}  ${p.name}`);
+        continue;
+      }
       const m = p.re.exec(text);
       if (m && !PUBLIC_BY_DESIGN.includes(m[0])) {
         const line = text.slice(0, m.index).split("\n").length;
