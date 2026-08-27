@@ -1,0 +1,76 @@
+# Brand Mint Studios Agency OS — Project TODO
+
+- [x] Establish a documented data model for clients, contacts, service selections, onboarding briefs, legal acceptances, projects, deliverables, documents, invoices, invoice items, files, and notifications.
+- [x] Build an elegant CEO dashboard displaying active clients, open projects, pending invoices, revenue summary, and high-priority operational actions.
+- [x] Build a guided client onboarding flow for lead capture, service selection, project brief intake, client-profile creation, and pre-activation legal acceptance.
+- [x] Create public Cookie Policy, Privacy Policy, and Terms & Conditions pages, each marked as a working draft for legal review before publication.
+- [x] Build a gated client portal where authenticated clients can access only their own eligible projects, invoices, and signed documents.
+- [x] Implement role-based backend procedures and UI guards for CEO/admin and client roles, including legal-acceptance eligibility checks.
+- [x] Build document records and signing-status workflows for contracts, NDAs, and SOWs, including secure CEO/client download access.
+- [x] Build invoice creation with itemised line items, due dates, payment-status transitions, and downloadable invoice-PDF records.
+- [x] Build a Kanban-style project pipeline with project status, deadlines, delivery items, and assignment visibility.
+- [x] Implement S3-backed file metadata and secure file workflows for documents and invoice PDF records.
+- [x] Build in-app notifications for new onboarding completion, legal acceptance, invoice payment status, and new client actions.
+- [x] Inspect available integrations and present compliant email-delivery options for CEO/client automated alerts before adding an email provider.
+- [x] Add automated tests for authorization, onboarding/legal eligibility, invoice totals/statuses, documents, and primary procedures.
+- [x] Add focused unit coverage for the required legal-acceptance predicate and server-side itemised invoice PDF generation.
+- [x] Document the user-selected provider-independent operating model, including the CEO’s manual email and e-signature responsibilities.
+- [x] Defer any future transactional-email or managed e-signature connection until the user selects and approves a provider account and credentials.
+- [x] Verify responsive UI, accessibility, legal-gate behavior, and key workflows visually before delivery.
+- [x] Commit and synchronize the completed project to the connected GitHub repository.
+- [x] Connect the CEO KPI cards and onboarding page to the implemented live procedures before confirming the dashboard and onboarding features as complete.
+- [x] Verify the legal policy routes and UI files in the completed project before the final checkpoint.
+- [x] Inspect the connected Vercel availability and repository configuration for a compatible Agency OS deployment.
+- [x] Do not deploy `manus/brand-mint-agency-os` to Vercel because the user selected branch-only delivery and no compatible dedicated Vercel target is authorized.
+- [x] Preserve the Agency OS as a GitHub-branch-only delivery; do not create, replace, or modify any Vercel project.
+- [x] Investigate the reported Vercel production mismatch, including unexpected website content, data-platform references, and the source deployment branch.
+- [x] Restore the intended prior production experience or remove unintended content only after the user confirms the verified corrective target.
+- [x] Add selective Framer Motion transitions for meaningful page, panel, modal, and feedback states in the Agency OS.
+- [x] Add Lenis only for public editorial onboarding and policy pages, while retaining native scrolling for dense CEO and client dashboard surfaces.
+- [x] Refine Agency OS interaction surfaces, hierarchy, loading states, and empty states using the existing Tailwind and shadcn/ui foundation.
+- [x] Verify motion and Lenis behavior at desktop/mobile breakpoints, including reduced-motion accessibility.
+- [x] Run independent end-to-end validation passes for source provenance, backend procedures, deployment state, and responsive UI without changing Vercel production.
+- [x] Present a verified explanation for the unexpected Supabase/Firestore references and the live production source branch before proposing any correction.
+- [x] Compare `claude/new-session-glceza` and `manus/brand-mint-agency-os` across actual code, UI, data/auth architecture, operational workflows, testing, and production suitability.
+- [x] Preserve both branches and propose a finalization plan only after presenting the verified comparison to the user.
+- [x] Identify the immediately prior verified Claude production deployment and obtain explicit confirmation of its deployment ID before restoring production.
+- [x] Restore only the confirmed Claude deployment to Vercel production; leave `manus/brand-mint-agency-os` unchanged.
+- [x] Verify Vercel production now resolves to `dpl_9f8i9yZw5qGsJcsCro7RuGdQ72iz` / commit `811c8cb32db98c0e6e3cd214e8e7732a083f7848` after the promotion.
+- [x] Verify that `manus/brand-mint-agency-os` received no commits or branch modifications during the production restoration.
+- [x] Produce a detailed, evidence-based comparison of the Claude and Manus branches across scope, UI, architecture, data/authentication, testing, deployment behavior, and operational risks without changing either branch.
+- [x] Replace all non-ecommerce public service categories with the confirmed Starter Store, Growth Store, and Commerce Store tiers, including their fixed prices, timelines, and 18% GST disclosure.
+- [x] Add the confirmed care plans, add-ons, client-provided inputs, client-paid accounts, excluded work, and commercial terms to the public ecommerce journey.
+- [x] Replace onboarding service selection with the confirmed ecommerce tiers and add-on choices; remove unapproved service options.
+- [x] Align legal-policy references and public copy with ecommerce scope, including Privacy, Terms, Refund, and Shipping policy requirements as working drafts pending legal review.
+- [x] Add the confirmed ecommerce Refund and Shipping policy draft routes, each marked for legal review before publication.
+- [x] Keep Razorpay references limited to the confirmed ecommerce scope; do not create payment links, charge customers, or enable a new payment flow without a separate approved integration step.
+- [x] Build a cream-led public Brand Mint ecommerce homepage with hero, confirmed store tiers, care plans, scope, process, FAQ, and project enquiry; exclude unapproved selected-work content.
+- [x] Add a responsive public navigation with clear routes into project onboarding, client portal, and secure CEO/admin access.
+- [x] Apply selective Framer Motion animation and a Lenis layer only to public editorial pages, preserving reduced-motion support and native dashboard scrolling.
+- [x] Preserve owner-based OAuth as the secure admin test path; do not add a default or hard-coded admin username/password.
+- [x] Validate public-homepage, onboarding, client portal, and CEO access journeys at desktop and mobile breakpoints.
+- [x] Unify the public, onboarding, portal, and CEO access surfaces around the approved Brand Mint wordmark asset.
+- [x] Do not add a Selected work section because the client-confirmed scope authorizes ecommerce services only and does not approve case-study content for this page.
+- [x] Add a direct project-enquiry capture section to the public homepage and revalidate it at desktop and mobile breakpoints.
+- [ ] Commit and push the final ecommerce-aligned Agency OS update to `manus/brand-mint-agency-os` for user-controlled production testing.
+- [x] Repair Vercel’s nested tRPC procedure routing and verify the Firebase Google-sign-in profile handshake before requesting another CEO test.
+- [ ] Diagnose and resolve the post-Google-sign-in server confirmation failure reported on production, then verify CEO dashboard access.
+- [x] Rotate the malformed Firebase service-account key and securely update `FIREBASE_SERVICE_ACCOUNT_JSON` in the existing Vercel project before final CEO authentication verification.
+- [ ] Validate and install the newly supplied Firebase service-account JSON in Vercel for both Preview and Production environments, then retest the authenticated CEO profile handshake.
+- [x] Correct Vercel’s serialized `FIREBASE_SERVICE_ACCOUNT_JSON` value after the refreshed deployment reported invalid JSON during Firebase Admin initialization.
+- [x] Promote commit `b19c996` so production uses the Firebase private-key normalization logic required by the correctly stored replacement credential.
+- [x] Add a prominent Google sign-out and account-switch action to the CEO-access-required screen and sign-in flow.
+- [x] Replace non-admin CEO-access wording with a lead-friendly “Log in to know more” experience that guides visitors to services and enquiries while preserving dashboard authorization.
+- [x] Preserve Google role routing—CEO to Agency OS and approved clients to client portal—while clarifying the appropriate next action for non-admin sessions.
+- [ ] Verify CEO dashboard access using `sumanthbolla97@gmail.com` after the previous non-admin session is signed out.
+- [ ] Define public service-detail, client enquiry/chat, qualification, review, call/meeting, and payment-gated onboarding requirements before implementation.
+- [x] Trace and correct why newly created projects are not appearing in the expected portal project-status view.
+- [x] Add an admin-controlled final-price adjustment for eligible personal projects, with invoice totals and client visibility updated accordingly.
+- [ ] Reproduce the user-reported production failure through an authenticated browser session and resolve it before making any further production claim.
+- [x] Replace separate sign-in/sign-up surfaces with one Google “Sign in” entry point that routes the CEO to Agency OS and all other authenticated users to the client portal.
+- [ ] Resolve the live post-Google-sign-in redirect stall that leaves both CEO and non-CEO accounts on the sign-in page.
+- [ ] Reduce production access to one sign-in screen and one Google button, then verify immediate role-based redirection without intermediary access screens.
+- [ ] Promote and verify the direct Google token-and-profile handoff so production no longer returns users to the prior redirect-based sign-in page.
+- [x] Add a visible CEO dashboard sign-out control that clears the Google session and returns the user to the single sign-in screen for account switching.
+- [ ] Verify that an anonymous public name/company/request submission persists and appears in the CEO admin workspace for qualification and follow-up.
+- [ ] Deploy and verify the public enquiry inbox with a real visitor request visible in the CEO admin dashboard.

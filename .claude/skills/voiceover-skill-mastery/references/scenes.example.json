@@ -1,0 +1,51 @@
+{
+  "title": "Name one",
+  "gate": "Comment OWN",
+  "duration": 30.4,
+  "scenes": [
+    { "words": [0, 4], "mode": "type", "kicker": "Your customers",
+      "h1": ["You have", "<em>four thousand</em>", "customers."] },
+
+    { "words": [5, 6], "mode": "type", "center": true,
+      "h1": ["Name one."] },
+
+    { "words": [7, 8], "mode": "support", "glyph": "crowd" },
+
+    { "words": [9, 13], "mode": "type", "kicker": "What the marketplace has",
+      "rows": [["Name", "Aarav Sharma", 0.12, "redact"]] },
+
+    { "words": [14, 15], "mode": "type", "kicker": "What the marketplace has",
+      "rows": [["Name", "Aarav Sharma", 0, "redact"],
+               ["Phone", "+91 98xxx xxxxx", 0.06, "redact"]] },
+
+    { "words": [16, 19], "mode": "type", "kicker": "What the marketplace has",
+      "rows": [["Name", "Aarav Sharma", 0, "redact"],
+               ["Phone", "+91 98xxx xxxxx", 0, "redact"],
+               ["Last order", "24 March · repeat", 0.14, "redact"]] },
+
+    { "words": [20, 26], "mode": "type", "kicker": "What you get",
+      "rows": [["Payout", "✓", 0.12], ["Rating", "✓", 0.44]] },
+
+    { "words": [27, 35], "mode": "support", "glyph": "one-way" },
+
+    { "words": [36, 43], "mode": "type", "flash": true, "center": true,
+      "h1": ["Every sale you make", "builds someone", "<em>else's asset.</em>"] },
+
+    { "words": [44, 48], "mode": "type", "kicker": "It has a name",
+      "h1": ["They call it", "<em>renting demand.</em>"] },
+
+    { "words": [49, 57], "mode": "type",
+      "h1": ["How many of your", "customers could you", "<em>email tomorrow?</em>"] },
+
+    { "words": [58, 59], "mode": "type",
+      "endcard": { "cta": "Comment “OWN”", "hint": "One word. I'll send the list." } },
+
+    { "words": [60, 67], "mode": "support", "kicker": "The four things to move first",
+      "cells": [["01", "Your own storefront"], ["02", "Your customer list"],
+                ["03", "Email + WhatsApp"], ["04", "Repeat-purchase data"]] },
+
+    { "at": 27.0, "hold": 3.4, "mode": "type",
+      "lockup": { "mark": true, "word": "Brand <em>Mint</em>", "city": "Hyderabad",
+                  "follow": { "text": "Follow to know more", "handle": "@brandmint.studios" } } }
+  ]
+}

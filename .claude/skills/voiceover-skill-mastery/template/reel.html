@@ -1,0 +1,825 @@
+<title>Brand Mint — campaign film</title>
+<style>
+  :root{
+    --ink:#0A2117; --ink-2:#0F2E20; --line:rgba(255,255,255,.13);
+    --mint:#7BF2A8; --mint-2:#3FC97A; --cream:#F4EFE4; --muted:#87A296; --red:#E0483C;
+    --page:#EEF2ED; --page-ink:#14342A; --page-muted:#5F7A6E; --page-line:#D2DFD5; --page-card:#fff;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --page:#0C1A15;--page-ink:#E4F0E8;--page-muted:#8FA79A;--page-line:#1F3A2E;--page-card:#11241C; } }
+  :root[data-theme="dark"]{ --page:#0C1A15;--page-ink:#E4F0E8;--page-muted:#8FA79A;--page-line:#1F3A2E;--page-card:#11241C; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--page-ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{min-height:100vh;display:grid;gap:22px;align-content:start;justify-items:center;padding:22px 16px 40px}
+  @media (min-width:900px){.wrap{grid-template-columns:auto minmax(280px,360px);align-content:center;justify-items:start;gap:40px}}
+
+  /* The stage is a container, so every internal size is cqw. vw would be
+     measured against the browser window and overflow the fixed 1080 render. */
+  .stage{position:relative;width:min(94vw,420px);aspect-ratio:9/16;max-height:86vh;overflow:hidden;border-radius:26px;
+    background:var(--ink);color:var(--cream);box-shadow:0 30px 70px rgba(9,30,22,.34);isolation:isolate;user-select:none;container-type:inline-size}
+  .aura{position:absolute;inset:-25%;z-index:0;opacity:.55;background:radial-gradient(closest-side,rgba(123,242,168,.22),transparent 70%)}
+  .grain{position:absolute;inset:0;z-index:46;pointer-events:none;opacity:.2;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E")}
+  .vig{position:absolute;inset:0;z-index:45;pointer-events:none;background:radial-gradient(120% 80% at 50% 45%,transparent 55%,rgba(0,0,0,.34) 100%)}
+
+  body.render{background:transparent;padding:0}
+  body.render .wrap{padding:0;display:block}
+  body.render .panel,body.render .gate{display:none}
+  body.render .stage{width:1080px;height:1920px;max-height:none;aspect-ratio:auto;border-radius:0;box-shadow:none}
+
+  .prog{position:absolute;left:0;right:0;top:0;height:.34cqw;z-index:42;background:rgba(255,255,255,.12)}
+  .prog b{display:block;height:100%;width:0;background:var(--mint)}
+
+  .scene{position:absolute;inset:0;display:grid;align-content:center;justify-items:start;gap:3cqw;
+    padding:14cqw 8cqw 46cqw;opacity:0;visibility:hidden;z-index:5}
+  /* A scene with no captions must not reserve the space for them — that leaves
+     a dead lower third under the hero type. */
+  .scene[data-mode="type"]{padding-bottom:16cqw}
+  .scene.is-live{visibility:visible;z-index:6}
+  /* A scene using footage as a backdrop rather than replacing itself with it.
+     Lifts above the clip and its grade, but stays under the captions. */
+  .scene.is-live.over-bg{z-index:24}
+  /* Its own scrim, so type stays legible over unpredictable footage. Behind the
+     scene's content but above the clip, because the scene owns this stack. */
+  .scene.over-bg::before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(10,33,23,.62)}
+  .scene.center{justify-items:center;text-align:center}
+  .scene.rail-on{padding-left:17cqw}
+
+  .kicker{font-size:2.3cqw;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:2cqw;white-space:nowrap}
+  .kicker::before{content:"";width:3.2cqw;height:1px;background:var(--mint);opacity:.8}
+  .scene.center .kicker{justify-content:center}
+  .flash .kicker{color:#0A2117}.flash .kicker::before{background:#0A2117}
+
+  .h1{font-family:Georgia,"Times New Roman",serif;font-size:12.4cqw;line-height:1.0;letter-spacing:-.04em;margin:0;text-wrap:balance}
+  .h1 .ln{display:block;overflow:hidden}
+  /* The authored line breaks are the design. Letting the browser re-wrap a line
+     inside .ln — which clips — produces breaks nobody chose. Hold each line on
+     one line and shrink the face instead; see the fit pass below. */
+  .h1 .ln i{display:block;font-style:normal;white-space:nowrap}
+  .h1 em{font-style:italic;color:var(--mint)}
+  .sub{font-size:3.3cqw;line-height:1.6;color:#B7D0C3;margin:0;max-width:30ch}
+
+  .rail{position:absolute;left:8cqw;top:24cqw;bottom:42cqw;width:.55cqw;z-index:3;background:rgba(255,255,255,.12);border-radius:1cqw;opacity:0}
+  .rail b{position:absolute;top:0;left:0;right:0;height:0;background:linear-gradient(180deg,var(--mint),var(--mint-2));border-radius:1cqw;display:block}
+  .rail .node{position:absolute;left:50%;width:2.2cqw;height:2.2cqw;margin-left:-1.1cqw;border-radius:50%;background:var(--ink-2);border:.4cqw solid rgba(255,255,255,.24)}
+  .rail .node.on{background:var(--mint);border-color:var(--mint)}
+  .rail .node em{position:absolute;left:3.4cqw;top:50%;transform:translateY(-50%);font-style:normal;font-size:1.95cqw;letter-spacing:.2em;
+    text-transform:uppercase;font-weight:800;color:var(--muted);white-space:nowrap;opacity:0}
+  .rail .node.now em{color:var(--mint)}
+
+  .card{width:100%;border:1px solid var(--line);border-radius:3cqw;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.015));padding:4.4cqw;display:grid;gap:0}
+  .r{display:flex;align-items:center;justify-content:space-between;gap:3cqw;font-size:3.1cqw;color:#C3DACE;padding:2.6cqw 0}
+  .r + .r{border-top:1px solid rgba(255,255,255,.09)}
+  .r b{font-weight:800;color:var(--cream);font-variant-numeric:tabular-nums}
+  .r .tick{width:3.4cqw;height:3.4cqw;border-radius:50%;background:var(--mint);color:#06251A;display:grid;place-items:center;font-size:2cqw;font-weight:900;flex:none}
+  .r .lbl{font-size:2.1cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .r.debit b{color:#FFB3AC}
+  .r.total{border-top:.34cqw solid var(--mint);margin-top:1cqw;padding-top:3.2cqw}
+  .r.total .lbl{color:var(--mint)}
+  .r.total b{font-size:4.6cqw;color:var(--mint)}
+  .r.blank b{color:var(--muted);letter-spacing:.3em}
+  /* The row that just arrived. Without it an accumulating card looks static,
+     because every row is already on screen by the time the new one lands. */
+  .r.now b{color:var(--mint)}
+  .r.now .lbl{color:#DCEFE4}
+  /* A value that is withheld rather than absent. The text is still there and
+     still sets the bar's width — it is simply not yours to read. */
+  .r.redact b{color:transparent;background:rgba(255,255,255,.17);border-radius:.6cqw;
+    padding:0 1cqw;box-shadow:0 0 0 .25cqw rgba(255,255,255,.05)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:2.2cqw;width:100%}
+  .cell{background:rgba(255,255,255,.055);border:1px solid var(--line);border-radius:2.4cqw;padding:3.2cqw;display:grid;gap:1.2cqw}
+  .cell u{text-decoration:none;font-size:1.95cqw;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .cell b{font-size:3.1cqw;font-weight:800;color:#E6F3EC;line-height:1.25}
+
+  .pills{display:flex;flex-wrap:wrap;gap:1.8cqw;width:100%}
+  .pill{background:rgba(123,242,168,.12);border:1px solid rgba(123,242,168,.45);color:var(--mint);border-radius:999px;padding:2.1cqw 3.2cqw;font-size:3cqw;font-weight:800;white-space:nowrap}
+
+  /* The line's own subject, drawn large above it and stroked on as it is said.
+     This is what stops a type scene being a subtitle: the same words, but the
+     frame now shows the thing they are about. */
+  .art{width:30cqw;height:30cqw;color:var(--mint);margin-bottom:5cqw;position:relative;flex:none;
+    display:grid;place-items:center}
+  /* A lit ground behind the subject. Without it the stroke floats on the
+     gradient and reads as a bullet point rather than as the frame's subject. */
+  .art::before{content:"";position:absolute;inset:-16%;border-radius:50%;
+    background:radial-gradient(circle at 50% 45%,rgba(123,242,168,.16),rgba(123,242,168,0) 68%)}
+  .art svg{width:100%;height:100%;display:block;overflow:visible}
+  .art svg path{fill:none;stroke:currentColor;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+  /* A subject the read denies. The stroke is drawn, then struck through. */
+  .art.no::after{content:"";position:absolute;left:-6%;top:48%;height:.9cqw;width:var(--slash,0%);
+    background:var(--red);border-radius:1cqw;transform:rotate(-24deg);transform-origin:left center}
+  .scene[data-mode] .art{align-self:flex-start}
+  .scene.center .art{align-self:center}
+
+  /* Icon tiles. A named thing gets a drawn thing beside it — a list of words in
+     boxes is still a list of words. Strokes only, one weight, so twenty of them
+     across thirty films still look like one hand drew them. */
+  .icons{display:grid;grid-template-columns:repeat(3,1fr);gap:2.2cqw;width:100%}
+  .icons.two{grid-template-columns:repeat(2,1fr)}
+  .tile{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:2.6cqw;
+    padding:3.4cqw 2.4cqw;display:grid;justify-items:center;gap:1.8cqw;text-align:center}
+  .tile svg{width:9cqw;height:9cqw;color:var(--mint);flex:none}
+  .tile svg *{vector-effect:non-scaling-stroke}
+  .tile b{font-size:2.5cqw;font-weight:800;color:#DCEFE4;line-height:1.25;letter-spacing:.01em}
+  /* The one that is ours. Exactly one tile per scene may carry it. */
+  .tile.on{background:rgba(123,242,168,.13);border-color:rgba(123,242,168,.5)}
+
+  /* Depth, honestly obtained: a real perspective transform on a real element,
+     not a picture of a phone. It rotates as it lands, so the plane reads as a
+     plane rather than as a rectangle with a gradient. */
+  .dev{width:100%;display:grid;place-items:center;perspective:120cqw}
+  .devbody{width:52cqw;border-radius:5cqw;padding:3cqw 2.6cqw;transform-style:preserve-3d;
+    background:linear-gradient(165deg,rgba(255,255,255,.10),rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.17);
+    box-shadow:0 6cqw 14cqw rgba(0,0,0,.5), inset 0 .2cqw 0 rgba(255,255,255,.14)}
+  .devbody .notch{width:16cqw;height:1.5cqw;border-radius:1cqw;background:rgba(255,255,255,.2);margin:0 auto 2.6cqw}
+  .devbody .dr{display:flex;align-items:center;gap:2.2cqw;padding:2.4cqw 2.6cqw;margin-bottom:1.6cqw;
+    border-radius:2cqw;background:rgba(255,255,255,.06);border:1px solid var(--line);
+    font-size:2.7cqw;font-weight:800;color:#DCEFE4}
+  .devbody .dr:last-child{margin-bottom:0}
+  .devbody .dr svg{width:5.4cqw;height:5.4cqw;color:var(--mint);flex:none}
+  .devbody .dr.on{background:rgba(123,242,168,.15);border-color:rgba(123,242,168,.5);color:var(--mint)}
+
+  .bar5050{width:100%;display:grid;gap:2cqw}
+  .bar5050 .track{display:flex;height:9cqw;border-radius:2cqw;overflow:hidden;border:1px solid var(--line)}
+  .bar5050 .a{background:rgba(255,255,255,.1);display:grid;place-items:center;font-weight:900;font-size:3.6cqw}
+  .bar5050 .b{background:var(--mint);color:#06251A;display:grid;place-items:center;font-weight:900;font-size:3.6cqw}
+  .bar5050 .legend{display:flex;justify-content:space-between;font-size:2.2cqw;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:800}
+
+  .nos{display:grid;gap:3cqw;width:100%}
+  .no{display:flex;align-items:center;gap:3cqw;font-size:7.2cqw;font-weight:900;color:#6F8A7D;position:relative}
+  .no .x{width:5cqw;height:5cqw;border-radius:50%;border:.45cqw solid var(--red);display:grid;place-items:center;color:var(--red);font-size:2.8cqw;font-weight:900;flex:none}
+  .no .txt{position:relative}
+  .no .txt::after{content:"";position:absolute;left:-1%;top:52%;height:.5cqw;width:var(--w,0%);background:var(--red);border-radius:1cqw}
+
+  /* The peak. Full bleed, mint ground — a number, or a sentence. */
+  .flash{background:var(--mint);color:#06251A}
+  /* Mint type on mint is invisible, so on the flash ground the accent inverts:
+     the emphasis is solid ink and everything else steps back. */
+  .flash .h1{color:rgba(6,37,26,.46)}
+  .flash .h1 em{color:#06251A;font-style:italic}
+  .slam{font-size:24cqw;font-weight:900;letter-spacing:-.06em;line-height:.84;margin:0;font-variant-numeric:tabular-nums}
+  /* A bare figure is meaningless in a screenshot. The unit rides with it. */
+  .slam u{text-decoration:none;font-size:7.4cqw;letter-spacing:-.01em;margin-left:1.6cqw}
+  .slamnote{font-size:2.9cqw;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:rgba(6,37,26,.68);margin:0}
+
+  /* Pictorial beat — shapes only, never words. A words-free scene is the one
+     place captions can carry the line without repeating what is drawn. */
+  .glyph{position:relative;width:100%;height:46cqw;overflow:hidden}
+  /* The door is shut and stays shut. It sits behind the parcel — a translucent
+     door drawn over the box reads as glass, not as a doorway. */
+  .doorway{position:absolute;right:9cqw;top:1cqw;bottom:1cqw;width:22cqw;z-index:1;border-radius:1.6cqw 1.6cqw 0 0;
+    background:linear-gradient(180deg,#0d2a1e,#091d15);border:.5cqw solid rgba(255,255,255,.14);
+    box-shadow:inset 0 0 6cqw rgba(0,0,0,.5)}
+  .doorway::before{content:"";position:absolute;inset:2.4cqw;border:.34cqw solid rgba(255,255,255,.08);border-radius:.8cqw}
+  .doorway::after{content:"";position:absolute;left:2.2cqw;top:52%;width:1.5cqw;height:1.5cqw;border-radius:50%;background:var(--muted)}
+  .parcel{position:absolute;z-index:2;left:16cqw;top:50%;width:36cqw;height:26cqw;margin-top:-13cqw;
+    border-radius:1.6cqw;background:linear-gradient(160deg,#C8A97E,#A8875C);box-shadow:0 5cqw 12cqw rgba(0,0,0,.45)}
+  .parcel::before{content:"";position:absolute;left:0;right:0;top:38%;height:3.4cqw;background:rgba(244,239,228,.72)}
+  .parcel::after{content:"";position:absolute;top:0;bottom:0;left:44%;width:3.4cqw;background:rgba(244,239,228,.5)}
+  .slash{position:absolute;left:4%;top:50%;height:1.1cqw;width:0;background:var(--red);border-radius:1cqw;transform:rotate(-19deg);transform-origin:left center;
+    box-shadow:0 0 3cqw rgba(224,72,60,.7)}
+
+  /* The monogram, drawn rather than placed. */
+  .mark{width:24cqw;opacity:0}
+  .mark svg{display:block;width:100%;height:auto;overflow:visible}
+  .lock .mark{width:15cqw;margin-bottom:1.4cqw}
+
+  /* Forty identical things. The point is that none of them is distinguishable,
+     so nothing here may be styled to stand out. */
+  .crowd{display:grid;grid-template-columns:repeat(8,1fr);gap:1.5cqw;width:100%;position:relative}
+  .crowd i{display:block;aspect-ratio:1;border-radius:1cqw;background:rgba(255,255,255,.13);
+    border:1px solid rgba(255,255,255,.07);opacity:0}
+  .crowd u{position:absolute;top:-2cqw;bottom:-2cqw;width:14cqw;left:0;text-decoration:none;opacity:0;
+    background:linear-gradient(90deg,transparent,rgba(123,242,168,.30),transparent);pointer-events:none}
+
+  /* One-way traffic. Things leave past the gate and the lane ends empty. */
+  .lane{position:relative;width:100%;height:26cqw;overflow:hidden}
+  .lane .gate{position:absolute;left:74%;top:6%;bottom:6%;width:.6cqw;border-radius:1cqw;
+    background:linear-gradient(180deg,rgba(123,242,168,0),rgba(123,242,168,.5),rgba(123,242,168,0))}
+  .lane i{position:absolute;top:50%;width:9cqw;height:7cqw;margin-top:-3.5cqw;border-radius:1.2cqw;
+    background:linear-gradient(160deg,#C8A97E,#A8875C);box-shadow:0 2cqw 6cqw rgba(0,0,0,.4)}
+  .lane b{position:absolute;right:26%;top:76%;height:.6cqw;width:0;margin-top:-.25cqw;border-radius:1cqw;
+    background:linear-gradient(270deg,rgba(224,72,60,.95),rgba(224,72,60,0))}
+
+  /* Outro */
+  .lock{display:grid;gap:1.6cqw;justify-items:center}
+  .lock .word{font-family:Georgia,serif;font-size:14cqw;line-height:1;letter-spacing:-.045em;overflow:hidden;display:block}
+  .lock .word i{display:block;font-style:normal}
+  .lock .word em{font-style:italic;color:var(--mint)}
+  .lock .rule{height:.42cqw;background:var(--mint);width:0;border-radius:1cqw}
+  .lock .city{font-size:2.3cqw;letter-spacing:.42em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  /* The outro has to ask for the follow. The wordmark alone tells them who you
+     are and gives them nothing to do about it. */
+  .lock .followline{margin-top:4.4cqw;font-size:2.3cqw;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);font-weight:800;white-space:nowrap}
+  /* The pill holds the handle alone. Putting the invitation inside it too makes
+     a chip wider than the wordmark, and it wraps. */
+  .lock .follow{display:flex;align-items:center;gap:2.2cqw;padding:2.6cqw 4.4cqw;border-radius:999px;white-space:nowrap;
+    border:1px solid rgba(123,242,168,.42);background:rgba(123,242,168,.1)}
+  .lock .follow b{font-size:3.4cqw;font-weight:900;color:var(--mint);letter-spacing:.01em}
+  .lock .follow::before{content:"";width:2.4cqw;height:2.4cqw;border-radius:50%;background:var(--mint);flex:none;
+    box-shadow:0 0 0 .7cqw rgba(123,242,168,.22)}
+  .endcta{display:grid;gap:2.4cqw;justify-items:center;width:100%}
+  .endcta .box{display:flex;align-items:center;justify-content:center;gap:2.4cqw;width:100%;background:var(--mint);color:#06251A;
+    border-radius:999px;padding:3.6cqw;font-size:5cqw;font-weight:900;letter-spacing:.02em}
+  .endcta .hint{font-size:2.6cqw;color:var(--muted);letter-spacing:.06em}
+  .endstrip{display:flex;gap:2.4cqw;justify-content:center;flex-wrap:wrap;font-size:2.2cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:800}
+  .endstrip span{display:flex;align-items:center;gap:2.4cqw}
+  .endstrip span::after{content:"";width:.5cqw;height:.5cqw;border-radius:50%;background:var(--mint);opacity:.7}
+  .endstrip span:last-child::after{display:none}
+
+  .broll,.brollFrame{position:absolute;inset:0;z-index:20;width:100%;height:100%;object-fit:cover;opacity:0;visibility:hidden}
+  .bgrade{position:absolute;inset:0;z-index:22;pointer-events:none;opacity:0;visibility:hidden;
+    background:linear-gradient(180deg,rgba(10,33,23,.55) 0%,rgba(10,33,23,0) 26%,rgba(10,33,23,0) 38%,rgba(10,33,23,.9) 92%)}
+
+  /* 24cqw, not 10. Two reasons: the brand badge composited over the
+     generator's watermark occupies the bottom-right corner from ~87% down, and
+     Instagram's own reel UI overlays roughly the bottom 13% — captions sitting
+     lower than this get covered by the platform, not just by us. */
+  .captions{position:absolute;left:0;right:0;bottom:24cqw;z-index:30;padding:0 7cqw;text-align:center;pointer-events:none}
+  .cap-line{display:flex;flex-wrap:wrap;justify-content:center;gap:1.2cqw 2cqw}
+  .cap-word{font-size:6.4cqw;font-weight:900;line-height:1.12;letter-spacing:-.02em;color:#fff;opacity:.26;
+    text-shadow:0 .5cqw 2.6cqw rgba(0,0,0,.72);display:inline-block}
+  .cap-word.spoken{opacity:1}
+  .cap-word.active{color:var(--mint)}
+  /* On the mint ground mint-on-mint is invisible; ink text on a white
+     highlighter reads instead. */
+  .on-flash .cap-word{color:#06251A;text-shadow:none;opacity:.34}
+  .on-flash .cap-word.spoken{opacity:1}
+  .on-flash .cap-word.active{color:#06251A;box-shadow:0 0 0 .9cqw #fff;background:#fff;border-radius:.6cqw}
+
+  .gate{position:absolute;inset:0;z-index:50;display:grid;place-content:center;justify-items:center;gap:16px;
+    background:linear-gradient(180deg,rgba(10,33,23,.6),rgba(10,33,23,.93));border:0;width:100%;cursor:pointer;color:var(--cream);font:inherit;text-align:center;padding:24px}
+  .gate[hidden]{display:none}
+  .gate .play{width:76px;height:76px;border-radius:50%;background:var(--mint);color:#06251A;display:grid;place-items:center}
+  .gate .play svg{width:30px;height:30px;margin-left:4px}
+  .gate .t{font-family:Georgia,serif;font-size:26px;letter-spacing:-.02em}
+  .gate .s{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mint);font-weight:700}
+  .gate:focus-visible{outline:3px solid var(--mint);outline-offset:-6px}
+
+  .panel{width:min(94vw,420px);display:grid;gap:14px}
+  @media (min-width:900px){.panel{width:auto;max-width:360px}}
+  .panel h1{font-family:Georgia,serif;font-size:27px;letter-spacing:-.03em;margin:0;line-height:1.05}
+  .panel p{margin:0;font-size:13.5px;line-height:1.6;color:var(--page-muted)}
+  .controls{display:flex;flex-wrap:wrap;gap:8px}
+  .btn{font:inherit;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--page-line);background:var(--page-card);color:var(--page-ink);padding:9px 15px;border-radius:999px}
+  .btn--primary{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+  .btn:focus-visible{outline:2px solid var(--mint-2);outline-offset:2px}
+</style>
+
+<div class="wrap">
+  <div class="stage" id="stage">
+    <div class="aura" id="aura"></div>
+    <div class="prog"><b id="progFill"></b></div>
+    <div class="rail" id="rail"><b id="railFill"></b></div>
+
+    <div id="scenes"></div>
+
+    <img class="brollFrame" id="brollFrame" alt="" />
+    <video id="broll" class="broll" muted playsinline preload="auto" src="__VIDEO_SRC__"></video>
+    <div class="bgrade" id="bgrade"></div>
+
+    <div class="captions"><div class="cap-line" id="cap"></div></div>
+    <div class="vig"></div><div class="grain"></div>
+
+    <button class="gate" id="gate" type="button" aria-label="Play with sound">
+      <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+      <span class="t" id="gateTitle">Play</span><span class="s" id="gateSub">Tap for sound</span>
+    </button>
+  </div>
+
+  <div class="panel">
+    <h1 id="panelTitle">Campaign film</h1>
+    <p id="panelNote">Cut to the recording. Every word is transcribed back and aligned individually, and every element animates from its own scene clock — so each rendered frame is a true in-between rather than a held pose.</p>
+    <div class="controls">
+      <button class="btn btn--primary" id="replay" type="button">Play from start</button>
+      <button class="btn" id="toggle" type="button">Pause</button>
+    </div>
+  </div>
+</div>
+
+<audio id="vo" preload="auto" src="__AUDIO_SRC__"></audio>
+<script>/*__MOTION__*/</script>
+<script>
+(() => {
+  "use strict";
+  const WORDS = __WORDS_JSON__;
+  const SPEC  = __SCENES_JSON__;
+  const DURATION = __DURATION__;
+
+  const SCENES = SPEC.scenes;
+  const SCENE_WORDS = SCENES.map(s => s.words || null);
+  // A scene runs until the NEXT scene's first word. Ending a scene on its own
+  // last word leaves its caption on screen while the next phrase is speaking.
+  // A scene with no words — an outro after the read ends — declares "at".
+  const PHRASES = SCENES.map(s => s.at != null
+    ? [s.at, s.at + 2]
+    : [WORDS[s.words[0]].s, WORDS[s.words[1]].e]);
+  const B_ROLL = {};
+  // `clip` replaces the scene with footage; `bg` runs footage behind its content.
+  SCENES.forEach((s,i) => { if (s.clip || s.bg) B_ROLL[i] = s.clipStart || 0; });
+  const RAIL = SPEC.rail || null;
+
+  const $ = (id) => document.getElementById(id);
+  const stage=$("stage"), vo=$("vo"), cap=$("cap"), gate=$("gate"), aura=$("aura"),
+        rail=$("rail"), railFill=$("railFill"), progFill=$("progFill"),
+        broll=$("broll"), brollFrame=$("brollFrame"), bgrade=$("bgrade");
+  const RENDER = new URLSearchParams(location.search).get("render")==="1";
+  if (RENDER) document.body.classList.add("render");
+
+  if (SPEC.title) { document.title = SPEC.title; $("panelTitle").textContent = SPEC.title; }
+  if (SPEC.gate)  { $("gateTitle").textContent = SPEC.gate; }
+  $("gateSub").textContent = `Tap for sound · ${Math.round(DURATION)}s`;
+
+  /* ── build the scenes from the spec ─────────────────────────────────────
+     The director writes scenes.json; nothing here is film-specific. */
+  const MARK_SVG = '<svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/></linearGradient></defs><circle class="disc" cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="m" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>';
+
+  const el = (tag, cls, html) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+  const anim = (n, kind, delay) => { n.dataset.a = kind; n.dataset.d = String(delay); return n; };
+
+  /* One stroke weight, one grid, one language. Everything a film can point at
+     is drawn here rather than fetched, so a film has no assets to lose. */
+  const ICON = {
+    cart:"M3 4h2.1l2.2 10.2a2 2 0 0 0 2 1.6h7.4a2 2 0 0 0 2-1.55L20.5 8H6.2M10 20.2a1.3 1.3 0 1 0 0-.1M17.4 20.2a1.3 1.3 0 1 0 0-.1",
+    box:"M12 3 4 7v10l8 4 8-4V7ZM4 7l8 4 8-4M12 11v10",
+    truck:"M3 6h11v9H3zM14 9h3.7l3.3 3.2V15h-7zM7 18.3a1.3 1.3 0 1 0 0-.1M17.5 18.3a1.3 1.3 0 1 0 0-.1",
+    rupee:"M7 4.5h10M7 8.5h10M15.4 4.5c0 3.2-2.3 4-5.6 4H7l8.4 11",
+    card:"M3 6h18v12H3zM3 10.2h18M6.4 14.4h4",
+    search:"M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0ZM20.6 20.6l-4.4-4.4",
+    tag:"M4 4h7.2l8.8 8.8-7.2 7.2L4 11.2ZM8.3 8.3h.1",
+    chart:"M3 20.4h18M6.6 17.4v-5.2M11.6 17.4V6.6M16.6 17.4V9.8",
+    phone:"M7 2.4h10v19.2H7zM10.6 18.7h2.8",
+    clock:"M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0ZM12 7.1v5.4l3.4 2",
+    shield:"M12 3.1 19 6v6c0 4.4-3 7.4-7 8.9-4-1.5-7-4.5-7-8.9V6ZM8.9 12.1l2.2 2.2 4.1-4.3",
+    warehouse:"M3 10.2 12 5l9 5.2v10.2H3ZM8 20.4v-6.2h8v6.2",
+    refresh:"M20 12a8 8 0 1 1-2.5-5.8M20.4 3.9v4.2h-4.2",
+    user:"M15.5 8.6a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0ZM5 20.4c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6",
+    chat:"M4 5h16v11H9.4l-5.4 4.2Z",
+    star:"m12 3.2 2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.2 6.1-.8Z",
+    check:"M20.5 12a8.5 8.5 0 1 1-17 0 8.5 8.5 0 0 1 17 0ZM8.1 12.1l2.8 2.8 5.5-5.8",
+    doc:"M6 3h8l4 4v14H6ZM14 3v4h4M9 12.4h6M9 16.2h4.4",
+    bell:"M6 17.2v-6a6 6 0 0 1 12 0v6l1.5 2.4h-15ZM10 20.2a2 2 0 0 0 4 0",
+    pin:"M12 21.2s7-6.3 7-11.1a7 7 0 1 0-14 0c0 4.8 7 11.1 7 11.1ZM14.6 10a2.6 2.6 0 1 1-5.2 0 2.6 2.6 0 0 1 5.2 0Z",
+    code:"m8.2 8-4.2 4 4.2 4M15.8 8l4.2 4-4.2 4M13.6 5.6l-3.2 12.8",
+    layers:"m12 3.1 9 4.5-9 4.5-9-4.5ZM3 12.4l9 4.5 9-4.5M3 16.6l9 4.5 9-4.5",
+    store:"M4.4 8h15.2l-1 3H5.4ZM5.4 11v9.4h13.2V11M4.4 8 6 4h12l1.6 4",
+    lock:"M6.8 11h10.4v9.4H6.8ZM9.4 11V8.2a2.6 2.6 0 0 1 5.2 0V11",
+    mail:"M3 6h18v12H3zM3 6.4l9 6.8 9-6.8",
+    filter:"M3.4 5h17.2l-6.6 7.8v6.4l-4 1.6v-8Z",
+    upload:"M12 16.4V4.6M8.2 8.4 12 4.6l3.8 3.8M4 16.4v3.4h16v-3.4",
+  };
+  const icon = key => {
+    const d = ICON[key] || ICON.check;
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55"
+      stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
+  };
+
+  function buildBlock(s) {
+    if (s.icons) {
+      const g = el("div", "icons" + (s.icons.length <= 4 ? " two" : ""));
+      s.icons.forEach(([key, label, on], k) => {
+        const t = anim(el("div", "tile" + (on ? " on" : "")), "pop", .12 + k * .11);
+        t.innerHTML = icon(key);
+        t.appendChild(el("b", null, label));
+        g.appendChild(t);
+      });
+      return g;
+    }
+    if (s.device) {
+      const d = el("div", "dev");
+      const b = anim(el("div", "devbody"), "tilt", .06);
+      b.appendChild(el("div", "notch"));
+      (s.device.rows || []).forEach(([key, label, on], k) => {
+        const r = anim(el("div", "dr" + (on ? " on" : "")), "row", .22 + k * .13);
+        r.innerHTML = icon(key);
+        r.appendChild(el("span", null, label));
+        b.appendChild(r);
+      });
+      d.appendChild(b);
+      return d;
+    }
+    if (s.h1) {
+      const h = el("h1", "h1");
+      s.h1.forEach((line, k) => {
+        const ln = anim(el("span", "ln"), "mask", .10 + k * .10);
+        ln.appendChild(el("i", null, line));
+        h.appendChild(ln);
+      });
+      return h;
+    }
+    if (s.rows) {
+      const c = el("div", "card");
+      s.rows.forEach((r, k) => {
+        const [label, value, delay, flag] = r;
+        const row = anim(el("div", "r" + (flag ? " " + flag : "")), "row",
+                         delay != null ? delay : .14 + k * .12);
+        row.appendChild(el("span", "lbl", label));
+        row.appendChild(value === "✓" ? el("i", "tick", "✓") : el("b", null, value));
+        c.appendChild(row);
+      });
+      return c;
+    }
+    if (s.cells) {
+      const g = el("div", "grid2");
+      s.cells.forEach(([u, b], k) => {
+        const cell = anim(el("div", "cell"), "pop", .12 + k * .11);
+        cell.appendChild(el("u", null, u));
+        cell.appendChild(el("b", null, b));
+        g.appendChild(cell);
+      });
+      return g;
+    }
+    if (s.pills) {
+      const p = el("div", "pills");
+      s.pills.forEach((t, k) => p.appendChild(anim(el("span", "pill", t), "pop", .1 + k * .09)));
+      return p;
+    }
+    if (s.number) {
+      const g = el("div", "endcta");
+      const v = anim(el("p", "slam"), "count", .06);
+      v.dataset.to = s.number.value;
+      // The figure lives in its own node so the count-up can rewrite it
+      // without wiping the unit beside it.
+      v.appendChild(el("i", "num", s.number.value));
+      if (s.number.unit) v.appendChild(el("u", null, s.number.unit));
+      g.appendChild(v);
+      if (s.number.note) g.appendChild(anim(el("p", "slamnote", s.number.note), "fade", .5));
+      return g;
+    }
+    if (s.split) {
+      const w = el("div", "bar5050");
+      const track = el("div", "track");
+      track.appendChild(anim(el("div", "a", s.split.a[1]), "grow-l", .14));
+      track.appendChild(anim(el("div", "b", s.split.b[1]), "grow-r", .28));
+      const legend = anim(el("div", "legend"), "fade", .5);
+      legend.appendChild(el("span", null, s.split.a[0]));
+      legend.appendChild(el("span", null, s.split.b[0]));
+      w.appendChild(track); w.appendChild(legend);
+      return w;
+    }
+    if (s.strikes) {
+      const w = el("div", "nos");
+      s.strikes.forEach((t, k) => {
+        const n = anim(el("div", "no"), "strike", .08 + k * .3);
+        n.appendChild(el("span", "x", "✕"));
+        n.appendChild(el("span", "txt", t));
+        w.appendChild(n);
+      });
+      return w;
+    }
+    if (s.glyph === "crowd") {
+      // Forty identical records. A mint scan crosses them and finds nothing,
+      // because there is nothing to find.
+      const w = anim(el("div", "crowd"), "crowd", 0);
+      for (let k = 0; k < 40; k++) w.appendChild(el("i"));
+      w.appendChild(el("u"));
+      return w;
+    }
+    if (s.glyph === "one-way") {
+      // Traffic that only goes one way. The lane ends empty; the red return
+      // stroke starts, stalls, and dies.
+      const w = anim(el("div", "lane"), "lane", 0);
+      w.appendChild(el("span", "gate"));
+      for (let k = 0; k < 6; k++) w.appendChild(el("i"));
+      w.appendChild(el("b"));
+      return w;
+    }
+    if (s.glyph) {
+      const w = el("div", "glyph");
+      const p = anim(el("div", "parcel"), "parcel", .05);
+      p.appendChild(el("i", "slash"));
+      w.appendChild(p);
+      if (s.glyph === "parcel-refused") w.appendChild(anim(el("div", "doorway"), "fade", .0));
+      return w;
+    }
+    if (s.mark) {
+      const w = anim(el("div", "mark", MARK_SVG), "mark", s.mark.delay || 0);
+      return w;
+    }
+    if (s.lockup) {
+      const w = el("div", "lock");
+      if (s.lockup.mark) w.appendChild(anim(el("div", "mark", MARK_SVG), "mark", 0));
+      const word = anim(el("span", "word"), "mask", s.lockup.mark ? .34 : .05);
+      word.appendChild(el("i", null, s.lockup.word || "Brand <em>Mint</em>"));
+      w.appendChild(word);
+      const d0 = s.lockup.mark ? .30 : 0;
+      w.appendChild(anim(el("div", "rule"), "rule", .34 + d0));
+      if (s.lockup.city) w.appendChild(anim(el("div", "city", s.lockup.city), "fade", .52 + d0));
+      if (s.lockup.follow) {
+        w.appendChild(anim(el("div", "followline", s.lockup.follow.text || "Follow to know more"), "fade", .70 + d0));
+        if (s.lockup.follow.handle) {
+          const f = anim(el("div", "follow"), "pop", .84 + d0);
+          f.appendChild(el("b", null, s.lockup.follow.handle));
+          w.appendChild(f);
+        }
+      }
+      return w;
+    }
+    if (s.endcard) {
+      const w = el("div", "endcta");
+      w.appendChild(anim(el("div", "box", s.endcard.cta), "pop", .14));
+      if (s.endcard.hint) w.appendChild(anim(el("div", "hint", s.endcard.hint), "fade", .4));
+      if (s.endcard.strip) {
+        const st = anim(el("div", "endstrip"), "fade", .58);
+        s.endcard.strip.forEach(t => st.appendChild(el("span", null, t)));
+        w.appendChild(st);
+      }
+      return w;
+    }
+    return null;
+  }
+
+  const host = $("scenes");
+  SCENES.forEach((s, i) => {
+    const sec = el("section", "scene");
+    sec.dataset.scene = i;
+    sec.dataset.mode = s.mode;
+    if (s.center || s.number || s.lockup || s.endcard || s.glyph || s.mark
+        || s.icons || s.device) sec.classList.add("center");
+    if (s.bg) sec.classList.add("over-bg");
+    if (s.flash || s.number) sec.classList.add("flash");
+    if (RAIL && RAIL.scenes.includes(i)) sec.classList.add("rail-on");
+    if (s.kicker) sec.appendChild(anim(el("p", "kicker", s.kicker), "fade", 0));
+    if (s.art) {
+      const [key, mod] = Array.isArray(s.art) ? s.art : [s.art, null];
+      const a = anim(el("div", "art" + (mod === "no" ? " no" : "")), "draw", .04);
+      a.innerHTML = `<svg viewBox="0 0 24 24"><path d="${ICON[key] || ICON.check}"/></svg>`;
+      sec.appendChild(a);
+    }
+    const block = buildBlock(s);
+    if (block) sec.appendChild(block);
+    if (s.sub) sec.appendChild(anim(el("p", "sub", s.sub), "fade", .46));
+    host.appendChild(sec);
+  });
+  /* Fit hero type to the stage.
+
+     12.4cqw holds about fourteen characters. A longer line used to wrap and get
+     clipped by .ln's overflow. Rather than ask whoever writes the scenes to
+     count characters, measure: step the size down until the widest authored
+     line fits. Runs once, before any frame is drawn, so every frame agrees. */
+  /* Measure each drawn subject once. getTotalLength is exact and the icons
+     differ in length by a factor of three, so a shared guess would have some
+     drawing instantly and others never finishing. */
+  host.querySelectorAll(".art path").forEach(p => {
+    p.dataset.len = String(Math.ceil(p.getTotalLength()));
+  });
+
+  host.querySelectorAll(".h1").forEach(h => {
+    const lines = [...h.querySelectorAll(".ln i")];
+    const wide = () => lines.some(i => i.scrollWidth > i.parentElement.clientWidth + 1);
+    for (let size = 12.4; wide() && size > 5.6; ) {
+      size -= 0.3;
+      h.style.fontSize = size.toFixed(2) + "cqw";
+    }
+  });
+
+  const scenes = [...host.querySelectorAll(".scene")];
+
+  let nodeEls = [];
+  if (RAIL) {
+    RAIL.nodes.forEach((label, i) => {
+      const n = el("i", "node");
+      n.style.top = (i / Math.max(1, RAIL.nodes.length - 1) * 100) + "%";
+      n.appendChild(el("em", null, label));
+      rail.appendChild(n);
+    });
+    nodeEls = [...rail.querySelectorAll(".node")];
+  }
+
+  /* ── animation ──────────────────────────────────────────────────────── */
+  const clamp=(v)=>v<0?0:v>1?1:v;
+  // Expo-out: fast departure, long settle. The standard motion-design curve.
+  const expo =(p)=>p>=1?1:1-Math.pow(2,-10*p);
+  const back =(p)=>{const c=1.70158+1;return 1+(c+1)*Math.pow(p-1,3)+c*Math.pow(p-1,2);};
+
+  /* Every element animates from the scene's own clock, so any frame — live or
+     rendered — is a true in-between. Nothing is simply switched on. */
+  function applyAnim(el, kind, delay, tl, dur) {
+    const p = clamp((tl - delay) / dur);
+    const e = expo(p);
+    switch (kind) {
+      case "fade":  el.style.opacity=e; el.style.transform=`translateY(${(1-e)*14}px)`; break;
+      case "mask":  el.firstElementChild.style.transform=`translateY(${(1-e)*104}%)`; el.style.opacity=p>0?1:0; break;
+      case "row":   el.style.opacity=e; el.style.transform=`translateX(${(1-e)*26}px)`; break;
+      case "pop":   el.style.opacity=e; el.style.transform=`scale(${.9+.1*back(clamp(p))})`; break;
+      case "grow-l":el.style.flexBasis=(e*50)+"%"; el.style.opacity=e; break;
+      case "grow-r":el.style.flexBasis=(e*50)+"%"; el.style.opacity=e; break;
+      case "rule":  el.style.width=(e*46)+"%"; break;
+      // The plane swings towards the viewer and settles short of flat, so it
+      // keeps a face and an edge. Ending at 0 would collapse it to a rectangle.
+      // The subject strokes itself on, then — if the read denies it — the slash
+      // is drawn through. Measured length, so every icon draws at one speed.
+      case "draw": {
+        el.style.opacity = clamp(p * 2.4);
+        const path = el.querySelector("path");
+        if (path) {
+          const L = Number(path.dataset.len || 100);
+          path.style.strokeDasharray = L;
+          path.style.strokeDashoffset = L * (1 - expo(clamp((tl - delay) / (dur * 1.5))));
+        }
+        if (el.classList.contains("no")) {
+          const sp = expo(clamp((tl - delay - .40) / .34));
+          el.style.setProperty("--slash", (sp * 112) + "%");
+        }
+        break;
+      }
+      case "tilt":  el.style.opacity=e;
+                    el.style.transform=`rotateY(${-26+12*e}deg) rotateX(${7-3*e}deg) translateY(${(1-e)*30}px)`;
+                    break;
+      case "count": {
+        // Slam in, and run the digits up underneath it. The number arrives
+        // before it is legible, which is what makes it feel like a hit.
+        el.style.opacity=e;
+        el.style.transform=`scale(${.62+.38*back(clamp(p))})`;
+        const to = el.dataset.to || "";
+        const digits = to.replace(/[^0-9]/g, "");
+        const num = el.querySelector(".num");
+        if (digits && num) {
+          const cp = expo(clamp((tl - delay) / (dur * 1.9)));
+          const n = Math.round(parseInt(digits, 10) * cp);
+          num.textContent = to.replace(digits, String(n));
+        }
+        break;
+      }
+      case "strike": {
+        // The word arrives, then the line is drawn through it a beat later.
+        el.style.opacity = clamp(p * 2.2);
+        el.style.transform = `translateX(${(1-e)*22}px)`;
+        const sp = expo(clamp((tl - delay - 0.26) / 0.34));
+        el.querySelector(".txt").style.setProperty("--w", (sp * 104) + "%");
+        break;
+      }
+      case "mark": {
+        // The monogram draws itself: the disc lands, then the M is stroked on.
+        el.style.opacity = clamp(p * 2.2);
+        el.style.transform = `scale(${.62 + .38 * back(clamp(p))})`;
+        const path = el.querySelector("path.m");
+        if (path) {
+          const L = 90;                                   // the M path is ~85 units
+          path.style.strokeDasharray = L;
+          path.style.strokeDashoffset = L * (1 - expo(clamp((tl - delay - .20) / (dur * 1.25))));
+        }
+        break;
+      }
+      case "crowd": {
+        // Every chip arrives on its own beat, then one mint sweep crosses the
+        // grid. Nothing lights up, because none of them is yours.
+        const chips = el.querySelectorAll("i");
+        for (let k = 0; k < chips.length; k++) {
+          const ck = expo(clamp((tl - delay - k * 0.012) / 0.42));
+          chips[k].style.opacity = ck * 0.9;
+          chips[k].style.transform = `scale(${.72 + .28 * ck})`;
+        }
+        const sweep = el.querySelector("u");
+        if (sweep) {
+          const sp = clamp((tl - delay - 0.30) / 0.85);
+          sweep.style.opacity = sp > 0 && sp < 1 ? 1 : 0;
+          sweep.style.transform = `translateX(${sp * 780}%)`;
+        }
+        break;
+      }
+      case "lane": {
+        // Six parcels cross the gate and leave. The red stroke tries to come
+        // back, stalls a third of the way, and fades. Nothing returns.
+        // Chip 0 is furthest right, so they cross the gate one after another
+        // and the lane is empty just as the line lands.
+        const chips = el.querySelectorAll("i");
+        const travel = ((tl - delay) / 3.0) * 150;
+        for (let k = 0; k < chips.length; k++) {
+          const x = 40 - k * 17 + travel;
+          chips[k].style.left = x + "%";
+          chips[k].style.opacity = (x > 96 || x < -22) ? 0 : 1;
+          chips[k].style.transform = `rotate(${Math.sin((x + k * 30) / 26) * 3}deg)`;
+        }
+        const back_ = el.querySelector("b");
+        if (back_) {
+          // Reaches back from the gate, stalls a third of the way, dies.
+          const bp = clamp((tl - delay - 1.35) / 0.55);
+          back_.style.width = (expo(bp) * 24) + "%";
+          back_.style.opacity = (1 - clamp((tl - delay - 2.05) / 0.5)) * clamp(bp * 3);
+        }
+        break;
+      }
+      case "parcel": {
+        // Lands at the door, is struck through, then goes back the way it came.
+        // Leaving to the right would carry it through the door, which is the
+        // one direction the shot must not imply.
+        const away = expo(clamp((tl - delay - 1.15) / 0.95));
+        el.style.opacity = clamp(p * 2.4) * (1 - away * 0.5);
+        el.style.transform =
+          `translateX(${-away*150}%) rotate(${-away*9}deg) scale(${.86+.14*back(clamp(p))})`;
+        const sl = expo(clamp((tl - delay - 0.5) / 0.42));
+        const s = el.querySelector(".slash");
+        if (s) s.style.width = (sl * 96) + "%";
+        break;
+      }
+    }
+  }
+
+  const SCENE_ANIM_DUR = .68;
+  function animateScene(i, tl) {
+    const el = scenes[i]; if (!el) return;
+    el.style.opacity = 1;
+    el.querySelectorAll("[data-a]").forEach(node => {
+      applyAnim(node, node.dataset.a, parseFloat(node.dataset.d || 0), tl, SCENE_ANIM_DUR);
+    });
+  }
+
+  let current=-1;
+  function setScene(i) {
+    if (i===current) return;
+    scenes.forEach((s,k)=>s.classList.toggle("is-live",k===i));
+    stage.classList.toggle("on-flash", !!scenes[i]?.classList.contains("flash"));
+    current=i;
+  }
+
+  let renderedKey="";
+  function paintCaption(i,t) {
+    const mode = scenes[i]?.dataset.mode;
+    // Captions only where the visual is not already carrying the same words.
+    if ((mode !== "support" && mode !== "broll") || !SCENE_WORDS[i]) {
+      if (cap.childElementCount) cap.innerHTML=""; renderedKey=""; return;
+    }
+    const [a,b]=SCENE_WORDS[i];
+    const ws=WORDS.slice(a,b+1);
+    // Three or four words at a time. A whole phrase at this size is a wall.
+    const groups=[]; let run=[];
+    for (const w of ws) {
+      const chars=run.reduce((s,x)=>s+x.w.length+1,0)+w.w.length;
+      if (run.length && (run.length>=4 || chars>26)) { groups.push(run); run=[]; }
+      run.push(w);
+    }
+    if (run.length) groups.push(run);
+    let gi=groups.findIndex(g=>t>=g[0].s && t<g[g.length-1].e);
+    if (gi===-1) gi = t<groups[0][0].s ? 0 : groups.length-1;
+    const key=i+":"+gi;
+    if (key!==renderedKey) {
+      cap.innerHTML="";
+      groups[gi].forEach(w=>{const s=document.createElement("span");s.className="cap-word";s.textContent=w.w;cap.appendChild(s);});
+      renderedKey=key;
+    }
+    groups[gi].forEach((w,k)=>{
+      const n=cap.children[k]; if(!n) return;
+      n.classList.toggle("spoken", t>=w.s);
+      n.classList.toggle("active", t>=w.s && t<w.e);
+    });
+  }
+
+  function sceneAt(t){ for(let i=PHRASES.length-1;i>=1;i--) if(t>=PHRASES[i][0]) return i; return 0; }
+
+  function paint(t) {
+    const i=sceneAt(t);
+    setScene(i);
+    animateScene(i, t - PHRASES[i][0]);
+    paintCaption(i,t);
+
+    progFill.style.width=(clamp(t/DURATION)*100).toFixed(2)+"%";
+
+    const onRail = RAIL && RAIL.scenes.includes(i);
+    rail.style.opacity = onRail ? 1 : 0;
+    if (onRail) {
+      const from=PHRASES[RAIL.scenes[0]][0], to=PHRASES[RAIL.scenes[RAIL.scenes.length-1]][1];
+      railFill.style.height=(clamp((t-from)/(to-from))*100).toFixed(2)+"%";
+      const reached = RAIL.scenes.filter(s => i >= s).length - 1;
+      nodeEls.forEach((n,k)=>{ n.classList.toggle("on",k<=reached); n.classList.toggle("now",k===reached);
+        const em=n.querySelector("em"); if(em) em.style.opacity = k===reached ? 1 : 0; });
+    }
+
+    const onB = i in B_ROLL;
+    brollFrame.style.visibility = onB && RENDER ? "visible" : "hidden";
+    brollFrame.style.opacity = onB && RENDER ? 1 : 0;
+    if (!RENDER) {
+      if (onB) {
+        broll.style.visibility="visible";
+        if (Math.abs(broll.currentTime - (B_ROLL[i] + (t-PHRASES[i][0]))) > .4) { try{ broll.currentTime=B_ROLL[i]+(t-PHRASES[i][0]); }catch(_){} }
+        if (broll.paused) broll.play().catch(()=>{});
+        broll.style.opacity = broll.videoWidth>0 ? 1 : 0;
+      } else { broll.pause(); broll.style.opacity=0; broll.style.visibility="hidden"; }
+    }
+    const showGrade = onB && (RENDER || broll.videoWidth>0);
+    bgrade.style.visibility = showGrade ? "visible" : "hidden";
+    bgrade.style.opacity = showGrade ? 1 : 0;
+
+    aura.style.transform=`translate(${Math.sin(t*.45)*5}%, ${Math.cos(t*.33)*6-8}%)`;
+  }
+
+  window.__seek=(t,src)=>{ if(src!==undefined) brollFrame.src=src||""; paint(t);
+    return { scene:current, caption:cap.textContent, active:[...cap.querySelectorAll(".cap-word.active")].map(n=>n.textContent) }; };
+  window.__meta={ words:WORDS, phrases:PHRASES, bRoll:B_ROLL, duration:DURATION, scenes:SCENES.length };
+
+  function frame(){ paint(vo.currentTime); if(!vo.paused) requestAnimationFrame(frame); }
+  function play(){ gate.hidden=true; vo.play().then(()=>requestAnimationFrame(frame)).catch(()=>{gate.hidden=false;}); }
+  gate.addEventListener("click",play);
+  $("replay").addEventListener("click",()=>{vo.currentTime=0;current=-1;renderedKey="";play();});
+  const tg=$("toggle");
+  tg.addEventListener("click",()=>{ if(vo.paused){vo.play();requestAnimationFrame(frame);tg.textContent="Pause";} else {vo.pause();broll.pause();tg.textContent="Play";} });
+  vo.addEventListener("ended",()=>{tg.textContent="Play";gate.hidden=false;gate.querySelector(".t").textContent="Watch again";});
+  if (RENDER) paint(0);
+})();
+</script>

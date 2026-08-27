@@ -1,0 +1,33 @@
+import { AgencyMobileNav, AgencyNav } from "@/components/AgencyNav";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { trpc } from "@/lib/trpc";
+import { ClipboardCheck } from "lucide-react";
+import { cloneElement, isValidElement, useId, useState } from "react";
+import { toast } from "sonner";
+
+export default function Deliverables() {
+  const utils = trpc.useUtils();
+  const projects = trpc.projects.list.useQuery(undefined, { retry: false });
+  const [form, setForm] = useState({ projectId: "", title: "", assignedTo: "", dueAt: "" });
+  const create = trpc.projects.addDeliverable.useMutation({ onSuccess: () => { utils.projects.list.invalidate(); utils.dashboard.overview.invalidate(); toast.success("Deliverable added"); setForm({ projectId: "", title: "", assignedTo: "", dueAt: "" }); }, onError: (error) => toast.error(error.message) });
+  const submit = () => { if (!form.projectId || !form.title) return toast.error("Project and deliverable title are required"); create.mutate({ projectId: Number(form.projectId), title: form.title, assignedTo: form.assignedTo || undefined, dueAt: form.dueAt ? new Date(form.dueAt).getTime() : null }); };
+  return <div className="agency-app-shell"><AgencyNav /><main className="agency-main"><header className="agency-topbar gap-3"><AgencyMobileNav /><div><p className="eyebrow">Delivery items</p><p className="mt-1 text-xs text-[#748b82]">Brand Mint Studios</p></div></header><section className="pt-10 sm:pt-14"><p className="eyebrow">Projects</p><h1 className="mt-3 font-display text-4xl tracking-[-0.06em] text-[#102f25] sm:text-5xl">Keep delivery visible.</h1><p className="mt-3 max-w-xl text-sm leading-6 text-[#668078]">Create assigned deliverables and review the project record, deadline and progress.</p><div className="mt-9 grid gap-5 lg:grid-cols-[.8fr_1.2fr]"><section className="surface-card space-y-4"><p className="eyebrow">Add deliverable</p><Field label="Project">{(id) => <Select value={form.projectId} onValueChange={(value) => setForm({ ...form, projectId: value })}><SelectTrigger id={id}><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{projects.data?.map((item) => <SelectItem key={item.project.id} value={String(item.project.id)}>{item.project.title}</SelectItem>)}</SelectContent></Select>}</Field><Field label="Deliverable"><Input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></Field><Field label="Assigned to"><Input value={form.assignedTo} onChange={(event) => setForm({ ...form, assignedTo: event.target.value })} /></Field><Field label="Due date"><Input type="date" value={form.dueAt} onChange={(event) => setForm({ ...form, dueAt: event.target.value })} /></Field><Button onClick={submit} disabled={create.isPending} className="mt-2 bg-[#103c2e] text-white hover:bg-[#0b3024]">Add deliverable</Button></section><section className="surface-card"><p className="eyebrow">Project record</p><div className="mt-5 space-y-3">{projects.data?.length ? projects.data.map((item) => <article key={item.project.id} className="rounded-xl border border-[#e3ece7] p-4"><div className="flex items-start justify-between gap-4"><div><p className="text-sm font-bold text-[#315347]">{item.project.title}</p><p className="mt-1 text-[11px] text-[#789087]">{item.clientName} · {item.project.status.replace("_", " ")}</p></div><ClipboardCheck className="h-4 w-4 text-[#0d8855]" /></div><div className="mt-4 grid gap-2 text-[11px] text-[#58736a] sm:grid-cols-2"><span>Deadline: {item.project.deadline ? new Date(item.project.deadline).toLocaleDateString() : "Not set"}</span><span>Assigned: {item.project.assignedTo || "Not set"}</span></div><div className="mt-4 border-t border-[#e7efea] pt-3">{item.deliverables.length ? item.deliverables.map((deliverable) => <div key={deliverable.id} className="flex items-center justify-between py-1.5 text-xs"><span className="font-semibold text-[#35564a]">{deliverable.title}</span><span className="text-[#789087]">{deliverable.assignedTo || "Unassigned"}</span></div>) : <p className="text-xs text-[#8aa097]">No deliverables added.</p>}</div></article>) : <div className="rounded-xl border border-dashed border-[#d6e3dc] bg-[#fbfcfa] p-4 text-xs text-[#789087]">Project records will appear here.</div>}</div></section></div></section></main></div>;
+}
+
+/** See the note on Field in AdminWorkspace: the label must name its control. */
+function Field({ label, children }: { label: string; children: React.ReactNode | ((id: string) => React.ReactNode) }) {
+  const id = useId();
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id} className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#5e766d]">{label}</Label>
+      {typeof children === "function"
+        ? children(id)
+        : isValidElement(children)
+          ? cloneElement(children as React.ReactElement<{ id?: string }>, { id })
+          : children}
+    </div>
+  );
+}
