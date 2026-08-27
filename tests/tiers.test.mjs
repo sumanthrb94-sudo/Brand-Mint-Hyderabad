@@ -127,13 +127,14 @@ const {
 /* ── the published numbers ──────────────────────────────────────── */
 
 const PUBLISHED = [
+  { id: "whatsapp", label: "WhatsApp Store", price: 49999,  weeks: 4,  warrantyDays: 30 },
   { id: "starter",  label: "Starter Store",  price: 99000,  weeks: 8,  warrantyDays: 30 },
   { id: "growth",   label: "Growth Store",   price: 200000, weeks: 12, warrantyDays: 30 },
   { id: "commerce", label: "Commerce Store", price: 300000, weeks: 12, warrantyDays: 60 },
 ];
 
-test("the three tiers are exactly what the services document publishes", () => {
-  assert.equal(TIERS.length, 3, "there are three tiers and no more");
+test("the tiers are exactly what the studio publishes", () => {
+  assert.equal(TIERS.length, 4, "there are four tiers and no more");
   PUBLISHED.forEach((want) => {
     const got = tier(want.id);
     assert.ok(got, `${want.id} exists`);
@@ -179,8 +180,15 @@ test("warranty is read from the tier, not from the standing term", () => {
 
 test("each tier includes everything the tier below it does", () => {
   const flat = (id) => tierIncludes(id).flatMap((g) => g.items);
+  // WhatsApp Store is the base of the chain; Starter adds the operations
+  // layer back on top of it.
+  const whatsapp = flat("whatsapp");
   const starter = flat("starter");
   const growth = flat("growth");
+  whatsapp.forEach((item) => {
+    assert.ok(starter.includes(item), `Starter must still include "${item}"`);
+  });
+  assert.ok(starter.length > whatsapp.length, "Starter adds something");
   const commerce = flat("commerce");
 
   assert.ok(starter.length > 0, "Starter includes something");

@@ -629,16 +629,30 @@ export const DAY_RATE = 10000;
    ══════════════════════════════════════════════════════════════════ */
 export const TIERS = [
   {
-    id: "starter",
-    label: "Starter Store",
-    price: 99000,
-    weeks: 8,
+    /* THE ENTRY TIER, AND THE POINT OF IT.
+     *
+     * A real store — catalogue, cart, checkout, Razorpay — where the
+     * OPERATIONS layer is a person with a phone instead of software. No
+     * customer accounts, no automated email, no courier API, no ticketing.
+     * Every order lands on WhatsApp with the message already written.
+     *
+     * The expensive part of an ecommerce build is never the shop; it is the
+     * operations software behind it. A jeweller doing thirty orders a month
+     * answers those thirty customers herself either way, so that software is
+     * cost with no return until volume arrives. Leaving it out is what makes
+     * ₹49,999 an honest price rather than a discounted one.
+     *
+     * It is also the bottom of the ladder in the literal sense: Starter
+     * inherits it and adds the operations layer back. */
+    id: "whatsapp",
+    label: "WhatsApp Store",
+    price: 49999,
+    weeks: 4,
     warrantyDays: 30,
-    blurb: "A complete, working online store. Everything needed to take orders and get paid.",
+    blurb: "A complete store you run from your phone. Orders, returns and customers all handled on WhatsApp — no operations software to pay for or learn.",
     adds: [
       { group: "Foundation", items: [
         "Database design and setup",
-        "Customer accounts — phone OTP login and signup",
         "Deployment, domain connection, SSL",
       ] },
       { group: "Storefront", items: [
@@ -647,31 +661,59 @@ export const TIERS = [
         "Product detail pages",
         "Search and category filters",
         "Cart",
+        "Saved pieces — a wishlist that needs no account",
       ] },
       { group: "Checkout & payments", items: [
         "Checkout flow",
-        "Razorpay integration — online payments and COD",
+        "Razorpay integration — UPI, cards, netbanking and COD",
+        "Reserve now, pay on a WhatsApp link you send",
         "Payment confirmation and webhook handling",
       ] },
       { group: "Orders", items: [
         "Order placement and confirmation",
-        "Order confirmation emails to customer",
-        "Shipping — admin enters courier and tracking number manually",
-        "Customer order history",
+        "Shipping — you enter the courier and tracking number",
+        "An order page the customer can track from, with no login",
       ] },
       { group: "Admin", items: [
         "Admin dashboard — view and manage orders",
         "Product management — add, edit, remove",
         "Stock levels and out-of-stock handling",
+        "Discount codes with minimum-spend rules",
+        "Customers grouped by phone number, with lifetime value",
+      ] },
+      { group: "The WhatsApp desk", items: [
+        "Every order handed to you as a pre-written message — nothing retyped",
+        "Return requests raised by the customer, recorded against the order",
+        "Refunds recorded, with the message to the customer already drafted",
+      ] },
+      { group: "Compliance & launch", items: [
+        "Legal pages — Privacy Policy, Terms, Refund Policy, Shipping Policy",
+        "On-page SEO setup",
+        "Handover — walkthrough video and documentation",
+        "30-day bug warranty",
+      ] },
+    ],
+  },
+  {
+    id: "starter",
+    label: "Starter Store",
+    price: 99000,
+    weeks: 8,
+    warrantyDays: 30,
+    inherits: "whatsapp",
+    blurb: "Everything in the WhatsApp Store, plus the operations layer — accounts, automated email and a GST invoice, so the shop stops depending on you answering it.",
+    adds: [
+      { group: "Foundation", items: [
+        "Customer accounts — phone OTP login and signup",
+      ] },
+      { group: "Orders", items: [
+        "Order confirmation emails to customer",
+        "Customer order history",
       ] },
       { group: "Compliance & launch", items: [
         "GST tax invoice PDF",
-        "Legal pages — Privacy Policy, Terms, Refund Policy, Shipping Policy",
-        "On-page SEO setup",
         "Automated smoke tests (Playwright)",
         "5-day client testing window (UAT) before launch",
-        "Handover — walkthrough video and documentation",
-        "30-day bug warranty",
       ] },
     ],
   },
@@ -1340,6 +1382,21 @@ export async function dedupeIntake(projectId) {
  * The retired templates below are kept for the same reason RETIRED_SERVICE_TYPES
  * is: an old project still opens its schedule. */
 export const MILESTONE_TEMPLATES = {
+  /* 4 weeks = 28 days. Shorter than Starter because the operations layer is
+     what takes the time: no accounts to build, no email journeys to wire, no
+     test suite to write. The client-owned rows are still here — the asset
+     handover and the testing window are exactly where a small shop stalls,
+     and dating them is the whole reason the portal exists. */
+  whatsapp: [
+    { title: "Kickoff + scope sign-off", owner: "us", offsetDays: 2 },
+    { title: "Brand assets + product data supplied", owner: "client", offsetDays: 5 },
+    { title: "Design direction approved", owner: "client", offsetDays: 9 },
+    { title: "Storefront — catalogue, search, cart", owner: "us", offsetDays: 16 },
+    { title: "Checkout, Razorpay + orders", owner: "us", offsetDays: 21 },
+    { title: "Admin, WhatsApp desk + legal pages", owner: "us", offsetDays: 24 },
+    { title: "Your testing window", owner: "client", offsetDays: 26 },
+    { title: "Launch + handover", owner: "us", offsetDays: 28 },
+  ],
   starter: [
     { title: "Kickoff + scope sign-off", owner: "us", offsetDays: 3 },
     { title: "Brand assets + product data supplied", owner: "client", offsetDays: 7 },

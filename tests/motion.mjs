@@ -190,9 +190,15 @@ try {
     await page.goto(`${BASE}/home-v2`, { waitUntil: "load" });
     await page.waitForTimeout(2400);
     const trust = await page.evaluate(`[...document.querySelectorAll(".trust-k")].map(e => e.textContent.trim())`);
-    check(trust.includes("3–5wk"), "the range 3–5wk is left alone, not counted", trust.join(" | "));
     check(trust.includes("50/50"), "the ratio 50/50 is left alone", trust.join(" | "));
     check(trust.includes("2"), "the plain number 2 ends on 2", trust.join(" | "));
+    check(trust.includes("4wk"), "the counted 4wk lands on 4, not 3 or 5", trust.join(" | "));
+    /* This used to name "3–5wk" and assert the counter left the RANGE alone.
+       The hero no longer carries a range — it carries the WhatsApp Store's
+       real 4 weeks — so that assertion had nothing left to protect and was
+       only pinning old copy. The guard it tested (/^\d+$/ in the motion
+       script) is still live and is still covered by the 50/50 ratio above.
+       Restore a range check here if a range ever returns to the hero. */
     await ctx.close();
   }
 } catch (err) {

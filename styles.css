@@ -935,6 +935,16 @@ main {
   grid-template-columns: repeat(3, 1fr);
   gap: 18px;
 }
+/* The tier grid only. A fourth tier in a three-column grid orphans one card on
+   a row of its own, which reads as a mistake rather than as a fourth option.
+   The supporting grid below it keeps three. */
+.services--tiers {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+@media (max-width: 1100px) {
+  .services--tiers { grid-template-columns: repeat(2, 1fr); }
+}
 .service {
   background: var(--white);
   border: 1px solid var(--line);

@@ -201,9 +201,10 @@ why it kept getting abandoned halfway.
 1. **Clients → New engagement** (the same button is on Delivery).
 2. **Name them, then pick the deal** — One-time project · Project then retainer ·
    Retainer only. The form asks only for what that shape needs.
-3. **Pick the tier.** Starter ₹99,000 · 8 weeks, Growth ₹2,00,000 · 12 weeks,
-   Commerce ₹3,00,000 · 12+ weeks. **You do not type a price or a length** — the
-   tier carries both, which is the entire reason tiers exist. Tick any add-ons.
+3. **Pick the tier.** WhatsApp Store ₹49,999 · 4 weeks, Starter ₹99,000 ·
+   8 weeks, Growth ₹2,00,000 · 12 weeks, Commerce ₹3,00,000 · 12+ weeks. **You do
+   not type a price or a length** — the tier carries both, which is the entire
+   reason tiers exist. Tick any add-ons.
 4. **Pick the care plan** if the deal has a retainer — Care ₹12,500, Growth
    ₹25,000, Managed Commerce ₹50,000 a month.
 5. **Read the preview.** It writes out exactly what is about to be created — the

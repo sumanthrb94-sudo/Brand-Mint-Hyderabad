@@ -180,6 +180,13 @@ h2.section-title {
 }
 .brand-name { font-weight: 700; font-size: 1.03rem; letter-spacing: -0.02em; }
 .brand-city { font-family: var(--mono); font-size: 0.66rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+/* On a phone the header has no room for it: " — Hyderabad" wraps to a second
+   line, orphaning the dash under the wordmark and making the sticky header
+   taller than the content it sits over. Hidden with display:none rather than
+   visibility, so it takes no space and no screen reader announces a fragment.
+   Nothing is lost — the city is in the <title>, the hero badge, the about
+   paragraph and the footer address. */
+@media (max-width: 620px) { .brand-city { display: none; } }
 
 .nav { display: flex; align-items: center; gap: 4px; }
 /* 44px minimum touch target — the skill's priority-2 CRITICAL rule. The
