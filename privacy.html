@@ -96,8 +96,9 @@
         </li>
         <li>
           <strong>Account details</strong> if you sign in — your email
-          address and a session token issued by our authentication provider
-          (Supabase).
+          address, your name and profile picture if you use Google sign-in,
+          and a session token issued by our authentication provider
+          (Google Firebase Authentication).
         </li>
         <li>
           <strong>Usage data</strong> — anonymous, aggregated analytics
@@ -110,7 +111,11 @@
       <h2>2. Why we use it</h2>
       <ul>
         <li>To respond to your inquiry and scope a potential project.</li>
-        <li>To send the magic-link email when you choose to sign in.</li>
+        <li>To send the sign-in link when you choose to sign in by email.</li>
+        <li>
+          To run the client portal — showing you your project timeline,
+          files, invoices and messages if you are a client.
+        </li>
         <li>To improve the website's performance and content.</li>
       </ul>
       <p>
@@ -120,10 +125,10 @@
 
       <h2>3. Where it lives</h2>
       <p>
-        Inquiries and account records are stored in Supabase (hosted in
-        Singapore on AWS). The website is served by Vercel. Both providers
-        offer industry-standard transport encryption (TLS) and at-rest
-        encryption.
+        Inquiries, client records and portal data are stored in Google Cloud
+        Firestore, in the region selected for our Firebase project. The
+        website is served by Vercel. Both providers offer industry-standard
+        transport encryption (TLS) and at-rest encryption.
       </p>
 
       <h2>4. How long we keep it</h2>
@@ -153,8 +158,9 @@
       <h2>6. Third-party processors</h2>
       <ul>
         <li>
-          <strong>Supabase</strong> — database, magic-link email, auth
-          session storage.
+          <strong>Google Firebase</strong> (Google Cloud) — database,
+          authentication, sign-in email delivery, and file storage for
+          project deliverables.
         </li>
         <li>
           <strong>Vercel</strong> — website hosting and privacy-friendly

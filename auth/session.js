@@ -1,79 +1,84 @@
 /**
- * Brand Mint — shared session core.
+ * Brand Mint — shared session core (Firebase Auth).
  *
- * ONE Supabase client, ONE session, used by every surface:
- *   /admin.html   → requires role 'admin'
- *   /portal.html  → requires role 'client' with at least one client membership
+ * ONE auth instance, ONE session, used by every surface:
+ *   /admin.html   → requires profiles/{uid}.role === 'admin'
+ *   /portal.html  → requires at least one clientUsers membership
  *   /index.html   → optional, just drives nav state
  *
- * This replaces the old `bm.demo.session` fake-auth. The role is read from the
- * `profiles` table, never from user_metadata — a user can edit their own
- * metadata through the SDK, so a metadata role check is not a security check.
- * The database enforces access via RLS; this module only decides which screen
- * to show.
+ * The exported API is unchanged from the Supabase version on purpose — every
+ * caller (admin/app.js, admin/auth.js, portal/app.js, auth/marketing.js,
+ * login.html) keeps working without edits.
+ *
+ * The role lives in the `profiles` collection, never in a custom claim we let
+ * the client set and never in a field the client can write. `firestore.rules`
+ * is what actually enforces it; this module only decides which screen to show.
  *
  * Public API:
- *   getClient()                  → Supabase client (lazy, cached)
- *   peekSession()                → sync, localStorage-only, for first paint
+ *   getClient()                  → { app, auth, db, sdk }
+ *   peekSession() / peekProfile()→ sync, localStorage-only, for first paint
  *   getSession() / getUser()     → async, authoritative
- *   getProfile({ force })        → async, { id, email, fullName, role, clientIds }
- *   signInWithGoogle(next)       → OAuth redirect
- *   signInWithEmail(email, next) → magic link
+ *   getProfile({ force })        → { id, email, fullName, role, clientIds }
+ *   signInWithGoogle(next)       → popup, redirect fallback
+ *   signInWithEmail(email, next) → email sign-in link
  *   signOut(redirectTo)
- *   onChange(fn)                 → auth-state subscription, returns unsubscribe
- *   requireRole(role, opts)      → gate a page; resolves with the profile
+ *   onChange(fn)                 → returns unsubscribe
+ *   requireRole(role, opts)      → page gate; resolves with the profile
  */
 
-const PROJECT_REF = "ycdfgtljxqrhyobnwwbz";
-export const SUPABASE_URL = `https://${PROJECT_REF}.supabase.co`;
-export const SUPABASE_ANON_KEY = "sb_publishable_ddoQWG7ZWqNwTRJFBdfbHA_HoX48n1l";
+import { getFirebase, isConfigured } from "/firebase/app.js";
+import { firebaseConfig } from "/firebase/config.js";
 
-const TOKEN_KEY = `sb-${PROJECT_REF}-auth-token`;
+/**
+ * Our own first-paint hint. We cache it rather than reading Firebase's
+ * internal localStorage key, because that key's shape is an implementation
+ * detail. It is a DISPLAY hint only — forging it shows you a nav link and
+ * an empty dashboard, because every read is checked server-side by rules.
+ */
 const PROFILE_KEY = "bm.auth.profile.v1";
+const EMAIL_LINK_KEY = "bm.auth.emailForSignIn";
 
-let _client = null;
-let _clientPromise = null;
 let _profile = null;
 let _profilePromise = null;
+let _authReady = null;
 const _listeners = new Set();
+
+export { isConfigured };
+export const PROJECT_ID = firebaseConfig.projectId;
 
 /* ------------------------------------------------------------------ client */
 
 export async function getClient() {
-  if (_client) return _client;
-  if (!_clientPromise) {
-    _clientPromise = import("https://esm.sh/@supabase/supabase-js@2").then(
-      ({ createClient }) => {
-        _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true,
-            flowType: "pkce",
-            storageKey: TOKEN_KEY,
-          },
-        });
-        _client.auth.onAuthStateChange((event) => {
-          // Any identity change invalidates the cached role.
-          if (event === "SIGNED_OUT" || event === "SIGNED_IN" || event === "USER_UPDATED") {
-            _profile = null;
-            _profilePromise = null;
-            if (event === "SIGNED_OUT") clearCachedProfile();
-          }
-          for (const fn of _listeners) {
-            try { fn(event, _profile); } catch (e) { console.error("[auth] listener", e); }
-          }
-        });
-        return _client;
+  const fb = await getFirebase();
+  if (!_authReady) _authReady = watchAuth(fb);
+  return fb;
+}
+
+/** Resolves once Firebase has restored (or ruled out) a persisted session. */
+function watchAuth(fb) {
+  const { onAuthStateChanged } = fb.sdk;
+  return new Promise((resolve) => {
+    let settled = false;
+    onAuthStateChanged(fb.auth, (user) => {
+      // Identity changed — the cached role is no longer trustworthy.
+      _profile = null;
+      _profilePromise = null;
+      if (!user) clearCachedProfile();
+
+      if (!settled) {
+        settled = true;
+        resolve(user);
       }
-    );
-  }
-  return _clientPromise;
+      const event = user ? "SIGNED_IN" : "SIGNED_OUT";
+      for (const fn of _listeners) {
+        try { fn(event, user); } catch (e) { console.error("[auth] listener", e); }
+      }
+    });
+  });
 }
 
 export function onChange(fn) {
   _listeners.add(fn);
-  // Make sure the client (and therefore the subscription) actually exists.
   getClient();
   return () => _listeners.delete(fn);
 }
@@ -81,25 +86,13 @@ export function onChange(fn) {
 /* -------------------------------------------------------------- fast peek */
 
 /**
- * Synchronous, localStorage-only read of the Supabase token. Good enough to
- * decide "show the gate" vs "show a spinner" before the SDK has loaded — it
- * proves a token exists and has not expired, nothing more. Never treat it as
- * an authorisation decision; the server does that.
+ * Synchronous read of our cached hint. Enough to decide "show a spinner" vs
+ * "bounce to /login" before the SDK has loaded. Never an authorisation
+ * decision — the server does that.
  */
 export function peekSession() {
-  try {
-    const raw = localStorage.getItem(TOKEN_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    const session = parsed?.currentSession || parsed;
-    const expiresAt = Number(session?.expires_at || 0);
-    if (!session?.access_token) return null;
-    // A slightly stale token is fine here; autoRefreshToken will renew it.
-    if (expiresAt && expiresAt * 1000 < Date.now() - 60_000) return null;
-    return session;
-  } catch {
-    return null;
-  }
+  const p = peekProfile();
+  return p ? { user: { id: p.id, email: p.email } } : null;
 }
 
 export function peekProfile() {
@@ -112,9 +105,7 @@ export function peekProfile() {
 }
 
 function cacheProfile(profile) {
-  try {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-  } catch {}
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); } catch {}
 }
 
 function clearCachedProfile() {
@@ -124,62 +115,137 @@ function clearCachedProfile() {
 /* ------------------------------------------------------------- session/user */
 
 export async function getSession() {
-  const sb = await getClient();
-  const { data } = await sb.auth.getSession();
-  return data?.session || null;
+  const user = await getUser();
+  return user ? { user } : null;
 }
 
 export async function getUser() {
-  const session = await getSession();
-  return session?.user || null;
+  const fb = await getClient();
+  if (fb.auth.currentUser) return fb.auth.currentUser;
+  return _authReady; // resolves with the restored user, or null
 }
 
 /**
- * Resolve the signed-in user's profile: role plus the client ids they may see.
- * Cached per page load; pass { force: true } after changing memberships.
+ * Resolve the signed-in user's profile: role plus the client ids they can
+ * see. Cached per page load; pass { force: true } after changing memberships.
  */
 export async function getProfile({ force = false } = {}) {
   if (_profile && !force) return _profile;
   if (_profilePromise && !force) return _profilePromise;
 
   _profilePromise = (async () => {
-    const sb = await getClient();
-    const { data: sessionData } = await sb.auth.getSession();
-    const user = sessionData?.session?.user;
+    const fb = await getClient();
+    const user = await getUser();
     if (!user) {
       _profile = null;
       clearCachedProfile();
       return null;
     }
 
-    const [{ data: row, error }, { data: memberships }] = await Promise.all([
-      sb.from("profiles").select("id, email, full_name, avatar_url, role").eq("id", user.id).maybeSingle(),
-      sb.from("client_users").select("client_id, role").eq("user_id", user.id),
-    ]);
+    const { doc, getDoc, setDoc, collection, query, where, getDocs } = fb.sdk;
 
-    if (error) console.warn("[auth] profile lookup failed", error.message);
+    // The profile document is created on first sign-in by the user
+    // themselves. Rules pin the role to 'client' on create, so this cannot
+    // be used to self-promote — an admin is made by editing the document in
+    // the Firebase console (see SETUP-FIREBASE.md).
+    const profileRef = doc(fb.db, "profiles", user.uid);
+    let snap = await getDoc(profileRef);
 
-    // The signup trigger creates the profile row. If it is missing (trigger not
-    // installed yet, or the row was deleted) fall back to the least-privileged
-    // interpretation rather than assuming admin.
+    if (!snap.exists()) {
+      try {
+        await setDoc(profileRef, {
+          email: user.email || "",
+          fullName: user.displayName || (user.email ? user.email.split("@")[0] : ""),
+          avatarUrl: user.photoURL || "",
+          role: "client",
+          createdAt: new Date().toISOString(),
+        });
+        snap = await getDoc(profileRef);
+      } catch (e) {
+        console.warn("[auth] could not create profile", e);
+      }
+    }
+
+    // Convert any invite left for this address into a real membership. This
+    // replaces the Postgres signup trigger; the equivalent guard lives in
+    // firestore.rules, which only permits the write when a matching invite
+    // exists AND the email is verified.
+    await claimPendingInvites(fb, user);
+
+    const memberships = await getDocs(
+      query(collection(fb.db, "clientUsers"), where("uid", "==", user.uid))
+    );
+
+    const data = snap.exists() ? snap.data() : null;
+
     _profile = {
-      id: user.id,
-      email: row?.email || user.email || "",
+      id: user.uid,
+      email: data?.email || user.email || "",
       fullName:
-        row?.full_name ||
-        user.user_metadata?.full_name ||
-        user.user_metadata?.name ||
-        (user.email ? user.email.split("@")[0] : ""),
-      avatarUrl: row?.avatar_url || user.user_metadata?.avatar_url || "",
-      role: row?.role === "admin" ? "admin" : "client",
-      clientIds: (memberships || []).map((m) => m.client_id),
-      profileMissing: !row,
+        data?.fullName || user.displayName || (user.email ? user.email.split("@")[0] : ""),
+      avatarUrl: data?.avatarUrl || user.photoURL || "",
+      // Least privilege when the document is missing or unreadable — never
+      // assume admin.
+      role: data?.role === "admin" ? "admin" : "client",
+      clientIds: memberships.docs.map((d) => d.data().clientId),
+      profileMissing: !data,
     };
     cacheProfile(_profile);
     return _profile;
   })();
 
   return _profilePromise;
+}
+
+/**
+ * Look for invites addressed to this user's verified email and turn each into
+ * a membership. Safe to call on every load: the document id is deterministic,
+ * so re-claiming is a no-op.
+ */
+async function claimPendingInvites(fb, user) {
+  if (!user.email || !user.emailVerified) return;
+  const { collection, query, where, getDocs, doc, setDoc, updateDoc } = fb.sdk;
+
+  // Query with the address EXACTLY as the ID token carries it. The rule
+  // compares `resource.data.email == request.auth.token.email`, and a list
+  // query is only allowed when its constraint provably matches the rule — so
+  // lowercasing here would make the two disagree and the read would be
+  // denied. Firebase normalises Google and email-link addresses to lowercase,
+  // and the admin writes invites lowercased, so these line up; if they ever
+  // didn't, the failure is "no invite found", never "wrong invite claimed".
+  const email = user.email;
+
+  try {
+    const pending = await getDocs(
+      query(collection(fb.db, "invites"), where("email", "==", email))
+    );
+    for (const inviteDoc of pending.docs) {
+      const { clientId } = inviteDoc.data();
+      if (!clientId) continue;
+      await setDoc(
+        doc(fb.db, "clientUsers", `${user.uid}_${clientId}`),
+        {
+          uid: user.uid,
+          clientId,
+          email,
+          role: "owner",
+          createdAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      if (!inviteDoc.data().acceptedAt) {
+        try {
+          await updateDoc(inviteDoc.ref, { acceptedAt: new Date().toISOString() });
+        } catch (e) {
+          // Non-fatal: the membership is what grants access.
+          console.warn("[auth] could not stamp invite accepted", e);
+        }
+      }
+    }
+  } catch (e) {
+    // A user with no invite simply has nothing to read here.
+    console.warn("[auth] invite claim skipped", e?.code || e);
+  }
 }
 
 /* --------------------------------------------------------------- sign in/out */
@@ -189,42 +255,78 @@ function absolute(path) {
 }
 
 export async function signInWithGoogle(next = "/portal") {
-  const sb = await getClient();
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: absolute(next),
-      queryParams: { prompt: "select_account" },
-    },
-  });
-  if (error) throw error;
+  const fb = await getClient();
+  const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } = fb.sdk;
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  try {
+    sessionStorage.setItem("bm.auth.next", next || "/portal");
+  } catch {}
+
+  try {
+    await signInWithPopup(fb.auth, provider);
+  } catch (e) {
+    // Popup blocked, or an in-app browser that can't open one. Redirect
+    // instead; the page reloads and the session is picked up on return.
+    if (
+      e?.code === "auth/popup-blocked" ||
+      e?.code === "auth/operation-not-supported-in-this-environment" ||
+      e?.code === "auth/cancelled-popup-request"
+    ) {
+      await signInWithRedirect(fb.auth, provider);
+      return;
+    }
+    throw e;
+  }
 }
 
 export async function signInWithEmail(email, next = "/portal") {
-  const sb = await getClient();
-  const { error } = await sb.auth.signInWithOtp({
-    email: (email || "").trim(),
-    options: {
-      emailRedirectTo: absolute(next),
-      // Onboarding only ever happens through an admin invite, so a stranger
-      // hitting the magic-link box must not create an account.
-      shouldCreateUser: true,
-    },
+  const fb = await getClient();
+  const { sendSignInLinkToEmail } = fb.sdk;
+  const clean = (email || "").trim();
+
+  await sendSignInLinkToEmail(fb.auth, clean, {
+    url: absolute(`/login?next=${encodeURIComponent(next || "/portal")}`),
+    handleCodeInApp: true,
   });
-  if (error) throw error;
+  // The link is opened on whatever device the mail is read on, so the address
+  // has to be remembered locally to complete sign-in without re-asking.
+  try { localStorage.setItem(EMAIL_LINK_KEY, clean); } catch {}
+}
+
+/**
+ * Completes an email-link sign-in if the current URL is one. Returns true if
+ * a sign-in happened. Called by login.html on load.
+ */
+export async function completeEmailLinkSignIn() {
+  const fb = await getClient();
+  const { isSignInWithEmailLink, signInWithEmailLink } = fb.sdk;
+  if (!isSignInWithEmailLink(fb.auth, window.location.href)) return false;
+
+  let email = null;
+  try { email = localStorage.getItem(EMAIL_LINK_KEY); } catch {}
+  if (!email) {
+    email = window.prompt("Confirm the email address this link was sent to:");
+  }
+  if (!email) return false;
+
+  await signInWithEmailLink(fb.auth, email, window.location.href);
+  try { localStorage.removeItem(EMAIL_LINK_KEY); } catch {}
+  return true;
 }
 
 export async function signOut(redirectTo = "/") {
   try {
-    const sb = await getClient();
-    await sb.auth.signOut();
+    const fb = await getClient();
+    await fb.sdk.signOut(fb.auth);
   } catch (e) {
     console.warn("[auth] signOut", e);
   }
   _profile = null;
   _profilePromise = null;
   clearCachedProfile();
-  // Clear the retired fake-session keys so an old browser cannot resurrect them.
+  // Clear retired fake-session keys so an old browser cannot resurrect them.
   for (const k of ["bm.demo.session", "bm.admin.v1.session", "bm.admin.v1.passhash"]) {
     try { localStorage.removeItem(k); } catch {}
   }
@@ -235,16 +337,14 @@ export async function signOut(redirectTo = "/") {
 
 /**
  * Page guard. Resolves with the profile when the user is allowed, and
- * redirects (never resolves) when they are not.
- *
- *   role   — 'admin' | 'client'
- *   signIn — where to send an unauthenticated visitor
- *   denied — where to send an authenticated visitor with the wrong role
+ * redirects (never resolving) when they are not.
  */
-export async function requireRole(role, { signIn = "/login", denied = "/login?denied=1", timeoutMs = 15000 } = {}) {
-  // If the SDK can't load or Supabase is unreachable the profile lookup never
-  // settles, and the caller would sit on its boot screen indefinitely. Fail
-  // loudly instead so the page can offer a retry.
+export async function requireRole(
+  role,
+  { signIn = "/login", denied = "/login?denied=1", timeoutMs = 15000 } = {}
+) {
+  // If the SDK can't load or Firestore is unreachable the lookup never
+  // settles, and the caller would sit on its boot screen indefinitely.
   const profile = await Promise.race([
     getProfile(),
     new Promise((_, reject) =>
@@ -255,7 +355,7 @@ export async function requireRole(role, { signIn = "/login", denied = "/login?de
   if (!profile) {
     const next = encodeURIComponent(window.location.pathname + window.location.search);
     window.location.replace(`${signIn}${signIn.includes("?") ? "&" : "?"}next=${next}`);
-    return new Promise(() => {}); // never resolves; the page is navigating away
+    return new Promise(() => {});
   }
 
   if (profile.role !== role) {
@@ -273,15 +373,18 @@ export async function requireRole(role, { signIn = "/login", denied = "/login?de
   return profile;
 }
 
-/** Strip the OAuth/magic-link params Supabase leaves behind after a redirect. */
+/** Strip the auth params Firebase leaves behind after a redirect or email link. */
 export function cleanAuthParamsFromUrl() {
   try {
     const url = new URL(window.location.href);
     let dirty = false;
-    for (const key of ["code", "type", "error", "error_description", "error_code", "next"]) {
+    for (const key of [
+      "apiKey", "oobCode", "mode", "lang", "continueUrl",
+      "code", "type", "error", "error_description", "next",
+    ]) {
       if (url.searchParams.has(key)) { url.searchParams.delete(key); dirty = true; }
     }
-    if (url.hash && /access_token|refresh_token|error/.test(url.hash)) {
+    if (url.hash && /access_token|id_token|error/.test(url.hash)) {
       url.hash = "";
       dirty = true;
     }

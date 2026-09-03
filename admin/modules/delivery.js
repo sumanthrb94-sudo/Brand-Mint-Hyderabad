@@ -7,7 +7,7 @@
  *   Thread       — the conversation, so feedback stops living in WhatsApp
  *
  * A deliverable stays invisible to the client while its status is 'draft'
- * (enforced by RLS, not just by this UI). "Send to client" flips it to
+ * (enforced by firestore.rules, not just by this UI). "Send to client" flips it to
  * awaiting_review, which is the moment it appears in their portal.
  *
  * Route: #/delivery  or  #/delivery/<clientId>

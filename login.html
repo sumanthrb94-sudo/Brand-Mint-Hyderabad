@@ -177,9 +177,10 @@
         getProfile,
         signInWithGoogle,
         signInWithEmail,
+        completeEmailLinkSignIn,
         cleanAuthParamsFromUrl,
         peekSession,
-      } from "/auth/session.js?v=1";
+      } from "/auth/session.js?v=fb1";
 
       const params = new URLSearchParams(location.search);
       const next = params.get("next");
@@ -217,14 +218,39 @@
         return "/portal.html";
       }
 
-      // If a session already exists, skip the form entirely.
+      // Three ways to arrive here: fresh, mid email-link sign-in, or already
+      // signed in. Handle all of them before showing the form.
       (async () => {
-        cleanAuthParamsFromUrl();
-        if (!peekSession()) return;
+        const looksLikeEmailLink = /[?&](oobCode|mode)=/.test(location.search);
+
+        if (looksLikeEmailLink) {
+          document.getElementById("subtitle").textContent = "Finishing sign-in…";
+          try {
+            await completeEmailLinkSignIn();
+          } catch (e) {
+            console.error("[login] email link", e);
+            say(
+              e?.code === "auth/invalid-action-code"
+                ? "That sign-in link has expired or was already used. Send yourself a new one."
+                : e?.message || "Could not complete sign-in from that link.",
+              "err"
+            );
+            cleanAuthParamsFromUrl();
+            return;
+          }
+        } else if (!peekSession()) {
+          return; // signed out and nothing to finish — just show the form
+        }
+
         document.getElementById("subtitle").textContent = "Checking your session…";
         try {
           const profile = await getProfile({ force: true });
-          if (!profile) return;
+          cleanAuthParamsFromUrl();
+          if (!profile) {
+            document.getElementById("subtitle").textContent =
+              "Use the Google account your invite was sent to.";
+            return;
+          }
           if (next && next.startsWith("/")) {
             location.replace(next);
           } else {
@@ -232,18 +258,31 @@
           }
         } catch (e) {
           console.error("[login] session check", e);
+          say(e?.message || "Could not verify your session.", "err");
         }
       })();
 
       googleBtn.addEventListener("click", async () => {
         googleBtn.disabled = true;
-        say("Redirecting to Google…", "info");
+        say("Opening Google…", "info");
         try {
-          await signInWithGoogle(next && next.startsWith("/") ? next : "/login");
+          await signInWithGoogle(next && next.startsWith("/") ? next : "/portal");
+          // Popup path resolves here; work out where this account belongs.
+          const profile = await getProfile({ force: true });
+          if (profile) {
+            location.replace(next && next.startsWith("/") ? next : homeFor(profile));
+            return;
+          }
+          googleBtn.disabled = false;
+          say("Signed in, but we couldn't load your profile. Try again.", "err");
         } catch (e) {
           googleBtn.disabled = false;
+          if (e?.code === "auth/popup-closed-by-user") {
+            say("Sign-in cancelled.", "info");
+            return;
+          }
           say(
-            e?.message?.includes("provider is not enabled")
+            e?.code === "auth/operation-not-allowed"
               ? "Google sign-in isn't switched on for this project yet. Use the email link below."
               : e?.message || "Could not start Google sign-in.",
             "err"
@@ -258,7 +297,7 @@
         magicBtn.disabled = true;
         magicBtn.textContent = "Sending…";
         try {
-          await signInWithEmail(email, next && next.startsWith("/") ? next : "/login");
+          await signInWithEmail(email, next && next.startsWith("/") ? next : "/portal");
           say(`Check ${email} — we've sent a one-tap sign-in link. It expires in an hour.`, "ok");
           magicBtn.textContent = "Link sent";
         } catch (err) {

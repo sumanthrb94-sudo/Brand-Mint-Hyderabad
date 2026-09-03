@@ -8,7 +8,7 @@
  * It used to also carry three hard-coded demo accounts whose SHA-256 password
  * hashes shipped in this file, writing a fake `bm.demo.session` that /admin
  * trusted. That is gone: roles now come from the `profiles` table and access
- * is enforced by RLS, so there is nothing here a browser console can forge.
+ * is enforced by firestore.rules, so nothing here a browser console can forge.
  *
  * Public API:  window.bmAuth = {
  *   openModal, closeModal, signOut, getUser, isSignedIn, isAdmin,
@@ -18,10 +18,14 @@
 
 import {
   getClient as getSessionClient,
+  getUser,
   getProfile,
+  peekProfile,
+  onChange,
   signInWithGoogle,
   signInWithEmail,
   signOut as sessionSignOut,
+  cleanAuthParamsFromUrl,
 } from "/auth/session.js";
 
 // Project URL and anon key now live in /auth/session.js — the single client.
@@ -40,7 +44,6 @@ function purgeLegacySessions() {
 
 /* ---------------- State ---------------- */
 
-let _client = null;
 let _user = null;
 let _ready = false;
 let _readyResolve;
@@ -53,20 +56,14 @@ function notify() {
   }
 }
 
-/* ---------------- Supabase client (lazy) ---------------- */
-
-async function getClient() {
-  if (_client) return _client;
-  _client = await getSessionClient();
-  return _client;
-}
+/* ---------------- State ---------------- */
 
 /* ---------------- DOM reconciliation ---------------- */
 
 function applyState(user) {
   _user = user || null;
   const state = _user ? "signed-in" : "signed-out";
-  const role = _user?.role || _user?.user_metadata?.role || "user";
+  const role = _user?.role || "client";
 
   document.documentElement.dataset.authState = state;
   if (_user) {
@@ -76,10 +73,7 @@ function applyState(user) {
   }
 
   const email = _user?.email || "";
-  const displayName =
-    _user?.user_metadata?.full_name ||
-    _user?.user_metadata?.name ||
-    (email ? email.split("@")[0] : "");
+  const displayName = _user?.fullName || (email ? email.split("@")[0] : "");
   const initial = (displayName || email || "·").trim().charAt(0).toUpperCase() || "·";
 
   for (const el of document.querySelectorAll("[data-auth-user-email]")) {
@@ -103,50 +97,72 @@ function capitalize(s) {
 
 /* ---------------- URL cleanup post magic-link callback ---------------- */
 
-function cleanAuthFragmentsFromURL() {
-  const url = new URL(window.location.href);
-  let dirty = false;
-  for (const key of ["code", "type", "error", "error_description", "error_code"]) {
-    if (url.searchParams.has(key)) { url.searchParams.delete(key); dirty = true; }
-  }
-  if (url.hash.startsWith("#access_token=") || url.hash.startsWith("#error=")) {
-    url.hash = ""; dirty = true;
-  }
-  if (dirty) {
-    history.replaceState(null, "", url.pathname + url.search + url.hash);
-  }
-}
-
 /* ---------------- Bootstrap ---------------- */
 
 async function bootstrap() {
   purgeLegacySessions();
 
-  const sb = await getClient();
-  const { data, error } = await sb.auth.getSession();
-  if (error) console.warn("[auth] getSession", error);
+  // Most visitors to the marketing site are signed out, and loading the
+  // Firebase SDK for them would be ~300KB spent to discover that. Only
+  // initialise when there is a reason to: a cached session hint, or an auth
+  // callback in the URL.
+  const hasHint = Boolean(peekProfile());
+  const isAuthCallback = /[?&](oobCode|mode|apiKey|code)=/.test(window.location.search);
 
-  await applyFromSession(data?.session?.user || null);
-  cleanAuthFragmentsFromURL();
+  if (!hasHint && !isAuthCallback) {
+    applyState(null);
+    _ready = true;
+    _readyResolve();
+    wireDeferredInit();
+    return;
+  }
 
-  sb.auth.onAuthStateChange(async (event, session) => {
-    await applyFromSession(session?.user || null);
+  await initFirebase();
+  _ready = true;
+  _readyResolve();
+}
+
+/** Bring Firebase up and reconcile the nav with the real session. */
+let _initStarted = false;
+async function initFirebase() {
+  if (_initStarted) return;
+  _initStarted = true;
+
+  const fb = await getSessionClient();
+  await applyFromSession(await getUser());
+  cleanAuthParamsFromUrl();
+
+  onChange(async (event, user) => {
+    await applyFromSession(user || null);
     if (event === "SIGNED_IN") {
       closeAuthModal();
-      const name = _user?.user_metadata?.full_name || _user?.email || "";
+      const name = _user?.displayName || _user?.email || "";
       toast(`Signed in${name ? `, ${name.split("@")[0]}` : ""}.`);
     } else if (event === "SIGNED_OUT") {
       toast("Signed out.");
     }
   });
 
-  // Bounced here from a gated page? Open the modal.
+  return fb;
+}
+
+/**
+ * Nothing is loaded for a signed-out visitor, so the SDK has to come up the
+ * moment they actually intend to sign in.
+ */
+function wireDeferredInit() {
+  const trigger = () => { initFirebase().catch((e) => console.error("[auth] init", e)); };
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-auth-action]")) trigger();
+  }, { capture: true, once: true });
+
+  // Bounced here from a gated page? Open the modal (which initialises too).
   try {
     const url = new URL(window.location.href);
     const bounced =
       url.searchParams.get("signin") === "1" ||
       sessionStorage.getItem("bm.openAuthOnHome") === "1";
-    if (bounced && !_user) {
+    if (bounced) {
       sessionStorage.removeItem("bm.openAuthOnHome");
       if (url.searchParams.has("signin")) {
         url.searchParams.delete("signin");
@@ -155,30 +171,36 @@ async function bootstrap() {
       setTimeout(() => openAuthModal("login"), 80);
     }
   } catch (e) {}
-
-  _ready = true;
-  _readyResolve();
 }
 
 /**
  * Attach the role from `profiles` before painting the nav. The role is NOT
  * read from user_metadata: a signed-in user can rewrite their own metadata
  * through the SDK, so trusting it would let anyone show themselves an "Admin"
- * link (and, before RLS, follow it).
+ * link (and, before the rules were in place, follow it).
  */
 async function applyFromSession(user) {
   if (!user) {
     applyState(null);
     return;
   }
+  // A Firebase User exposes its fields via prototype getters, so spreading it
+  // yields an empty object. Build the shape applyState expects explicitly.
   let role = "client";
+  let fullName = user.displayName || "";
   try {
-    const profile = await getProfile({ force: true });
+    const profile = await getProfile();
     role = profile?.role || "client";
+    fullName = profile?.fullName || fullName;
   } catch (e) {
     console.warn("[auth] role lookup", e);
   }
-  applyState({ ...user, role });
+  applyState({
+    id: user.uid,
+    email: user.email || "",
+    fullName,
+    role,
+  });
 }
 
 /* ---------------- Sign out ---------------- */
@@ -505,9 +527,9 @@ window.bmAuth = {
   signOut,
   getUser: () => _user,
   isSignedIn: () => Boolean(_user),
-  isAdmin: () => _user?.role === "admin" || _user?.user_metadata?.role === "admin",
-  getSession: async () => (await getClient()).auth.getSession().then((r) => r.data.session),
-  getClient,
+  isAdmin: () => _user?.role === "admin",
+  getSession: async () => (_user ? { user: _user } : null),
+  getClient: getSessionClient,
   onChange: (fn) => {
     _listeners.add(fn);
     queueMicrotask(() => { try { fn(_user); } catch (_) {} });

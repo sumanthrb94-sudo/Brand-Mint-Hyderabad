@@ -1,7 +1,15 @@
 # Moving Brand Mint from Supabase to Firebase — scoping document
 
-**Status: a plan, not a change.** Nothing in the working app has been touched.
-Read this, then decide.
+**Status: DONE.** This was the scoping document; the migration has since been
+carried out and the app now runs on Firebase. Kept as the record of why the
+design is shaped the way it is. For operating instructions see
+**`SETUP-FIREBASE.md`**.
+
+Two things changed during implementation, both simplifications:
+- **No data migration** (§6) — you had no production data, so we started fresh.
+- **No composite indexes** — the portal sorts client-side instead of using
+  `orderBy()`, which removed a whole deploy step. Revisit if a client ever
+  accumulates more than a few hundred documents.
 
 Firebase project: `brandmintstudios-a5eb7`.
 

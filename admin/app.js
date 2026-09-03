@@ -117,7 +117,10 @@ async function boot() {
   setSidebarAccount(profile.email || "Signed in", () => ctx.logout());
 
   await db.hydrate();
-  await seedIfEmpty();
+  // Demo data is NOT seeded automatically any more. On Supabase this ran on
+  // first boot; against a real Firebase project it would write fake clients
+  // ("Verdant Foods" and friends) into live data. Run `bm.seed()` from the
+  // console if you want the sample set to look around.
   await renderRoute();
 
   // Being signed out in another tab must not leave this one showing data.
@@ -185,7 +188,7 @@ window.addEventListener("keydown", (e) => {
 boot().catch((err) => {
   // requireAdmin() navigates away on a genuine auth failure, so reaching here
   // means the check itself could not complete — offline, a blocked CDN, or
-  // Supabase being unreachable. Say so instead of spinning forever.
+  // Firebase being unreachable. Say so instead of spinning forever.
   console.error("[admin] boot failed", err);
   const bootScreen = document.getElementById("boot");
   if (!bootScreen) return;
@@ -208,4 +211,4 @@ boot().catch((err) => {
 });
 
 // Expose helpers for the topbar palette trigger + console debugging.
-window.bm = { db, auth, ctx, openPalette: () => openPalette(ctx) };
+window.bm = { db, auth, ctx, seed: seedIfEmpty, openPalette: () => openPalette(ctx) };

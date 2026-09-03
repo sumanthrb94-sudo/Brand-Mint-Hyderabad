@@ -73,25 +73,43 @@
     });
   }
 
-  // Contact form — POSTs to Supabase `leads`, falls back to mailto on error.
-  const SUPABASE_URL = "https://ycdfgtljxqrhyobnwwbz.supabase.co";
-  const SUPABASE_ANON_KEY =
-    "sb_publishable_ddoQWG7ZWqNwTRJFBdfbHA_HoX48n1l";
+  // Contact form — writes a `leads` document, falls back to WhatsApp always.
+  //
+  // Deliberately uses the Firestore REST API rather than the Firebase SDK:
+  // this runs on the public marketing page, and pulling ~300KB of SDK in for
+  // a single insert on a page most visitors never submit would be a bad
+  // trade. The API key is public by design; firestore.rules is what allows
+  // this unauthenticated create and pins the document shape.
+  const FIREBASE_PROJECT_ID = "brandmintstudios-a5eb7";
+  const FIREBASE_API_KEY = "PASTE_API_KEY_HERE"; // see firebase/config.js
 
-  async function sendLeadToSupabase(payload) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+  // Firestore REST wants typed values: { stringValue }, { integerValue }, …
+  function toFirestoreFields(obj) {
+    const fields = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (v == null) continue; // never send null — the rules type-check these
+      if (typeof v === "number") fields[k] = { integerValue: String(Math.round(v)) };
+      else if (typeof v === "boolean") fields[k] = { booleanValue: v };
+      else fields[k] = { stringValue: String(v) };
+    }
+    return fields;
+  }
+
+  async function sendLead(payload) {
+    if (FIREBASE_API_KEY.startsWith("PASTE_")) {
+      throw new Error("Firebase API key not set in script.js");
+    }
+    const url =
+      `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}` +
+      `/databases/(default)/documents/leads?key=${FIREBASE_API_KEY}`;
+    const res = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: toFirestoreFields(payload) }),
     });
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      throw new Error(`Supabase ${res.status}: ${text}`);
+      throw new Error(`Firestore ${res.status}: ${text}`);
     }
   }
 
@@ -127,21 +145,24 @@
       const phone = (data.get("phone") || "").toString().trim();
       const message = (data.get("message") || "").toString().trim();
 
+      // Keys here must stay inside the allow-list in firestore.rules, and
+      // name/email/message must be strings — nulls fail the type check.
       const payload = {
         name,
         email,
-        phone: phone || null,
-        project_type: type,
-        message: message || null,
+        phone: phone || "",
+        projectType: type,
+        message: message || "—",
         status: "new",
         score: authUser ? 65 : 50,
         source: authUser ? "Signed-in inquiry" : "Site contact form",
-        user_id: authUser?.id || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       // Best-effort: still capture the lead in the CRM (non-blocking).
-      sendLeadToSupabase(payload).catch((err) =>
-        console.error("[contact] Supabase insert failed", err)
+      sendLead(payload).catch((err) =>
+        console.error("[contact] lead capture failed", err)
       );
 
       // Primary action: open WhatsApp to the studio with the inquiry prefilled.

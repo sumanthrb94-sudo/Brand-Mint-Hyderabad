@@ -1,12 +1,12 @@
 /**
- * Admin auth — a thin adapter over the shared Supabase session.
+ * Admin auth — a thin adapter over the shared Firebase session.
  *
  * This file used to hold a single shared passcode whose hash lived in
  * localStorage, which meant anyone who could open devtools could grant
  * themselves access. It is now purely a view onto /auth/session.js; the
- * real check is `requireRole('admin')` at page load, backed by RLS on the
- * database so a forged client-side session gets an empty result set rather
- * than the CRM.
+ * real check is `requireRole('admin')` at page load, backed by
+ * firestore.rules so a forged client-side session gets an empty result set
+ * rather than the CRM.
  */
 
 import {

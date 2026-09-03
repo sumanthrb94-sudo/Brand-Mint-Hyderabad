@@ -10,24 +10,20 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/admin/styles.css?v=13" />
+    <link rel="stylesheet" href="/admin/styles.css?v=fb1" />
 
     <!--
       Fast preflight. This is a UX optimisation, NOT the security check: it
       only avoids painting the dashboard shell for someone with no token at
       all. The real gate is requireRole('admin') in admin/app.js, and the
-      actual boundary is RLS on the database — a forged localStorage entry
-      buys you an empty dashboard, not the data.
+      actual boundary is firestore.rules — a forged localStorage entry buys
+      you an empty dashboard, not the data.
     -->
     <script>
       (function () {
         try {
-          var raw = localStorage.getItem("sb-ycdfgtljxqrhyobnwwbz-auth-token");
-          if (raw) {
-            var s = JSON.parse(raw);
-            var session = (s && s.currentSession) || s;
-            if (session && session.access_token) return; // let app.js verify
-          }
+          var p = JSON.parse(localStorage.getItem("bm.auth.profile.v1") || "null");
+          if (p && p.id) return; // let app.js verify for real
         } catch (e) {}
         window.location.replace("/login?next=%2Fadmin.html");
       })();
@@ -54,6 +50,6 @@
     <div id="toast" class="toast" hidden></div>
     <div id="modal-root"></div>
 
-    <script type="module" src="/admin/app.js?v=13"></script>
+    <script type="module" src="/admin/app.js?v=fb1"></script>
   </body>
 </html>

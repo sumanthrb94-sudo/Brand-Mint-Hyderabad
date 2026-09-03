@@ -1,26 +1,28 @@
 /**
- * Brand Mint Admin — Data layer.
+ * Brand Mint Admin — Data layer (Firestore).
  *
- * Offline-first Supabase sync wrapper. Keeps a synchronous in-memory cache
- * mirrored to localStorage so the existing modules don't need to be async.
+ * Keeps a synchronous in-memory cache so the admin modules stay sync — they
+ * call db.list()/db.get() during render and can't await. Firestore's own
+ * persistent cache handles durability and offline writes, which is what the
+ * hand-rolled localStorage mirror used to do.
  *
  * Lifecycle:
- *   1. boot() awaits db.hydrate()  -> pulls every row from Supabase into cache
- *   2. cache mirrors to localStorage so a refresh comes up instantly
- *   3. db.list/get serve from cache (sync, instant)
- *   4. db.create/update/remove patch cache + localStorage immediately, then
- *      fire-and-forget push to Supabase. On push failure the local change
- *      stays; console.error is emitted and an offline-write counter increments
- *      so the topbar can surface it later.
+ *   1. boot() awaits db.hydrate() — attaches an onSnapshot listener per
+ *      collection. The first snapshot fills the cache; every later one keeps
+ *      it live, so hydration and realtime are the same mechanism.
+ *   2. db.list/get serve from cache (sync, instant)
+ *   3. db.create/update/remove patch the cache immediately, then
+ *      fire-and-forget the write. Firestore queues it if offline; a genuine
+ *      rejection (usually a rules denial) increments a counter and toasts.
  *
- * Key handling: app uses camelCase, DB uses snake_case. We auto-convert at
- * the row boundary. JSON values (line_items, bank, pricing) pass through
- * unchanged.
+ * No case conversion: Firestore stores the JS objects it's given, so the
+ * app's camelCase goes in and comes back unchanged. Timestamps stay ISO
+ * strings rather than Firestore Timestamps, because every consumer here
+ * does Date.parse() or a string compare.
  */
 
-import { getClient, isConfigured } from "/admin/supabase.js";
+import { getFirebase, isConfigured } from "/firebase/app.js";
 
-const NS = "bm.admin.v2.";
 const COLLECTIONS = [
   "leads",
   "projects",
@@ -36,13 +38,8 @@ const COLLECTIONS = [
   "messages",
 ];
 
-// Collection name (camelCase, what modules ask for) → Postgres table name.
-// Anything not listed uses its own name.
-const TABLE = {
-  clientUsers: "client_users",
-  onboardingResponses: "onboarding_responses",
-};
-const tableFor = (collection) => TABLE[collection] || collection;
+// The singleton settings document lives at settings/singleton.
+const SETTINGS_ID = "singleton";
 
 // Optional toast handle, set by admin/app.js after components.js loads.
 let toastFn = null;
@@ -53,8 +50,8 @@ function toastIfAvailable(msg) {
   }
 }
 
-// Per-table change listeners. Modules subscribe to re-render when their
-// table changes (locally or via Postgres Changes).
+// Per-collection change listeners. Modules subscribe to re-render when their
+// collection changes (locally or from a snapshot).
 const tableListeners = new Map();
 function emitTable(table) {
   const set = tableListeners.get(table);
@@ -105,100 +102,75 @@ function status() {
   };
 }
 
-/* ---------- case conversion ---------- */
+/* ---------- hydration + realtime (one mechanism) ---------- */
 
-const toSnake = (s) => s.replace(/[A-Z]/g, (c) => "_" + c.toLowerCase());
-const toCamel = (s) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-
-function toDbRow(obj) {
-  const out = {};
-  for (const [k, v] of Object.entries(obj)) {
-    if (k === "id" || k === "createdAt") continue; // server-managed for some flows
-    out[toSnake(k)] = v;
-  }
-  return out;
-}
-function fromDbRow(row) {
-  if (!row) return row;
-  const out = {};
-  for (const [k, v] of Object.entries(row)) out[toCamel(k)] = v;
-  return out;
-}
-
-/* ---------- local cache mirror ---------- */
-
-function loadFromLocal() {
-  try {
-    for (const t of COLLECTIONS) {
-      const raw = localStorage.getItem(NS + t);
-      cache[t] = raw ? JSON.parse(raw) : [];
-    }
-    const s = localStorage.getItem(NS + "settings");
-    cache.settings = s ? JSON.parse(s) : null;
-  } catch {
-    for (const t of COLLECTIONS) cache[t] = [];
-    cache.settings = null;
-  }
-}
-function persist(table) {
-  try {
-    if (table === "settings") {
-      localStorage.setItem(NS + "settings", JSON.stringify(cache.settings));
-    } else {
-      localStorage.setItem(NS + table, JSON.stringify(cache[table]));
-    }
-  } catch (e) {
-    console.warn("[db] persist failed", e);
-  }
-}
-
-/* ---------- hydration ---------- */
+let bound = false;
+const unsubscribers = [];
 
 export async function hydrate() {
-  loadFromLocal();
   if (!isConfigured()) {
-    console.warn("[db] Supabase not configured; running in local-only mode");
+    console.warn("[db] Firebase not configured; running in local-only mode");
     return { remote: false };
   }
+  if (bound) return { remote: true };
+
   try {
-    const sb = await getClient();
-    // One failing table must not blank the other nine — a table that has not
-    // been migrated yet, or that RLS hides, just stays on its cached value.
-    const results = await Promise.all(
-      COLLECTIONS.map(async (t) => {
-        const { data, error } = await sb.from(tableFor(t)).select("*");
-        return { t, data, error };
-      })
+    const fb = await getFirebase();
+    const { collection, doc, onSnapshot } = fb.sdk;
+
+    // Wait for the first snapshot of every collection before returning, so
+    // the first render has data rather than flashing empty panels.
+    await Promise.all(
+      COLLECTIONS.map(
+        (name) =>
+          new Promise((resolve) => {
+            let settled = false;
+            const unsub = onSnapshot(
+              collection(fb.db, name),
+              (snap) => {
+                cache[name] = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+                lastSyncAt = new Date().toISOString();
+                emitTable(name);
+                emit();
+                if (!settled) { settled = true; resolve(); }
+              },
+              (err) => {
+                // One denied or missing collection must not blank the rest.
+                console.warn(`[db] ${name} listener failed`, err);
+                syncErrors++;
+                lastError = `${name}: ${err.message}`;
+                emit();
+                if (!settled) { settled = true; resolve(); }
+              }
+            );
+            unsubscribers.push(unsub);
+          })
+      )
     );
-    const failures = [];
-    for (const { t, data, error } of results) {
-      if (error) {
-        failures.push(`${tableFor(t)}: ${error.message}`);
-        continue;
-      }
-      cache[t] = (data || []).map(fromDbRow);
-      persist(t);
-    }
-    if (failures.length) {
-      console.warn("[db] some tables did not load", failures);
-      syncErrors += failures.length;
-      lastError = failures[0];
-    }
-    const { data: settingsRow, error: settingsErr } = await sb
-      .from("settings")
-      .select("*")
-      .eq("id", "singleton")
-      .maybeSingle();
-    if (settingsErr) throw settingsErr;
-    cache.settings = settingsRow ? fromDbRow(settingsRow) : null;
-    persist("settings");
-    lastSyncAt = new Date().toISOString();
+
+    // Settings is a single document, not a collection.
+    await new Promise((resolve) => {
+      let settled = false;
+      const unsub = onSnapshot(
+        doc(fb.db, "settings", SETTINGS_ID),
+        (snap) => {
+          cache.settings = snap.exists() ? { id: snap.id, ...snap.data() } : null;
+          emit();
+          if (!settled) { settled = true; resolve(); }
+        },
+        (err) => {
+          console.warn("[db] settings listener failed", err);
+          if (!settled) { settled = true; resolve(); }
+        }
+      );
+      unsubscribers.push(unsub);
+    });
+
+    bound = true;
     emit();
-    for (const t of COLLECTIONS) emitTable(t);
-    subscribeRealtime();
     return { remote: true };
   } catch (e) {
-    console.error("[db] hydrate failed, using local cache only", e);
+    console.error("[db] hydrate failed", e);
     syncErrors++;
     lastError = e?.message || String(e);
     emit();
@@ -206,73 +178,12 @@ export async function hydrate() {
   }
 }
 
-/* ---------- Realtime ---------- */
-
-let realtimeBound = false;
-async function subscribeRealtime() {
-  if (realtimeBound || !isConfigured()) return;
-  realtimeBound = true;
-  try {
-    const sb = await getClient();
-    const ch = sb.channel("bm-admin-realtime");
-    for (const t of COLLECTIONS) {
-      ch.on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: tableFor(t) },
-        (payload) => applyRealtimeEvent(t, payload),
-      );
-    }
-    ch.on(
-      "postgres_changes",
-      { event: "*", schema: "public", table: "settings" },
-      (payload) => {
-        if (payload.eventType === "DELETE") {
-          cache.settings = null;
-        } else {
-          cache.settings = fromDbRow(payload.new);
-        }
-        persist("settings");
-        emit();
-      },
-    );
-    ch.subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-        console.info("[db] realtime channel subscribed");
-      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-        console.warn("[db] realtime channel", status);
-      }
-    });
-  } catch (e) {
-    console.warn("[db] realtime setup failed", e);
-    realtimeBound = false;
+/** Detach every listener. Called on sign-out. */
+export function teardown() {
+  while (unsubscribers.length) {
+    try { unsubscribers.pop()(); } catch (_) {}
   }
-}
-
-function applyRealtimeEvent(table, payload) {
-  const list = cache[table] || [];
-  if (payload.eventType === "INSERT") {
-    const incoming = fromDbRow(payload.new);
-    if (!list.find((r) => r.id === incoming.id)) {
-      cache[table] = [incoming, ...list];
-    }
-  } else if (payload.eventType === "UPDATE") {
-    const incoming = fromDbRow(payload.new);
-    const idx = list.findIndex((r) => r.id === incoming.id);
-    if (idx === -1) cache[table] = [incoming, ...list];
-    else {
-      // Last-write-wins by updatedAt to avoid clobbering a fresh local edit.
-      const local = list[idx];
-      const localTs = Date.parse(local.updatedAt || 0) || 0;
-      const remoteTs = Date.parse(incoming.updatedAt || 0) || 0;
-      if (remoteTs >= localTs) cache[table][idx] = incoming;
-    }
-  } else if (payload.eventType === "DELETE") {
-    const oldId = payload.old?.id;
-    if (oldId) cache[table] = list.filter((r) => r.id !== oldId);
-  }
-  persist(table);
-  emitTable(table);
-  emit();
+  bound = false;
 }
 
 /* ---------- async writers ---------- */
@@ -287,15 +198,25 @@ function recordFailure(op, e) {
   emit();
 }
 
+/**
+ * Firestore rejects `undefined` field values outright, where Postgres just
+ * ignored them. Strip them rather than letting a write blow up.
+ */
+function clean(obj) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v !== undefined) out[k] = v;
+  }
+  return out;
+}
+
 async function pushInsert(table, row) {
   if (!isConfigured()) return { ok: true, local: true };
   try {
-    const sb = await getClient();
-    const { error } = await sb.from(tableFor(table)).insert({
-      id: row.id,
-      ...toDbRow(row),
-    });
-    if (error) throw error;
+    const fb = await getFirebase();
+    const { doc, setDoc } = fb.sdk;
+    const { id, ...rest } = row;
+    await setDoc(doc(fb.db, table, id), clean(rest));
     recordSuccess();
     return { ok: true };
   } catch (e) {
@@ -304,12 +225,14 @@ async function pushInsert(table, row) {
     return { ok: false, error: e };
   }
 }
+
 async function pushUpdate(table, id, patch) {
   if (!isConfigured()) return { ok: true, local: true };
   try {
-    const sb = await getClient();
-    const { error } = await sb.from(tableFor(table)).update(toDbRow(patch)).eq("id", id);
-    if (error) throw error;
+    const fb = await getFirebase();
+    const { doc, updateDoc } = fb.sdk;
+    const { id: _ignored, ...rest } = patch;
+    await updateDoc(doc(fb.db, table, id), clean(rest));
     recordSuccess();
     return { ok: true };
   } catch (e) {
@@ -318,12 +241,13 @@ async function pushUpdate(table, id, patch) {
     return { ok: false, error: e };
   }
 }
+
 async function pushDelete(table, id) {
   if (!isConfigured()) return { ok: true, local: true };
   try {
-    const sb = await getClient();
-    const { error } = await sb.from(tableFor(table)).delete().eq("id", id);
-    if (error) throw error;
+    const fb = await getFirebase();
+    const { doc, deleteDoc } = fb.sdk;
+    await deleteDoc(doc(fb.db, table, id));
     recordSuccess();
     return { ok: true };
   } catch (e) {
@@ -332,21 +256,24 @@ async function pushDelete(table, id) {
     return { ok: false, error: e };
   }
 }
+
 async function pushSettings(patch) {
   if (!isConfigured()) return;
   try {
-    const sb = await getClient();
-    const { error } = await sb.from("settings").upsert({
-      id: "singleton",
-      ...toDbRow({ ...patch, id: undefined }),
-    });
-    if (error) throw error;
+    const fb = await getFirebase();
+    const { doc, setDoc } = fb.sdk;
+    const { id: _ignored, ...rest } = patch;
+    await setDoc(doc(fb.db, "settings", SETTINGS_ID), clean(rest), { merge: true });
     recordSuccess();
   } catch (e) {
-    console.error("[db] settings upsert failed", e);
-    recordFailure("settings upsert", e);
+    console.error("[db] settings write failed", e);
+    recordFailure("settings write", e);
   }
 }
+
+// Kept so callers that still reference it don't break; the cache is now
+// owned by Firestore's persistence layer, so there is nothing to mirror.
+function persist(_table) {}
 
 /* ---------- sync API ---------- */
 
@@ -496,13 +423,17 @@ export const db = {
       persist("settings");
     }
   },
+  /**
+   * Clear the in-memory view only. This does NOT delete anything in
+   * Firestore — a live listener will refill the cache on the next snapshot.
+   * It exists for the Settings screen's "start over" affordance, which is a
+   * local reset, not a destructive remote one.
+   */
   wipe() {
-    for (const t of COLLECTIONS) {
-      cache[t] = [];
-      localStorage.removeItem(NS + t);
-    }
+    for (const t of COLLECTIONS) cache[t] = [];
     cache.settings = null;
-    localStorage.removeItem(NS + "settings");
+    for (const t of COLLECTIONS) emitTable(t);
+    emit();
   },
   hydrate,
   status,

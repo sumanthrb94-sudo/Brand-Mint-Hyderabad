@@ -15,29 +15,18 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=auth7" />
+    <link rel="stylesheet" href="/styles.css?v=fb1" />
 
-    <!-- Auth preflight: matches index.html. Display hint only — RLS is the boundary. -->
+    <!-- Auth preflight: matches index.html. Display hint only — firestore.rules is the boundary. -->
     <script>
       (function () {
         var html = document.documentElement;
-        var ref = "ycdfgtljxqrhyobnwwbz";
         try {
-          var rawSb = localStorage.getItem("sb-" + ref + "-auth-token");
-          if (rawSb) {
-            var parsed = JSON.parse(rawSb);
-            var session = (parsed && parsed.currentSession) || parsed;
-            var expSec = (session && session.expires_at) || 0;
-            if (session && session.access_token && expSec * 1000 > Date.now() - 60000) {
-              html.setAttribute("data-auth-state", "signed-in");
-              var role = "client";
-              try {
-                var prof = JSON.parse(localStorage.getItem("bm.auth.profile.v1") || "null");
-                if (prof && prof.role) role = prof.role;
-              } catch (e2) {}
-              html.setAttribute("data-auth-role", role);
-              return;
-            }
+          var p = JSON.parse(localStorage.getItem("bm.auth.profile.v1") || "null");
+          if (p && p.id) {
+            html.setAttribute("data-auth-state", "signed-in");
+            html.setAttribute("data-auth-role", p.role === "admin" ? "admin" : "client");
+            return;
           }
         } catch (e) {}
         html.setAttribute("data-auth-state", "signed-out");
@@ -321,7 +310,7 @@
     </section>
 
     <script type="module">
-      import "/auth/marketing.js?v=auth7";
+      import "/auth/marketing.js?v=fb1";
 
       const main = document.getElementById("bm-acct");
       const gate = document.getElementById("bm-acct-gate");

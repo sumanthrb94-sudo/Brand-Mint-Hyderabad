@@ -1,0 +1,252 @@
+rules_version = '2';
+
+// ===========================================================================
+// Brand Mint — Firestore security rules.
+//
+// THIS FILE IS THE SECURITY BOUNDARY. The Firebase apiKey in
+// firebase/config.js is public by design and authorises nothing; what stops a
+// stranger reading your leads, invoices and bank details is entirely below.
+//
+// To deploy: Firebase Console → Firestore Database → Rules → paste → Publish.
+// (No CLI needed, same as pasting SQL into a database console.)
+//
+// Two rules of thumb when editing:
+//   1. Rules filter DOCUMENTS, not QUERIES. A client-side query that isn't
+//      already constrained to what these rules allow is rejected outright.
+//      Every portal read carries where("clientId","==",...) for this reason.
+//   2. Every get()/exists() below is a billed document read, and there is a
+//      fixed budget per request (10 for a single-document operation, 20 for a
+//      query). That is why clientId is denormalised onto every document
+//      instead of being joined.
+// ===========================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ------------------------------- helpers ------------------------------ */
+
+    function signedIn() { return request.auth != null; }
+    function uid()      { return request.auth.uid; }
+
+    // The analogue of the old SQL is_admin(). Reads the caller's own profile.
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/profiles/$(uid()))
+        && get(/databases/$(database)/documents/profiles/$(uid())).data.role == 'admin';
+    }
+
+    // The analogue of my_client_ids(). Membership documents use a composite
+    // id so this is one exists() rather than a query.
+    function isMember(clientId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/clientUsers/$(uid() + '_' + clientId));
+    }
+
+    function canSee(clientId) { return isAdmin() || isMember(clientId); }
+
+    // Only ever trust an email address the identity provider verified.
+    // Without this check someone could register an unverified address that
+    // happens to match an outstanding invite and claim it.
+    function verifiedEmail() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email != null;
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    /* ------------------------------- profiles ----------------------------- */
+    // Replaces the guard_profile_role() trigger: a user may edit their own
+    // profile but may NOT change their own role. Admins are made by editing
+    // the document in the Firebase console — see SETUP-FIREBASE.md.
+
+    match /profiles/{userId} {
+      allow get, list: if uid() == userId || isAdmin();
+
+      allow create: if uid() == userId
+                    && request.resource.data.role == 'client';
+
+      allow update: if isAdmin()
+                    || (uid() == userId
+                        && request.resource.data.role == resource.data.role);
+
+      allow delete: if isAdmin();
+    }
+
+    /* ----------------------------- memberships ---------------------------- */
+    // Replaces the handle_new_user() signup trigger. A user may create
+    // exactly their own membership, and only where an invite already exists
+    // for their verified address. No invite, no access.
+
+    match /clientUsers/{membershipId} {
+      allow get, list: if isAdmin()
+                       || (signedIn() && resource.data.uid == uid());
+
+      allow create: if verifiedEmail()
+                    && membershipId == uid() + '_' + request.resource.data.clientId
+                    && request.resource.data.uid == uid()
+                    && request.resource.data.role == 'owner'
+                    && exists(/databases/$(database)/documents/invites/$(
+                         request.auth.token.email + '_' + request.resource.data.clientId));
+
+      allow update, delete: if isAdmin();
+    }
+
+    /* -------------------------------- invites ----------------------------- */
+    // Admins manage invites. An invitee may read only their own (so the app
+    // can discover which client to join) and may stamp acceptedAt on it.
+    //
+    // Document id MUST be `{lowercased email}_{clientId}` — rules have no
+    // lower(), so the admin app is responsible for writing it lowercased.
+
+    match /invites/{inviteId} {
+      allow get, list: if isAdmin()
+                       || (verifiedEmail() && resource.data.email == request.auth.token.email);
+
+      allow create, delete: if isAdmin();
+
+      allow update: if isAdmin()
+                    || (verifiedEmail()
+                        && resource.data.email == request.auth.token.email
+                        && changedKeys().hasOnly(['acceptedAt']));
+    }
+
+    /* -------------------------------- clients ----------------------------- */
+    // A client may read their own record and may only move the onboarding
+    // status forward as they fill the brief. Everything else is the admin's.
+
+    match /clients/{clientId} {
+      allow get: if canSee(clientId);
+      allow list: if isAdmin();   // the portal fetches its client by id
+
+      allow create, delete: if isAdmin();
+
+      allow update: if isAdmin()
+                    || (isMember(clientId)
+                        && changedKeys().hasOnly(['onboardingStatus'])
+                        && request.resource.data.onboardingStatus in ['in_progress', 'submitted']);
+    }
+
+    /* --------------------------- projects, invoices ----------------------- */
+    // Read-only for the client, scoped by clientId.
+
+    match /projects/{id} {
+      allow get:  if canSee(resource.data.clientId);
+      allow list: if isAdmin() || isMember(resource.data.clientId);
+      allow write: if isAdmin();
+    }
+
+    match /invoices/{id} {
+      allow get:  if canSee(resource.data.clientId);
+      allow list: if isAdmin() || isMember(resource.data.clientId);
+      allow write: if isAdmin();
+    }
+
+    /* ------------------------------- milestones --------------------------- */
+
+    match /milestones/{id} {
+      allow get:  if canSee(resource.data.clientId);
+      allow list: if isAdmin() || isMember(resource.data.clientId);
+      allow write: if isAdmin();
+    }
+
+    /* ------------------------------ deliverables -------------------------- */
+    // Replaces the guard_deliverable_review() trigger. A client can approve
+    // or request changes, and CANNOT rename the item, re-point its URL or
+    // bump its version while doing so. Draft items are invisible to them.
+
+    match /deliverables/{id} {
+      allow get: if isAdmin()
+                 || (isMember(resource.data.clientId) && resource.data.status != 'draft');
+
+      allow list: if isAdmin()
+                  || (isMember(resource.data.clientId) && resource.data.status != 'draft');
+
+      allow create, delete: if isAdmin();
+
+      allow update: if isAdmin()
+                    || (isMember(resource.data.clientId)
+                        && resource.data.status != 'draft'
+                        && request.resource.data.status in ['approved', 'revision_requested']
+                        && request.resource.data.reviewedBy == uid()
+                        && changedKeys().hasOnly([
+                             'status', 'revisionNote', 'reviewedBy', 'reviewedAt', 'updatedAt'
+                           ]));
+    }
+
+    /* -------------------------------- messages ---------------------------- */
+    // Replaces the guard_message_author() and guard_message_edit() triggers.
+    // A client cannot post as the agency, cannot post as someone else, and
+    // cannot rewrite an existing message — only flip its own read flag.
+
+    match /messages/{id} {
+      allow get:  if canSee(resource.data.clientId);
+      allow list: if isAdmin() || isMember(resource.data.clientId);
+
+      allow create: if canSee(request.resource.data.clientId)
+                    && request.resource.data.authorId == uid()
+                    && request.resource.data.authorRole == (isAdmin() ? 'admin' : 'client');
+
+      allow update: if (isAdmin() && changedKeys().hasOnly(['readByAdmin']))
+                    || (isMember(resource.data.clientId)
+                        && changedKeys().hasOnly(['readByClient']));
+
+      allow delete: if isAdmin();
+    }
+
+    /* ------------------------- onboarding responses ----------------------- */
+    // Document id is the clientId, so there is exactly one brief per client.
+
+    match /onboardingResponses/{clientId} {
+      allow get, list: if canSee(clientId);
+
+      allow create, update: if canSee(clientId)
+                            && request.resource.data.clientId == clientId;
+
+      allow delete: if isAdmin();
+    }
+
+    /* --------------------------------- leads ------------------------------ */
+    // The public contact form writes here unauthenticated. Nobody but an
+    // admin can read them back.
+    //
+    // Shape is pinned so the open create rule can't be used to dump arbitrary
+    // documents into the project.
+
+    match /leads/{id} {
+      allow create: if request.resource.data.keys().hasOnly([
+                         'name', 'email', 'phone', 'company', 'budget', 'projectType',
+                         'message', 'source', 'status', 'score', 'createdAt', 'updatedAt'
+                       ])
+                    // `is string` also enforces presence — an absent field is
+                    // undefined and fails the type check — so these four are
+                    // required, and must never be sent as null.
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() <= 200
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() <= 320
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() <= 5000
+                    && request.resource.data.status == 'new';
+
+      allow get, list, update, delete: if isAdmin();
+    }
+
+    /* --------------------------- content, settings ------------------------ */
+    // Admin only. Settings carries bank details and GSTIN.
+
+    match /content/{id}  { allow read, write: if isAdmin(); }
+    match /settings/{id} { allow read, write: if isAdmin(); }
+
+    /* --------------------------------- deny ------------------------------- */
+    // Anything not matched above is denied. Adding a collection to the app
+    // means adding a rule here, or it simply will not work — which is the
+    // failure mode we want.
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

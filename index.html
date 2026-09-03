@@ -39,36 +39,25 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=auth7" />
+    <link rel="stylesheet" href="styles.css?v=fb1" />
 
     <!-- Auth preflight: sets <html data-auth-state> and <html data-auth-role>
          before first paint so the nav never flashes the wrong UI.
 
-         This reads the Supabase token and the role cached by /auth/session.js.
+         This reads the role cached by /auth/session.js after sign-in.
          It decides what the NAV LOOKS LIKE, nothing else — the role is
          re-read from the `profiles` table on load, and every gated page and
-         table is enforced server-side by RLS. Forging the cached role here
+         collection is enforced server-side by firestore.rules. Forging the role here
          changes one link's visibility and grants no access. -->
     <script>
       (function () {
         var html = document.documentElement;
-        var ref = "ycdfgtljxqrhyobnwwbz";
         try {
-          var rawSb = localStorage.getItem("sb-" + ref + "-auth-token");
-          if (rawSb) {
-            var parsed = JSON.parse(rawSb);
-            var session = (parsed && parsed.currentSession) || parsed;
-            var expSec = (session && session.expires_at) || 0;
-            if (session && session.access_token && expSec * 1000 > Date.now() - 60000) {
-              html.setAttribute("data-auth-state", "signed-in");
-              var role = "client";
-              try {
-                var prof = JSON.parse(localStorage.getItem("bm.auth.profile.v1") || "null");
-                if (prof && prof.role) role = prof.role;
-              } catch (e2) {}
-              html.setAttribute("data-auth-role", role);
-              return;
-            }
+          var p = JSON.parse(localStorage.getItem("bm.auth.profile.v1") || "null");
+          if (p && p.id) {
+            html.setAttribute("data-auth-state", "signed-in");
+            html.setAttribute("data-auth-role", p.role === "admin" ? "admin" : "client");
+            return;
           }
         } catch (e) {}
         html.setAttribute("data-auth-state", "signed-out");
@@ -1365,8 +1354,8 @@
       </div>
     </footer>
 
-    <script src="script.js?v=scroll5" defer></script>
-    <script type="module" src="/auth/marketing.js?v=auth7"></script>
+    <script src="script.js?v=fb1" defer></script>
+    <script type="module" src="/auth/marketing.js?v=fb1"></script>
 
     <!-- Vercel Web Analytics (zero-config; enable in Vercel dashboard → Analytics). -->
     <script>

@@ -4,7 +4,7 @@
  * Boot: gate on role 'client' → load the workspace → if the brief has never
  * been submitted, the wizard IS the app; otherwise show the four tabs.
  *
- * Everything rendered here is already scoped by RLS to the client(s) this
+ * Everything rendered here is already scoped by firestore.rules to the client(s) this
  * user belongs to. The filtering in this file is for layout, not security.
  */
 

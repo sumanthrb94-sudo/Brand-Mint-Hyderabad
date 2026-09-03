@@ -319,18 +319,26 @@ export async function render(ctx) {
         await db.updateAsync("clients", clientId, { onboardingStatus: "invited" });
       }
 
-      const existing = db.list(
-        "invites",
-        (i) => i.clientId === clientId && (i.email || "").toLowerCase() === email
-      )[0];
-      if (existing) {
+      // The invite's document id MUST be `{email}_{clientId}`: firestore.rules
+      // proves an invite exists with a single exists() on that exact path when
+      // the client claims their membership. A random id would make the claim
+      // unverifiable and every client sign-in would be denied.
+      const inviteId = `${email}_${clientId}`;
+
+      if (db.get("invites", inviteId)) {
         close();
         toast("That email is already invited to this client.");
         paint();
         return;
       }
 
-      await db.createAsync("invites", { email, clientId, role: "client" });
+      await db.createAsync("invites", {
+        id: inviteId,
+        email,
+        clientId,
+        role: "client",
+        acceptedAt: null,
+      });
 
       close();
       paint();
