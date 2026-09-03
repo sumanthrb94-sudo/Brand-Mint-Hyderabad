@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1f1a" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Your project — Brand Mint</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/portal/styles.css?v=1" />
+
+    <!-- Same shape as the admin preflight: a UX shortcut, not the gate. -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem("sb-ycdfgtljxqrhyobnwwbz-auth-token");
+          if (raw) {
+            var s = JSON.parse(raw);
+            var session = (s && s.currentSession) || s;
+            if (session && session.access_token) return;
+          }
+        } catch (e) {}
+        window.location.replace("/login?next=%2Fportal.html");
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="boot" class="p-boot">
+      <div>
+        <div class="p-boot-mark" aria-hidden="true">◆</div>
+        <p>Opening your workspace…</p>
+      </div>
+    </div>
+
+    <div id="app" hidden>
+      <header class="p-top">
+        <a class="p-brand" href="/portal.html">
+          <span class="p-brand-mark" aria-hidden="true">◆</span>
+          <span>
+            <strong>Brand Mint</strong>
+            <small id="client-name">Client portal</small>
+          </span>
+        </a>
+        <nav class="p-tabs" id="tabs" aria-label="Sections"></nav>
+        <div class="p-account">
+          <span id="account-email" class="p-account-email"></span>
+          <button class="p-btn p-btn-ghost" id="signout" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <main class="p-main" id="view"></main>
+    </div>
+
+    <div id="toast" class="p-toast" hidden></div>
+    <div id="modal-root"></div>
+
+    <script type="module" src="/portal/app.js?v=1"></script>
+  </body>
+</html>

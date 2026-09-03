@@ -499,7 +499,9 @@ const NAV = [
       { id: "dashboard", label: "Dashboard", route: "#/dashboard", icon: iconGrid() },
       { id: "leads", label: "Leads", route: "#/leads", icon: iconInbox() },
       { id: "pipeline", label: "Pipeline", route: "#/pipeline", icon: iconColumns() },
+      { id: "onboarding", label: "Onboarding", route: "#/onboarding", icon: iconRocket() },
       { id: "clients", label: "Clients", route: "#/clients", icon: iconUsers() },
+      { id: "delivery", label: "Delivery", route: "#/delivery", icon: iconCheckCircle() },
       { id: "invoices", label: "Invoices", route: "#/invoices", icon: iconFile() },
     ],
   },
@@ -562,10 +564,24 @@ export function renderSidebar(activeId, badges = {}) {
 
   root.appendChild(
     h("div", { class: "sidebar-foot" }, [
-      h("div", { text: "v1.0 · Local mode" }),
+      h("div", { text: _footerAccount || "Signed in" }),
       h("a", { href: "/", text: "← View public site" }),
-    ])
+      _signOut
+        ? h("a", { href: "#", text: "Sign out", onclick: (e) => { e.preventDefault(); _signOut(); } })
+        : null,
+    ].filter(Boolean))
   );
+}
+
+/**
+ * Who is signed in, shown in the sidebar foot. Set once from app.js after the
+ * admin gate resolves; renderSidebar is called on every route change.
+ */
+let _footerAccount = "";
+let _signOut = null;
+export function setSidebarAccount(label, onSignOut) {
+  _footerAccount = label || "";
+  _signOut = typeof onSignOut === "function" ? onSignOut : null;
 }
 
 export function renderTopbar({ breadcrumb, title, actions }) {
@@ -738,3 +754,5 @@ function iconChart()   { return svg('<path d="M2 14V2M14 14H2M5 11V8M8 11V5M11 1
 function iconPalette() { return svg('<path d="M8 1.5C4.4 1.5 1.5 4.4 1.5 8c0 3 2 5.5 5 6.4.5.1.8-.2.8-.6v-1.4c-2-.1-2.4-1-2.4-1 0-.3-.2-.5-.2-.5"/><circle cx="5" cy="5.5" r=".5"/><circle cx="8" cy="3.5" r=".5"/><circle cx="11" cy="5.5" r=".5"/><circle cx="12" cy="9" r=".5"/>'); }
 function iconBook()    { return svg('<path d="M3 2.5h4.5C8 2.5 8 3 8 3v11s-.2-.5-.7-.5H3V2.5z"/><path d="M13 2.5H8.5C8 2.5 8 3 8 3v11s.2-.5.7-.5H13V2.5z"/>'); }
 function iconCog()     { return svg('<circle cx="8" cy="8" r="2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M11.2 4.8l1-1M3.8 12.2l1-1"/>'); }
+function iconRocket()      { return svg('<path d="M8 1.5c2.5 1.5 3.8 4 3.8 6.6L8 12 4.2 8.1C4.2 5.5 5.5 3 8 1.5z"/><circle cx="8" cy="6.5" r="1.2"/><path d="M5.4 10.4 3.5 12.3M10.6 10.4l1.9 1.9M6.5 12.5 5.5 14.5M9.5 12.5l1 2"/>'); }
+function iconCheckCircle() { return svg('<circle cx="8" cy="8" r="6.2"/><path d="M5.4 8.2 7.2 10l3.4-3.6"/>'); }

@@ -9,7 +9,14 @@
 
 import { auth } from "/admin/auth.js";
 import { db, seedIfEmpty, setToastHandle } from "/admin/db.js";
-import { renderSidebar, renderTopbar, mount, h, toast } from "/admin/components.js";
+import {
+  renderSidebar,
+  renderTopbar,
+  mount,
+  h,
+  toast,
+  setSidebarAccount,
+} from "/admin/components.js";
 import { openPalette } from "/admin/palette.js";
 
 // Let the data layer surface sync errors via the topbar toast.
@@ -19,7 +26,9 @@ const routes = {
   dashboard: () => import("/admin/modules/dashboard.js"),
   leads:     () => import("/admin/modules/leads.js"),
   pipeline:  () => import("/admin/modules/pipeline.js"),
+  onboarding: () => import("/admin/modules/onboarding.js"),
   clients:   () => import("/admin/modules/clients.js"),
+  delivery:  () => import("/admin/modules/delivery.js"),
   invoices:  () => import("/admin/modules/invoices.js"),
   content:   () => import("/admin/modules/content.js"),
   metrics:   () => import("/admin/modules/metrics.js"),
@@ -38,14 +47,23 @@ const ctx = {
   refreshSidebar() {
     const leadCount = db.list("leads", { status: "new" }).length;
     const overdueInvoices = db.list("invoices", { status: "overdue" }).length;
+    // Things the client is waiting on you for, or you on them.
+    const briefsToRead = db.list(
+      "onboardingResponses",
+      (r) => r.status === "submitted" && !r.reviewedAt
+    ).length;
+    const awaitingReview = db.list("deliverables", { status: "awaiting_review" }).length;
+    const revisions = db.list("deliverables", { status: "revision_requested" }).length;
     renderSidebar(activeRoute(), {
       leads: leadCount || null,
       invoices: overdueInvoices || null,
+      onboarding: briefsToRead || null,
+      delivery: revisions || awaitingReview || null,
     });
   },
   logout() {
+    // signOut() navigates away; no reload needed.
     auth.endSession();
-    location.reload();
   },
 };
 
@@ -85,14 +103,27 @@ async function renderRoute() {
 /* ---------- Init ---------- */
 
 async function boot() {
-  const gate = document.getElementById("auth-gate");
-  if (gate) gate.hidden = true;
+  // Gate first. requireAdmin() navigates away (and never resolves) when the
+  // visitor is not a signed-in admin, so nothing below runs for them.
+  const profile = await auth.requireAdmin();
+
+  const bootScreen = document.getElementById("boot");
+  if (bootScreen) bootScreen.remove();
   document.getElementById("app").hidden = false;
   document.getElementById("view").innerHTML =
     '<div class="view-loading">Loading your data…</div>';
+
+  ctx.profile = profile;
+  setSidebarAccount(profile.email || "Signed in", () => ctx.logout());
+
   await db.hydrate();
   await seedIfEmpty();
   await renderRoute();
+
+  // Being signed out in another tab must not leave this one showing data.
+  auth.onChange((event) => {
+    if (event === "SIGNED_OUT") window.location.replace("/login?signedout=1");
+  });
 }
 
 window.addEventListener("hashchange", renderRoute);
@@ -103,7 +134,9 @@ const NAV_KEYS = {
   d: "dashboard",
   e: "leads",
   p: "pipeline",
+  o: "onboarding",
   c: "clients",
+  v: "delivery",
   i: "invoices",
   n: "content",
   m: "metrics",
@@ -149,8 +182,30 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-// Auth disabled — always boot straight into the dashboard.
-await boot();
+boot().catch((err) => {
+  // requireAdmin() navigates away on a genuine auth failure, so reaching here
+  // means the check itself could not complete — offline, a blocked CDN, or
+  // Supabase being unreachable. Say so instead of spinning forever.
+  console.error("[admin] boot failed", err);
+  const bootScreen = document.getElementById("boot");
+  if (!bootScreen) return;
+  bootScreen.innerHTML = "";
+  bootScreen.appendChild(
+    h("div", { class: "boot-inner" }, [
+      h("div", { class: "boot-mark", style: "animation:none", text: "◆" }),
+      h("p", { text: "We couldn't verify your access." }),
+      h("p", {
+        class: "muted",
+        style: "font-size:13px;max-width:34ch;margin:0 auto 16px",
+        text: err?.message || "Check your connection and try again.",
+      }),
+      h("div", { class: "hstack", style: "justify-content:center" }, [
+        h("button", { class: "btn btn-primary", text: "Retry", onclick: () => location.reload() }),
+        h("a", { class: "btn btn-ghost", href: "/login", text: "Sign in again" }),
+      ]),
+    ])
+  );
+});
 
 // Expose helpers for the topbar palette trigger + console debugging.
 window.bm = { db, auth, ctx, openPalette: () => openPalette(ctx) };

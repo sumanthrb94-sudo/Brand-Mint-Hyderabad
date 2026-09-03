@@ -39,37 +39,34 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=scroll5" />
+    <link rel="stylesheet" href="styles.css?v=auth7" />
 
-    <!-- Auth preflight: sets <html data-auth-state> AND <html data-auth-role>
-         before first paint so the nav never flashes the wrong UI. Checks the
-         demo session first, then Supabase. The async client in
-         /auth/marketing.js reconciles this with the live session. -->
+    <!-- Auth preflight: sets <html data-auth-state> and <html data-auth-role>
+         before first paint so the nav never flashes the wrong UI.
+
+         This reads the Supabase token and the role cached by /auth/session.js.
+         It decides what the NAV LOOKS LIKE, nothing else — the role is
+         re-read from the `profiles` table on load, and every gated page and
+         table is enforced server-side by RLS. Forging the cached role here
+         changes one link's visibility and grants no access. -->
     <script>
       (function () {
         var html = document.documentElement;
+        var ref = "ycdfgtljxqrhyobnwwbz";
         try {
-          var raw = localStorage.getItem("bm.demo.session");
-          if (raw) {
-            var demo = JSON.parse(raw);
-            if (demo && demo.user && (demo.expires_at || 0) * 1000 > Date.now()) {
-              html.setAttribute("data-auth-state", "signed-in");
-              html.setAttribute("data-auth-role", demo.user.role || "user");
-              return;
-            }
-          }
-        } catch (e) {}
-        try {
-          var ref = "ycdfgtljxqrhyobnwwbz";
-          var keys = ["sb-" + ref + "-auth-token", "sb-auth-token"];
-          for (var i = 0; i < keys.length; i++) {
-            var rawSb = localStorage.getItem(keys[i]);
-            if (!rawSb) continue;
+          var rawSb = localStorage.getItem("sb-" + ref + "-auth-token");
+          if (rawSb) {
             var parsed = JSON.parse(rawSb);
-            var expSec = (parsed && (parsed.expires_at || (parsed.currentSession && parsed.currentSession.expires_at))) || 0;
-            if (expSec * 1000 > Date.now()) {
+            var session = (parsed && parsed.currentSession) || parsed;
+            var expSec = (session && session.expires_at) || 0;
+            if (session && session.access_token && expSec * 1000 > Date.now() - 60000) {
               html.setAttribute("data-auth-state", "signed-in");
-              html.setAttribute("data-auth-role", "user");
+              var role = "client";
+              try {
+                var prof = JSON.parse(localStorage.getItem("bm.auth.profile.v1") || "null");
+                if (prof && prof.role) role = prof.role;
+              } catch (e2) {}
+              html.setAttribute("data-auth-role", role);
               return;
             }
           }
@@ -178,6 +175,14 @@
           Sign up
         </a>
 
+        <a href="/portal" class="nav-admin" data-auth-show="client" title="Open your client portal">
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="2.5" y="3" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M2.5 6.2h11M5.6 9h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          My project
+        </a>
+
         <a href="/admin" class="nav-admin" data-auth-show="admin" title="Open admin dashboard">
           <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M8 2l5 2v4c0 3-2.2 5.5-5 6-2.8-.5-5-3-5-6V4l5-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
@@ -212,6 +217,13 @@
                 <path d="M3.5 13c.8-2 2.5-3 4.5-3s3.7 1 4.5 3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
               </svg>
               Account
+            </a>
+            <a class="um-item" role="menuitem" href="/portal" data-auth-show="client">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <rect x="2.5" y="3" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M2.5 6.2h11M5.6 9h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              My project
             </a>
             <a class="um-item um-item--admin" role="menuitem" href="/admin" data-auth-show="admin">
               <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -1354,7 +1366,7 @@
     </footer>
 
     <script src="script.js?v=scroll5" defer></script>
-    <script type="module" src="/auth/marketing.js?v=auth6"></script>
+    <script type="module" src="/auth/marketing.js?v=auth7"></script>
 
     <!-- Vercel Web Analytics (zero-config; enable in Vercel dashboard → Analytics). -->
     <script>

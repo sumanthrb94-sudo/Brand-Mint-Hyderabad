@@ -88,7 +88,91 @@ export async function render(ctx) {
     .sort((a, b) => (a.due < b.due ? -1 : 1))
     .slice(0, 6);
 
+  /* ---- Needs you: anything a client is currently waiting on ---- */
+  const actions = [];
+
+  const briefsIn = db.list(
+    "onboardingResponses",
+    (r) => r.status === "submitted" && !r.reviewedAt
+  );
+  for (const b of briefsIn) {
+    const c = db.get("clients", b.clientId);
+    actions.push({
+      text: `${c?.name || "A client"} submitted their brief`,
+      cta: "Read it",
+      route: "/onboarding",
+    });
+  }
+
+  const revisions = db.list("deliverables", { status: "revision_requested" });
+  for (const d of revisions) {
+    const c = db.get("clients", d.clientId);
+    actions.push({
+      text: `${c?.name || "A client"} asked for changes to "${d.title}"`,
+      cta: "Open delivery",
+      route: "/delivery/" + d.clientId,
+    });
+  }
+
+  const unreadMsgs = db.list("messages", (m) => m.authorRole === "client" && !m.readByAdmin);
+  const byClient = new Map();
+  for (const m of unreadMsgs) byClient.set(m.clientId, (byClient.get(m.clientId) || 0) + 1);
+  for (const [clientId, count] of byClient) {
+    const c = db.get("clients", clientId);
+    actions.push({
+      text: `${count} unread message${count > 1 ? "s" : ""} from ${c?.name || "a client"}`,
+      cta: "Reply",
+      route: "/delivery/" + clientId,
+    });
+  }
+
+  const stalledInvites = db
+    .list("invites", (i) => !i.acceptedAt)
+    .filter((i) => Date.now() - Date.parse(i.createdAt || 0) > 3 * 24 * 3600 * 1000);
+  for (const i of stalledInvites) {
+    actions.push({
+      text: `${i.email} hasn't signed in since you invited them`,
+      cta: "Chase",
+      route: "/onboarding",
+    });
+  }
+
+  const needsYou = actions.length
+    ? h("div", { class: "panel", style: "margin-bottom:16px" }, [
+        h("div", { class: "panel-head" }, [
+          h("div", {}, [
+            h("h3", { text: "Needs you" }),
+            h("div", { class: "subt", text: `${actions.length} open` }),
+          ]),
+        ]),
+        h(
+          "div",
+          { class: "vstack", style: "gap:8px" },
+          actions.slice(0, 6).map((a) =>
+            h(
+              "div",
+              {
+                class: "hstack",
+                style:
+                  "justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px",
+              },
+              [
+                h("span", { text: a.text, style: "font-size:14px" }),
+                h("button", {
+                  class: "chip-btn",
+                  type: "button",
+                  text: a.cta,
+                  onclick: () => ctx.navigate(a.route),
+                }),
+              ]
+            )
+          )
+        ),
+      ])
+    : null;
+
   return h("div", {}, [
+    needsYou,
     h("div", { class: "kpi-grid" }, [
       kpi({
         label: "Pipeline value",

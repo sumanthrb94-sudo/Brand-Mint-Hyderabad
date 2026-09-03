@@ -21,7 +21,28 @@
 import { getClient, isConfigured } from "/admin/supabase.js";
 
 const NS = "bm.admin.v2.";
-const COLLECTIONS = ["leads", "projects", "clients", "invoices", "content"];
+const COLLECTIONS = [
+  "leads",
+  "projects",
+  "clients",
+  "invoices",
+  "content",
+  // Portal + onboarding
+  "clientUsers",
+  "invites",
+  "onboardingResponses",
+  "milestones",
+  "deliverables",
+  "messages",
+];
+
+// Collection name (camelCase, what modules ask for) → Postgres table name.
+// Anything not listed uses its own name.
+const TABLE = {
+  clientUsers: "client_users",
+  onboardingResponses: "onboarding_responses",
+};
+const tableFor = (collection) => TABLE[collection] || collection;
 
 // Optional toast handle, set by admin/app.js after components.js loads.
 let toastFn = null;
@@ -49,6 +70,12 @@ const cache = {
   clients: [],
   invoices: [],
   content: [],
+  clientUsers: [],
+  invites: [],
+  onboardingResponses: [],
+  milestones: [],
+  deliverables: [],
+  messages: [],
   settings: null,
 };
 
@@ -135,11 +162,27 @@ export async function hydrate() {
   }
   try {
     const sb = await getClient();
-    for (const t of COLLECTIONS) {
-      const { data, error } = await sb.from(t).select("*");
-      if (error) throw error;
+    // One failing table must not blank the other nine — a table that has not
+    // been migrated yet, or that RLS hides, just stays on its cached value.
+    const results = await Promise.all(
+      COLLECTIONS.map(async (t) => {
+        const { data, error } = await sb.from(tableFor(t)).select("*");
+        return { t, data, error };
+      })
+    );
+    const failures = [];
+    for (const { t, data, error } of results) {
+      if (error) {
+        failures.push(`${tableFor(t)}: ${error.message}`);
+        continue;
+      }
       cache[t] = (data || []).map(fromDbRow);
       persist(t);
+    }
+    if (failures.length) {
+      console.warn("[db] some tables did not load", failures);
+      syncErrors += failures.length;
+      lastError = failures[0];
     }
     const { data: settingsRow, error: settingsErr } = await sb
       .from("settings")
@@ -175,7 +218,7 @@ async function subscribeRealtime() {
     for (const t of COLLECTIONS) {
       ch.on(
         "postgres_changes",
-        { event: "*", schema: "public", table: t },
+        { event: "*", schema: "public", table: tableFor(t) },
         (payload) => applyRealtimeEvent(t, payload),
       );
     }
@@ -248,7 +291,7 @@ async function pushInsert(table, row) {
   if (!isConfigured()) return { ok: true, local: true };
   try {
     const sb = await getClient();
-    const { error } = await sb.from(table).insert({
+    const { error } = await sb.from(tableFor(table)).insert({
       id: row.id,
       ...toDbRow(row),
     });
@@ -265,7 +308,7 @@ async function pushUpdate(table, id, patch) {
   if (!isConfigured()) return { ok: true, local: true };
   try {
     const sb = await getClient();
-    const { error } = await sb.from(table).update(toDbRow(patch)).eq("id", id);
+    const { error } = await sb.from(tableFor(table)).update(toDbRow(patch)).eq("id", id);
     if (error) throw error;
     recordSuccess();
     return { ok: true };
@@ -279,7 +322,7 @@ async function pushDelete(table, id) {
   if (!isConfigured()) return { ok: true, local: true };
   try {
     const sb = await getClient();
-    const { error } = await sb.from(table).delete().eq("id", id);
+    const { error } = await sb.from(tableFor(table)).delete().eq("id", id);
     if (error) throw error;
     recordSuccess();
     return { ok: true };

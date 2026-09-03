@@ -258,7 +258,8 @@ button {
 [data-auth-show] { display: none !important; }
 html[data-auth-state="signed-in"]  [data-auth-show="signed-in"],
 html[data-auth-state="signed-out"] [data-auth-show="signed-out"],
-html[data-auth-role="admin"]       [data-auth-show="admin"] {
+html[data-auth-role="admin"]       [data-auth-show="admin"],
+html[data-auth-role="client"]      [data-auth-show="client"] {
   display: inline-flex !important;
 }
 
@@ -642,6 +643,49 @@ html[data-auth-role="admin"]       [data-auth-show="admin"] {
 .bm-auth-submit {
   width: 100%;
   margin-top: 4px;
+}
+/* Google button + "or" divider in the sign-in modal. */
+.bm-auth-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.bm-auth-google:hover {
+  border-color: #b9c8b8;
+  box-shadow: var(--shadow-sm);
+}
+.bm-auth-google[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.bm-auth-sep {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.bm-auth-sep::before,
+.bm-auth-sep::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
 }
 .bm-auth-status {
   margin: 14px 0 0;

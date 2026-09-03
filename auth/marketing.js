@@ -1,123 +1,41 @@
 /**
- * Brand Mint — Public-site auth.
+ * Brand Mint — public-site auth.
  *
- * Two auth paths live side-by-side:
+ * A thin view over /auth/session.js. It does two things:
+ *   1. Reflects the signed-in state into the nav (data-auth-* attributes)
+ *   2. Offers a sign-in modal — Google, or a magic link
  *
- *   1. DEMO accounts (this file): hard-coded for testing. Password is
- *      compared against a SHA-256 hash, then a fake session is written to
- *      localStorage under `bm.demo.session`. One demo user has role=admin
- *      and unlocks /admin + the nav "Admin" link.
- *
- *   2. Supabase magic-link: leave the password blank and a one-tap login
- *      link is emailed via Supabase. This is the production flow.
- *
- * The <head> preflight script sets <html data-auth-state> AND
- * <html data-auth-role> synchronously from whichever session is present,
- * so the nav never flashes the wrong UI.
+ * It used to also carry three hard-coded demo accounts whose SHA-256 password
+ * hashes shipped in this file, writing a fake `bm.demo.session` that /admin
+ * trusted. That is gone: roles now come from the `profiles` table and access
+ * is enforced by RLS, so there is nothing here a browser console can forge.
  *
  * Public API:  window.bmAuth = {
- *   openModal, closeModal, signOut, getUser, isSignedIn, getSession,
- *   getClient, onChange, toast, ready
+ *   openModal, closeModal, signOut, getUser, isSignedIn, isAdmin,
+ *   getSession, getClient, onChange, toast, ready
  * }
  */
 
-const PROJECT_REF = "ycdfgtljxqrhyobnwwbz";
-const SUPABASE_URL = `https://${PROJECT_REF}.supabase.co`;
-const SUPABASE_ANON_KEY = "sb_publishable_ddoQWG7ZWqNwTRJFBdfbHA_HoX48n1l";
+import {
+  getClient as getSessionClient,
+  getProfile,
+  signInWithGoogle,
+  signInWithEmail,
+  signOut as sessionSignOut,
+} from "/auth/session.js";
 
-/* ---------------- Demo accounts -----------------
- * Passwords are stored as SHA-256 hashes; comparing the hash means the
- * cleartext never appears in source. (For real production auth use
- * Supabase passwords or magic links — this is a test harness.)
- *
- *   admin@brandmint.studio  /  Admin@2026     →  admin
- *   team@brandmint.studio   /  Team@2026      →  user
- *   client@brandmint.studio /  Client@2026    →  user
+// Project URL and anon key now live in /auth/session.js — the single client.
+
+/* ---------------- Retired demo-session cleanup ----------------
+ * Older builds stored a forged session under these keys. Clear them on load
+ * so a returning visitor's browser can't keep presenting a stale "signed in
+ * as admin" nav that no longer means anything.
  */
-const DEMO_USERS = [
-  {
-    email: "admin@brandmint.studio",
-    passhash: "a36aef5a11c4073fbe60314fc9df530a9d5f986533594d1f5190742ff9e0e408",
-    name: "Brand Mint Admin",
-    role: "admin",
-  },
-  {
-    email: "team@brandmint.studio",
-    passhash: "f315b9092562633daf960f5a2e01b39629d451aa9f82c36e7a17da1431d85b81",
-    name: "Brand Mint Team",
-    role: "user",
-  },
-  {
-    email: "client@brandmint.studio",
-    passhash: "9e1b6928325caf4d330da9d7398b48c6bfe74a521a8cd0d5b8b010f4a23fa497",
-    name: "Demo Client",
-    role: "user",
-  },
-];
-
-const DEMO_KEY = "bm.demo.session";
-const DEMO_TTL_HOURS = 12;
-const ADMIN_BRIDGE_KEY = "bm.admin.v1.session"; // legacy /admin gate key
-
-async function sha256Hex(s) {
-  const buf = new TextEncoder().encode(s);
-  const out = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(out))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-async function verifyDemo(email, password) {
-  const e = (email || "").trim().toLowerCase();
-  const match = DEMO_USERS.find((u) => u.email === e);
-  if (!match) return null;
-  const hash = await sha256Hex(password || "");
-  if (hash !== match.passhash) return null;
-  return {
-    id: `demo-${match.email}`,
-    email: match.email,
-    user_metadata: { full_name: match.name, role: match.role },
-    role: match.role,
-    isDemo: true,
-    created_at: new Date(2026, 0, 1).toISOString(),
-    last_sign_in_at: new Date().toISOString(),
-  };
-}
-
-function setDemoSession(user) {
-  const session = {
-    user,
-    expires_at: Math.floor(Date.now() / 1000) + DEMO_TTL_HOURS * 3600,
-  };
-  localStorage.setItem(DEMO_KEY, JSON.stringify(session));
-  // Bridge to legacy /admin gate so admins are recognised there too.
-  if (user.role === "admin") {
-    localStorage.setItem(
-      ADMIN_BRIDGE_KEY,
-      String(Date.now() + DEMO_TTL_HOURS * 3600 * 1000),
-    );
+const LEGACY_KEYS = ["bm.demo.session", "bm.admin.v1.session", "bm.admin.v1.passhash"];
+function purgeLegacySessions() {
+  for (const k of LEGACY_KEYS) {
+    try { localStorage.removeItem(k); } catch (e) {}
   }
-  return session;
-}
-
-function getDemoSession() {
-  try {
-    const raw = localStorage.getItem(DEMO_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed || (parsed.expires_at || 0) * 1000 < Date.now()) {
-      localStorage.removeItem(DEMO_KEY);
-      return null;
-    }
-    return parsed;
-  } catch (e) {
-    return null;
-  }
-}
-
-function clearDemoSession() {
-  localStorage.removeItem(DEMO_KEY);
-  localStorage.removeItem(ADMIN_BRIDGE_KEY);
 }
 
 /* ---------------- State ---------------- */
@@ -139,15 +57,7 @@ function notify() {
 
 async function getClient() {
   if (_client) return _client;
-  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-  _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      flowType: "pkce",
-    },
-  });
+  _client = await getSessionClient();
   return _client;
 }
 
@@ -210,37 +120,27 @@ function cleanAuthFragmentsFromURL() {
 /* ---------------- Bootstrap ---------------- */
 
 async function bootstrap() {
-  // Demo session takes precedence — local-only, no network.
-  const demo = getDemoSession();
-  if (demo?.user) {
-    applyState(demo.user);
-  }
+  purgeLegacySessions();
 
-  // Always wire up Supabase too, so magic-link callbacks land cleanly even
-  // when there's an active demo session (signing out of demo then in via
-  // magic link is supported).
   const sb = await getClient();
   const { data, error } = await sb.auth.getSession();
   if (error) console.warn("[auth] getSession", error);
 
-  // Real Supabase user trumps demo only if there's no demo active.
-  if (!demo?.user) applyState(data?.session?.user || null);
-
+  await applyFromSession(data?.session?.user || null);
   cleanAuthFragmentsFromURL();
 
-  sb.auth.onAuthStateChange((event, session) => {
-    if (getDemoSession()) return; // ignore Supabase changes while demo is active
-    applyState(session?.user || null);
+  sb.auth.onAuthStateChange(async (event, session) => {
+    await applyFromSession(session?.user || null);
     if (event === "SIGNED_IN") {
       closeAuthModal();
-      const name = session?.user?.user_metadata?.full_name || session?.user?.email || "";
+      const name = _user?.user_metadata?.full_name || _user?.email || "";
       toast(`Signed in${name ? `, ${name.split("@")[0]}` : ""}.`);
     } else if (event === "SIGNED_OUT") {
       toast("Signed out.");
     }
   });
 
-  // If we landed here from the admin gate, open the login modal.
+  // Bounced here from a gated page? Open the modal.
   try {
     const url = new URL(window.location.href);
     const bounced =
@@ -252,10 +152,7 @@ async function bootstrap() {
         url.searchParams.delete("signin");
         history.replaceState(null, "", url.pathname + url.search + url.hash);
       }
-      setTimeout(() => {
-        openAuthModal("login");
-        toast("Sign in as admin to open the dashboard.", { error: true });
-      }, 80);
+      setTimeout(() => openAuthModal("login"), 80);
     }
   } catch (e) {}
 
@@ -263,19 +160,37 @@ async function bootstrap() {
   _readyResolve();
 }
 
+/**
+ * Attach the role from `profiles` before painting the nav. The role is NOT
+ * read from user_metadata: a signed-in user can rewrite their own metadata
+ * through the SDK, so trusting it would let anyone show themselves an "Admin"
+ * link (and, before RLS, follow it).
+ */
+async function applyFromSession(user) {
+  if (!user) {
+    applyState(null);
+    return;
+  }
+  let role = "client";
+  try {
+    const profile = await getProfile({ force: true });
+    role = profile?.role || "client";
+  } catch (e) {
+    console.warn("[auth] role lookup", e);
+  }
+  applyState({ ...user, role });
+}
+
 /* ---------------- Sign out ---------------- */
 
 async function signOut() {
-  const wasDemo = Boolean(getDemoSession());
-  clearDemoSession();
+  purgeLegacySessions();
   try {
-    const sb = await getClient();
-    await sb.auth.signOut();
+    await sessionSignOut(null); // null: stay on this page, just clear state
   } catch (err) {
     console.error("[auth] signOut", err);
   }
   applyState(null);
-  if (wasDemo) toast("Signed out.");
 }
 
 /* ---------------- Account chip dropdown ---------------- */
@@ -371,21 +286,29 @@ function openAuthModal(mode = "login") {
       <h2 id="bm-auth-title">${mode === "signup" ? "Create your Brand Mint account" : "Welcome back"}</h2>
       <p class="bm-auth-sub" id="bm-auth-sub">
         ${mode === "signup"
-          ? "Email + password for demo accounts, or leave the password blank and we'll email a magic link."
-          : "Enter email + password (demo) or leave the password blank for a magic link."}
+          ? "Continue with Google, or we'll email you a one-tap sign-in link."
+          : "Continue with Google, or we'll email you a one-tap sign-in link."}
       </p>
+
+      <button type="button" class="btn bm-auth-google" id="bm-auth-google">
+        <svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div class="bm-auth-sep"><span>or</span></div>
 
       <form id="bm-auth-form" autocomplete="on" novalidate>
         <label class="bm-auth-field">
           <input id="bm-auth-email" type="email" name="email" required autocomplete="email" inputmode="email" placeholder="you@studio.com" aria-describedby="bm-auth-status" />
           <span>Email</span>
         </label>
-        <label class="bm-auth-field">
-          <input id="bm-auth-password" type="password" name="password" autocomplete="current-password" placeholder="••••••••" />
-          <span>Password (optional)</span>
-        </label>
         <button type="submit" class="btn btn--primary bm-auth-submit">
-          <span class="btn-label">Continue</span>
+          <span class="btn-label">Email me a link</span>
         </button>
         <p class="bm-auth-status" id="bm-auth-status" role="status" aria-live="polite" hidden></p>
       </form>
@@ -406,7 +329,7 @@ function openAuthModal(mode = "login") {
   const card = overlay.querySelector(".bm-auth-card");
   const form = overlay.querySelector("#bm-auth-form");
   const emailEl = overlay.querySelector("#bm-auth-email");
-  const passEl = overlay.querySelector("#bm-auth-password");
+  const googleBtn = overlay.querySelector("#bm-auth-google");
   const submitBtn = overlay.querySelector(".bm-auth-submit");
   const submitLabel = submitBtn.querySelector(".btn-label");
   const status = overlay.querySelector("#bm-auth-status");
@@ -486,11 +409,27 @@ function openAuthModal(mode = "login") {
     return Math.max(0, Math.ceil(COOLDOWN_SECONDS - (Date.now() - at) / 1000));
   }
 
+  googleBtn.addEventListener("click", async () => {
+    hideStatus();
+    googleBtn.disabled = true;
+    try {
+      await signInWithGoogle(window.location.pathname + window.location.search);
+    } catch (err) {
+      console.error("[auth] google", err);
+      googleBtn.disabled = false;
+      showStatus(
+        String(err?.message || "").includes("provider is not enabled")
+          ? "Google sign-in isn't switched on yet — use the email link below."
+          : friendlyAuthError(err),
+        { error: true },
+      );
+    }
+  });
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     hideStatus();
     const email = emailEl.value.trim().toLowerCase();
-    const password = passEl.value;
 
     if (!emailIsValid(email)) {
       showStatus("That email looks off — mind double-checking?", { error: true });
@@ -498,44 +437,6 @@ function openAuthModal(mode = "login") {
       return;
     }
 
-    // Path A — password supplied: try demo accounts.
-    if (password) {
-      submitBtn.disabled = true; submitLabel.textContent = "Signing in…";
-
-      // Verify is the only step that can legitimately fail. Anything that
-      // happens AFTER a successful verify (session write, DOM updates,
-      // modal teardown) is post-success and must never surface as a
-      // sign-in failure in the form.
-      let user = null;
-      try {
-        user = await verifyDemo(email, password);
-      } catch (err) {
-        console.error("[auth] demo verify", err);
-        submitBtn.disabled = false; submitLabel.textContent = "Continue";
-        showStatus("Couldn't sign you in. Try again.", { error: true });
-        return;
-      }
-
-      if (!user) {
-        submitBtn.disabled = false; submitLabel.textContent = "Continue";
-        showStatus("Email or password didn't match. Leave the password blank for a magic link.", { error: true });
-        passEl.focus(); passEl.select();
-        return;
-      }
-
-      // Success. Persist + close the modal BEFORE updating shared state,
-      // so no downstream listener can throw and leave the modal stuck.
-      try { setDemoSession(user); } catch (err) { console.error("[auth] setDemoSession", err); }
-      try { cleanup(); } catch (err) { console.error("[auth] cleanup", err); }
-      try { applyState(user); } catch (err) { console.error("[auth] applyState", err); }
-      try {
-        const first = (user.user_metadata?.full_name || user.email || "").split(/[\s@]/)[0];
-        toast(`Signed in${user.role === "admin" ? " (admin)" : ""} — welcome, ${first}.`);
-      } catch (err) { console.error("[auth] toast", err); }
-      return;
-    }
-
-    // Path B — magic-link via Supabase.
     const remaining = remainingCooldown(email);
     if (remaining > 0) {
       showStatus(`Hold tight — you can resend in ${remaining}s.`, { error: true });
@@ -545,22 +446,15 @@ function openAuthModal(mode = "login") {
     submitLabel.textContent = "Sending…";
     submitBtn.disabled = true;
     try {
-      const sb = await getClient();
-      const { error } = await sb.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: window.location.origin + window.location.pathname,
-          shouldCreateUser: mode === "signup",
-        },
-      });
-      if (error) throw error;
-      submitLabel.textContent = "Continue";
+      await signInWithEmail(email, window.location.pathname + window.location.search);
+      submitLabel.textContent = "Email me a link";
       showStatus(`Magic link sent to ${email}. Check your inbox.`);
       emailEl.disabled = true;
       startCooldown(email);
     } catch (err) {
       console.error("[auth] signInWithOtp", err);
-      submitBtn.disabled = false; submitLabel.textContent = "Continue";
+      submitBtn.disabled = false;
+      submitLabel.textContent = "Email me a link";
       showStatus(friendlyAuthError(err), { error: true });
     }
   });

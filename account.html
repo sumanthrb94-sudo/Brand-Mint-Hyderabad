@@ -15,34 +15,27 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=auth4" />
+    <link rel="stylesheet" href="/styles.css?v=auth7" />
 
-    <!-- Auth preflight: matches index.html. Demo session takes precedence. -->
+    <!-- Auth preflight: matches index.html. Display hint only — RLS is the boundary. -->
     <script>
       (function () {
         var html = document.documentElement;
+        var ref = "ycdfgtljxqrhyobnwwbz";
         try {
-          var raw = localStorage.getItem("bm.demo.session");
-          if (raw) {
-            var demo = JSON.parse(raw);
-            if (demo && demo.user && (demo.expires_at || 0) * 1000 > Date.now()) {
-              html.setAttribute("data-auth-state", "signed-in");
-              html.setAttribute("data-auth-role", demo.user.role || "user");
-              return;
-            }
-          }
-        } catch (e) {}
-        try {
-          var ref = "ycdfgtljxqrhyobnwwbz";
-          var keys = ["sb-" + ref + "-auth-token", "sb-auth-token"];
-          for (var i = 0; i < keys.length; i++) {
-            var rawSb = localStorage.getItem(keys[i]);
-            if (!rawSb) continue;
+          var rawSb = localStorage.getItem("sb-" + ref + "-auth-token");
+          if (rawSb) {
             var parsed = JSON.parse(rawSb);
-            var expSec = (parsed && (parsed.expires_at || (parsed.currentSession && parsed.currentSession.expires_at))) || 0;
-            if (expSec * 1000 > Date.now()) {
+            var session = (parsed && parsed.currentSession) || parsed;
+            var expSec = (session && session.expires_at) || 0;
+            if (session && session.access_token && expSec * 1000 > Date.now() - 60000) {
               html.setAttribute("data-auth-state", "signed-in");
-              html.setAttribute("data-auth-role", "user");
+              var role = "client";
+              try {
+                var prof = JSON.parse(localStorage.getItem("bm.auth.profile.v1") || "null");
+                if (prof && prof.role) role = prof.role;
+              } catch (e2) {}
+              html.setAttribute("data-auth-role", role);
               return;
             }
           }
@@ -328,7 +321,7 @@
     </section>
 
     <script type="module">
-      import "/auth/marketing.js?v=auth6";
+      import "/auth/marketing.js?v=auth7";
 
       const main = document.getElementById("bm-acct");
       const gate = document.getElementById("bm-acct-gate");

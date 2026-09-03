@@ -1,59 +1,55 @@
 /**
- * Auth — single-passcode gate.
+ * Admin auth — a thin adapter over the shared Supabase session.
  *
- * On first run, the default passcode is "brandmint2026" and is treated as
- * the active one until the CEO sets a new one via Settings. We store only
- * the SHA-256 hash in localStorage, never the cleartext.
+ * This file used to hold a single shared passcode whose hash lived in
+ * localStorage, which meant anyone who could open devtools could grant
+ * themselves access. It is now purely a view onto /auth/session.js; the
+ * real check is `requireRole('admin')` at page load, backed by RLS on the
+ * database so a forged client-side session gets an empty result set rather
+ * than the CRM.
  */
 
-const HASH_KEY = "bm.admin.v1.passhash";
-const SESSION_KEY = "bm.admin.v1.session";
-const DEFAULT_PASS = "brandmint2026";
-const SESSION_HOURS = 12;
+import {
+  getProfile,
+  signOut as sessionSignOut,
+  requireRole,
+  onChange,
+} from "/auth/session.js";
 
-async function sha256(str) {
-  const buf = new TextEncoder().encode(str);
-  const hashBuf = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(hashBuf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+let _profile = null;
 
 export const auth = {
-  async isPasscodeSet() {
-    return !!localStorage.getItem(HASH_KEY);
+  /** Gate the page. Resolves with the admin profile, or navigates away. */
+  async requireAdmin() {
+    _profile = await requireRole("admin", {
+      signIn: "/login",
+      denied: "/login?denied=1",
+    });
+    return _profile;
   },
-  async setPasscode(plain) {
-    const hash = await sha256(plain);
-    localStorage.setItem(HASH_KEY, hash);
+
+  /** Cached profile for the current page load. */
+  profile() {
+    return _profile;
   },
-  async verify(plain) {
-    const stored = localStorage.getItem(HASH_KEY);
-    const compareTo = stored || (await sha256(DEFAULT_PASS));
-    // Mobile keyboards often add a trailing space or autocapitalize the first
-    // letter. Try the literal input first, then forgiving variants.
-    const candidates = [plain, plain.trim(), plain.trim().toLowerCase()];
-    for (const c of candidates) {
-      if ((await sha256(c)) === compareTo) return true;
-    }
-    return false;
+
+  displayName() {
+    return _profile?.fullName || _profile?.email || "Admin";
   },
-  resetToDefault() {
-    localStorage.removeItem(HASH_KEY);
+
+  email() {
+    return _profile?.email || "";
   },
-  startSession() {
-    const expires = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
-    localStorage.setItem(SESSION_KEY, String(expires));
+
+  async refresh() {
+    _profile = await getProfile({ force: true });
+    return _profile;
   },
-  isSessionValid() {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return false;
-    return Number(raw) > Date.now();
-  },
+
+  onChange,
+
+  /** Sign out everywhere and return to the public site. */
   endSession() {
-    localStorage.removeItem(SESSION_KEY);
-    // Clear the demo-auth session too so admin sign-out fully signs out the
-    // user, not just locks the admin module.
-    localStorage.removeItem("bm.demo.session");
+    return sessionSignOut("/login?signedout=1");
   },
 };

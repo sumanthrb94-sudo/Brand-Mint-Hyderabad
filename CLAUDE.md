@@ -6,9 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Brand Mint is the marketing site **and** internal admin CRM for a Hyderabad design studio. It is a **static HTML/CSS/JS site with no build step** — files are served as-is. The backend is **Supabase** (Postgres + Auth), and `supabase-js` is loaded at runtime from `https://esm.sh/@supabase/supabase-js@2` (no bundler, no npm dependencies). Deployed on **Vercel**.
 
-There are two separate apps in one repo:
+There are three apps in one repo, sharing one Supabase project and one auth session:
 - **Public marketing site** — `index.html` + `styles.css` + `script.js` + `auth/marketing.js`
-- **Admin CRM SPA** — `admin.html` + `admin/` (ES-module app with a hash router and offline-first Supabase layer)
+- **Admin CRM SPA** — `admin.html` + `admin/` (ES-module app with a hash router and offline-first Supabase layer). Requires `profiles.role = 'admin'`.
+- **Client portal** — `portal.html` + `portal/` (what a paying client sees: onboarding brief, timeline, deliverable approvals, invoices, messages). Requires a `client_users` membership.
+
+`login.html` is the single front door for both signed-in apps and routes by role. `shared/brief.js` holds the onboarding questionnaire, read by both the portal (renders the wizard) and the admin (renders the answers).
 
 ## Commands
 
@@ -45,14 +48,19 @@ Use this to assert DOM state, intercept `window.open`, check `pageerror`, and sc
 
 ## Admin CRM architecture (`admin/`)
 
-- **Auth is currently DISABLED.** `admin.html` injects a fake long-lived session into `localStorage` and `admin/app.js` boots straight into the dashboard, bypassing the passcode gate in `admin/auth.js`. The CRM (leads, clients, invoices incl. bank details) is reachable by anyone with the URL; only a `noindex` meta protects it.
+- **Auth is real Supabase Auth** (Google OAuth + email magic link), gated by `requireRole('admin')` in `auth/session.js`. The role is read from the `profiles` table, never from `user_metadata` — a user can rewrite their own metadata through the SDK, so a metadata check is not a security check. `admin/auth.js` is a thin adapter over the shared session; the old shared-passcode gate and the three hard-coded demo accounts are gone. The inline preflight in `admin.html` is a first-paint optimisation only — the boundary is RLS.
 - **`admin/app.js`** — hash router. Routes lazy-import modules from `admin/modules/*.js` (dashboard, leads, pipeline, clients, invoices, content, metrics, brand-kit, documents, settings). Keyboard nav (`g` + key) and `⌘/Ctrl-K` palette.
 - **`admin/db.js`** — the offline-first data layer and the most important file to understand. It keeps a **synchronous in-memory `cache`** (so modules stay sync) mirrored to `localStorage` (namespace `bm.admin.v2.`). On boot it hydrates from Supabase; writes patch the cache + localStorage immediately, then **fire-and-forget push** to Supabase (failures only increment a counter — local and remote can silently diverge). It auto-converts **camelCase (app) ↔ snake_case (DB)** at the row boundary and subscribes to Postgres Changes for realtime. `seedIfEmpty()` writes demo leads/clients/invoices on first run.
-- **`admin/supabase.js`** — singleton client, `persistSession: false`, loaded from esm.sh. **`admin/config.js`** holds `SUPABASE_URL` + the publishable anon key.
+- **`admin/supabase.js`** — delegates to the shared authenticated client in `auth/session.js`. It must NOT create its own client: a second client with `persistSession: false` sends every query as the anonymous role, which under RLS returns nothing. `admin/config.js` holds `SUPABASE_URL` + the publishable anon key.
+- **`admin/db.js` collections** map to Postgres tables via a `TABLE` lookup, because the app speaks camelCase (`onboardingResponses`) and the DB speaks snake_case (`onboarding_responses`). Add new collections to both `COLLECTIONS` and `cache`.
+- New admin modules: **`onboarding.js`** (invite a client, watch the four-stage funnel, read their brief, kick the project off) and **`delivery.js`** (per-client milestones, deliverables with the client's approve/revise verdict, and the message thread).
 
 ## Supabase
 
-- Both apps share the same project (ref `ycdfgtljxqrhyobnwwbz`). The **anon key is shipped in client source** (`admin/config.js`, `script.js`, `auth/marketing.js`) — **RLS policies are the only security boundary**. Tables: `leads`, `projects`, `clients`, `invoices`, `content`, and a singleton `settings` row.
+- All three apps share the same project (ref `ycdfgtljxqrhyobnwwbz`). The **anon key is shipped in client source** (`admin/config.js`, `script.js`, `auth/session.js`) — **RLS policies are the only security boundary**.
+- Tables: `leads`, `projects`, `clients`, `invoices`, `content`, a singleton `settings` row, plus `profiles`, `client_users`, `invites`, `onboarding_responses`, `milestones`, `deliverables` and `messages`.
+- The schema and every RLS policy live in **`supabase/migrations/0001_auth_portal_onboarding.sql`** — idempotent, run by hand in the SQL editor. Helper functions `is_admin()`, `my_client_ids()` and `can_see_client()` are `SECURITY DEFINER` because the policies call them (a plain function would recurse on `profiles`). `BEFORE` triggers stop a client escalating their own role, rewriting a deliverable while "approving" it, or posting a message stamped as the agency.
+- **`SETUP-AUTH.md`** is the operator checklist: run the migration, set redirect URLs, enable Google, promote the first admin, onboard a client.
 
 ## Non-code directories
 

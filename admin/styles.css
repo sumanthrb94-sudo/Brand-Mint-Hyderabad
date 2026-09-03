@@ -1568,3 +1568,126 @@ th.num {
 .mb-2 { margin-bottom: 8px; }
 .flex-wrap { flex-wrap: wrap; }
 .gap-2 { gap: 8px; }
+
+/* ---------- BOOT / AUTH GATE ---------- */
+.boot-screen {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg, #f6f8f5);
+  z-index: 200;
+}
+.boot-inner { text-align: center; color: var(--muted); font-size: 14px; }
+.boot-mark {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 14px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 20px;
+  background: linear-gradient(140deg, #10b981, #047857);
+  animation: bootPulse 1.4s ease-in-out infinite;
+}
+@keyframes bootPulse {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%      { transform: scale(0.92); opacity: .72; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-mark { animation: none; }
+}
+
+/* ---------- ONBOARDING / DELIVERY ---------- */
+.stage-track {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 22px;
+  flex-wrap: wrap;
+}
+.stage-step {
+  flex: 1 1 150px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+}
+.stage-step .n {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--faint);
+  display: block;
+  margin-bottom: 5px;
+}
+.stage-step .t { font-weight: 600; font-size: 13.5px; }
+.stage-step .c {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 6px;
+  display: block;
+}
+.stage-step.hot { border-color: var(--mint-3); box-shadow: 0 0 0 2px var(--mint-1); }
+
+.brief-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.brief-item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 13px 15px;
+  background: var(--surface, #fff);
+}
+.brief-item dt {
+  font-size: 11px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 6px;
+  font-family: var(--mono);
+}
+.brief-item dd { margin: 0; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
+
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li {
+  position: relative;
+  padding: 0 0 20px 26px;
+  border-left: 2px solid var(--line);
+}
+.timeline li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface, #fff);
+  border: 2px solid var(--line);
+}
+.timeline li.done::before      { background: var(--mint-3); border-color: var(--mint-3); }
+.timeline li.in_progress::before { background: var(--mint-1); border-color: var(--mint-3); }
+.timeline li.blocked::before   { background: var(--danger); border-color: var(--danger); }
+.timeline .tl-title { font-weight: 600; font-size: 14.5px; }
+.timeline .tl-meta  { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+.thread { display: flex; flex-direction: column; gap: 12px; max-height: 460px; overflow-y: auto; padding-right: 4px; }
+.msg { max-width: 78%; padding: 11px 14px; border-radius: 14px; font-size: 14px; line-height: 1.55; }
+.msg .who { display: block; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; opacity: .7; margin-bottom: 4px; font-family: var(--mono); }
+.msg.from-admin  { align-self: flex-end; background: var(--mint-3); color: #fff; border-bottom-right-radius: 5px; }
+.msg.from-client { align-self: flex-start; background: rgba(10,14,12,0.05); border-bottom-left-radius: 5px; }
+.pill.awaiting_review    { color: var(--info);   background: rgba(59,130,246,0.10); }
+.pill.approved           { color: #fff;          background: var(--mint-3); }
+.pill.approved::before   { background: #fff; }
+.pill.revision_requested { color: var(--danger); background: rgba(226,59,59,0.10); }
+.pill.submitted          { color: var(--info);   background: rgba(59,130,246,0.10); }
+.pill.in_progress        { color: var(--mint-4); background: var(--mint-1); }
+.pill.invited            { color: var(--muted);  background: rgba(10,14,12,0.06); }
+.pill.not_started        { color: var(--muted);  background: rgba(10,14,12,0.06); }
+.pill.complete           { color: #fff;          background: var(--mint-3); }
+.pill.complete::before   { background: #fff; }

@@ -10,10 +10,38 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/admin/styles.css?v=12" />
+    <link rel="stylesheet" href="/admin/styles.css?v=13" />
+
+    <!--
+      Fast preflight. This is a UX optimisation, NOT the security check: it
+      only avoids painting the dashboard shell for someone with no token at
+      all. The real gate is requireRole('admin') in admin/app.js, and the
+      actual boundary is RLS on the database — a forged localStorage entry
+      buys you an empty dashboard, not the data.
+    -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem("sb-ycdfgtljxqrhyobnwwbz-auth-token");
+          if (raw) {
+            var s = JSON.parse(raw);
+            var session = (s && s.currentSession) || s;
+            if (session && session.access_token) return; // let app.js verify
+          }
+        } catch (e) {}
+        window.location.replace("/login?next=%2Fadmin.html");
+      })();
+    </script>
   </head>
   <body class="admin">
-    <div id="app" class="shell">
+    <div id="boot" class="boot-screen">
+      <div class="boot-inner">
+        <div class="boot-mark" aria-hidden="true">◆</div>
+        <p>Checking your access…</p>
+      </div>
+    </div>
+
+    <div id="app" class="shell" hidden>
       <aside class="sidebar" id="sidebar"></aside>
       <main class="main">
         <header class="topbar" id="topbar"></header>
@@ -26,35 +54,6 @@
     <div id="toast" class="toast" hidden></div>
     <div id="modal-root"></div>
 
-    <script>
-      // Admin gate: only an authenticated admin (demo session with role=admin)
-      // can load the dashboard. Non-admins are bounced back to the home page
-      // with the login modal open.
-      (function () {
-        function bounce() {
-          try { sessionStorage.setItem("bm.openAuthOnHome", "1"); } catch (e) {}
-          window.location.replace("/?signin=1");
-        }
-        try {
-          var raw = localStorage.getItem("bm.demo.session");
-          if (!raw) return bounce();
-          var demo = JSON.parse(raw);
-          var live = demo && demo.user &&
-            (demo.expires_at || 0) * 1000 > Date.now();
-          if (!live) {
-            localStorage.removeItem("bm.demo.session");
-            return bounce();
-          }
-          if (demo.user.role !== "admin") return bounce();
-          // Bridge to the existing admin module's session key so its internal
-          // gate is satisfied for the duration of the demo session.
-          localStorage.setItem(
-            "bm.admin.v1.session",
-            String((demo.expires_at || 0) * 1000)
-          );
-        } catch (e) { bounce(); }
-      })();
-    </script>
-    <script type="module" src="/admin/app.js?v=12"></script>
+    <script type="module" src="/admin/app.js?v=13"></script>
   </body>
 </html>
