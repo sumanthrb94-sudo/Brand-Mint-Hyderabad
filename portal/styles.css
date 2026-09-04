@@ -8,27 +8,32 @@
  */
 
 :root {
-  --bg: #f5f7f4;
+  --bg: #f5f1ea;
   --surface: #ffffff;
-  --surface-2: #f7faf7;
-  --ink: #0b1f1a;
-  --ink-2: #294a40;
-  --muted: #5d7368;
-  --faint: #8a9b91;
-  --line: #dde5da;
+  --surface-2: #fbfaf6;
+  --ink: #0a0e0c;
+  --ink-2: #3a423e;
+  --muted: #5b625e;
+  --faint: #6f7672;
+  --line: rgba(10, 14, 12, 0.12);
   --mint: #10b981;
-  --mint-soft: #e6f7f0;
+  --mint-soft: #d6f5e6;
   --mint-deep: #047857;
-  --gold: #c9a961;
-  --danger: #c0392b;
+  --bm-ink: #0b1f1a;
+  --bm-ink-2: #14352d;
+  --bm-ink-deep: #06140f;
+  --cream: #f5f1ea;
+  --gold: #c9a14a;
+  --danger: #b3261e;
   --danger-soft: #fdecea;
-  --info: #2563eb;
+  --info: #1d4ed8;
   --info-soft: #eaf1fe;
   --radius: 16px;
   --display: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --sans: "Inter", system-ui, -apple-system, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
-  --shadow: 0 1px 2px rgba(11, 31, 26, 0.05), 0 8px 28px rgba(11, 31, 26, 0.06);
+  --shadow: 0 1px 2px rgba(10, 14, 12, 0.04), 0 8px 28px rgba(10, 14, 12, 0.06);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 * { box-sizing: border-box; }
@@ -47,6 +52,7 @@ body {
 }
 
 h1, h2, h3, h4 { font-family: var(--display); letter-spacing: -0.02em; margin: 0; }
+:focus-visible { outline: 2px solid var(--mint-deep); outline-offset: 2px; }
 
 /* ---------------------------------------------------------------- boot */
 
@@ -196,7 +202,7 @@ h1, h2, h3, h4 { font-family: var(--display); letter-spacing: -0.02em; margin: 0
 .p-card-head .sub { font-size: 13px; color: var(--muted); }
 
 .p-hero {
-  background: linear-gradient(150deg, #0b1f1a, #12362c 62%, #0d2a22);
+  background: linear-gradient(150deg, var(--bm-ink), var(--bm-ink-2) 62%, var(--bm-ink-deep));
   color: #fff;
   border-radius: 22px;
   padding: clamp(24px, 4vw, 38px);
@@ -479,7 +485,6 @@ textarea.p-input:focus, input.p-input:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .p-boot-mark { animation: none; }
-  .p-progress > span { transition: none; }
+  *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
   .p-btn:active { transform: none; }
 }
