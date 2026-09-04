@@ -24,7 +24,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=clean3" />
+    <link rel="stylesheet" href="/styles.css?v=clean4" />
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
     <script>
@@ -44,6 +44,7 @@
   </head>
 
   <body>
+    <a class="skip" href="#main">Skip to content</a>
     <header class="nav">
       <a class="brand" href="/">
         <span class="brand-mark" aria-hidden="true">◆</span>
@@ -61,11 +62,11 @@
       </div>
     </header>
 
-    <main>
+    <main id="main">
       <!-- HERO -->
       <section class="hero">
         <p class="kicker">Hyderabad · Now booking</p>
-        <h1>Your online store, <em>built to sell</em> — not just to launch.</h1>
+        <h1>Your online store, built to <em>sell</em>, not just to launch.</h1>
         <p class="lede">
           Four tiers, one fixed price each, and everything a store in India actually
           needs — UPI, COD, GST invoices, WhatsApp orders. Pick one, sign in with
@@ -86,7 +87,7 @@
       <section class="section" id="stores">
         <header class="section-head">
           <p class="kicker">01 — What we build</p>
-          <h2>Four stores. Pick the one that's <em>your business.</em></h2>
+          <h2>Four stores. Pick the one that fits <em>yours.</em></h2>
           <p>
             Each tier includes everything in the one before it. Prices are one-time,
             in INR, exclusive of 18% GST. Every store comes with a monthly care plan
@@ -100,7 +101,7 @@
       <section class="section section--dark" id="how">
         <header class="section-head">
           <p class="kicker">02 — How it works</p>
-          <h2>Three steps. <em>No forms.</em></h2>
+          <h2>Three steps. No <em>forms.</em></h2>
         </header>
         <ol class="steps" id="steps"><!-- rendered from /shared/tiers.js --></ol>
       </section>
@@ -128,7 +129,7 @@
 
       <!-- CTA -->
       <section class="cta">
-        <h2>Start with a call, not a quote.</h2>
+        <h2>Start with a <em>call,</em> not a quote.</h2>
         <p>
           Pick a tier, sign in with Google, and we'll ring you within one working
           day. If the honest answer is that you don't need us yet, we'll say so.
@@ -153,7 +154,7 @@
     </footer>
 
     <script type="module">
-      import { TIERS, STEPS, CARE_PLANS, inr } from "/shared/tiers.js?v=clean3";
+      import { TIERS, STEPS, CARE_PLANS, inr } from "/shared/tiers.js?v=clean4";
 
       // ---- tier cards
       const host = document.getElementById("tiers");
@@ -168,7 +169,7 @@
             <span class="num">${inr(t.price)}</span>
             <span class="tier-weeks num">${t.weeks}</span>
           </div>
-          <div class="tier-groups"></div>
+          <details class="tier-groups"><summary>What's included</summary></details>
           <a class="tier-cta" href="/login?tier=${t.id}">Choose ${t.name} →</a>
         `;
         card.querySelector(".tier-blurb").textContent = t.blurb;
@@ -187,6 +188,18 @@
         }
         host.appendChild(card);
       }
+
+      // Inclusions fold away on phones only. Open them wherever there is
+      // room, and keep that in sync if the window is resized across 720px.
+      const wide = matchMedia("(min-width: 720px)");
+      const syncGroups = () => {
+        for (const d of host.querySelectorAll("details.tier-groups")) {
+          if (wide.matches) d.open = true;
+          else d.open = d.closest(".tier--featured") != null;
+        }
+      };
+      syncGroups();
+      wide.addEventListener("change", syncGroups);
 
       // ---- care plans
       const care = document.getElementById("care-plans");

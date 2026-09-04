@@ -15,8 +15,8 @@
     />
     <style>
       :root {
-        --ink: #0b1f1a; --ink-2: #294a40; --muted: #5d7368; --faint: #8a9b91;
-        --line: #d8e0d4; --mint: #10b981; --mint-deep: #047857; --mint-wash: #e6f7f0;
+        --ink: #0a0e0c; --ink-2: #3a423e; --muted: #5b625e; --faint: #6f7672;
+        --line: rgba(10,14,12,.12); --mint: #10b981; --mint-deep: #047857; --mint-wash: #e6f7f0;
         --display: "Plus Jakarta Sans", system-ui, sans-serif;
         --sans: "Inter", system-ui, sans-serif;
         --mono: "JetBrains Mono", ui-monospace, monospace;
@@ -27,16 +27,16 @@
         padding: 32px 20px; font-family: var(--sans); color: var(--ink);
         background:
           radial-gradient(900px 600px at 15% -10%, rgba(16,185,129,.16), transparent 60%),
-          #f5f7f4;
+          #f5f1ea;
       }
       .card {
         width: 100%; max-width: 460px; background: #fff;
         border: 1px solid var(--line); border-radius: 24px; padding: 38px 34px 30px;
         box-shadow: 0 30px 80px rgba(11,31,26,.12);
       }
-      .mark { display: flex; align-items: center; gap: 10px; font: 800 18px var(--display); letter-spacing: -.02em; margin-bottom: 24px; }
-      .mark .dot { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; color: #05140f; font-size: 14px; background: linear-gradient(140deg, var(--mint), var(--mint-deep)); }
-      h1 { font: 800 26px/1.2 var(--display); letter-spacing: -.025em; margin: 0 0 8px; }
+      .mark { display: flex; align-items: center; gap: 10px; font: 700 17px var(--display); letter-spacing: -.02em; margin-bottom: 24px; }
+      .mark .dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #05140f; font-size: 14px; background: linear-gradient(140deg, var(--mint), var(--mint-deep)); }
+      h1 { font: 600 27px/1.15 var(--display); letter-spacing: -.025em; margin: 0 0 8px; }
       p.sub { margin: 0 0 22px; color: var(--muted); font-size: 14.5px; line-height: 1.55; }
 
       .tier {
@@ -51,17 +51,18 @@
 
       .btn {
         width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
-        padding: 13px 18px; border-radius: 13px; font: 600 15px/1 var(--sans); cursor: pointer;
+        padding: 13px 18px; border-radius: 12px; font: 600 15px/1.3 var(--sans); text-align: center; cursor: pointer;
         border: 1px solid var(--line); background: #fff; color: var(--ink);
         transition: border-color .15s, box-shadow .15s, transform .08s;
       }
       .btn:hover { border-color: #b9c8b8; box-shadow: 0 6px 20px rgba(11,31,26,.08); }
       .btn:active { transform: translateY(1px); }
       .btn[disabled] { opacity: .55; cursor: not-allowed; }
-      .btn:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+      :focus-visible { outline: 2px solid var(--mint-deep); outline-offset: 3px; border-radius: 4px; }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
       .consent { margin: 16px 0 4px; font-size: 13px; color: var(--muted); line-height: 1.55; }
-      .consent a { color: var(--mint-deep); }
+      .consent a { color: var(--mint-deep); text-underline-offset: 3px; }
       label.opt { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 13.5px; color: var(--ink-2); cursor: pointer; }
       label.opt input { margin-top: 3px; accent-color: var(--mint-deep); width: 16px; height: 16px; }
 
@@ -72,12 +73,12 @@
       .status[hidden] { display: none; }
 
       .foot { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--faint); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-      .foot a { color: var(--muted); }
+      .foot a { color: var(--muted); text-underline-offset: 3px; }
     </style>
   </head>
   <body>
     <main class="card">
-      <div class="mark"><span class="dot">◆</span> Brand Mint</div>
+      <div class="mark"><span class="dot" aria-hidden="true">◆</span> Brand Mint</div>
 
       <h1 id="title">Continue with Google</h1>
       <p class="sub" id="subtitle">
@@ -129,7 +130,7 @@
         cleanAuthParamsFromUrl,
         peekSession,
       } from "/auth/session.js?v=clean1";
-      import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean3";
+      import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean4";
 
       const params = new URLSearchParams(location.search);
       const next = params.get("next");
