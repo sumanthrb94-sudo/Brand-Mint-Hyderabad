@@ -8,7 +8,8 @@
  * user belongs to. The filtering in this file is for layout, not security.
  */
 
-import { requireRole, signOut, cleanAuthParamsFromUrl, recordSignup } from "/auth/session.js";
+import { requireRole, signOut, cleanAuthParamsFromUrl, recordSignup, getIdToken } from "/auth/session.js";
+import { track, identify } from "/shared/analytics.js";
 import {
   loadWorkspace,
   reviewDeliverable,
@@ -52,6 +53,7 @@ let forceWizard = false;
 async function boot() {
   cleanAuthParamsFromUrl();
   profile = await requireRole("client", { signIn: "/login", denied: "/login?denied=1" });
+  identify(profile.id, getIdToken);
 
   document.getElementById("account-email").textContent = profile.email || "";
   document.getElementById("signout").addEventListener("click", () => signOut("/login?signedout=1"));
@@ -294,7 +296,7 @@ function quizIntro(repaint) {
       h("h2", { text: "How ready is your store to launch?" }),
       h("p", { class: "p-muted", text: "Answer ten quick questions. You get a score out of 100, the tier that fits how you operate, and the three things to fix first. We see it too, so the call starts where you are." }),
     ]),
-    h("button", { class: "p-btn p-btn-primary", type: "button", text: "Start", onclick: () => { quizAnswers = {}; quizStep = 0; repaint(); } }),
+    h("button", { class: "p-btn p-btn-primary", type: "button", text: "Start", onclick: () => { quizAnswers = {}; quizStep = 0; track("quiz_start"); repaint(); } }),
   ]);
 }
 
@@ -332,6 +334,7 @@ async function finishQuiz(repaint) {
   const readiness = { ...result, answers: quizAnswers, at: new Date().toISOString() };
   profile.readiness = readiness;
   quizAnswers = null;
+  track("quiz_finish", { score: readiness.score, tier: readiness.tierId });
   repaint();
   try {
     await saveReadiness(readiness);
@@ -360,6 +363,7 @@ function quizResult(r, repaint) {
     try {
       await recordSignup({ tier: r.tierId, newsletter: !!profile.consent?.newsletter });
       profile.selectedTier = r.tierId;
+      track("tier_switch", { tier: r.tierId, from: "quiz" });
       toast(`Noted — ${fit.name}. We'll confirm on the call.`);
       if (!profile.clientIds.length) renderLeadState(); else repaint();
     } catch (e) { console.error(e); chooseBtn.disabled = false; chooseBtn.textContent = `Choose ${fit.name}`; toast("Couldn't save that. Try again."); }
@@ -404,6 +408,7 @@ function markRequested(el) {
   if (!requested.has(key)) return;
   el.classList.add("is-requested");
   const kind = key.split(":")[0];
+  if (el.hasAttribute("download")) { el.textContent = "Download again ✓"; return; }
   el.textContent = kind === "prebook" ? "Pre-booked ✓" : "Asked ✓ — check WhatsApp";
   if (kind === "prebook") el.disabled = true;
 }
@@ -424,20 +429,23 @@ async function record(kind, item, label, btn) {
 }
 
 function perksCard() {
-  return card("Free for you, right now", `Ask on WhatsApp ${WHATSAPP_DISPLAY} and we do it. No tier needed, nothing to pay.`,
+  return card("Free for you, right now", `The documents download instantly. For the rest, ask on WhatsApp ${WHATSAPP_DISPLAY} and we do it. No tier needed, nothing to pay.`,
     h("div", { class: "p-perks" }, PERKS.map((pk) => {
       const msg = `Hi Brand Mint — ${pk.ask} (signed in as ${profile.email})`;
-      const link = h("a", {
-        class: "p-btn p-btn-sm p-btn-primary", href: waLink(msg), target: "_blank", rel: "noopener",
-        "data-req": `perk:${pk.id}`, text: "Ask on WhatsApp",
+      const wa = h("a", {
+        class: "p-btn p-btn-sm" + (pk.file ? "" : " p-btn-primary"), href: waLink(msg), target: "_blank", rel: "noopener",
+        "data-req": pk.file ? null : `perk:${pk.id}`, text: pk.file ? "Or ask on WhatsApp" : "Ask on WhatsApp",
       });
-      // Record the ask, then let the link open WhatsApp as normal.
-      link.addEventListener("click", () => { record("perk", pk.id, pk.title, link); });
+      wa.addEventListener("click", () => { track("perk_ask", { perk: pk.id }); record("perk", pk.id, pk.title, pk.file ? null : wa); });
+      const dl = pk.file
+        ? h("a", { class: "p-btn p-btn-sm p-btn-primary", href: pk.file, download: "", "data-req": `perk:${pk.id}`, text: "Download PDF" })
+        : null;
+      if (dl) dl.addEventListener("click", () => { track("perk_download", { perk: pk.id }); record("perk", pk.id, `${pk.title} (PDF)`, dl); });
       return h("article", { class: "p-perk" }, [
         h("h3", { text: pk.title }),
         h("p", { class: "p-perk-summary", text: pk.summary }),
         h("p", { class: "p-muted", text: pk.detail }),
-        link,
+        h("div", { class: "p-perk-actions" }, [dl, wa].filter(Boolean)),
       ]);
     })));
 }
@@ -470,7 +478,7 @@ function productsCard() {
       btn.addEventListener("click", async () => {
         btn.disabled = true; btn.textContent = "Saving…";
         const ok = await record("prebook", pr.id, `${pr.name} — free trial`, btn);
-        if (ok) toast(`You're on the list for ${pr.name}.`);
+        if (ok) { track("prebook", { product: pr.id }); toast(`You're on the list for ${pr.name}.`); }
         else { btn.disabled = false; btn.textContent = "Pre-book free trial"; }
       });
       markRequested(btn);
@@ -534,6 +542,7 @@ function tierAlt(t, current) {
     try {
       await recordSignup({ tier: t.id, newsletter: !!profile.consent?.newsletter });
       profile.selectedTier = t.id;
+      track("tier_switch", { tier: t.id });
       toast(`Noted — ${t.name}. We'll confirm on the call.`);
       renderLeadState();
     } catch (e) {

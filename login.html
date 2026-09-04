@@ -131,6 +131,7 @@
         peekSession,
       } from "/auth/session.js?v=clean2";
       import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean5";
+      import { track } from "/shared/analytics.js?v=1";
 
       const params = new URLSearchParams(location.search);
       const next = params.get("next");
@@ -188,6 +189,7 @@
 
       googleBtn.addEventListener("click", async () => {
         googleBtn.disabled = true;
+        track("signin_start", { tier: tier?.id || null });
         say("Opening Google…", "info");
         try {
           await signInWithGoogle(next && next.startsWith("/") ? next : "/portal");
@@ -197,6 +199,7 @@
           // Consent is implied by the button per the line above it; the
           // newsletter is the one genuinely optional thing, so it's a tick.
           await recordSignup({ tier: tier?.id || null, newsletter: newsletter.checked });
+          track("signin_success", { tier: tier?.id || null, newsletter: newsletter.checked });
 
           location.replace(next && next.startsWith("/") ? next : homeFor(profile));
         } catch (e) {

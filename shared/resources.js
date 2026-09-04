@@ -29,6 +29,7 @@ export const PERKS = [
   },
   {
     id: "launch-checklist",
+    file: "/downloads/brand-mint-launch-readiness-checklist.pdf",
     title: "Launch-readiness checklist",
     summary: "The 20-point pass every Brand Mint store clears before it goes live.",
     detail: "Lighthouse across all four axes, real-device mobile QA, cross-browser check, WCAG AA accessibility, end-to-end form and checkout tests, link-preview validation, DNS and SSL verification. Run it against a store you already have.",
@@ -36,6 +37,7 @@ export const PERKS = [
   },
   {
     id: "catalogue-template",
+    file: "/downloads/brand-mint-product-catalogue-template.pdf",
     title: "Product catalogue template",
     summary: "The exact fields we ask every client for, before a single page is built.",
     detail: "Titles, descriptions, variants, stock units, pricing, HSN codes, weights and dimensions for courier rating, photography specs. Filling this in early is the single biggest thing that keeps a build on schedule.",
@@ -43,6 +45,7 @@ export const PERKS = [
   },
   {
     id: "scope-worksheet",
+    file: "/downloads/brand-mint-scope-worksheet.pdf",
     title: "Scope worksheet",
     summary: "Work out what you actually need before anyone quotes you.",
     detail: "Catalogue size, payment methods, shipping model, returns policy, who owns which account. Come out of it able to compare quotes on the same basis, including ours.",

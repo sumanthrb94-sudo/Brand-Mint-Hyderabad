@@ -290,7 +290,17 @@ function newId() {
     : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 }
 
+/** Analytics events since an ISO timestamp, newest first. Not cached — the
+ *  collection grows without bound, so the analytics views query on demand. */
+export async function fetchEvents({ since, max = 5000 } = {}) {
+  const fb = await getFirebase();
+  const { collection, query, where, orderBy, limit, getDocs } = fb.sdk;
+  const snap = await getDocs(query(collection(fb.db, "events"), where("ts", ">=", since), orderBy("ts", "desc"), limit(max)));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
 export const db = {
+  fetchEvents,
   list(table, filter) {
     const rows = cache[table] || [];
     if (typeof filter === "function") return rows.filter(filter);

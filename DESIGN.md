@@ -98,3 +98,11 @@ A person who signed in but has not been called sees the full services
 review: their tier in detail plus everything it inherits, one-click switch
 to another tier, what we need from them, the three steps, care plans, FAQ.
 All of it renders from `shared/tiers.js`, so it never drifts from the site.
+
+## Charts (admin)
+
+Two-series lines use the validated pair mint-deep `#047857` + gold `#C9A14A`
+(dataviz check: CVD ΔE 18, normal 26). Gold sits under 3:1 on white, so every
+chart carries a legend, direct end labels and a "Show as table" view.
+Single-series bars are mint-deep only. The heat map is one sequential hue,
+mint light → dark, never a rainbow.

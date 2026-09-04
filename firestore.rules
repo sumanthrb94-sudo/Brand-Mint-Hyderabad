@@ -260,6 +260,35 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    match /events/{id} {
+      // First-party analytics from shared/analytics.js. Anyone may append
+      // one event of a pinned shape; only the studio can read. A uid may be
+      // claimed only by the signed-in owner of that uid.
+      allow create: if request.resource.data.keys().hasOnly([
+                         't', 'ts', 'path', 'sid', 'aid', 'uid', 'vw', 'vh', 'dev', 'dh',
+                         'x', 'y', 'xr', 'yr', 'el', 'txt', 'href', 'ref', 'utm', 'lang',
+                         'sec', 'depth', 'secs', 'n', 'p'
+                       ])
+                    && request.resource.data.t in ['page_view', 'click', 'scroll', 'section', 'leave', 'event']
+                    && request.resource.data.ts is string && request.resource.data.ts.size() <= 40
+                    && request.resource.data.path is string && request.resource.data.path.size() <= 200
+                    && request.resource.data.sid is string && request.resource.data.sid.size() <= 24
+                    && request.resource.data.aid is string && request.resource.data.aid.size() <= 24
+                    && (!('uid' in request.resource.data)
+                        || request.resource.data.uid == ''
+                        || (request.auth != null && request.resource.data.uid == request.auth.uid))
+                    && (!('el' in request.resource.data) || request.resource.data.el.size() <= 80)
+                    && (!('txt' in request.resource.data) || request.resource.data.txt.size() <= 60)
+                    && (!('href' in request.resource.data) || request.resource.data.href.size() <= 200)
+                    && (!('ref' in request.resource.data) || request.resource.data.ref.size() <= 100)
+                    && (!('utm' in request.resource.data) || request.resource.data.utm.size() <= 120)
+                    && (!('n' in request.resource.data) || request.resource.data.n.size() <= 40)
+                    && (!('p' in request.resource.data) || request.resource.data.p.size() <= 300);
+      allow get, list: if isAdmin();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
     /* --------------------------- content, settings ------------------------ */
     // Admin only. Settings carries bank details and GSTIN.
 

@@ -21,6 +21,8 @@ const ROUTES = [
   { id: "delivery",   label: "Go to Delivery",   icon: "✓", kbd: "G V" },
   { id: "pipeline",   label: "Go to Pipeline",   icon: "▥", kbd: "G P" },
   { id: "invoices",   label: "Go to Invoices",   icon: "₹", kbd: "G I" },
+  { id: "analytics",  label: "Go to Analytics",  icon: "◫", kbd: "G A" },
+  { id: "heatmap",    label: "Go to Heat map",   icon: "◉", kbd: "G H" },
   { id: "settings",   label: "Go to Settings",   icon: "⚙", kbd: "G S" },
 ];
 

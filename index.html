@@ -339,5 +339,6 @@
       new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting && e.boundingClientRect.top < 0; nav.classList.toggle("is-scrolled", pastHero); paint(); }, { threshold: 0 }).observe(hero);
       new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; paint(); }, { threshold: 0.2 }).observe(footer);
     </script>
+    <script type="module" src="/shared/analytics.js?v=1"></script>
   </body>
 </html>

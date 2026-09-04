@@ -117,6 +117,12 @@ export async function getSession() {
   return user ? { user } : null;
 }
 
+/** Fresh ID token for the signed-in user, or null. Used to sign analytics writes. */
+export async function getIdToken() {
+  const user = await getUser();
+  return user ? user.getIdToken() : null;
+}
+
 export async function getUser() {
   const fb = await getClient();
   if (fb.auth.currentUser) return fb.auth.currentUser;

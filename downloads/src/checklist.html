@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"></head><body>
+<div class="head"><div class="brand"><svg class="mark" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#g)"/><path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg> Brand Mint <em>— Hyderabad</em></div><span class="tag">Free resource · brandmintstudios.in</span></div>
+<p class="tag">20-point pass</p>
+<h1>Launch-readiness <em>checklist</em></h1>
+<p class="lede">Every Brand Mint store clears these twenty checks before it goes live. Run them against a store you already have. Anything unticked is losing you orders or trust, usually both.</p>
+<h2><span>01</span>Speed and mobile</h2>
+<ul class="check">
+<li><strong>Lighthouse 90+ on mobile, all four axes</strong><span>Performance, Accessibility, Best Practices, SEO. Test the home page, a product page and the cart. Chrome → DevTools → Lighthouse, mobile preset.</span></li>
+<li><strong>Largest Contentful Paint under 2.5 seconds on 4G</strong><span>Usually the hero image. Serve WebP or AVIF, sized to the slot, and preload it.</span></li>
+<li><strong>Images lazy-loaded below the fold</strong><span>Every product image outside the first screen carries loading="lazy".</span></li>
+<li><strong>Tested on a real Android and a real iPhone</strong><span>Not the emulator. Tap targets, sticky bars, keyboard on the checkout form, the back button.</span></li>
+<li><strong>No horizontal scroll at 320px wide</strong><span>Shrink the browser to a small phone. Nothing should push the page sideways.</span></li>
+</ul>
+<h2><span>02</span>Commerce, end to end</h2>
+<ul class="check">
+<li><strong>A real Razorpay order, start to finish</strong><span>Place a ₹1 order with a live card or UPI. Confirm the order appears in admin, stock decrements, and the confirmation arrives.</span></li>
+<li><strong>A real cash-on-delivery order</strong><span>Same path, COD. Confirm the order flags as unpaid and the confirmation step works.</span></li>
+<li><strong>A refund, back by the original method</strong><span>Refund the ₹1 order from admin. Watch it land in Razorpay and in the customer's email.</span></li>
+<li><strong>Order emails and the GST invoice arrive</strong><span>Confirmation, shipped and delivered mails; invoice PDF with GSTIN, HSN and the right rate. Check the spam folder too.</span></li>
+<li><strong>A coupon applies and expires correctly</strong><span>Create a test code, use it, confirm it stops working after its end date or usage cap.</span></li>
+</ul>
+<h2><span>03</span>Trust and legal</h2>
+<ul class="check">
+<li><strong>Terms, Privacy, Shipping, Returns and Cancellation pages exist</strong><span>Linked from the footer and from checkout. Razorpay checks for these before enabling settlements.</span></li>
+<li><strong>Legal name, address, contact and grievance officer visible</strong><span>Consumer Protection (E-Commerce) Rules 2020. A name, an email and a response time.</span></li>
+<li><strong>MRP, net quantity, manufacturer and country of origin on packaged goods</strong><span>Legal Metrology rules apply to the listing, not just the pack.</span></li>
+<li><strong>Privacy policy matches what the store actually does</strong><span>Analytics, pixels, WhatsApp, email tools: if it runs, it's named. Marketing opt-in is separate from purchase.</span></li>
+</ul>
+<h2><span>04</span>Technical</h2>
+<ul class="check">
+<li><strong>Domain, SSL and redirects</strong><span>http → https, www ↔ bare domain, one canonical version. Certificate auto-renews.</span></li>
+<li><strong>Custom 404 page and a working search</strong><span>A dead link should lead somewhere useful, with a search box and the top categories.</span></li>
+<li><strong>Backups and uptime monitoring switched on</strong><span>Daily database backup you have restored at least once. An uptime monitor that messages you.</span></li>
+</ul>
+<h2><span>05</span>Marketing plumbing</h2>
+<ul class="check">
+<li><strong>Link previews render on WhatsApp and Instagram</strong><span>Open Graph title, description and a 1200×630 image on every product and the home page.</span></li>
+<li><strong>GA4 and Meta Pixel fire the right events with values</strong><span>view_item, add_to_cart, begin_checkout, purchase with amount and currency. Verify in DebugView and the Pixel helper.</span></li>
+<li><strong>Sitemap submitted, robots.txt correct, Search Console verified</strong><span>Products and categories in the sitemap; admin and cart paths disallowed.</span></li>
+</ul>
+<div class="note">Want us to run this against your store and send back the list? It's free. WhatsApp +91 77999 34943 with "store audit", or sign in at brandmintstudios.in and ask from your portal.</div>
+<div class="foot"><span>Brand Mint · HITEC City, Hyderabad · WhatsApp +91 77999 34943</span><span>Free to use and share. Not legal or tax advice.</span></div>
+</body></html>

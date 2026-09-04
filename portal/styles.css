@@ -554,7 +554,8 @@ textarea.p-input:focus, input.p-input:focus {
 .p-perk h3 { font-size: 16px; font-weight: 600; }
 .p-perk-summary { font-size: 14px; color: var(--ink-2); line-height: 1.5; }
 .p-perk .p-muted { font-size: 13px; line-height: 1.5; flex: 1; }
-.p-perk .p-btn { margin-top: 8px; justify-content: center; text-decoration: none; }
+.p-perk-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.p-perk .p-btn { justify-content: center; text-decoration: none; }
 .p-btn.is-requested { background: var(--mint-soft); color: var(--mint-deep); border-color: transparent; }
 
 .p-lessons { border-top: 1px solid var(--line); }

@@ -35,8 +35,11 @@ There is no contact form and no invite email. Sign-in **is** the form. Consent t
 | `firestore.rules` | **The security boundary.** Admin sees all; a client sees only docs carrying their `clientId`; a lead can only write their own profile and lead |
 | `portal.html` + `portal/` | Client side. Three states in `portal/app.js`: lead (no membership) → onboarding (`clients.status !== "active"`) → active |
 | `admin.html` + `admin/` | Studio side. Hash router in `admin/app.js`; modules: dashboard, leads, onboarding, clients, delivery, pipeline, invoices, settings |
+| `admin/modules/analytics.js`, `heatmap.js` | Admin → Analytics (KPIs, daily line, tiers, sections, scroll depth, devices, referrers, portal actions) and Heat map (clicks + scroll depth over the real page in a same-origin iframe). Both read `events` on demand via `db.fetchEvents()`, never cached |
 | `admin/db.js` | Sync in-memory cache fed by one `onSnapshot` per collection; writes are fire-and-forget. Add new collections to `COLLECTIONS` and `cache` |
 | `shared/brief.js` | The onboarding questionnaire (portal renders it, admin reads it) |
+| `shared/analytics.js` | First-party analytics. Loaded by every public page and the portal; writes page views, clicks (with coordinates), scroll depth, section reach, time on page and `track()` events straight to Firestore REST (`events`). Off under DNT/GPC and inside the heat-map iframe (`?bm_nt=1`) |
+| `downloads/` | The three free PDFs (checklist, catalogue template, scope worksheet) + CSV. Sources in `downloads/src/`, regenerate with `node downloads/src/render.cjs` |
 | `shared/quiz.js` | The Store Readiness Score: 10 questions, `scoreQuiz()` → score/100, tier fit, three fixes. Saved to `profiles/{uid}.readiness`; admin shows it on the lead |
 | `shared/resources.js` | Free perks (asked for on WhatsApp), `LESSONS`, `COMPLIANCE`, upcoming `PRODUCTS` (Modcon HR, Real Estate CRM). Portal renders them in every signed-in state; requests land in the `requests` collection and show in Admin → Leads |
 | `marketing/video/` | The video production kit — prompts, VO scripts, logo refs. Assets, not code. Keep. |

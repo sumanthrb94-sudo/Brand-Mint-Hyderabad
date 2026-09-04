@@ -1693,3 +1693,31 @@ th.num {
 .pill.not_started        { color: var(--muted);  background: rgba(10,14,12,0.06); }
 .pill.complete           { color: #fff;          background: var(--mint-3); }
 .pill.complete::before   { background: #fff; }
+
+/* ---------- ANALYTICS ---------- */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; }
+.hbars { display: flex; flex-direction: column; gap: 9px; padding: 4px 0; }
+.hbar { display: grid; grid-template-columns: 110px 1fr 84px; align-items: center; gap: 10px; font-size: 12.5px; }
+.hbar-label { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbar-track { height: 10px; background: var(--line-2); border-radius: 4px; overflow: hidden; }
+.hbar-fill { display: block; height: 100%; border-radius: 0 4px 4px 0; min-width: 2px; }
+.hbar-value { text-align: right; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.chart-wrap { position: relative; }
+.chart { width: 100%; height: auto; display: block; }
+.chart-grid { stroke: var(--line-2); stroke-width: 1; }
+.chart-tick { font: 500 10.5px var(--mono); fill: var(--faint); }
+.chart-label { font: 600 11px var(--sans); fill: var(--ink-2); }
+.chart-cross { stroke: var(--faint); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+.chart-legend i, .chart-tip i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.chart-tip { position: absolute; top: 28px; background: var(--ink); color: var(--paper); font-size: 12px; padding: 8px 10px; border-radius: 8px; pointer-events: none; box-shadow: var(--shadow-md); white-space: nowrap; }
+.chart-tip strong { display: block; font-family: var(--mono); font-weight: 500; margin-bottom: 4px; color: rgba(245,241,234,.7); }
+.chart-table { margin-top: 8px; }
+.chart-table summary { cursor: pointer; font-size: 12px; color: var(--muted); }
+
+/* ---------- HEAT MAP ---------- */
+.heat-scroll { overflow: auto; max-height: 78vh; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--paper); }
+.heat-stage { position: relative; }
+.heat-frame { display: block; border: 0; height: 1200px; background: #fff; pointer-events: none; }
+.heat-canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
+.heat-strip { position: absolute; right: 0; top: 0; pointer-events: none; }

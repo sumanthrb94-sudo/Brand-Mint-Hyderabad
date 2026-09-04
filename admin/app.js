@@ -31,6 +31,8 @@ const routes = {
   delivery:  () => import("/admin/modules/delivery.js"),
   invoices:  () => import("/admin/modules/invoices.js"),
   settings:  () => import("/admin/modules/settings.js"),
+  analytics: () => import("/admin/modules/analytics.js"),
+  heatmap:   () => import("/admin/modules/heatmap.js"),
 };
 
 const ctx = {

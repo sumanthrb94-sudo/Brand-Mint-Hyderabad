@@ -503,6 +503,8 @@ const NAV = [
       { id: "delivery", label: "Delivery", route: "#/delivery", icon: iconCheckCircle() },
       { id: "pipeline", label: "Pipeline", route: "#/pipeline", icon: iconColumns() },
       { id: "invoices", label: "Invoices", route: "#/invoices", icon: iconFile() },
+      { id: "analytics", label: "Analytics", route: "#/analytics", icon: iconChart() },
+      { id: "heatmap", label: "Heat map", route: "#/heatmap", icon: iconHeat() },
     ],
   },
   {
@@ -737,6 +739,7 @@ function iconUsers()   { return svg('<circle cx="6" cy="6" r="2.5"/><path d="M2 
 function iconFile()    { return svg('<path d="M4 1.5h5l3 3V14a.5.5 0 0 1-.5.5h-7A.5.5 0 0 1 4 14V2a.5.5 0 0 1 .5-.5z"/><path d="M9 1.5V4a.5.5 0 0 0 .5.5H12"/><path d="M6 8h4M6 11h4"/>'); }
 function iconCalendar(){ return svg('<rect x="2" y="3" width="12" height="11" rx="1"/><path d="M2 6h12M5 1.5v3M11 1.5v3"/>'); }
 function iconChart()   { return svg('<path d="M2 14V2M14 14H2M5 11V8M8 11V5M11 11V7"/>'); }
+function iconHeat()    { return svg('<circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.4"/>'); }
 function iconPalette() { return svg('<path d="M8 1.5C4.4 1.5 1.5 4.4 1.5 8c0 3 2 5.5 5 6.4.5.1.8-.2.8-.6v-1.4c-2-.1-2.4-1-2.4-1 0-.3-.2-.5-.2-.5"/><circle cx="5" cy="5.5" r=".5"/><circle cx="8" cy="3.5" r=".5"/><circle cx="11" cy="5.5" r=".5"/><circle cx="12" cy="9" r=".5"/>'); }
 function iconBook()    { return svg('<path d="M3 2.5h4.5C8 2.5 8 3 8 3v11s-.2-.5-.7-.5H3V2.5z"/><path d="M13 2.5H8.5C8 2.5 8 3 8 3v11s.2-.5.7-.5H13V2.5z"/>'); }
 function iconCog()     { return svg('<circle cx="8" cy="8" r="2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M11.2 4.8l1-1M3.8 12.2l1-1"/>'); }
