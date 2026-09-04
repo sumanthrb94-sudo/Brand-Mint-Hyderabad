@@ -188,6 +188,7 @@ export async function getProfile({ force = false } = {}) {
       clientIds: memberships.docs.map((d) => d.data().clientId),
       selectedTier: data?.selectedTier || null,
       consent: data?.consent || null,
+      readiness: data?.readiness || null,
       profileMissing: !data,
     };
     cacheProfile(_profile);

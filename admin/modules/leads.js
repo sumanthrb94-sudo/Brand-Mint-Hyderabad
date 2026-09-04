@@ -7,6 +7,7 @@
 
 import { h, kpi, table, pill, modal, confirm, field, formToObject, bindSubmit, renderTopbar, relTime } from "/admin/components.js";
 import { TIER_BY_ID, inr as inrTier } from "/shared/tiers.js";
+import { QUIZ, scoreLabel } from "/shared/quiz.js";
 
 const STATUSES = ["new", "qualified", "won", "lost"];
 const BUDGETS = ["", "<1L", "1-3L", "3-8L", "8L+"];
@@ -117,6 +118,17 @@ export async function render(ctx) {
                   h("div", { class: "strong", text: r.name || "—" }),
                   h("div", { class: "sub", text: r.company || "—" }),
                 ]),
+            },
+            {
+              label: "Readiness",
+              cell: (r) => {
+                const rd = readinessFor(r);
+                if (!rd) return h("span", { class: "muted", text: "—" });
+                return h("div", {}, [
+                  h("div", { class: "strong num", text: `${rd.score}/100` }),
+                  h("div", { class: "sub", text: `${scoreLabel(rd.score)} · fits ${TIER_BY_ID[rd.tierId]?.name || rd.tierId}` }),
+                ]);
+              },
             },
             {
               label: "Store",
@@ -335,6 +347,30 @@ export async function render(ctx) {
     });
   }
 
+  /* The readiness quiz result lives on the person's profile, keyed by uid. */
+  function readinessFor(lead) {
+    if (!lead?.uid) return null;
+    return db.get("profiles", lead.uid)?.readiness || null;
+  }
+
+  function readinessBlock(lead) {
+    const rd = readinessFor(lead);
+    if (!rd) return null;
+    const answers = QUIZ.map((q) => {
+      const i = rd.answers?.[q.id];
+      const o = Number.isInteger(i) ? q.options[i] : null;
+      return h("li", {}, [h("span", { class: "muted", text: q.q + " " }), h("strong", { text: o ? o.label : "—" })]);
+    });
+    return h("div", { class: "card", style: "background:var(--surface-2);padding:14px 16px" }, [
+      h("div", { class: "hstack", style: "justify-content:space-between;align-items:baseline" }, [
+        h("h4", { text: `Store readiness ${rd.score}/100 — ${scoreLabel(rd.score)}` }),
+        h("span", { class: "muted", text: `fits ${TIER_BY_ID[rd.tierId]?.name || rd.tierId}` }),
+      ]),
+      h("ul", { class: "muted", style: "margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.6" }, answers),
+      rd.fixes?.length ? h("p", { class: "muted", style: "margin:8px 0 0;font-size:12.5px" }, [h("strong", { text: "Fix first: " }), rd.fixes.map((f) => f.q.replace(/\?$/, "")).join(" · ")]) : null,
+    ]);
+  }
+
   function openForm(lead) {
     const isNew = !lead;
     const data = lead || {
@@ -351,6 +387,7 @@ export async function render(ctx) {
     };
 
     const form = h("form", { class: "vstack", style: { gap: "12px" } });
+    if (!isNew) { const rb = readinessBlock(lead); if (rb) form.appendChild(rb); }
 
     form.appendChild(
       h("div", { class: "field-row" }, [

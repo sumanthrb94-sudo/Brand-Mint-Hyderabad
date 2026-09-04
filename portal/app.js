@@ -17,10 +17,12 @@ import {
   watch,
   sendRequest,
   myRequests,
+  saveReadiness,
 } from "/portal/data.js";
 import { renderWizard, briefSummaryCard } from "/portal/wizard.js";
 import { TIERS, TIER_BY_ID, STEPS, CARE_PLANS, NEEDS, FAQ, inclusionsFor } from "/shared/tiers.js";
 import { PERKS, LESSONS, COMPLIANCE, COMPLIANCE_NOTE, PRODUCTS, WHATSAPP_DISPLAY, waLink } from "/shared/resources.js";
+import { QUIZ, scoreQuiz, scoreLabel } from "/shared/quiz.js";
 import {
   h,
   mount,
@@ -231,6 +233,7 @@ function renderLeadState() {
   mount(
     view,
     hero,
+    quizCard(),
     tier ? inclusionsCard(tier) : null,
     tier ? alternativesCard(tier) : allTiersCard(),
     perksCard(),
@@ -257,12 +260,132 @@ function renderResources() {
       h("h1", { text: "Things we'll do for you, and things worth knowing." }),
       h("p", { text: `Ask for any of these on WhatsApp (${WHATSAPP_DISPLAY}) and we do it — no charge, no tier required.` }),
     ]),
+    quizCard(),
     perksCard(),
     productsCard(),
     lessonsCard(),
     complianceCard()
   );
   loadMyRequests();
+}
+
+/* ------------------------------------------------- store readiness score */
+
+let quizAnswers = null; // null = not started; {} while in progress
+let quizStep = 0;
+
+function quizCard() {
+  const host = h("section", { class: "p-card p-quiz", id: "quiz" });
+  const paintQuiz = () => {
+    host.innerHTML = "";
+    const r = profile.readiness;
+    if (quizAnswers) return host.appendChild(quizQuestion(paintQuiz));
+    if (r && r.score != null) return host.appendChild(quizResult(r, paintQuiz));
+    host.appendChild(quizIntro(paintQuiz));
+  };
+  paintQuiz();
+  return host;
+}
+
+function quizIntro(repaint) {
+  return h("div", { class: "p-quiz-intro" }, [
+    h("div", {}, [
+      h("p", { class: "p-mono p-quiz-kicker", text: "Two minutes · 10 questions" }),
+      h("h2", { text: "How ready is your store to launch?" }),
+      h("p", { class: "p-muted", text: "Answer ten quick questions. You get a score out of 100, the tier that fits how you operate, and the three things to fix first. We see it too, so the call starts where you are." }),
+    ]),
+    h("button", { class: "p-btn p-btn-primary", type: "button", text: "Start", onclick: () => { quizAnswers = {}; quizStep = 0; repaint(); } }),
+  ]);
+}
+
+function quizQuestion(repaint) {
+  const q = QUIZ[quizStep];
+  const n = QUIZ.length;
+  const wrap = h("div", { class: "p-quiz-q" }, [
+    h("div", { class: "p-quiz-top" }, [
+      h("span", { class: "p-mono p-muted", text: `${quizStep + 1} / ${n}` }),
+      h("div", { class: "p-progress", "aria-hidden": "true" }, h("span", { style: `width:${Math.round((quizStep / n) * 100)}%` })),
+    ]),
+    h("h2", { text: q.q }),
+    h("div", { class: "p-quiz-options", role: "group", "aria-label": q.q }, q.options.map((o, i) =>
+      h("button", {
+        class: "p-quiz-opt" + (quizAnswers[q.id] === i ? " picked" : ""), type: "button", text: o.label,
+        onclick: () => {
+          quizAnswers[q.id] = i;
+          if (quizStep < n - 1) { quizStep += 1; repaint(); }
+          else finishQuiz(repaint);
+        },
+      })
+    )),
+    h("div", { class: "p-row", style: "justify-content:space-between;margin-top:14px" }, [
+      h("button", { class: "p-btn p-btn-ghost p-btn-sm", type: "button", text: quizStep ? "← Back" : "Cancel",
+        onclick: () => { if (quizStep) { quizStep -= 1; } else { quizAnswers = null; } repaint(); } }),
+      h("span", { class: "p-muted", style: "font-size:12.5px", text: "Pick the closest answer" }),
+    ]),
+  ]);
+  setTimeout(() => wrap.querySelector(".p-quiz-opt")?.focus(), 0);
+  return wrap;
+}
+
+async function finishQuiz(repaint) {
+  const result = scoreQuiz(quizAnswers);
+  const readiness = { ...result, answers: quizAnswers, at: new Date().toISOString() };
+  profile.readiness = readiness;
+  quizAnswers = null;
+  repaint();
+  try {
+    await saveReadiness(readiness);
+    toast(`Saved — ${readiness.score}/100, ${scoreLabel(readiness.score)}.`);
+  } catch (e) {
+    console.error("[portal] readiness", e);
+    toast("Scored, but we couldn't save it. It'll still be here until you reload.");
+  }
+}
+
+function quizResult(r, repaint) {
+  const fit = TIER_BY_ID[r.tierId];
+  const isCurrent = profile.selectedTier === r.tierId;
+  const circ = 2 * Math.PI * 52;
+  const ring = h("svg", { class: "p-ring", viewBox: "0 0 120 120", width: "120", height: "120", role: "img", "aria-label": `${r.score} out of 100` }, [
+    h("circle", { cx: "60", cy: "60", r: "52", class: "p-ring-track" }),
+    h("circle", { cx: "60", cy: "60", r: "52", class: "p-ring-fill", style: `stroke-dasharray:${circ};stroke-dashoffset:${circ * (1 - r.score / 100)}` }),
+    h("text", { x: "60", y: "58", class: "p-ring-num", "text-anchor": "middle", dominantBaseline: "central", text: String(r.score) }),
+    h("text", { x: "60", y: "80", class: "p-ring-sub", "text-anchor": "middle", text: "/ 100" }),
+  ]);
+  const chooseBtn = fit && !isCurrent
+    ? h("button", { class: "p-btn p-btn-primary p-btn-sm", type: "button", text: `Choose ${fit.name}` })
+    : null;
+  if (chooseBtn) chooseBtn.addEventListener("click", async () => {
+    chooseBtn.disabled = true; chooseBtn.textContent = "Saving…";
+    try {
+      await recordSignup({ tier: r.tierId, newsletter: !!profile.consent?.newsletter });
+      profile.selectedTier = r.tierId;
+      toast(`Noted — ${fit.name}. We'll confirm on the call.`);
+      if (!profile.clientIds.length) renderLeadState(); else repaint();
+    } catch (e) { console.error(e); chooseBtn.disabled = false; chooseBtn.textContent = `Choose ${fit.name}`; toast("Couldn't save that. Try again."); }
+  });
+  return h("div", { class: "p-quiz-result" }, [
+    h("div", { class: "p-quiz-score" }, [
+      ring,
+      h("div", {}, [
+        h("p", { class: "p-mono p-quiz-kicker", text: "Store readiness" }),
+        h("h2", { text: scoreLabel(r.score) }),
+        h("p", { class: "p-muted", text: fit
+          ? (isCurrent ? `The ${fit.name} matches how you operate — the one you picked.` : `How you operate fits the ${fit.name} (${inr(fit.price)}, ${fit.weeks}).`)
+          : "" }),
+        h("div", { class: "p-row", style: "margin-top:10px" }, [
+          chooseBtn,
+          h("button", { class: "p-btn p-btn-ghost p-btn-sm", type: "button", text: "Retake", onclick: () => { quizAnswers = { ...(r.answers || {}) }; quizStep = 0; repaint(); } }),
+        ].filter(Boolean)),
+      ]),
+    ]),
+    r.fixes?.length
+      ? h("div", { class: "p-quiz-fixes" }, [
+          h("h3", { text: r.fixes.length === 1 ? "The one thing to fix first" : `The ${r.fixes.length} things to fix first` }),
+          h("ol", {}, r.fixes.map((f) => h("li", {}, [h("strong", { text: f.q }), h("span", { text: f.fix })]))),
+        ])
+      : h("p", { class: "p-quiz-clean", text: "Nothing is holding you back. Sign the agreement and we start." }),
+  ]);
 }
 
 /** ids of things already requested, so buttons can show it. */

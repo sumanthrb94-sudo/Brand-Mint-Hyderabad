@@ -230,3 +230,13 @@ export async function myRequests() {
   const snap = await getDocs(query(collection(fb.db, "requests"), where("uid", "==", profile.id)));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
+
+/* ------------------------------------------------------- readiness score */
+
+/** Save the Store Readiness Score on the caller's own profile. */
+export async function saveReadiness(readiness) {
+  const fb = await getFirebase();
+  const { doc, setDoc } = fb.sdk;
+  const profile = await getProfile();
+  await setDoc(doc(fb.db, "profiles", profile.id), { readiness, updatedAt: new Date().toISOString() }, { merge: true });
+}

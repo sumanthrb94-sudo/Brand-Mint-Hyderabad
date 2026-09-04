@@ -37,6 +37,8 @@ const COLLECTIONS = [
   "messages",
   // Free perks + pre-bookings from the portal
   "requests",
+  // Sign-in profiles (readiness score lives here)
+  "profiles",
 ];
 
 // The singleton settings document lives at settings/singleton.
@@ -74,6 +76,7 @@ const cache = {
   deliverables: [],
   messages: [],
   requests: [],
+  profiles: [],
   settings: null,
 };
 
