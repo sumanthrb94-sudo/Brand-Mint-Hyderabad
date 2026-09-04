@@ -149,17 +149,17 @@ html[data-auth-role="admin"]       [data-auth-show="admin"] {
   background: rgba(245, 241, 234, 0.88);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--line-soft);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
-.brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
-.brand-mark {
-  width: 34px; height: 34px; border-radius: 50%;
-  display: grid; place-items: center;
-  background: linear-gradient(140deg, var(--mint-2), var(--mint) 55%, var(--mint-deep));
-  color: var(--bm-ink-deep); font-size: 13px; font-weight: 700;
-}
-.brand-name { font-family: var(--display); font-weight: 700; font-size: 15px; line-height: 1.1; letter-spacing: -0.01em; }
-.brand-name small { display: block; font: 500 10.5px var(--mono); letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+.nav.is-scrolled { border-bottom-color: var(--line-soft); box-shadow: 0 8px 30px rgba(10, 14, 12, 0.06); }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.bm-mark { display: block; width: 34px; height: 34px; flex: none; }
+.brand-name { font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: -0.02em; white-space: nowrap; }
+.brand-name em { font-style: italic; font-weight: 400; font-size: 13px; color: var(--muted); margin-left: 2px; }
+/* The M draws itself once on load — the brand's one signature moment. */
+html.js .bm-mark-m { stroke-dasharray: 100; stroke-dashoffset: 100; animation: bmDraw 0.9s var(--ease) 0.15s forwards; }
+@keyframes bmDraw { to { stroke-dashoffset: 0; } }
 .nav-links { display: flex; gap: 2px; flex: 1; }
 .nav-links a {
   padding: 8px 12px; border-radius: 999px;
@@ -304,15 +304,34 @@ html[data-auth-role="admin"]       [data-auth-show="admin"] {
 
 .tier-cta {
   margin-top: auto;
-  padding-top: var(--s-5);
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14.5px;
   font-weight: 700;
-  font-size: 15px;
   color: var(--mint-deep);
-  text-decoration: none;
-  text-underline-offset: 3px;
+  border-color: rgba(4, 120, 87, 0.35);
+  background: transparent;
 }
-.tier-cta:hover { text-decoration: underline; }
-.tier--featured .tier-cta { color: var(--mint-2); }
+.tier-groups + .tier-cta, .tier-cta { margin-top: var(--s-5); }
+.tier-cta .arrow { display: inline-block; margin-left: 6px; transition: transform 0.2s var(--ease); }
+.tier-cta:hover { background: var(--mint-wash); border-color: var(--mint-deep); box-shadow: none; }
+.tier-cta:hover .arrow { transform: translateX(3px); }
+.tier-cta.btn-primary { color: var(--bm-ink-deep); border-color: var(--mint); background: var(--mint); }
+.tier-cta.btn-primary:hover { background: #0ea774; border-color: #0ea774; }
+.tier--featured .tier-cta:focus-visible { outline-color: var(--emerald); }
+
+.tier-guide {
+  margin-top: var(--s-6);
+  padding: var(--s-5) 0 0;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: minmax(180px, 0.6fr) 2fr;
+  gap: var(--s-3) var(--s-6);
+}
+.tier-guide h3 { font-size: 18px; font-weight: 600; }
+.tier-guide ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14.5px; color: var(--ink-2); }
+.tier-guide strong { font-weight: 600; color: var(--ink); }
+.tier-guide p { grid-column: 2; font-size: 13.5px; color: var(--muted); max-width: 56ch; }
 
 /* ------------------------------------------------------------- steps ---- */
 
@@ -416,4 +435,96 @@ html[data-auth-role="admin"]       [data-auth-show="admin"] {
   .care-body { grid-column: 1 / -1; }
   .steps { gap: var(--s-5); }
   .cta .hero-actions .btn { flex: 1 1 auto; }
+}
+
+/* ------------------------------------------------------------- trust ---- */
+
+.trust {
+  list-style: none; margin: var(--s-5) 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 8px 10px;
+}
+.trust li {
+  font: 500 12.5px/1 var(--mono);
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* --------------------------------------------------------------- faq ---- */
+
+.section--faq { padding-top: 0; }
+.faq { border-top: 1px solid var(--line); max-width: 760px; }
+.faq-item { border-bottom: 1px solid var(--line); }
+.faq-item summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+  padding: 18px 0;
+  font-family: var(--display); font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+  transition: color 0.15s var(--ease);
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: ""; flex: none; width: 10px; height: 10px; margin-right: 6px;
+  border-right: 1.6px solid var(--mint-deep); border-bottom: 1.6px solid var(--mint-deep);
+  transform: rotate(45deg); transition: transform 0.25s var(--ease);
+}
+.faq-item[open] summary::after { transform: rotate(-135deg); }
+.faq-item summary:hover { color: var(--mint-deep); }
+.faq-item p { padding: 0 0 20px; max-width: 56ch; font-size: 15.5px; line-height: 1.6; color: var(--ink-2); }
+html.js .faq-item[open] p { animation: fadeUp 0.35s var(--ease) both; }
+
+/* -------------------------------------------------------- sticky cta ---- */
+
+.sticky-cta {
+  position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 60;
+  display: none; align-items: center; justify-content: space-between; gap: var(--s-3);
+  padding: 10px 10px 10px 16px;
+  background: var(--bm-ink); color: var(--cream);
+  border-radius: 14px; box-shadow: var(--shadow-lg);
+  transform: translateY(calc(100% + 24px)); opacity: 0;
+  transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
+}
+.sticky-cta strong { display: block; font-size: 15px; }
+.sticky-cta span { font-size: 12px; color: var(--cream-mute); }
+.sticky-cta .btn { padding: 11px 16px; }
+.sticky-cta.is-on { transform: none; opacity: 1; }
+
+/* ------------------------------------------------------------ motion ---- */
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* Hero entrance: staggered, once, only with JS so nothing is ever hidden. */
+html.js .hero [data-enter] { animation: fadeUp 0.7s var(--ease) both; }
+html.js .hero [data-enter]:nth-child(1) { animation-delay: 0.05s; }
+html.js .hero [data-enter]:nth-child(2) { animation-delay: 0.15s; }
+html.js .hero [data-enter]:nth-child(3) { animation-delay: 0.25s; }
+html.js .hero [data-enter]:nth-child(4) { animation-delay: 0.35s; }
+html.js .hero [data-enter]:nth-child(5) { animation-delay: 0.45s; }
+html.js .hero [data-enter]:nth-child(6) { animation-delay: 0.55s; }
+
+/* Scroll reveal: the observer adds .is-in; children of a group stagger by --i. */
+html.js [data-reveal] {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+html.js [data-reveal].is-in { opacity: 1; transform: none; }
+html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-shadow; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal], html.js .hero [data-enter] { opacity: 1; transform: none; animation: none; }
+  html.js .bm-mark-m { stroke-dashoffset: 0; animation: none; }
+  .sticky-cta { transition: none; }
+}
+
+@media (max-width: 719px) {
+  .sticky-cta { display: flex; }
+  .brand-name em { display: none; }
+  .tier-guide { grid-template-columns: 1fr; }
+  .tier-guide p { grid-column: auto; }
+  .trust li { font-size: 12px; padding: 7px 10px; }
+  body { padding-bottom: 72px; }
 }

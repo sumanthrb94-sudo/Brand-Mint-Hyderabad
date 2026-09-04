@@ -35,7 +35,7 @@
         box-shadow: 0 30px 80px rgba(11,31,26,.12);
       }
       .mark { display: flex; align-items: center; gap: 10px; font: 700 17px var(--display); letter-spacing: -.02em; margin-bottom: 24px; }
-      .mark .dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: #05140f; font-size: 14px; background: linear-gradient(140deg, var(--mint), var(--mint-deep)); }
+      .mark .bm-mark { width: 30px; height: 30px; display: block; }
       h1 { font: 600 27px/1.15 var(--display); letter-spacing: -.025em; margin: 0 0 8px; }
       p.sub { margin: 0 0 22px; color: var(--muted); font-size: 14.5px; line-height: 1.55; }
 
@@ -78,7 +78,7 @@
   </head>
   <body>
     <main class="card">
-      <div class="mark"><span class="dot" aria-hidden="true">◆</span> Brand Mint</div>
+      <div class="mark"><svg class="bm-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true" focusable="false"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="bm-mark-m" pathLength="100" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg> Brand Mint</div>
 
       <h1 id="title">Continue with Google</h1>
       <p class="sub" id="subtitle">

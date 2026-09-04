@@ -187,7 +187,7 @@ boot().catch((err) => {
   bootScreen.innerHTML = "";
   bootScreen.appendChild(
     h("div", { class: "boot-inner" }, [
-      h("div", { class: "boot-mark", style: "animation:none", text: "◆" }),
+      h("div", { class: "boot-mark", style: "animation:none", html: document.querySelector(".sidebar-brand svg")?.outerHTML || "" }),
       h("p", { text: "We couldn't verify your access." }),
       h("p", {
         class: "muted",

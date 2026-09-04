@@ -24,7 +24,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=clean4" />
+    <link rel="stylesheet" href="/styles.css?v=clean5" />
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
     <script>
@@ -46,14 +46,15 @@
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header class="nav">
-      <a class="brand" href="/">
-        <span class="brand-mark" aria-hidden="true">◆</span>
-        <span class="brand-name">Brand Mint<small>Hyderabad</small></span>
+      <a class="brand" href="/" aria-label="Brand Mint, Hyderabad — home">
+        <svg class="bm-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true" focusable="false"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="bm-mark-m" pathLength="100" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <span class="brand-name">Brand Mint <em>— Hyderabad</em></span>
       </a>
       <nav class="nav-links" aria-label="Primary">
         <a href="#stores">Stores</a>
         <a href="#how">How it works</a>
         <a href="#care">After launch</a>
+        <a href="#faq">FAQ</a>
       </nav>
       <div class="nav-actions">
         <a class="btn btn-ghost" href="/login" data-auth-show="signed-out">Sign in</a>
@@ -65,27 +66,34 @@
     <main id="main">
       <!-- HERO -->
       <section class="hero">
-        <p class="kicker">Hyderabad · Now booking</p>
-        <h1>Your online store, built to <em>sell</em>, not just to launch.</h1>
-        <p class="lede">
+        <p class="kicker" data-enter>Hyderabad · Now booking</p>
+        <h1 data-enter>Your online store, built to <em>sell</em>, not just to launch.</h1>
+        <p class="lede" data-enter>
           Four tiers, one fixed price each, and everything a store in India actually
           needs — UPI, COD, GST invoices, WhatsApp orders. Pick one, sign in with
           Google, and we'll call you tomorrow.
         </p>
-        <div class="hero-actions">
+        <div class="hero-actions" data-enter>
           <a class="btn btn-primary btn-lg" href="#stores">See the four stores</a>
           <a class="btn btn-ghost btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20an%20online%20store." rel="noopener">WhatsApp us</a>
         </div>
-        <ul class="hero-proof">
+        <ul class="hero-proof" data-enter>
           <li><span class="num">4</span> store tiers</li>
           <li><span class="num">₹49,999</span> to start</li>
           <li><span class="num">4–12</span> weeks to launch</li>
+        </ul>
+        <ul class="trust" data-enter aria-label="Built for selling in India">
+          <li>Razorpay + UPI</li>
+          <li>Cash on delivery</li>
+          <li>GST invoices</li>
+          <li>WhatsApp orders</li>
+          <li>Your domain, your accounts</li>
         </ul>
       </section>
 
       <!-- STORES -->
       <section class="section" id="stores">
-        <header class="section-head">
+        <header class="section-head" data-reveal>
           <p class="kicker">01 — What we build</p>
           <h2>Four stores. Pick the one that fits <em>yours.</em></h2>
           <p>
@@ -94,21 +102,31 @@
             you can add after launch.
           </p>
         </header>
-        <div class="tiers" id="tiers"><!-- rendered from /shared/tiers.js --></div>
+        <div class="tiers" id="tiers" data-reveal-group><!-- rendered from /shared/tiers.js --></div>
+        <aside class="tier-guide" data-reveal aria-labelledby="guide-h">
+          <h3 id="guide-h">Not sure which one?</h3>
+          <ul>
+            <li><strong>Small catalogue, happy to run orders from your phone</strong> → WhatsApp Store</li>
+            <li><strong>Want accounts, order emails and GST invoices without you in the loop</strong> → Starter Store</li>
+            <li><strong>Shipping daily, running ads, or losing carts</strong> → Growth Store</li>
+            <li><strong>A team with roles, reviews, loyalty and volume</strong> → Commerce Store</li>
+          </ul>
+          <p>Still unsure? Pick the closest one — the call is where we confirm it, and moving up later is a scoped add-on.</p>
+        </aside>
       </section>
 
       <!-- HOW IT WORKS -->
       <section class="section section--dark" id="how">
-        <header class="section-head">
+        <header class="section-head" data-reveal>
           <p class="kicker">02 — How it works</p>
           <h2>Three steps. No <em>forms.</em></h2>
         </header>
-        <ol class="steps" id="steps"><!-- rendered from /shared/tiers.js --></ol>
+        <ol class="steps" id="steps" data-reveal-group><!-- rendered from /shared/tiers.js --></ol>
       </section>
 
       <!-- AFTER LAUNCH -->
       <section class="section" id="care">
-        <header class="section-head">
+        <header class="section-head" data-reveal>
           <p class="kicker">03 — After launch</p>
           <h2>The work does not stop at <em>launch.</em></h2>
           <p>
@@ -118,7 +136,7 @@
             and a health report. Cancel with 30 days' notice.
           </p>
         </header>
-        <div class="care" id="care-plans"><!-- rendered from /shared/tiers.js --></div>
+        <div class="care" id="care-plans" data-reveal-group><!-- rendered from /shared/tiers.js --></div>
         <div class="care-note">
           <p>
             Per month, exclusive of GST. Sale-event cover (festive season, BFCM,
@@ -127,8 +145,42 @@
         </div>
       </section>
 
+      <!-- FAQ -->
+      <section class="section section--faq" id="faq">
+        <header class="section-head" data-reveal>
+          <p class="kicker">04 — Before you ask</p>
+          <h2>The questions every founder <em>asks.</em></h2>
+        </header>
+        <div class="faq" data-reveal-group>
+          <details class="faq-item">
+            <summary>What happens after I sign in?</summary>
+            <p>We get your email and the store you picked, nothing else. Within one working day we call you for a 30-minute conversation: confirm the tier, walk the scope, agree a start date. No obligation, no pitch deck.</p>
+          </details>
+          <details class="faq-item">
+            <summary>When do I pay, and is GST included?</summary>
+            <p>50% when you sign the agreement, 50% before launch. Prices are exclusive of 18% GST and you get a GST invoice for every payment. There are no hourly bills or surprise extras inside a tier.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Do I own the store?</summary>
+            <p>Yes. The domain, hosting and Razorpay account are set up in your business name, and the store lives on your accounts. If we part ways, you keep everything.</p>
+          </details>
+          <details class="faq-item">
+            <summary>What do you need from me?</summary>
+            <p>Your product list and photos, business and GST details, a logo if you have one. We send a catalogue template on the call. Timelines run from the day we receive your assets, so a ready catalogue is the fastest way to launch sooner.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Can I start small and upgrade later?</summary>
+            <p>Yes. Every tier includes everything in the one before it, so moving up is a scoped add-on rather than a rebuild. Most founders start where their operations are today.</p>
+          </details>
+          <details class="faq-item">
+            <summary>What is the care plan, and can I cancel?</summary>
+            <p>An optional monthly plan with a defined scope: updates tested on staging, monitoring, security patches, fixes and a health report. Cancel with 30 days' notice. Your store keeps running either way.</p>
+          </details>
+        </div>
+      </section>
+
       <!-- CTA -->
-      <section class="cta">
+      <section class="cta" data-reveal>
         <h2>Start with a <em>call,</em> not a quote.</h2>
         <p>
           Pick a tier, sign in with Google, and we'll ring you within one working
@@ -140,6 +192,14 @@
         </div>
       </section>
     </main>
+
+    <div class="sticky-cta" id="sticky-cta" aria-hidden="true">
+      <div>
+        <strong class="num">From ₹49,999</strong>
+        <span>one-time · GST extra</span>
+      </div>
+      <a class="btn btn-primary" href="#stores" tabindex="-1">Choose a store</a>
+    </div>
 
     <footer class="footer">
       <div>
@@ -153,6 +213,7 @@
       </nav>
     </footer>
 
+    <script>document.documentElement.classList.add("js");</script>
     <script type="module">
       import { TIERS, STEPS, CARE_PLANS, inr } from "/shared/tiers.js?v=clean4";
 
@@ -170,7 +231,7 @@
             <span class="tier-weeks num">${t.weeks}</span>
           </div>
           <details class="tier-groups"><summary>What's included</summary></details>
-          <a class="tier-cta" href="/login?tier=${t.id}">Choose ${t.name} →</a>
+          <a class="btn tier-cta ${t.featured ? "btn-primary" : ""}" href="/login?tier=${t.id}">Choose ${t.name}<span class="arrow" aria-hidden="true">→</span></a>
         `;
         card.querySelector(".tier-blurb").textContent = t.blurb;
 
@@ -221,6 +282,37 @@
         li.querySelector("p").textContent = s.body;
         steps.appendChild(li);
       });
+
+      // ---- motion. Reveal on scroll, nav shadow, sticky CTA on phones.
+      // Everything here is additive: without JS or with reduced motion the
+      // page is fully visible and static (see styles.css).
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const targets = [...document.querySelectorAll("[data-reveal]")];
+      for (const g of document.querySelectorAll("[data-reveal-group]")) {
+        [...g.children].forEach((el, i) => { el.setAttribute("data-reveal", ""); el.style.setProperty("--i", i); targets.push(el); });
+      }
+      if (reduce || !("IntersectionObserver" in window)) {
+        targets.forEach((el) => el.classList.add("is-in"));
+      } else {
+        const io = new IntersectionObserver((entries) => {
+          for (const e of entries) if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
+        }, { rootMargin: "0px 0px -10% 0px", threshold: 0.08 });
+        targets.forEach((el) => io.observe(el));
+      }
+
+      const nav = document.querySelector(".nav");
+      const hero = document.querySelector(".hero");
+      const sticky = document.getElementById("sticky-cta");
+      const footer = document.querySelector(".cta");
+      let pastHero = false, atEnd = false;
+      const paint = () => {
+        const show = pastHero && !atEnd;
+        sticky.classList.toggle("is-on", show);
+        sticky.setAttribute("aria-hidden", String(!show));
+        sticky.querySelector("a").tabIndex = show ? 0 : -1;
+      };
+      new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting && e.boundingClientRect.top < 0; nav.classList.toggle("is-scrolled", pastHero); paint(); }, { threshold: 0 }).observe(hero);
+      new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; paint(); }, { threshold: 0.2 }).observe(footer);
     </script>
   </body>
 </html>
