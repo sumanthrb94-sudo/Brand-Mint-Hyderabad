@@ -151,32 +151,7 @@
           <p class="kicker">04 — Before you ask</p>
           <h2>The questions every founder <em>asks.</em></h2>
         </header>
-        <div class="faq" data-reveal-group>
-          <details class="faq-item">
-            <summary>What happens after I sign in?</summary>
-            <p>We get your email and the store you picked, nothing else. Within one working day we call you for a 30-minute conversation: confirm the tier, walk the scope, agree a start date. No obligation, no pitch deck.</p>
-          </details>
-          <details class="faq-item">
-            <summary>When do I pay, and is GST included?</summary>
-            <p>50% when you sign the agreement, 50% before launch. Prices are exclusive of 18% GST and you get a GST invoice for every payment. There are no hourly bills or surprise extras inside a tier.</p>
-          </details>
-          <details class="faq-item">
-            <summary>Do I own the store?</summary>
-            <p>Yes. The domain, hosting and Razorpay account are set up in your business name, and the store lives on your accounts. If we part ways, you keep everything.</p>
-          </details>
-          <details class="faq-item">
-            <summary>What do you need from me?</summary>
-            <p>Your product list and photos, business and GST details, a logo if you have one. We send a catalogue template on the call. Timelines run from the day we receive your assets, so a ready catalogue is the fastest way to launch sooner.</p>
-          </details>
-          <details class="faq-item">
-            <summary>Can I start small and upgrade later?</summary>
-            <p>Yes. Every tier includes everything in the one before it, so moving up is a scoped add-on rather than a rebuild. Most founders start where their operations are today.</p>
-          </details>
-          <details class="faq-item">
-            <summary>What is the care plan, and can I cancel?</summary>
-            <p>An optional monthly plan with a defined scope: updates tested on staging, monitoring, security patches, fixes and a health report. Cancel with 30 days' notice. Your store keeps running either way.</p>
-          </details>
-        </div>
+        <div class="faq" id="faq-list" data-reveal-group><!-- rendered from /shared/tiers.js --></div>
       </section>
 
       <!-- CTA -->
@@ -215,7 +190,7 @@
 
     <script>document.documentElement.classList.add("js");</script>
     <script type="module">
-      import { TIERS, STEPS, CARE_PLANS, inr } from "/shared/tiers.js?v=clean4";
+      import { TIERS, STEPS, CARE_PLANS, FAQ, inr } from "/shared/tiers.js?v=clean5";
 
       // ---- tier cards
       const host = document.getElementById("tiers");
@@ -282,6 +257,17 @@
         li.querySelector("p").textContent = s.body;
         steps.appendChild(li);
       });
+
+      // ---- faq
+      const faq = document.getElementById("faq-list");
+      for (const f of FAQ) {
+        const d = document.createElement("details");
+        d.className = "faq-item";
+        d.innerHTML = "<summary></summary><p></p>";
+        d.querySelector("summary").textContent = f.q;
+        d.querySelector("p").textContent = f.a;
+        faq.appendChild(d);
+      }
 
       // ---- motion. Reveal on scroll, nav shadow, sticky CTA on phones.
       // Everything here is additive: without JS or with reduced motion the

@@ -66,3 +66,35 @@ hairline. Nothing is nested inside a card.
 
 Skip link, visible `:focus-visible` on everything, reduced-motion kills every
 transition, no horizontal scroll at 375px, colour never the only signal.
+
+## Motion
+
+All vanilla, CSP-safe, and additive: nothing is hidden unless `html.js` is
+present, and `prefers-reduced-motion` renders everything static.
+
+- The logo's M draws itself once on load (stroke-dashoffset, 0.9s).
+- Hero children enter staggered (`data-enter`, 70ms apart).
+- Sections and grid children reveal on scroll (`data-reveal`,
+  `data-reveal-group` staggers children by `--i`), via IntersectionObserver.
+- The nav gains a shadow once the hero has scrolled past.
+- Tier cards lift 2px on hover; the CTA arrow nudges 3px.
+- FAQ answers fade up on open.
+
+One easing everywhere: `cubic-bezier(0.2, 0.7, 0.2, 1)`. Durations 150ms
+for state, 600–700ms for entrances. No parallax, no loops, no scroll-jacking.
+
+## Conversion patterns
+
+- One dominant action: "See the four stores" in the hero, then a tier button
+  in every card (featured tier filled), and a sticky bottom bar on phones.
+- Trust strip of India-specific facts under the hero, not badges.
+- "Not sure which one?" guide under the tiers to cut choice paralysis.
+- FAQ that answers the six objections before the call (shared with the portal).
+- No fabricated testimonials or numbers; the brand voice forbids it.
+
+## The portal's first screen
+
+A person who signed in but has not been called sees the full services
+review: their tier in detail plus everything it inherits, one-click switch
+to another tier, what we need from them, the three steps, care plans, FAQ.
+All of it renders from `shared/tiers.js`, so it never drifts from the site.

@@ -8,7 +8,7 @@
  * user belongs to. The filtering in this file is for layout, not security.
  */
 
-import { requireRole, signOut, cleanAuthParamsFromUrl } from "/auth/session.js";
+import { requireRole, signOut, cleanAuthParamsFromUrl, recordSignup } from "/auth/session.js";
 import {
   loadWorkspace,
   reviewDeliverable,
@@ -17,7 +17,7 @@ import {
   watch,
 } from "/portal/data.js";
 import { renderWizard, briefSummaryCard } from "/portal/wizard.js";
-import { TIER_BY_ID, STEPS } from "/shared/tiers.js";
+import { TIERS, TIER_BY_ID, STEPS, CARE_PLANS, NEEDS, FAQ, inclusionsFor } from "/shared/tiers.js";
 import {
   h,
   mount,
@@ -199,28 +199,134 @@ function stepsCard(doneCount) {
   );
 }
 
-/** Signed in, picked a tier, not yet converted by the studio. */
+/** Signed in, picked a tier, not yet converted by the studio.
+ *  This is the services review: the whole offer, in detail, the moment they land. */
 function renderLeadState() {
   tabsEl.innerHTML = "";
   document.getElementById("client-name").textContent = "Your request";
   const first = (profile.fullName || "").split(/\s+/)[0] || "there";
+  const tier = profile.selectedTier ? TIER_BY_ID[profile.selectedTier] : null;
+
+  const hero = h("div", { class: "p-hero" }, [
+    h("p", { class: "p-mono p-hero-kicker", text: tier ? `Tier ${tier.tier} · ${tier.name}` : "Signed in" }),
+    h("h1", { text: tier ? `Thanks, ${first} — we'll call you within one working day.` : `Welcome, ${first}. Pick the store that fits.` }),
+    h("p", { text: tier
+      ? "Below is everything your store includes, what we'll need from you, and what happens next. Nothing is due until the agreement is signed."
+      : "Everything we build is below, in detail. Choose one and we'll call you within one working day to confirm the scope." }),
+    tier ? h("div", { class: "p-hero-stats" }, [
+      stat(inr(tier.price), "one-time, GST extra"),
+      stat(tier.weeks, "to launch"),
+      stat("50%", "deposit to start"),
+    ]) : null,
+    h("div", { class: "p-row", style: "margin-top:22px" }, [
+      h("a", { class: "p-btn", href: "https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%20just%20signed%20in%20on%20the%20site.", rel: "noopener", text: "Can't wait? WhatsApp us" }),
+    ]),
+  ]);
 
   mount(
     view,
-    h("div", { class: "p-hero" }, [
-      h("h1", { text: `Thanks, ${first} — we'll call you within one working day.` }),
-      h("p", { text:
-        profile.selectedTier
-          ? `You picked the ${TIER_BY_ID[profile.selectedTier]?.name || "store"}. We'll confirm the scope, agree a start date and send the agreement. Nothing is due until then.`
-          : "You're signed in. Pick a store on the site and we'll take it from there." }),
-      h("div", { class: "p-row", style: "margin-top:22px" }, [
-        h("a", { class: "p-btn", href: "https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%20just%20signed%20in%20on%20the%20site.", rel: "noopener", text: "Can't wait? WhatsApp us" }),
-        profile.selectedTier ? null : h("a", { class: "p-btn p-btn-primary", href: "/#stores", text: "Choose a store" }),
-      ].filter(Boolean)),
-    ]),
+    hero,
+    tier ? inclusionsCard(tier) : null,
+    tier ? alternativesCard(tier) : allTiersCard(),
+    needsCard(),
     stepsCard(1),
-    profile.selectedTier ? tierCard(profile.selectedTier) : null
+    careCard(),
+    faqCard()
   );
+  window.scrollTo(0, 0);
+}
+
+function stat(value, label) {
+  return h("div", { class: "p-hero-stat" }, [
+    h("span", { class: "v p-mono", text: value }),
+    h("span", { class: "l", text: label }),
+  ]);
+}
+
+/** The chosen tier, then every tier it stands on, group by group. */
+function inclusionsCard(tier) {
+  const chain = inclusionsFor(tier.id);
+  const blocks = chain.map(({ tier: t, own }) =>
+    h("div", { class: "p-incl-block" + (own ? " own" : "") }, [
+      h("div", { class: "p-incl-title" }, [
+        h("h3", { text: own ? `In the ${t.name}` : `Also included — everything in the ${t.name}` }),
+        own ? null : h("span", { class: "p-mono p-muted", text: `Tier ${t.tier}` }),
+      ]),
+      own ? h("p", { class: "p-muted", style: "margin:0 0 14px", text: t.blurb }) : null,
+      h("div", { class: "p-incl-grid" }, t.groups.map((g) =>
+        h("div", { class: "p-incl-group" }, [
+          h("h4", { text: g.title }),
+          h("ul", {}, g.items.map((it) => h("li", { text: it }))),
+        ])
+      )),
+    ])
+  );
+  const total = chain.reduce((n, { tier: t }) => n + t.groups.reduce((m, g) => m + g.items.length, 0), 0);
+  return card(`Your store, in full`, `${total} deliverables · ${inr(tier.price)} + GST · ${tier.weeks}`, ...blocks);
+}
+
+/** The other three tiers, each switchable in one click. */
+function alternativesCard(tier) {
+  const others = TIERS.filter((t) => t.id !== tier.id);
+  return card("Not the right fit? Change it here", "Every tier includes the one before it. You can also change it on the call.",
+    h("div", { class: "p-alts" }, others.map((t) => tierAlt(t, tier))));
+}
+
+function allTiersCard() {
+  return card("The four stores", "One fixed price each, in INR, exclusive of 18% GST.",
+    h("div", { class: "p-alts" }, TIERS.map((t) => tierAlt(t, null))));
+}
+
+function tierAlt(t, current) {
+  const up = current ? t.tier > current.tier : true;
+  const btn = h("button", { class: "p-btn p-btn-sm" + (t.featured ? " p-btn-primary" : ""), type: "button",
+    text: current ? (up ? `Move up to ${t.name}` : `Switch to ${t.name}`) : `Choose ${t.name}` });
+  btn.addEventListener("click", async () => {
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+      await recordSignup({ tier: t.id, newsletter: !!profile.consent?.newsletter });
+      profile.selectedTier = t.id;
+      toast(`Noted — ${t.name}. We'll confirm on the call.`);
+      renderLeadState();
+    } catch (e) {
+      console.error("[portal] switch tier", e);
+      btn.disabled = false; btn.textContent = `Choose ${t.name}`;
+      toast("Couldn't save that. Try again, or tell us on the call.");
+    }
+  });
+  return h("div", { class: "p-alt" + (t.featured ? " featured" : "") }, [
+    h("div", { class: "p-mono p-muted", style: "font-size:11px;letter-spacing:.14em;text-transform:uppercase", text: `Tier ${t.tier}` }),
+    h("h3", { text: t.name }),
+    h("p", { class: "p-muted", text: t.blurb }),
+    h("div", { class: "p-alt-price" }, [h("strong", { class: "p-mono", text: inr(t.price) }), h("span", { class: "p-muted", text: t.weeks })]),
+    h("ul", { class: "p-alt-list" }, t.groups.flatMap((g) => g.items).slice(0, 4).map((it) => h("li", { text: it }))),
+    btn,
+  ]);
+}
+
+function needsCard() {
+  return card("What we'll need from you", "Have these ready and the build starts sooner. Nothing is needed before the call.",
+    h("ul", { class: "p-check" }, NEEDS.map((n) =>
+      h("li", {}, [h("strong", { text: n.title }), h("span", { text: n.body })])
+    )));
+}
+
+function careCard() {
+  return card("After launch", "Optional monthly care plans. Per month, exclusive of GST. Cancel with 30 days' notice.",
+    h("div", { class: "p-care" }, CARE_PLANS.map((c) =>
+      h("div", { class: "p-care-row" }, [
+        h("strong", { text: c.name }),
+        h("span", { class: "p-mono", text: `${inr(c.price)}/mo` }),
+        h("p", { class: "p-muted", text: c.body }),
+      ])
+    )));
+}
+
+function faqCard() {
+  return card("Before you ask", null,
+    h("div", { class: "p-faq" }, FAQ.map((f) =>
+      h("details", { class: "p-faq-item" }, [h("summary", { text: f.q }), h("p", { text: f.a })])
+    )));
 }
 
 /** Converted to a client; agreement and deposit still outstanding. */

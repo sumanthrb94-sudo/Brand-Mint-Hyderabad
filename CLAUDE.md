@@ -13,7 +13,7 @@ It is a **static HTML/CSS/JS site with no build step** — files are served as-i
 ```
 Home page → "Choose <tier>" → /login?tier=<id> → Google sign-in
   → profiles/{uid} gets consent + selectedTier, a leads doc is created (with uid)
-  → portal shows "we'll call you within a day"
+  → portal shows the services review: tier in full (with inherited tiers), switch tier, needs, steps, care plans, FAQ
 Admin: Leads → Convert to client
   → clients doc (status: onboarding, storeTier), clientUsers/{uid}_{clientId}, projects stub
   → portal shows the onboarding checklist: agreement (a deliverable of kind "document") + 50% deposit invoice
@@ -28,7 +28,7 @@ There is no contact form and no invite email. Sign-in **is** the form. Consent t
 | Path | Role |
 |---|---|
 | `index.html` + `styles.css` | Home page. Tier cards and steps are rendered from `shared/tiers.js` — **edit tiers there, not in HTML** |
-| `shared/tiers.js` | The four tiers: id, name, price, weeks, blurb, grouped inclusions. Single source of truth for home, login, portal, admin |
+| `shared/tiers.js` | The four tiers (id, name, price, weeks, blurb, grouped inclusions), `CARE_PLANS`, `STEPS`, `FAQ`, `NEEDS`, and `inclusionsFor()`. Single source of truth for home, login, portal, admin |
 | `login.html` | Google sign-in. Reads `?tier=`, calls `recordSignup()` after auth |
 | `auth/session.js` | One Firebase Auth session for every surface. `requireRole()`, `getProfile()`, `recordSignup()`, `claimPendingInvites()` |
 | `firebase/app.js`, `firebase/config.js` | SDK loader and web config. **Three placeholder values in config.js must be filled from the console** — see `SETUP-FIREBASE.md` |
