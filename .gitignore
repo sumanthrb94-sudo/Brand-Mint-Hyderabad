@@ -6,3 +6,8 @@ node_modules/
 .idea/
 dist/
 .cache/
+
+# Service-account keys must never be committed — every file here ships to the browser.
+*firebase-adminsdk*.json
+*service-account*.json
+*serviceAccount*.json

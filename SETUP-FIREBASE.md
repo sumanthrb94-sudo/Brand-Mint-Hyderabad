@@ -1,12 +1,31 @@
-# Switching Brand Mint on — 20 minutes, once
+# Switching Brand Mint on
 
-The code is done and running on **Firebase** (project `brandmintstudios-a5eb7`).
-These are the steps only you can do, because they live in the Firebase console.
+The code is done and runs on **Firebase** (project `brandmintstudios-a5eb7`).
 
-**Until you finish steps 1–3 nothing will load** — the app has placeholder
-config values and no security rules. That's deliberate; it fails closed.
+## The fast path — one command
 
-Do them in order.
+Everything below except one click can be done by a script, using a
+service-account key you download from the console:
+
+```bash
+node scripts/setup-firebase.mjs --key ~/Downloads/brandmintstudios-a5eb7-xxxx.json --admin you@gmail.com
+```
+
+It registers the web app if needed and writes `firebase/config.js`, creates
+the Firestore database in `asia-south1` if needed, deploys `firestore.rules`,
+adds the site to Auth's authorized domains, and makes `--admin` an admin.
+Re-run it any time — most usefully after editing `firestore.rules`. Add
+`--dry-run` to see what it would do.
+
+The one thing it can't do is enable Google sign-in (Firebase provisions the
+OAuth client only from the console). It tells you if that's off.
+
+**Then delete the key.** IAM → Service accounts → `firebase-adminsdk-fbsvc@…` →
+Keys. It's a full-control credential; nothing in the app uses it, and
+`.gitignore` refuses to commit it. Never paste it into a chat, a ticket, or
+this repo.
+
+The manual steps below are the same work by hand.
 
 ---
 
