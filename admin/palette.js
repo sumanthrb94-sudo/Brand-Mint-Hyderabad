@@ -4,7 +4,7 @@
  * Universal fuzzy-searchable index of:
  *   - All routes (Dashboard, Leads, Pipeline, …)
  *   - Quick create actions (+ New lead, + New invoice, …)
- *   - Every entity in the db (leads, projects, clients, invoices, content)
+ *   - Every entity in the db (leads, projects, clients, invoices)
  *
  * Keyboard:  ↑ ↓ to move, Enter to run, Esc to close
  */
@@ -14,24 +14,21 @@ import { h, clear } from "/admin/components.js";
 let openInstance = null;
 
 const ROUTES = [
-  { id: "dashboard", label: "Go to Dashboard", icon: "▦", kbd: "G D" },
-  { id: "leads",     label: "Go to Leads",     icon: "✉", kbd: "G E" },
-  { id: "pipeline",  label: "Go to Pipeline",  icon: "▥", kbd: "G P" },
-  { id: "clients",   label: "Go to Clients",   icon: "◔", kbd: "G C" },
-  { id: "invoices",  label: "Go to Invoices",  icon: "₹", kbd: "G I" },
-  { id: "content",   label: "Go to Content calendar", icon: "▤", kbd: "G N" },
-  { id: "metrics",   label: "Go to Metrics",   icon: "△", kbd: "G M" },
-  { id: "brand-kit", label: "Go to Brand kit", icon: "◉", kbd: "G B" },
-  { id: "documents", label: "Go to Documents", icon: "▢", kbd: "G U" },
-  { id: "settings",  label: "Go to Settings",  icon: "⚙", kbd: "G S" },
+  { id: "dashboard",  label: "Go to Dashboard",  icon: "▦", kbd: "G D" },
+  { id: "leads",      label: "Go to Leads",      icon: "✉", kbd: "G E" },
+  { id: "onboarding", label: "Go to Onboarding", icon: "◆", kbd: "G O" },
+  { id: "clients",    label: "Go to Clients",    icon: "◔", kbd: "G C" },
+  { id: "delivery",   label: "Go to Delivery",   icon: "✓", kbd: "G V" },
+  { id: "pipeline",   label: "Go to Pipeline",   icon: "▥", kbd: "G P" },
+  { id: "invoices",   label: "Go to Invoices",   icon: "₹", kbd: "G I" },
+  { id: "settings",   label: "Go to Settings",   icon: "⚙", kbd: "G S" },
 ];
 
 const CREATE = [
-  { label: "New lead",          target: "/leads?new=1",    icon: "+" },
-  { label: "New project",       target: "/pipeline?new=1", icon: "+" },
-  { label: "New client",        target: "/clients?new=1",  icon: "+" },
-  { label: "New invoice",       target: "/invoices?new=1", icon: "+" },
-  { label: "New content post",  target: "/content?new=1",  icon: "+" },
+  { label: "New lead",    target: "/leads?new=1",    icon: "+" },
+  { label: "New project", target: "/pipeline?new=1", icon: "+" },
+  { label: "New client",  target: "/clients?new=1",  icon: "+" },
+  { label: "New invoice", target: "/invoices?new=1", icon: "+" },
 ];
 
 export function openPalette(ctx) {
@@ -222,15 +219,6 @@ function buildItems(ctx) {
       sub: [inv.client, inv.status].filter(Boolean).join(" · "),
       icon: "₹",
       run: () => navigate("/invoices?id=" + inv.id),
-    });
-  }
-  for (const post of db.list("content")) {
-    items.push({
-      section: "Content",
-      label: post.title || "(untitled)",
-      sub: [post.date, post.channel, post.status].filter(Boolean).join(" · "),
-      icon: "▤",
-      run: () => navigate("/content?id=" + post.id),
     });
   }
 

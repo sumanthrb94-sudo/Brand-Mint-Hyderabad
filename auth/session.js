@@ -3,12 +3,10 @@
  *
  * ONE auth instance, ONE session, used by every surface:
  *   /admin.html   → requires profiles/{uid}.role === 'admin'
- *   /portal.html  → requires at least one clientUsers membership
+ *   /portal.html  → role 'client'; with no membership yet it shows the lead state
  *   /index.html   → optional, just drives nav state
  *
- * The exported API is unchanged from the Supabase version on purpose — every
- * caller (admin/app.js, admin/auth.js, portal/app.js, auth/marketing.js,
- * login.html) keeps working without edits.
+ * Callers: admin/app.js, admin/auth.js, portal/app.js, login.html.
  *
  * The role lives in the `profiles` collection, never in a custom claim we let
  * the client set and never in a field the client can write. `firestore.rules`
@@ -188,6 +186,8 @@ export async function getProfile({ force = false } = {}) {
       // assume admin.
       role: data?.role === "admin" ? "admin" : "client",
       clientIds: memberships.docs.map((d) => d.data().clientId),
+      selectedTier: data?.selectedTier || null,
+      consent: data?.consent || null,
       profileMissing: !data,
     };
     cacheProfile(_profile);
@@ -246,6 +246,64 @@ async function claimPendingInvites(fb, user) {
     // A user with no invite simply has nothing to read here.
     console.warn("[auth] invite claim skipped", e?.code || e);
   }
+}
+
+/* ------------------------------------------------------------- signup ---- */
+
+/**
+ * Record what a visitor agreed to and what they picked. Called right after
+ * Google sign-in. Writes to their own profile (which rules let them update)
+ * and drops a lead so the studio sees them in the admin the same minute.
+ *
+ * Idempotent per (uid, tier): re-signing in with the same tier updates the
+ * profile but does not create a second lead.
+ */
+export async function recordSignup({ tier = null, newsletter = false } = {}) {
+  const fb = await getClient();
+  const user = await getUser();
+  if (!user) return;
+  const { doc, setDoc, getDoc, collection, query, where, getDocs, addDoc } = fb.sdk;
+  const now = new Date().toISOString();
+
+  await setDoc(
+    doc(fb.db, "profiles", user.uid),
+    {
+      email: user.email || "",
+      fullName: user.displayName || "",
+      avatarUrl: user.photoURL || "",
+      consent: { privacy: true, terms: true, newsletter: !!newsletter, at: now },
+      ...(tier ? { selectedTier: tier, selectedTierAt: now } : {}),
+      updatedAt: now,
+    },
+    { merge: true }
+  );
+
+  if (!tier) return;
+
+  // One lead per person per tier. The uid is what lets the admin convert
+  // this lead straight into a client membership without an invite.
+  const existing = await getDocs(
+    query(collection(fb.db, "leads"), where("uid", "==", user.uid), where("tier", "==", tier))
+  ).catch(() => null);
+  if (existing && !existing.empty) return;
+
+  await addDoc(collection(fb.db, "leads"), {
+    uid: user.uid,
+    name: user.displayName || user.email || "",
+    email: user.email || "",
+    phone: user.phoneNumber || "",
+    tier,
+    message: `Picked ${tier} on the site and signed in with Google.`,
+    source: "Site — tier sign-in",
+    status: "new",
+    score: 70,
+    newsletter: !!newsletter,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  _profile = null; // selectedTier changed; force a re-read next time
+  _profilePromise = null;
 }
 
 /* --------------------------------------------------------------- sign in/out */
@@ -363,13 +421,8 @@ export async function requireRole(
     return new Promise(() => {});
   }
 
-  // A client with no membership can see nothing — send them somewhere that
-  // explains why rather than an empty portal.
-  if (role === "client" && profile.clientIds.length === 0) {
-    window.location.replace("/login?pending=1");
-    return new Promise(() => {});
-  }
-
+  // A client with no membership yet is a LEAD — they picked a tier and signed
+  // in, and we haven't converted them. The portal renders that state itself.
   return profile;
 }
 

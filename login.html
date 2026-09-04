@@ -10,134 +10,88 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
-        --ink: #0b1f1a;
-        --ink-2: #294a40;
-        --muted: #5d7368;
-        --line: #d8e0d4;
-        --mint: #10b981;
-        --mint-4: #047857;
-        --paper: #fbfaf2;
+        --ink: #0b1f1a; --ink-2: #294a40; --muted: #5d7368; --faint: #8a9b91;
+        --line: #d8e0d4; --mint: #10b981; --mint-deep: #047857; --mint-wash: #e6f7f0;
         --display: "Plus Jakarta Sans", system-ui, sans-serif;
         --sans: "Inter", system-ui, sans-serif;
+        --mono: "JetBrains Mono", ui-monospace, monospace;
       }
       * { box-sizing: border-box; }
       body {
-        margin: 0;
-        min-height: 100dvh;
-        display: grid;
-        place-items: center;
-        padding: 32px 20px;
-        font-family: var(--sans);
-        color: var(--ink);
+        margin: 0; min-height: 100dvh; display: grid; place-items: center;
+        padding: 32px 20px; font-family: var(--sans); color: var(--ink);
         background:
-          radial-gradient(900px 600px at 15% -10%, rgba(16, 185, 129, 0.16), transparent 60%),
-          radial-gradient(700px 500px at 100% 110%, rgba(201, 169, 97, 0.12), transparent 60%),
+          radial-gradient(900px 600px at 15% -10%, rgba(16,185,129,.16), transparent 60%),
           #f5f7f4;
       }
       .card {
-        width: 100%;
-        max-width: 440px;
-        background: #fff;
-        border: 1px solid var(--line);
-        border-radius: 24px;
-        padding: 40px 34px 32px;
-        box-shadow: 0 30px 80px rgba(11, 31, 26, 0.12);
+        width: 100%; max-width: 460px; background: #fff;
+        border: 1px solid var(--line); border-radius: 24px; padding: 38px 34px 30px;
+        box-shadow: 0 30px 80px rgba(11,31,26,.12);
       }
-      .mark {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-family: var(--display);
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        font-size: 18px;
-        margin-bottom: 26px;
+      .mark { display: flex; align-items: center; gap: 10px; font: 800 18px var(--display); letter-spacing: -.02em; margin-bottom: 24px; }
+      .mark .dot { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; color: #05140f; font-size: 14px; background: linear-gradient(140deg, var(--mint), var(--mint-deep)); }
+      h1 { font: 800 26px/1.2 var(--display); letter-spacing: -.025em; margin: 0 0 8px; }
+      p.sub { margin: 0 0 22px; color: var(--muted); font-size: 14.5px; line-height: 1.55; }
+
+      .tier {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        padding: 12px 14px; border-radius: 13px; margin-bottom: 20px;
+        background: var(--mint-wash); border: 1px solid #b8e8d3;
       }
-      .mark span.dot {
-        width: 28px; height: 28px; border-radius: 9px;
-        background: linear-gradient(140deg, var(--mint), var(--mint-4));
-        display: grid; place-items: center;
-        color: #fff; font-size: 15px;
-      }
-      h1 {
-        font-family: var(--display);
-        font-size: 26px;
-        line-height: 1.2;
-        letter-spacing: -0.025em;
-        margin: 0 0 8px;
-      }
-      p.sub { margin: 0 0 26px; color: var(--muted); font-size: 14.5px; line-height: 1.55; }
+      .tier b { font-family: var(--display); font-size: 15px; }
+      .tier small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+      .tier .price { font: 600 15px var(--mono); color: var(--mint-deep); white-space: nowrap; }
+      .tier[hidden] { display: none; }
+
       .btn {
-        width: 100%;
-        display: flex; align-items: center; justify-content: center; gap: 10px;
-        padding: 13px 18px;
-        border-radius: 13px;
-        font: 600 15px/1 var(--sans);
-        cursor: pointer;
-        border: 1px solid var(--line);
-        background: #fff;
-        color: var(--ink);
+        width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+        padding: 13px 18px; border-radius: 13px; font: 600 15px/1 var(--sans); cursor: pointer;
+        border: 1px solid var(--line); background: #fff; color: var(--ink);
         transition: border-color .15s, box-shadow .15s, transform .08s;
       }
       .btn:hover { border-color: #b9c8b8; box-shadow: 0 6px 20px rgba(11,31,26,.08); }
       .btn:active { transform: translateY(1px); }
       .btn[disabled] { opacity: .55; cursor: not-allowed; }
-      .btn-primary {
-        background: linear-gradient(140deg, var(--mint), var(--mint-4));
-        border-color: transparent; color: #fff;
-      }
-      .sep {
-        display: flex; align-items: center; gap: 12px;
-        margin: 22px 0; color: var(--muted); font-size: 12px;
-        text-transform: uppercase; letter-spacing: .12em;
-      }
-      .sep::before, .sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-      label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; }
-      input[type="email"] {
-        width: 100%; padding: 12px 14px; border-radius: 12px;
-        border: 1px solid var(--line); font: 15px var(--sans); color: var(--ink);
-        background: #fcfdfc; margin-bottom: 12px;
-      }
-      input[type="email"]:focus {
-        outline: none; border-color: var(--mint);
-        box-shadow: 0 0 0 3px rgba(16,185,129,.16);
-      }
-      .note {
-        margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line);
-        font-size: 13px; color: var(--muted); line-height: 1.6;
-      }
-      .status {
-        margin-top: 16px; padding: 12px 14px; border-radius: 12px;
-        font-size: 13.5px; line-height: 1.5;
-      }
+      .btn:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+
+      .consent { margin: 16px 0 4px; font-size: 13px; color: var(--muted); line-height: 1.55; }
+      .consent a { color: var(--mint-deep); }
+      label.opt { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 13.5px; color: var(--ink-2); cursor: pointer; }
+      label.opt input { margin-top: 3px; accent-color: var(--mint-deep); width: 16px; height: 16px; }
+
+      .status { margin-top: 16px; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.5; }
       .status.ok   { background: #e8f8f1; color: #07603f; border: 1px solid #b8e8d3; }
       .status.err  { background: #fdeceb; color: #8f2119; border: 1px solid #f6c9c5; }
       .status.info { background: #f2f5f1; color: var(--ink-2); border: 1px solid var(--line); }
       .status[hidden] { display: none; }
-      a { color: var(--mint-4); }
-      .spinner {
-        width: 15px; height: 15px; border-radius: 50%;
-        border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
-        animation: spin .7s linear infinite;
-      }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+      .foot { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--faint); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      .foot a { color: var(--muted); }
     </style>
   </head>
   <body>
     <main class="card">
       <div class="mark"><span class="dot">◆</span> Brand Mint</div>
 
-      <h1 id="title">Sign in</h1>
+      <h1 id="title">Continue with Google</h1>
       <p class="sub" id="subtitle">
-        Use the Google account your invite was sent to. We'll take you to the
-        right place automatically.
+        That's the whole sign-up. We get your email, you get a portal, and we
+        call you within one working day.
       </p>
+
+      <div class="tier" id="tier" hidden>
+        <div>
+          <b id="tier-name"></b>
+          <small id="tier-weeks"></small>
+        </div>
+        <span class="price" id="tier-price"></span>
+      </div>
 
       <div class="status" id="status" hidden></div>
 
@@ -148,46 +102,43 @@
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
         </svg>
-        Continue with Google
+        <span id="google-label">Continue with Google</span>
       </button>
 
-      <div class="sep">or</div>
-
-      <form id="magic" novalidate>
-        <label for="email">Email a sign-in link</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          autocomplete="email"
-          placeholder="you@company.com"
-          required
-        />
-        <button class="btn btn-primary" id="magic-btn" type="submit">Send me a link</button>
-      </form>
-
-      <p class="note" id="note">
-        Access is by invitation. If your studio contact hasn't added your email
-        yet, sign-in will succeed but the portal will stay empty until they do.
+      <p class="consent">
+        By continuing you accept our
+        <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> and
+        <a href="/terms" target="_blank" rel="noopener">Terms</a>.
       </p>
+      <label class="opt">
+        <input type="checkbox" id="newsletter" checked />
+        <span>Send me occasional notes on running an online store in India. No spam, unsubscribe any time.</span>
+      </label>
+
+      <div class="foot">
+        <span>Brand Mint · Hyderabad</span>
+        <a href="/">← Back to the site</a>
+      </div>
     </main>
 
     <script type="module">
       import {
         getProfile,
         signInWithGoogle,
-        signInWithEmail,
-        completeEmailLinkSignIn,
+        recordSignup,
         cleanAuthParamsFromUrl,
         peekSession,
-      } from "/auth/session.js?v=fb1";
+      } from "/auth/session.js?v=clean1";
+      import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean1";
 
       const params = new URLSearchParams(location.search);
       const next = params.get("next");
+      const tierId = params.get("tier");
+      const tier = tierId ? TIER_BY_ID[tierId] : null;
+
       const statusEl = document.getElementById("status");
       const googleBtn = document.getElementById("google");
-      const magicForm = document.getElementById("magic");
-      const magicBtn = document.getElementById("magic-btn");
+      const newsletter = document.getElementById("newsletter");
 
       function say(msg, kind = "info") {
         statusEl.textContent = msg;
@@ -195,70 +146,42 @@
         statusEl.hidden = false;
       }
 
-      // Contextual messages when we bounced someone here.
+      // Show which store they picked, so the sign-in feels like step one of
+      // that choice rather than a generic login wall.
+      if (tier) {
+        document.getElementById("tier").hidden = false;
+        document.getElementById("tier-name").textContent = tier.name;
+        document.getElementById("tier-weeks").textContent = `Tier ${tier.tier} · ${tier.weeks}`;
+        document.getElementById("tier-price").textContent = inr(tier.price);
+        document.getElementById("title").textContent = "Almost there";
+        document.getElementById("subtitle").textContent =
+          "Sign in with Google and we'll call you within one working day to get started.";
+        document.getElementById("google-label").textContent = `Continue with Google — ${tier.name}`;
+      }
+
       if (params.get("denied")) {
-        say(
-          "That account doesn't have access to the page you tried to open. " +
-            "Sign in with a different account, or ask Brand Mint to grant access.",
-          "err"
-        );
-      } else if (params.get("pending")) {
-        say(
-          "You're signed in, but no client workspace is linked to this email yet. " +
-            "Brand Mint has been notified — you'll get in as soon as they add you.",
-          "info"
-        );
+        say("That account doesn't have access to the page you tried to open. Sign in with a different account.", "err");
       } else if (params.get("signedout")) {
         say("You've been signed out.", "ok");
       }
 
-      /** Where does this user belong? */
       function homeFor(profile) {
-        if (profile.role === "admin") return "/admin.html";
-        return "/portal.html";
+        return profile.role === "admin" ? "/admin" : "/portal";
       }
 
-      // Three ways to arrive here: fresh, mid email-link sign-in, or already
-      // signed in. Handle all of them before showing the form.
+      // Already signed in? Skip the button.
       (async () => {
-        const looksLikeEmailLink = /[?&](oobCode|mode)=/.test(location.search);
-
-        if (looksLikeEmailLink) {
-          document.getElementById("subtitle").textContent = "Finishing sign-in…";
-          try {
-            await completeEmailLinkSignIn();
-          } catch (e) {
-            console.error("[login] email link", e);
-            say(
-              e?.code === "auth/invalid-action-code"
-                ? "That sign-in link has expired or was already used. Send yourself a new one."
-                : e?.message || "Could not complete sign-in from that link.",
-              "err"
-            );
-            cleanAuthParamsFromUrl();
-            return;
-          }
-        } else if (!peekSession()) {
-          return; // signed out and nothing to finish — just show the form
-        }
-
+        cleanAuthParamsFromUrl();
+        if (!peekSession()) return;
         document.getElementById("subtitle").textContent = "Checking your session…";
         try {
           const profile = await getProfile({ force: true });
-          cleanAuthParamsFromUrl();
-          if (!profile) {
-            document.getElementById("subtitle").textContent =
-              "Use the Google account your invite was sent to.";
-            return;
-          }
-          if (next && next.startsWith("/")) {
-            location.replace(next);
-          } else {
-            location.replace(homeFor(profile));
-          }
+          if (!profile) return;
+          // A signed-in visitor picking a new tier still gets it recorded.
+          if (tier) await recordSignup({ tier: tier.id, newsletter: newsletter.checked });
+          location.replace(next && next.startsWith("/") ? next : homeFor(profile));
         } catch (e) {
           console.error("[login] session check", e);
-          say(e?.message || "Could not verify your session.", "err");
         }
       })();
 
@@ -267,43 +190,23 @@
         say("Opening Google…", "info");
         try {
           await signInWithGoogle(next && next.startsWith("/") ? next : "/portal");
-          // Popup path resolves here; work out where this account belongs.
           const profile = await getProfile({ force: true });
-          if (profile) {
-            location.replace(next && next.startsWith("/") ? next : homeFor(profile));
-            return;
-          }
-          googleBtn.disabled = false;
-          say("Signed in, but we couldn't load your profile. Try again.", "err");
+          if (!profile) throw new Error("Signed in, but we couldn't load your profile.");
+
+          // Consent is implied by the button per the line above it; the
+          // newsletter is the one genuinely optional thing, so it's a tick.
+          await recordSignup({ tier: tier?.id || null, newsletter: newsletter.checked });
+
+          location.replace(next && next.startsWith("/") ? next : homeFor(profile));
         } catch (e) {
           googleBtn.disabled = false;
-          if (e?.code === "auth/popup-closed-by-user") {
-            say("Sign-in cancelled.", "info");
-            return;
-          }
+          if (e?.code === "auth/popup-closed-by-user") return say("Sign-in cancelled.", "info");
           say(
             e?.code === "auth/operation-not-allowed"
-              ? "Google sign-in isn't switched on for this project yet. Use the email link below."
-              : e?.message || "Could not start Google sign-in.",
+              ? "Google sign-in isn't switched on for this project yet."
+              : e?.message || "Could not sign in.",
             "err"
           );
-        }
-      });
-
-      magicForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = document.getElementById("email").value.trim();
-        if (!email || !email.includes("@")) return say("Enter a valid email address.", "err");
-        magicBtn.disabled = true;
-        magicBtn.textContent = "Sending…";
-        try {
-          await signInWithEmail(email, next && next.startsWith("/") ? next : "/portal");
-          say(`Check ${email} — we've sent a one-tap sign-in link. It expires in an hour.`, "ok");
-          magicBtn.textContent = "Link sent";
-        } catch (err) {
-          magicBtn.disabled = false;
-          magicBtn.textContent = "Send me a link";
-          say(err?.message || "Could not send the link. Try again in a moment.", "err");
         }
       });
     </script>

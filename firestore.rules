@@ -84,12 +84,13 @@ service cloud.firestore {
       allow get, list: if isAdmin()
                        || (signedIn() && resource.data.uid == uid());
 
-      allow create: if verifiedEmail()
+      allow create: if isAdmin()
+                    || (verifiedEmail()
                     && membershipId == uid() + '_' + request.resource.data.clientId
                     && request.resource.data.uid == uid()
                     && request.resource.data.role == 'owner'
                     && exists(/databases/$(database)/documents/invites/$(
-                         request.auth.token.email + '_' + request.resource.data.clientId));
+                         request.auth.token.email + '_' + request.resource.data.clientId)));
 
       allow update, delete: if isAdmin();
     }
@@ -216,22 +217,25 @@ service cloud.firestore {
     // documents into the project.
 
     match /leads/{id} {
-      allow create: if request.resource.data.keys().hasOnly([
-                         'name', 'email', 'phone', 'company', 'budget', 'projectType',
-                         'message', 'source', 'status', 'score', 'createdAt', 'updatedAt'
+      // A visitor who signed in and picked a tier. uid is pinned to the
+      // caller so nobody can file a lead as someone else; the shape is
+      // pinned so this can't be used as free storage.
+      allow create: if signedIn()
+                    && request.resource.data.uid == uid()
+                    && request.resource.data.keys().hasOnly([
+                         'uid', 'name', 'email', 'phone', 'company', 'tier', 'budget',
+                         'projectType', 'message', 'source', 'status', 'score',
+                         'newsletter', 'createdAt', 'updatedAt'
                        ])
-                    // `is string` also enforces presence — an absent field is
-                    // undefined and fails the type check — so these four are
-                    // required, and must never be sent as null.
-                    && request.resource.data.name is string
-                    && request.resource.data.name.size() <= 200
                     && request.resource.data.email is string
                     && request.resource.data.email.size() <= 320
-                    && request.resource.data.message is string
-                    && request.resource.data.message.size() <= 5000
+                    && request.resource.data.tier is string
+                    && request.resource.data.tier in ['whatsapp', 'starter', 'growth', 'commerce']
                     && request.resource.data.status == 'new';
 
-      allow get, list, update, delete: if isAdmin();
+      // A person may read their own leads (the portal shows what they picked).
+      allow get, list: if isAdmin() || (signedIn() && resource.data.uid == uid());
+      allow update, delete: if isAdmin();
     }
 
     /* --------------------------- content, settings ------------------------ */

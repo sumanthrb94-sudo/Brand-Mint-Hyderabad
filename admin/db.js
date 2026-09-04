@@ -28,7 +28,6 @@ const COLLECTIONS = [
   "projects",
   "clients",
   "invoices",
-  "content",
   // Portal + onboarding
   "clientUsers",
   "invites",
@@ -66,7 +65,6 @@ const cache = {
   projects: [],
   clients: [],
   invoices: [],
-  content: [],
   clientUsers: [],
   invites: [],
   onboardingResponses: [],
@@ -405,7 +403,6 @@ export const db = {
         projects: cache.projects,
         clients: cache.clients,
         invoices: cache.invoices,
-        content: cache.content,
         settings: cache.settings || {},
       },
     };
@@ -692,49 +689,5 @@ export async function seedIfEmpty() {
     d.setDate(d.getDate() + n);
     return fmt(d);
   };
-  const content = [
-    {
-      date: addDays(0),
-      title: "Case study: Verdant Foods +47% conversion",
-      channel: "LinkedIn",
-      type: "Carousel",
-      status: "published",
-    },
-    {
-      date: addDays(2),
-      title: "Why we charge in INR, not USD",
-      channel: "LinkedIn",
-      type: "Post",
-      status: "scheduled",
-    },
-    {
-      date: addDays(4),
-      title: "Behind the scenes — Nimbus AI architecture diagram",
-      channel: "X / Twitter",
-      type: "Image",
-      status: "draft",
-    },
-    {
-      date: addDays(7),
-      title: "Hyderabad studio reveal",
-      channel: "Instagram",
-      type: "Reel",
-      status: "draft",
-    },
-    {
-      date: addDays(10),
-      title: "Pricing breakdown: the ₹2 L marketing site",
-      channel: "LinkedIn",
-      type: "Article",
-      status: "scheduled",
-    },
-    {
-      date: addDays(14),
-      title: "Founder note: Q2 retrospective",
-      channel: "Newsletter",
-      type: "Long-form",
-      status: "draft",
-    },
-  ];
-  content.forEach((c) => db.create("content", c));
+
 }

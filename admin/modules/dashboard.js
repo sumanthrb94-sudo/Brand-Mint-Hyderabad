@@ -91,6 +91,15 @@ export async function render(ctx) {
   /* ---- Needs you: anything a client is currently waiting on ---- */
   const actions = [];
 
+  const signups = db.list("leads", (l) => l.status === "new" && l.uid);
+  if (signups.length) {
+    actions.push({
+      text: `${signups.length} new sign-up${signups.length > 1 ? "s" : ""} from the site — call within a day`,
+      cta: "Open leads",
+      route: "/leads",
+    });
+  }
+
   const briefsIn = db.list(
     "onboardingResponses",
     (r) => r.status === "submitted" && !r.reviewedAt

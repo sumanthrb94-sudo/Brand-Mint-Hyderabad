@@ -2,53 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1f1a" />
-    <title>Brand Mint — Hyderabad's premium digital studio for ambitious brands</title>
+    <title>Brand Mint — Online stores for Indian brands, built in Hyderabad</title>
     <meta
       name="description"
-      content="Brand Mint is a senior digital studio in Hyderabad. We design custom websites and build bespoke internal tools for India's most ambitious teams."
+      content="Four store tiers, one price each, GST extra. Pick one, sign in with Google, and we call you the next day. Built in HITEC City, Hyderabad."
     />
     <link rel="canonical" href="https://brand-mint-sdmk.vercel.app/" />
-    <meta property="og:site_name" content="Brand Mint" />
-    <meta property="og:title" content="Brand Mint — Hyderabad's premium digital studio" />
-    <meta
-      property="og:description"
-      content="A senior studio in Hyderabad. We mint brands that compound — custom websites and bespoke tools for India's most ambitious teams."
-    />
     <meta property="og:type" content="website" />
+    <meta property="og:title" content="Brand Mint — Online stores for Indian brands" />
+    <meta property="og:description" content="Four store tiers from ₹49,999. Pick one, sign in with Google, we call you the next day." />
     <meta property="og:url" content="https://brand-mint-sdmk.vercel.app/" />
     <meta property="og:image" content="https://brand-mint-sdmk.vercel.app/og-image.png" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Brand Mint — Hyderabad's premium digital studio." />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Brand Mint — Hyderabad's premium digital studio" />
-    <meta
-      name="twitter:description"
-      content="We mint brands that compound — custom websites and bespoke tools, made in Hyderabad."
-    />
-    <meta name="twitter:image" content="https://brand-mint-sdmk.vercel.app/og-image.png" />
-    <meta name="twitter:image:alt" content="Brand Mint — Hyderabad's premium digital studio." />
-    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=fb1" />
+    <link rel="stylesheet" href="/styles.css?v=clean2" />
 
-    <!-- Auth preflight: sets <html data-auth-state> and <html data-auth-role>
-         before first paint so the nav never flashes the wrong UI.
-
-         This reads the role cached by /auth/session.js after sign-in.
-         It decides what the NAV LOOKS LIKE, nothing else — the role is
-         re-read from the `profiles` table on load, and every gated page and
-         collection is enforced server-side by firestore.rules. Forging the role here
-         changes one link's visibility and grants no access. -->
+    <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
     <script>
       (function () {
         var html = document.documentElement;
@@ -63,1309 +41,161 @@
         html.setAttribute("data-auth-state", "signed-out");
       })();
     </script>
-
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@graph": [
-          {
-            "@type": "Organization",
-            "@id": "https://brand-mint-sdmk.vercel.app/#organization",
-            "name": "Brand Mint Studio",
-            "legalName": "Brand Mint Studio Pvt. Ltd.",
-            "url": "https://brand-mint-sdmk.vercel.app/",
-            "logo": "https://brand-mint-sdmk.vercel.app/og-image.png",
-            "image": "https://brand-mint-sdmk.vercel.app/og-image.png",
-            "description": "Senior digital studio in Hyderabad building custom websites and bespoke internal tools for ambitious teams.",
-            "email": "hello@brandmint.studio",
-            "telephone": "+91-77999-34943",
-            "areaServed": ["IN", "AE", "SA", "GB", "US"],
-            "address": {
-              "@type": "PostalAddress",
-              "addressLocality": "Hyderabad",
-              "addressRegion": "Telangana",
-              "addressCountry": "IN"
-            },
-            "sameAs": []
-          },
-          {
-            "@type": "LocalBusiness",
-            "@id": "https://brand-mint-sdmk.vercel.app/#localbusiness",
-            "name": "Brand Mint Studio",
-            "url": "https://brand-mint-sdmk.vercel.app/",
-            "image": "https://brand-mint-sdmk.vercel.app/og-image.png",
-            "telephone": "+91-77999-34943",
-            "email": "hello@brandmint.studio",
-            "address": {
-              "@type": "PostalAddress",
-              "streetAddress": "HITEC City",
-              "addressLocality": "Hyderabad",
-              "addressRegion": "Telangana",
-              "postalCode": "500081",
-              "addressCountry": "IN"
-            }
-          },
-          {
-            "@type": "WebSite",
-            "@id": "https://brand-mint-sdmk.vercel.app/#website",
-            "url": "https://brand-mint-sdmk.vercel.app/",
-            "name": "Brand Mint",
-            "publisher": { "@id": "https://brand-mint-sdmk.vercel.app/#organization" },
-            "inLanguage": "en-IN"
-          }
-        ]
-      }
-    </script>
   </head>
+
   <body>
-    <div class="grain" aria-hidden="true"></div>
-    <div class="orb orb--1" aria-hidden="true"></div>
-    <div class="orb orb--2" aria-hidden="true"></div>
-
-    <header class="nav" id="nav">
-      <a class="logo" href="#top" aria-label="Brand Mint home">
-        <svg
-          class="logo-mark"
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-          aria-hidden="true"
-        >
-          <defs>
-            <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#7CF6C8" />
-              <stop offset="100%" stop-color="#10B981" />
-            </linearGradient>
-          </defs>
-          <circle cx="16" cy="16" r="15" fill="url(#lg)" />
-          <path
-            d="M9 22V10l7 6 7-6v12"
-            stroke="#0b1f1a"
-            stroke-width="2.4"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            fill="none"
-          />
-        </svg>
-        <span class="logo-word">Brand Mint</span>
-        <span class="logo-loc" aria-hidden="true">— Hyderabad</span>
+    <header class="nav">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">◆</span>
+        <span class="brand-name">Brand Mint<small>Hyderabad</small></span>
       </a>
-
       <nav class="nav-links" aria-label="Primary">
-        <a href="#services">Services</a>
-        <a href="#work">Work</a>
-        <a href="#process">Process</a>
-        <a href="#about">Studio</a>
-
-        <a href="#" class="nav-signin" data-auth-action="open-login" data-auth-show="signed-out">
-          Log in
-        </a>
-        <a href="#" class="nav-signup" data-auth-action="open-signup" data-auth-show="signed-out">
-          Sign up
-        </a>
-
-        <a href="/portal" class="nav-admin" data-auth-show="client" title="Open your client portal">
-          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-            <rect x="2.5" y="3" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M2.5 6.2h11M5.6 9h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          My project
-        </a>
-
-        <a href="/admin" class="nav-admin" data-auth-show="admin" title="Open admin dashboard">
-          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M8 2l5 2v4c0 3-2.2 5.5-5 6-2.8-.5-5-3-5-6V4l5-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-            <path d="M6 8l1.5 1.5L10 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Admin
-        </a>
-
-        <div class="nav-userchip-wrap" id="nav-userchip-wrap" data-auth-show="signed-in">
-          <button
-            type="button"
-            class="nav-userchip"
-            id="nav-userchip"
-            aria-haspopup="menu"
-            aria-expanded="false"
-            aria-controls="nav-userchip-menu"
-          >
-            <span class="nav-userchip-avatar" data-auth-user-initial aria-hidden="true">·</span>
-            <span class="nav-userchip-name" data-auth-user-name>Account</span>
-            <svg class="nav-userchip-caret" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-              <path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <div class="nav-userchip-menu" id="nav-userchip-menu" role="menu" aria-labelledby="nav-userchip">
-            <div class="um-head">
-              <div class="label">Signed in as</div>
-              <div class="email" data-auth-user-email>—</div>
-            </div>
-            <a class="um-item" role="menuitem" href="/account">
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <circle cx="8" cy="6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.4"/>
-                <path d="M3.5 13c.8-2 2.5-3 4.5-3s3.7 1 4.5 3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-              Account
-            </a>
-            <a class="um-item" role="menuitem" href="/portal" data-auth-show="client">
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <rect x="2.5" y="3" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
-                <path d="M2.5 6.2h11M5.6 9h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-              My project
-            </a>
-            <a class="um-item um-item--admin" role="menuitem" href="/admin" data-auth-show="admin">
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M8 2l5 2v4c0 3-2.2 5.5-5 6-2.8-.5-5-3-5-6V4l5-2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-                <path d="M6 8l1.5 1.5L10 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Admin dashboard
-            </a>
-            <a class="um-item" role="menuitem" href="#contact">
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M2.5 4.5h11v7h-11z" fill="none" stroke="currentColor" stroke-width="1.4"/>
-                <path d="M2.5 5.5l5.5 3.5 5.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-              Contact studio
-            </a>
-            <div class="um-divider" role="separator"></div>
-            <button type="button" class="um-item" role="menuitem" data-auth-action="signout">
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M9 3H4v10h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                <path d="M8 8h6m0 0l-2-2m2 2l-2 2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-              Sign out
-            </button>
-          </div>
-        </div>
-
-        <a href="#contact" class="btn btn--ghost">Start a project</a>
+        <a href="#stores">Stores</a>
+        <a href="#how">How it works</a>
+        <a href="#care">After launch</a>
       </nav>
-
-      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="nav-actions">
+        <a class="btn btn-ghost" href="/login" data-auth-show="signed-out">Sign in</a>
+        <a class="btn btn-primary" href="/portal" data-auth-show="client">My project</a>
+        <a class="btn btn-primary" href="/admin" data-auth-show="admin">Admin</a>
+      </div>
     </header>
 
-    <main id="top">
+    <main>
       <!-- HERO -->
       <section class="hero">
-        <div class="hero-inner">
-          <span class="eyebrow">
-            <span class="dot"></span>
-            BUILT IN HYDERABAD · NOW BOOKING Q3 2026
-          </span>
-          <h1 class="hero-title">
-            We mint <em>brands</em>
-            <br />that <span class="grad">compound.</span>
-          </h1>
-          <p class="hero-sub">
-            A senior digital studio in Hyderabad designing custom websites
-            and engineering bespoke internal tools for India's most
-            ambitious teams. Strategy, design, and engineering — under one
-            crisp roof.
-          </p>
-          <div class="hero-cta">
-            <a href="#contact" class="btn btn--primary">
-              Start a project
-              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                <path
-                  d="M3 8h10m-4-4 4 4-4 4"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
-              </svg>
-            </a>
-            <a href="#work" class="btn btn--ghost">See selected work</a>
-          </div>
-
-          <div class="hero-meta">
-            <div>
-              <strong>98<span class="unit">%</span></strong>
-              <span>Client retention</span>
-            </div>
-            <div>
-              <strong>4.9<span class="unit unit--star">★</span></strong>
-              <span>Average rating</span>
-            </div>
-          </div>
+        <p class="kicker">Hyderabad · Now booking</p>
+        <h1>Your online store, <em>built to sell</em> — not just to launch.</h1>
+        <p class="lede">
+          Four tiers, one fixed price each, and everything a store in India actually
+          needs — UPI, COD, GST invoices, WhatsApp orders. Pick one, sign in with
+          Google, and we'll call you tomorrow.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#stores">See the four stores</a>
+          <a class="btn btn-ghost btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20an%20online%20store." rel="noopener">WhatsApp us</a>
         </div>
-
-        <div class="hero-logo3d" aria-hidden="true">
-          <div class="logo3d-stage">
-            <div class="logo3d-ring logo3d-ring--a"></div>
-            <div class="logo3d-ring logo3d-ring--b"></div>
-            <div class="logo3d-coin">
-              <div class="logo3d-face logo3d-face--front">
-                <svg viewBox="0 0 64 64" width="120" height="120" aria-hidden="true">
-                  <defs>
-                    <linearGradient id="l3dG" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stop-color="#7CF6C8" />
-                      <stop offset="100%" stop-color="#10B981" />
-                    </linearGradient>
-                  </defs>
-                  <circle cx="32" cy="32" r="32" fill="url(#l3dG)" />
-                  <path d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                </svg>
-              </div>
-              <div class="logo3d-face logo3d-face--back"></div>
-              <div class="logo3d-shine"></div>
-            </div>
-            <span class="logo3d-spark logo3d-spark--1"></span>
-            <span class="logo3d-spark logo3d-spark--2"></span>
-            <span class="logo3d-spark logo3d-spark--3"></span>
-          </div>
-          <span class="logo3d-caption">Brand Mint — minted in Hyderabad</span>
-        </div>
-      </section>
-
-      <!-- MARQUEE — moving horizontal strips -->
-      <section class="marquee-band" aria-label="What we do">
-        <div class="marquee" aria-hidden="true">
-          <div class="marquee-track">
-            <span class="m-item">Custom Websites</span><span class="m-dot"></span>
-            <span class="m-item">Internal Tools</span><span class="m-dot"></span>
-            <span class="m-item">Brand Systems</span><span class="m-dot"></span>
-            <span class="m-item">AI Integrations</span><span class="m-dot"></span>
-            <span class="m-item">Performance Media</span><span class="m-dot"></span>
-            <span class="m-item">SEO Engines</span><span class="m-dot"></span>
-            <span class="m-item">Custom Websites</span><span class="m-dot"></span>
-            <span class="m-item">Internal Tools</span><span class="m-dot"></span>
-            <span class="m-item">Brand Systems</span><span class="m-dot"></span>
-            <span class="m-item">AI Integrations</span><span class="m-dot"></span>
-            <span class="m-item">Performance Media</span><span class="m-dot"></span>
-            <span class="m-item">SEO Engines</span><span class="m-dot"></span>
-          </div>
-        </div>
-        <div class="marquee marquee--reverse marquee--ghost" aria-hidden="true">
-          <div class="marquee-track">
-            <span class="m-item">Senior-led</span><span class="m-dot"></span>
-            <span class="m-item">Hyderabad</span><span class="m-dot"></span>
-            <span class="m-item">Ship in weeks</span><span class="m-dot"></span>
-            <span class="m-item">Strategy → Build → Care</span><span class="m-dot"></span>
-            <span class="m-item">No interns at the table</span><span class="m-dot"></span>
-            <span class="m-item">Founder-to-founder</span><span class="m-dot"></span>
-            <span class="m-item">Senior-led</span><span class="m-dot"></span>
-            <span class="m-item">Hyderabad</span><span class="m-dot"></span>
-            <span class="m-item">Ship in weeks</span><span class="m-dot"></span>
-            <span class="m-item">Strategy → Build → Care</span><span class="m-dot"></span>
-            <span class="m-item">No interns at the table</span><span class="m-dot"></span>
-            <span class="m-item">Founder-to-founder</span><span class="m-dot"></span>
-          </div>
-        </div>
-      </section>
-
-      <!-- SERVICES -->
-      <section class="section" id="services">
-        <header class="section-head">
-          <span class="kicker">01 — Services</span>
-          <h2>Everything to take a brand from <em>idea</em> to <em>infrastructure.</em></h2>
-          <p>
-            We work in tight, senior pods — strategy, design, and engineering
-            sitting at the same table from day one. No handoffs, no telephone.
-            All work led by a partner with 8+ years.
-          </p>
-        </header>
-
-        <div class="services">
-          <article class="service">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <rect
-                  x="4"
-                  y="6"
-                  width="24"
-                  height="18"
-                  rx="2"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  fill="none"
-                />
-                <path
-                  d="M4 11h24M8 17h8M8 20h12"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </div>
-            <h3>Custom websites</h3>
-            <p>
-              Marketing sites, e-commerce, and editorial platforms — designed
-              from scratch and engineered for speed, SEO, and accessibility.
-              Every pixel earns its keep.
-            </p>
-            <ul class="chips">
-              <li>Next.js / Astro</li>
-              <li>Headless CMS</li>
-              <li>Shopify / Razorpay</li>
-              <li>Lighthouse 95+</li>
-            </ul>
-          </article>
-
-          <article class="service service--feature">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <path
-                  d="M6 22 16 6l10 16M6 22h20M11 22v-6h10v6"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
-              </svg>
-            </div>
-            <h3>Custom internal tools</h3>
-            <p>
-              Dashboards, CRMs, ops consoles, AI agents, and one-of-one tools
-              that replace spreadsheets and Zaps. We build the thing your team
-              keeps trying to hire for.
-            </p>
-            <ul class="chips">
-              <li>React / TypeScript</li>
-              <li>Supabase / Postgres</li>
-              <li>Claude &amp; OpenAI</li>
-              <li>Auth &amp; RBAC</li>
-            </ul>
-          </article>
-
-          <article class="service">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <circle
-                  cx="16"
-                  cy="16"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  fill="none"
-                />
-                <path
-                  d="M16 6v20M6 16h20"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                />
-              </svg>
-            </div>
-            <h3>Brand &amp; identity</h3>
-            <p>
-              Logo systems, type pairings, motion guidelines, and the messaging
-              spine. Your brand book becomes a tool, not a PDF nobody opens.
-            </p>
-            <ul class="chips">
-              <li>Identity systems</li>
-              <li>Canva templates</li>
-              <li>Motion &amp; sound</li>
-              <li>Voice &amp; copy</li>
-            </ul>
-          </article>
-
-          <article class="service">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <path
-                  d="M5 20c4-9 18-9 22 0M9 20a7 7 0 0 0 14 0"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  fill="none"
-                />
-                <circle cx="16" cy="20" r="2.5" fill="currentColor" />
-              </svg>
-            </div>
-            <h3>Performance media</h3>
-            <p>
-              Paid social, search, and creator buys with weekly readouts. We
-              ship the asset, the landing page, and the dashboard — so the
-              loop closes in days, not quarters.
-            </p>
-            <ul class="chips">
-              <li>Meta &amp; TikTok</li>
-              <li>Google &amp; YouTube</li>
-              <li>Creator buys</li>
-              <li>Attribution</li>
-            </ul>
-          </article>
-
-          <article class="service">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <rect
-                  x="6"
-                  y="8"
-                  width="20"
-                  height="14"
-                  rx="2"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  fill="none"
-                />
-                <path
-                  d="M6 13h20M11 18h4"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </svg>
-            </div>
-            <h3>SEO &amp; content engines</h3>
-            <p>
-              Programmatic SEO, content ops, and editorial systems that
-              compound monthly. We treat content like product — versioned,
-              measured, and rebuilt.
-            </p>
-            <ul class="chips">
-              <li>Programmatic SEO</li>
-              <li>Editorial CMS</li>
-              <li>AI content ops</li>
-              <li>Topic graphs</li>
-            </ul>
-          </article>
-
-          <article class="service">
-            <div class="service-icon" aria-hidden="true">
-              <svg viewBox="0 0 32 32" width="28" height="28">
-                <path
-                  d="M16 4v8m0 8v8M4 16h8m8 0h8"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-                <circle
-                  cx="16"
-                  cy="16"
-                  r="4"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  fill="none"
-                />
-              </svg>
-            </div>
-            <h3>AI integrations</h3>
-            <p>
-              Claude, OpenAI, and bespoke agent stacks woven into your product
-              and ops. We start from the workflow, not the model.
-            </p>
-            <ul class="chips">
-              <li>Agents &amp; MCP</li>
-              <li>RAG pipelines</li>
-              <li>Eval harnesses</li>
-              <li>Guardrails</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <!-- WORK / CLIENTS -->
-      <section class="bm-clients" id="work">
-        <style>
-          /* ─── SCOPED STYLES ─── */
-          .bm-clients {
-            --bm-emerald: #00c897;
-            --bm-emerald-deep: #008f6b;
-            --bm-gold: #c9a14a;
-            --bm-gold-soft: #e6c987;
-            --bm-ink: #0b1f1a;
-            --bm-ink-2: #14352d;
-            --bm-ink-deep: #06140f;
-            --bm-cream: #f5f1ea;
-            --bm-mist: rgba(245, 241, 234, 0.55);
-            --bm-line: rgba(245, 241, 234, 0.08);
-
-            background: linear-gradient(160deg, #0b1f1a 0%, #14352d 100%);
-            color: var(--bm-cream);
-            padding: 72px 24px 88px;
-            position: relative;
-            overflow: hidden;
-            font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-          }
-          .bm-clients::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(
-                ellipse 1200px 600px at 15% 20%,
-                rgba(0, 200, 151, 0.08),
-                transparent 60%
-              ),
-              radial-gradient(
-                ellipse 800px 400px at 90% 80%,
-                rgba(201, 161, 74, 0.06),
-                transparent 60%
-              );
-            pointer-events: none;
-          }
-          .bm-clients__inner {
-            max-width: 1280px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-          }
-          .bm-clients__eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 11px;
-            font-weight: 500;
-            letter-spacing: 0.32em;
-            text-transform: uppercase;
-            color: var(--bm-emerald);
-            margin-bottom: 24px;
-          }
-          .bm-clients__eyebrow::before {
-            content: "";
-            width: 32px;
-            height: 1px;
-            background: var(--bm-emerald);
-          }
-          .bm-clients__title {
-            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-            font-weight: 600;
-            font-size: clamp(30px, 4.4vw, 52px);
-            line-height: 1.05;
-            letter-spacing: -0.02em;
-            max-width: 880px;
-            margin: 0 0 20px;
-          }
-          .bm-clients__title em {
-            font-style: italic;
-            color: var(--bm-gold);
-          }
-          .bm-clients__lede {
-            font-size: 16px;
-            line-height: 1.6;
-            color: var(--bm-mist);
-            max-width: 620px;
-            margin: 0 0 48px;
-          }
-          .bm-clients__featured {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 56px;
-          }
-          .bm-card {
-            background: linear-gradient(165deg, var(--bm-ink-deep) 0%, #081913 100%);
-            border: 1px solid var(--bm-line);
-            border-radius: 4px;
-            padding: 28px 24px 26px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1),
-              border-color 0.5s ease;
-          }
-          .bm-card::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--bm-emerald), transparent);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-          }
-          .bm-card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(0, 200, 151, 0.25);
-          }
-          .bm-card:hover::after {
-            opacity: 1;
-          }
-          .bm-card__num {
-            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-            font-style: italic;
-            font-size: 12px;
-            color: var(--bm-gold);
-            letter-spacing: 0.1em;
-            margin-bottom: 18px;
-            display: block;
-          }
-          .bm-card__name {
-            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-            font-size: 24px;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            line-height: 1.15;
-            margin: 0 0 4px;
-          }
-          .bm-card__category {
-            font-size: 10.5px;
-            font-weight: 500;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            color: var(--bm-emerald);
-            margin-bottom: 16px;
-          }
-          .bm-card__quote {
-            font-size: 14px;
-            line-height: 1.55;
-            color: var(--bm-mist);
-            margin-bottom: 20px;
-            min-height: 80px;
-          }
-          .bm-card__meta {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            padding-top: 18px;
-            border-top: 1px solid var(--bm-line);
-            margin-bottom: 18px;
-          }
-          .bm-card__meta-label {
-            font-size: 10px;
-            font-weight: 500;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: rgba(245, 241, 234, 0.4);
-            margin-bottom: 6px;
-          }
-          .bm-card__meta-value {
-            font-size: 14px;
-            color: var(--bm-cream);
-          }
-          .bm-card__link {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--bm-gold);
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-decoration: none;
-            transition: gap 0.3s ease, color 0.3s ease;
-          }
-          .bm-card__link:hover {
-            gap: 16px;
-            color: var(--bm-gold-soft);
-          }
-          .bm-card__link span {
-            transition: transform 0.3s ease;
-          }
-          .bm-card__link:hover span {
-            transform: translateX(4px);
-          }
-          .bm-roster__heading {
-            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-            font-style: italic;
-            font-size: 13px;
-            color: var(--bm-gold);
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            margin: 0 0 22px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--bm-line);
-          }
-          .bm-roster {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
-            background: var(--bm-line);
-            border: 1px solid var(--bm-line);
-          }
-          .bm-roster__item {
-            background: var(--bm-ink-deep);
-            padding: 36px 28px;
-            transition: background 0.4s ease;
-            cursor: default;
-          }
-          .bm-roster__item:hover {
-            background: var(--bm-ink-2);
-          }
-          .bm-roster__name {
-            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-            font-size: 22px;
-            font-weight: 500;
-            letter-spacing: -0.01em;
-            margin-bottom: 8px;
-            color: var(--bm-cream);
-          }
-          .bm-roster__tag {
-            font-size: 10px;
-            font-weight: 500;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            color: var(--bm-emerald);
-            margin-bottom: 16px;
-          }
-          .bm-roster__desc {
-            font-size: 13px;
-            line-height: 1.65;
-            color: var(--bm-mist);
-            margin: 0;
-          }
-          @media (max-width: 980px) {
-            .bm-clients {
-              padding: 80px 20px 100px;
-            }
-            .bm-clients__lede {
-              margin-bottom: 56px;
-            }
-            .bm-clients__featured {
-              grid-template-columns: 1fr;
-              gap: 16px;
-              margin-bottom: 72px;
-            }
-            .bm-card {
-              padding: 32px 24px 28px;
-            }
-            .bm-card__quote {
-              min-height: auto;
-            }
-            .bm-roster {
-              grid-template-columns: 1fr;
-            }
-            .bm-roster__item {
-              padding: 28px 24px;
-            }
-          }
-          @media (min-width: 981px) and (max-width: 1180px) {
-            .bm-roster {
-              grid-template-columns: repeat(2, 1fr);
-            }
-          }
-        </style>
-
-        <div class="bm-clients__inner">
-          <span class="bm-clients__eyebrow">Selected Work · 2024–2026</span>
-          <h2 class="bm-clients__title">
-            Brands we've built, scaled, and <em>shipped.</em>
-          </h2>
-          <p class="bm-clients__lede">
-            From a national UK e-commerce platform to a luxury real estate
-            curation brand operating across Hyderabad and Dubai — Brand Mint
-            partners with founders who want craft and conversion in the same
-            breath.
-          </p>
-
-          <div class="bm-clients__featured">
-            <article class="bm-card">
-              <span class="bm-card__num">01 / Featured</span>
-              <h3 class="bm-card__name">Mobile Phone Market UK</h3>
-              <div class="bm-card__category">E-commerce · Consumer Electronics</div>
-              <p class="bm-card__quote">
-                A UK consumer electronics marketplace built to operate at
-                national retail scale — full e-commerce platform, catalog
-                architecture, and conversion-grade storefront.
-              </p>
-              <div class="bm-card__meta">
-                <div>
-                  <div class="bm-card__meta-label">Market</div>
-                  <div class="bm-card__meta-value">United Kingdom</div>
-                </div>
-                <div>
-                  <div class="bm-card__meta-label">Build</div>
-                  <div class="bm-card__meta-value">Platform + Catalog</div>
-                </div>
-              </div>
-              <a href="#" class="bm-card__link">View case study <span>→</span></a>
-            </article>
-
-            <article class="bm-card">
-              <span class="bm-card__num">02 / Featured</span>
-              <h3 class="bm-card__name">The Green Team</h3>
-              <div class="bm-card__category">Luxury Real Estate · Curation</div>
-              <p class="bm-card__quote">
-                A luxury real estate curation brand operating across
-                Hyderabad and Dubai — full brand system, website, and a
-                20-post Instagram engine for premium developments.
-              </p>
-              <div class="bm-card__meta">
-                <div>
-                  <div class="bm-card__meta-label">Markets</div>
-                  <div class="bm-card__meta-value">Hyderabad · Dubai</div>
-                </div>
-                <div>
-                  <div class="bm-card__meta-label">Scope</div>
-                  <div class="bm-card__meta-value">Brand · Web · Ads</div>
-                </div>
-              </div>
-              <a href="#" class="bm-card__link">View case study <span>→</span></a>
-            </article>
-
-            <article class="bm-card">
-              <span class="bm-card__num">03 / Featured</span>
-              <h3 class="bm-card__name">SimplySip Elixirs</h3>
-              <div class="bm-card__category">D2C · Cold-Pressed Wellness</div>
-              <p class="bm-card__quote">
-                A cold-pressed juice brand turned into a luxury wellness
-                label — full e-commerce, Razorpay checkout, ad creative, and
-                a print-ready menu system.
-              </p>
-              <div class="bm-card__meta">
-                <div>
-                  <div class="bm-card__meta-label">Location</div>
-                  <div class="bm-card__meta-value">Hyderabad</div>
-                </div>
-                <div>
-                  <div class="bm-card__meta-label">Domain</div>
-                  <div class="bm-card__meta-value">simplysip.in</div>
-                </div>
-              </div>
-              <a href="#" class="bm-card__link">View case study <span>→</span></a>
-            </article>
-          </div>
-
-          <div class="bm-roster__heading">— The full roster</div>
-
-          <div class="bm-roster">
-            <div class="bm-roster__item">
-              <div class="bm-roster__name">Mobile Phone Market UK</div>
-              <div class="bm-roster__tag">E-commerce</div>
-              <p class="bm-roster__desc">
-                Mid-tier UK consumer electronics marketplace. Full platform
-                build, catalog architecture, conversion-grade storefront.
-              </p>
-            </div>
-            <div class="bm-roster__item">
-              <div class="bm-roster__name">The Green Team</div>
-              <div class="bm-roster__tag">Real Estate</div>
-              <p class="bm-roster__desc">
-                Luxury real estate curation across Hyderabad and Dubai.
-                Channel partner for Agartha, Syl Residences, and MODCON.
-              </p>
-            </div>
-            <div class="bm-roster__item">
-              <div class="bm-roster__name">SimplySip Elixirs</div>
-              <div class="bm-roster__tag">D2C Wellness</div>
-              <p class="bm-roster__desc">
-                Cold-pressed juice studio in Hyderabad. Brand identity,
-                e-commerce, Meta Ads creative, menu brochure system.
-              </p>
-            </div>
-            <div class="bm-roster__item">
-              <div class="bm-roster__name">Jora Bakes</div>
-              <div class="bm-roster__tag">D2C Bakery</div>
-              <p class="bm-roster__desc">
-                Artisan bakery storefront on jorabakes.in. Next.js, Firebase
-                Auth with phone OTP, Razorpay checkout, deployed on Vercel.
-              </p>
-            </div>
-            <div class="bm-roster__item">
-              <div class="bm-roster__name">Inventory Manager</div>
-              <div class="bm-roster__tag">SaaS Platform</div>
-              <p class="bm-roster__desc">
-                Multichannel commerce hub in the ChannelGrabber tradition.
-                One SKU, every marketplace, real-time stock — designed
-                end-to-end.
-              </p>
-            </div>
-            <div class="bm-roster__item">
-              <div class="bm-roster__name">Tresor Couture</div>
-              <div class="bm-roster__tag">Fashion · Textiles</div>
-              <p class="bm-roster__desc">
-                Premium fabric house identity. Folded-cloth mark, brushed-gold
-                palette, an aesthetic built to live next to the Hermès orange.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      <!-- PROCESS -->
-      <section class="section" id="process">
-        <header class="section-head">
-          <span class="kicker">03 — Process</span>
-          <h2>Crisp, fast, no theater.</h2>
-          <p>
-            Most engagements run 4–8 weeks. We over-communicate in writing,
-            ship every Friday, and keep a single shared dashboard so you
-            always know where things stand.
-          </p>
-        </header>
-
-        <ol class="process">
-          <li>
-            <span class="step">01</span>
-            <h3>Mint</h3>
-            <p>
-              Half-day strategy intensive at our HITEC City studio (or on
-              video). We map the audience, the offer, and the smallest thing
-              that would move the needle. You leave with a one-page brief
-              and a fixed quote.
-            </p>
-          </li>
-          <li>
-            <span class="step">02</span>
-            <h3>Make</h3>
-            <p>
-              Design and engineering run in parallel in a shared Figma + repo.
-              Weekly demos, daily Loom updates, and a live staging URL from
-              week one.
-            </p>
-          </li>
-          <li>
-            <span class="step">03</span>
-            <h3>Move</h3>
-            <p>
-              Launch day is boring on purpose. Then we instrument, iterate,
-              and run paid &amp; SEO loops to compound the work into growth.
-            </p>
-          </li>
-          <li>
-            <span class="step">04</span>
-            <h3>Maintain</h3>
-            <p>
-              Optional retainers for product care, content engines, and a
-              monthly experiment cycle. We write the playbook so you can run
-              it without us.
-            </p>
-          </li>
-        </ol>
-      </section>
-
-      <!-- TESTIMONIALS -->
-      <section class="section section--quiet">
-        <header class="section-head">
-          <span class="kicker">04 — Word of mouth</span>
-          <h2>People we've worked with.</h2>
-        </header>
-        <div class="quotes">
-          <figure class="quote">
-            <blockquote>
-              "Brand Mint moved fast and got the voice right on the first
-              try. The site we got back is the most accurate read on our
-              team I've seen — and the easiest to update."
-            </blockquote>
-            <figcaption>
-              <strong>Founder</strong>
-              <span>The Green Team</span>
-            </figcaption>
-          </figure>
-          <figure class="quote">
-            <blockquote>
-              "The site is fast, the brand is sharp, and — more importantly —
-              the team understood the business in the first call."
-            </blockquote>
-            <figcaption>
-              <strong>Founder</strong>
-              <span>SimplySip · India</span>
-            </figcaption>
-          </figure>
-          <figure class="quote">
-            <blockquote>
-              "They built and shipped a UK storefront from across the world
-              in record time. Conversion has held steady through three
-              feature waves."
-            </blockquote>
-            <figcaption>
-              <strong>Operations Lead</strong>
-              <span>Mobile Phone Market · UK</span>
-            </figcaption>
-          </figure>
-        </div>
-      </section>
-
-      <!-- ABOUT / STUDIO -->
-      <section class="section section--split" id="about">
-        <div class="split-text">
-          <span class="kicker">05 — Studio</span>
-          <h2>A small studio with a long memory — based in Hyderabad.</h2>
-          <p>
-            Brand Mint is a tight team of designers, engineers, and operators
-            who've shipped at agencies, in-house, and at venture-backed
-            startups across India and the US. We took the parts that worked —
-            senior people, fast cycles, real ownership — and left the rest
-            behind.
-          </p>
-          <p>
-            Our flagship studio sits in HITEC City, Hyderabad, with
-            collaborators across Bengaluru, Mumbai, and Singapore. We work
-            with founders who care about craft, and operators who want an
-            outside team that moves like an in-house one.
-          </p>
-          <div class="values">
-            <div>
-              <strong>Senior only</strong>
-              <span>Every engagement led by a partner with 8+ years.</span>
-            </div>
-            <div>
-              <strong>Fixed scope</strong>
-              <span>Quotes that survive contact with reality.</span>
-            </div>
-            <div>
-              <strong>You own it</strong>
-              <span>Code, design files, dashboards — all yours.</span>
-            </div>
-          </div>
-        </div>
-        <aside class="split-card">
-          <div class="badge">Studio principles</div>
-          <ol>
-            <li>
-              <strong>Ship Fridays.</strong>
-              Something visible every week. No black boxes.
-            </li>
-            <li>
-              <strong>Write it down.</strong>
-              Decisions live in docs, not in heads or DMs.
-            </li>
-            <li>
-              <strong>Measure or it didn't happen.</strong>
-              Every project leaves with a dashboard.
-            </li>
-            <li>
-              <strong>Boring tech, sharp craft.</strong>
-              Tools that will still be here in five years.
-            </li>
-            <li>
-              <strong>Hand it back better.</strong>
-              You should be more capable when we leave.
-            </li>
-          </ol>
-        </aside>
-      </section>
-
-      <!-- LEADERSHIP -->
-      <section class="section section--quiet">
-        <header class="section-head">
-          <span class="kicker">06 — Leadership</span>
-          <h2>Senior, accountable, in the room.</h2>
-          <p>
-            Every engagement is led by a partner — not handed to a junior.
-            You'll have a direct line to the people writing the code and
-            making the calls.
-          </p>
-        </header>
-        <ul class="leaders">
-          <li class="leader">
-            <div class="leader-photo" aria-hidden="true"><span>S</span></div>
-            <h3>Founder &amp; CEO</h3>
-            <span class="leader-role">Strategy · Client lead</span>
-            <p>
-              12+ years across product, marketing, and operations. Sets the
-              brief, holds the line, and personally signs off every shipment.
-            </p>
-          </li>
-          <li class="leader">
-            <div class="leader-photo leader-photo--alt" aria-hidden="true"><span>D</span></div>
-            <h3>Head of Design</h3>
-            <span class="leader-role">Brand · UX · Motion</span>
-            <p>
-              Ex-in-house lead at two venture-backed startups. Awwwards SOTD
-              twice; teaches type at a Hyderabad design school on weekends.
-            </p>
-          </li>
-          <li class="leader">
-            <div class="leader-photo leader-photo--alt2" aria-hidden="true"><span>E</span></div>
-            <h3>Head of Engineering</h3>
-            <span class="leader-role">Web · Tools · AI</span>
-            <p>
-              Shipped systems running at 99.99% uptime for fintech and SaaS
-              companies. Bias toward boring tech, sharp craft.
-            </p>
-          </li>
+        <ul class="hero-proof">
+          <li><span class="num">4</span> store tiers</li>
+          <li><span class="num">₹49,999</span> to start</li>
+          <li><span class="num">4–12</span> weeks to launch</li>
         </ul>
       </section>
 
-      <!-- FAQ -->
-      <section class="section" id="faq">
+      <!-- STORES -->
+      <section class="section" id="stores">
         <header class="section-head">
-          <span class="kicker">07 — FAQ</span>
-          <h2>Common questions.</h2>
+          <p class="kicker">01 — What we build</p>
+          <h2>Four stores. Pick the one that's <em>your business.</em></h2>
+          <p>
+            Each tier includes everything in the one before it. Prices are one-time,
+            in INR, exclusive of 18% GST. Every store comes with a monthly care plan
+            you can add after launch.
+          </p>
         </header>
-        <div class="faq">
-          <details>
-            <summary>What does a typical engagement cost?</summary>
-            <p>
-              We're a startup studio, so the floors are friendly and every
-              quote is fixed-scope after the Mint workshop — no surprises, no
-              hourly meters. Tell us the goal and we'll send a tailored
-              estimate. GST extra.
-            </p>
-          </details>
-          <details>
-            <summary>How fast can you start?</summary>
-            <p>
-              We hold one or two slots open each month. From signed SOW to
-              kick-off is usually under two weeks. Rush slots happen — ask.
-            </p>
-          </details>
-          <details>
-            <summary>Do you work with in-house teams?</summary>
-            <p>
-              Often. We slot in next to in-house design, marketing, or eng
-              teams as a force multiplier — not a replacement. We use your
-              tools and your conventions.
-            </p>
-          </details>
-          <details>
-            <summary>What stack do you use?</summary>
-            <p>
-              For sites: Next.js, Astro, or Shopify Hydrogen, on Vercel. For
-              tools: React + TypeScript, Supabase or Postgres, with Claude or
-              OpenAI where it earns its keep. Razorpay or Stripe for payments.
-              We pick boring tech on purpose.
-            </p>
-          </details>
-          <details>
-            <summary>Can we meet the team in person?</summary>
-            <p>
-              Yes — our studio is in HITEC City, Hyderabad. We host kickoff
-              workshops in person and run weekly demos on video. Travel to
-              Bengaluru, Mumbai, and the Gulf is on us for larger engagements.
-            </p>
-          </details>
-          <details>
-            <summary>Who owns the work?</summary>
-            <p>
-              You do — code, design files, copy, accounts, and dashboards.
-              We hand over a clean repo, a Notion playbook, and a Loom
-              walkthrough.
-            </p>
-          </details>
+        <div class="tiers" id="tiers"><!-- rendered from /shared/tiers.js --></div>
+      </section>
+
+      <!-- HOW IT WORKS -->
+      <section class="section section--dark" id="how">
+        <header class="section-head">
+          <p class="kicker">02 — How it works</p>
+          <h2>Three steps. <em>No forms.</em></h2>
+        </header>
+        <ol class="steps" id="steps"><!-- rendered from /shared/tiers.js --></ol>
+      </section>
+
+      <!-- AFTER LAUNCH -->
+      <section class="section" id="care">
+        <header class="section-head">
+          <p class="kicker">03 — After launch</p>
+          <h2>The work does not stop at <em>launch.</em></h2>
+          <p>
+            Every store can continue on a monthly care plan. This is a defined scope
+            of work, not an hourly bucket — updates tested on staging, uptime and
+            speed monitoring, security patches, monthly merchandising, bug fixes,
+            and a health report. Cancel with 30 days' notice.
+          </p>
+        </header>
+        <div class="care-note">
+          <p>
+            Care plans are priced per tier and agreed on the call. Sale-event cover
+            (festive season, BFCM, your brand day) is quoted separately.
+          </p>
         </div>
       </section>
 
-      <!-- CONTACT -->
-      <section class="section section--cta" id="contact">
-        <div class="cta">
-          <div class="cta-text">
-            <span class="kicker">08 — Start a project</span>
-            <h2>Tell us what you're building.</h2>
-            <p>
-              Drop a few notes about the project and we'll be back within one
-              business day with a calendar link or a friendly "not the right
-              fit." No drip campaigns, ever.
-            </p>
-            <ul class="cta-list">
-              <li>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                  <path
-                    d="M3 4h10v8H3zM3 4l5 4 5-4"
-                    stroke="currentColor"
-                    stroke-width="1.4"
-                    fill="none"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                hello@brandmint.studio
-              </li>
-              <li>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                  <path d="M3 3h3l2 5-2 1a8 8 0 0 0 4 4l1-2 5 2v3a1 1 0 0 1-1 1A12 12 0 0 1 3 4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linejoin="round"/>
-                </svg>
-                <a href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%2C%20I%27d%20like%20to%20start%20a%20project." target="_blank" rel="noopener">+91 77999 34943 · WhatsApp</a>
-              </li>
-              <li>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                  <path d="M2 8a6 6 0 0 1 12 0c0 4-6 7-6 7s-6-3-6-7Z" stroke="currentColor" stroke-width="1.4" fill="none" />
-                  <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.4" fill="none" />
-                </svg>
-                Studio: HITEC City, Hyderabad — Telangana 500081
-              </li>
-              <li>
-                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                  <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4" fill="none" />
-                  <path d="M8 4v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none" />
-                </svg>
-                Replies within 1 business day · IST
-              </li>
-            </ul>
-          </div>
-
-          <form class="contact-form" id="contact-form" novalidate>
-            <div class="field">
-              <label for="name">Your name</label>
-              <input id="name" name="name" type="text" autocomplete="name" required />
-            </div>
-            <div class="field">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" autocomplete="email" required />
-            </div>
-            <div class="field">
-              <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+91" />
-            </div>
-            <div class="field field--full">
-              <label for="type">What do you need?</label>
-              <select id="type" name="type" required>
-                <option value="">Pick one…</option>
-                <option>Custom website</option>
-                <option>Custom internal tool</option>
-                <option>Brand &amp; identity</option>
-                <option>Performance media</option>
-                <option>SEO &amp; content engine</option>
-                <option>AI integration</option>
-                <option>Something else</option>
-              </select>
-            </div>
-            <div class="field field--full">
-              <label for="message">A few notes</label>
-              <textarea id="message" name="message" rows="4" placeholder="Goal, timeline, anything we should know."></textarea>
-            </div>
-            <button class="btn btn--primary btn--full" type="submit">
-              <span class="btn-label">Send it</span>
-              <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-                <path
-                  d="M3 8h10m-4-4 4 4-4 4"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
-              </svg>
-            </button>
-            <p class="form-status" role="status" aria-live="polite"></p>
-          </form>
+      <!-- CTA -->
+      <section class="cta">
+        <h2>Start with a call, not a quote.</h2>
+        <p>
+          Pick a tier, sign in with Google, and we'll ring you within one working
+          day. If the honest answer is that you don't need us yet, we'll say so.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#stores">Choose a store</a>
+          <a class="btn btn-ghost btn-lg" href="/login">Sign in</a>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
-            <circle cx="16" cy="16" r="15" fill="url(#lg)" />
-            <path
-              d="M9 22V10l7 6 7-6v12"
-              stroke="#0b1f1a"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              fill="none"
-            />
-          </svg>
-          <span>Brand Mint Studio</span>
-        </div>
-        <p class="footer-tagline">
-          Custom websites &amp; bespoke tools. Made in Hyderabad — shipped
-          across India and the world.
-        </p>
-        <nav class="footer-links" aria-label="Footer">
-          <a href="#services">Services</a>
-          <a href="#work">Work</a>
-          <a href="#process">Process</a>
-          <a href="#about">Studio</a>
-          <a href="#contact">Contact</a>
-          <a href="/privacy">Privacy</a>
-          <a href="/terms">Terms</a>
-        </nav>
-        <div class="footer-meta">
-          <span>© <span id="year"></span> Brand Mint Studio Pvt. Ltd. · HITEC City, Hyderabad</span>
-          <span>Made with care, shipped on Fridays.</span>
-        </div>
+      <div>
+        <strong>Brand Mint</strong> · HITEC City, Hyderabad
+        <span class="num">+91 77999 34943</span>
       </div>
+      <nav class="footer-links" aria-label="Legal">
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/login">Sign in</a>
+      </nav>
     </footer>
 
-    <script src="script.js?v=fb1" defer></script>
-    <script type="module" src="/auth/marketing.js?v=fb1"></script>
+    <script type="module">
+      import { TIERS, STEPS, inr } from "/shared/tiers.js?v=clean1";
 
-    <!-- Vercel Web Analytics (zero-config; enable in Vercel dashboard → Analytics). -->
-    <script>
-      window.va =
-        window.va ||
-        function () {
-          (window.vaq = window.vaq || []).push(arguments);
-        };
+      // ---- tier cards
+      const host = document.getElementById("tiers");
+      for (const t of TIERS) {
+        const card = document.createElement("article");
+        card.className = "tier" + (t.featured ? " tier--featured" : "");
+        card.innerHTML = `
+          <p class="tier-kicker">Tier ${t.tier}</p>
+          <h3>${t.name}</h3>
+          <p class="tier-blurb"></p>
+          <div class="tier-price">
+            <span class="num">${inr(t.price)}</span>
+            <span class="tier-weeks num">${t.weeks}</span>
+          </div>
+          <div class="tier-groups"></div>
+          <a class="tier-cta" href="/login?tier=${t.id}">Choose ${t.name} →</a>
+        `;
+        card.querySelector(".tier-blurb").textContent = t.blurb;
+
+        const groups = card.querySelector(".tier-groups");
+        for (const g of t.groups) {
+          const h4 = document.createElement("h4");
+          h4.textContent = g.title;
+          const ul = document.createElement("ul");
+          for (const item of g.items) {
+            const li = document.createElement("li");
+            li.textContent = item;
+            ul.appendChild(li);
+          }
+          groups.append(h4, ul);
+        }
+        host.appendChild(card);
+      }
+
+      // ---- steps
+      const steps = document.getElementById("steps");
+      STEPS.forEach((s, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="step-n num">0${i + 1}</span><h3></h3><p></p>`;
+        li.querySelector("h3").textContent = s.title;
+        li.querySelector("p").textContent = s.body;
+        steps.appendChild(li);
+      });
     </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-    <script defer src="/_vercel/speed-insights/script.js"></script>
   </body>
 </html>

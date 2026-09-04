@@ -17,6 +17,7 @@ import {
   watch,
 } from "/portal/data.js";
 import { renderWizard, briefSummaryCard } from "/portal/wizard.js";
+import { TIER_BY_ID, STEPS } from "/shared/tiers.js";
 import {
   h,
   mount,
@@ -49,6 +50,16 @@ async function boot() {
 
   document.getElementById("account-email").textContent = profile.email || "";
   document.getElementById("signout").addEventListener("click", () => signOut("/login?signedout=1"));
+
+  // No client membership yet: they picked a tier and signed in, and we
+  // haven't called them. That is a real state with its own screen, not an
+  // error.
+  if (!profile.clientIds.length) {
+    document.getElementById("boot")?.remove();
+    document.getElementById("app").hidden = false;
+    renderLeadState();
+    return;
+  }
 
   await refresh();
 
@@ -127,11 +138,8 @@ function paint() {
   if (!data) return;
   document.getElementById("client-name").textContent = data.client?.name || "Client portal";
 
-  // Until the brief is in, it is the only thing on screen. Nothing else is
-  // meaningful yet, and a half-onboarded client staring at empty tabs is
-  // exactly the impression we're trying to avoid.
-  const briefDone = data.brief?.status === "submitted";
-  if (!briefDone || forceWizard) {
+  // The brief opens as a full-screen wizard only when asked for.
+  if (forceWizard) {
     tabsEl.innerHTML = "";
     renderWizard(view, {
       brief: data.brief,
@@ -145,10 +153,123 @@ function paint() {
   }
 
   paintTabs();
-  if (activeTab === "overview") return renderOverview();
+  // Until the agreement is signed and the deposit is in, the overview is the
+  // onboarding checklist. Everything else (files, invoices, messages) works
+  // as normal so the deposit invoice and the agreement are reachable.
+  const active = (data.client?.status || "active") === "active";
+  if (activeTab === "overview") return active ? renderOverview() : renderOnboardingOverview();
   if (activeTab === "files") return renderFiles();
   if (activeTab === "invoices") return renderInvoices();
   if (activeTab === "messages") return renderMessages();
+}
+
+/* ------------------------------------------------------------- lead state */
+
+function tierCard(tierId) {
+  const t = TIER_BY_ID[tierId];
+  if (!t) return null;
+  return card(
+    t.name,
+    `Tier ${t.tier} · ${inr(t.price)} · ${t.weeks} · GST extra`,
+    h("p", { class: "p-muted", style: "margin:0 0 14px", text: t.blurb }),
+    h("div", { class: "p-stack" }, t.groups.map((g) =>
+      h("div", {}, [
+        h("div", { class: "p-mono p-muted", style: "font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px", text: g.title }),
+        h("ul", { class: "p-timeline", style: "padding-left:0" }, g.items.map((it) =>
+          h("li", { class: "done", style: "padding-bottom:8px;border-left-color:transparent" }, [
+            h("span", { class: "p-tl-title", style: "font-weight:500;font-size:14px", text: it }),
+          ])
+        )),
+      ])
+    ))
+  );
+}
+
+function stepsCard(doneCount) {
+  return card("What happens next", null,
+    h("ol", { class: "p-timeline", style: "list-style:none;padding-left:0" }, STEPS.map((s, i) =>
+      h("li", { class: i < doneCount ? "done" : i === doneCount ? "in_progress" : "upcoming" }, [
+        h("div", { class: "p-tl-head" }, [
+          h("span", { class: "p-tl-title", text: s.title }),
+          pill(i < doneCount ? "done" : i === doneCount ? "in_progress" : "upcoming"),
+        ]),
+        h("div", { class: "p-tl-detail", text: s.body }),
+      ])
+    ))
+  );
+}
+
+/** Signed in, picked a tier, not yet converted by the studio. */
+function renderLeadState() {
+  tabsEl.innerHTML = "";
+  document.getElementById("client-name").textContent = "Your request";
+  const first = (profile.fullName || "").split(/\s+/)[0] || "there";
+
+  mount(
+    view,
+    h("div", { class: "p-hero" }, [
+      h("h1", { text: `Thanks, ${first} — we'll call you within one working day.` }),
+      h("p", { text:
+        profile.selectedTier
+          ? `You picked the ${TIER_BY_ID[profile.selectedTier]?.name || "store"}. We'll confirm the scope, agree a start date and send the agreement. Nothing is due until then.`
+          : "You're signed in. Pick a store on the site and we'll take it from there." }),
+      h("div", { class: "p-row", style: "margin-top:22px" }, [
+        h("a", { class: "p-btn", href: "https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%20just%20signed%20in%20on%20the%20site.", rel: "noopener", text: "Can't wait? WhatsApp us" }),
+        profile.selectedTier ? null : h("a", { class: "p-btn p-btn-primary", href: "/#stores", text: "Choose a store" }),
+      ].filter(Boolean)),
+    ]),
+    stepsCard(1),
+    profile.selectedTier ? tierCard(profile.selectedTier) : null
+  );
+}
+
+/** Converted to a client; agreement and deposit still outstanding. */
+function renderOnboardingOverview() {
+  const c = data.client || {};
+  const signed = !!c.agreementSignedAt;
+  const paid = !!c.depositPaidAt;
+  const docs = data.deliverables.filter((d) => d.kind === "document");
+  const tier = c.storeTier ? TIER_BY_ID[c.storeTier] : null;
+
+  const checklist = card("Before we start", `${[signed, paid].filter(Boolean).length} of 2 done`,
+    h("ul", { class: "p-timeline" }, [
+      h("li", { class: signed ? "done" : "in_progress" }, [
+        h("div", { class: "p-tl-head" }, [h("span", { class: "p-tl-title", text: "Agreement signed" }), pill(signed ? "done" : "in_progress")]),
+        h("div", { class: "p-tl-detail", text: signed ? `Signed ${dateLong(c.agreementSignedAt)}.` : docs.length ? "Open the agreement under Files, sign it, and tell us in Messages." : "We'll send the agreement to your portal after the call." }),
+      ]),
+      h("li", { class: paid ? "done" : signed ? "in_progress" : "upcoming" }, [
+        h("div", { class: "p-tl-head" }, [h("span", { class: "p-tl-title", text: "50% deposit paid" }), pill(paid ? "done" : signed ? "in_progress" : "upcoming")]),
+        h("div", { class: "p-tl-detail", text: paid ? `Received ${dateLong(c.depositPaidAt)}. Your timeline goes live now.` : "The deposit invoice appears under Invoices once the agreement is signed. Work starts the day it lands." }),
+      ]),
+    ])
+  );
+
+  const actions = [];
+  if (docs.length) actions.push({ text: `${docs.length} document${docs.length > 1 ? "s" : ""} to review`, cta: "Open Files", tab: "files" });
+  const unpaid = data.invoices.filter((i) => i.status === "sent" || i.status === "overdue");
+  if (unpaid.length) actions.push({ text: `Deposit invoice — ${inr(unpaid.reduce((s, i) => s + (Number(i.total) || 0), 0))}`, cta: "See invoice", tab: "invoices" });
+  const todo = actions.length
+    ? card("Over to you", null, h("div", { class: "p-stack" }, actions.map((a) =>
+        h("div", { class: "p-row", style: "justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:12px" }, [
+          h("span", { text: a.text }),
+          h("button", { class: "p-btn p-btn-sm", type: "button", text: a.cta, onclick: () => { activeTab = a.tab; window.location.hash = "#/" + a.tab; paint(); } }),
+        ]))))
+    : null;
+
+  mount(
+    view,
+    h("div", { class: "p-hero" }, [
+      h("h1", { text: c.name || "Getting started" }),
+      h("p", { text: tier ? `${tier.name} · ${inr(tier.price)} + GST · ${tier.weeks}` : "We're setting up your project." }),
+    ]),
+    todo,
+    checklist,
+    stepsCard(paid ? 3 : 2),
+    briefSummaryCard(data.brief, () => { forceWizard = true; paint(); }) ||
+      card("Your brief", "Not started", h("p", { class: "p-muted", style: "margin:0 0 14px", text: "Five short questions about your business, so we start from facts. Takes ten minutes and saves as you go." }),
+        h("button", { class: "p-btn p-btn-primary", type: "button", text: "Start the brief", onclick: () => { forceWizard = true; paint(); } })),
+    tier ? tierCard(c.storeTier) : null
+  );
 }
 
 /* ---------------------------------------------------------------- overview */
@@ -322,7 +443,7 @@ function deliverableCard(d) {
             href,
             target: "_blank",
             rel: "noopener noreferrer",
-            text: d.kind === "preview" ? "Open preview" : d.kind === "link" ? "Open link" : "Download",
+            text: d.kind === "document" ? "Open document" : d.kind === "preview" ? "Open preview" : d.kind === "link" ? "Open link" : "Download",
           })
         : h("span", { class: "p-muted", style: "font-size:13px", text: "No link attached — ask us for it in Messages." }),
 
@@ -330,7 +451,7 @@ function deliverableCard(d) {
         ? h("button", {
             class: "p-btn p-btn-sm p-btn-primary",
             type: "button",
-            text: "Approve",
+            text: d.kind === "document" ? "I've signed this" : "Approve",
             onclick: () => confirmApprove(d),
           })
         : null,

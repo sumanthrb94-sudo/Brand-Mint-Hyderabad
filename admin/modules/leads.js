@@ -18,6 +18,7 @@ import {
   renderTopbar,
   relTime,
 } from "/admin/components.js";
+import { TIER_BY_ID, inr as inrTier } from "/shared/tiers.js";
 
 const STATUSES = ["new", "qualified", "won", "lost"];
 const BUDGETS = ["", "<1L", "1-3L", "3-8L", "8L+"];
@@ -129,7 +130,17 @@ export async function render(ctx) {
                   h("div", { class: "sub", text: r.company || "—" }),
                 ]),
             },
-            { label: "Type", cell: (r) => r.projectType || "—" },
+            {
+              label: "Store",
+              cell: (r) => {
+                const t = r.tier ? TIER_BY_ID[r.tier] : null;
+                if (!t) return h("span", { class: "muted", text: r.projectType || "—" });
+                return h("div", {}, [
+                  h("div", { class: "strong", text: t.name }),
+                  h("div", { class: "sub mono", text: `${inrTier(t.price)} · ${t.weeks}` }),
+                ]);
+              },
+            },
             { label: "Budget", cell: (r) => h("span", { class: "mono", text: r.budget || "—" }) },
             {
               label: "Score",
@@ -170,6 +181,17 @@ export async function render(ctx) {
               label: "",
               cell: (r) =>
                 h("div", { class: "hstack", style: { gap: "4px", justifyContent: "flex-end" } }, [
+                  r.status !== "won" && r.uid
+                    ? h("button", {
+                        class: "btn btn-primary btn-sm",
+                        text: "Convert to client",
+                        title: "Creates the client, links their Google login, opens Delivery",
+                        onclick: (e) => {
+                          e.stopPropagation();
+                          convertToClient(r);
+                        },
+                      })
+                    : null,
                   h("button", {
                     class: "btn btn-ghost btn-sm",
                     text: "Edit",
@@ -202,7 +224,7 @@ export async function render(ctx) {
           rows,
           empty: {
             title: state.query || state.filter !== "all" ? "No matching leads" : "No leads yet",
-            body: "Inbound from the contact form will land here.",
+            body: "Anyone who picks a store on the site and signs in with Google lands here, with the tier they chose.",
           },
           onRow: (r) => openForm(r),
         })
@@ -210,6 +232,75 @@ export async function render(ctx) {
     }
 
     renderTable();
+  }
+
+  /**
+   * Lead → client in one click. The lead already carries the person's uid
+   * from Google sign-in, so their membership is created directly — no invite,
+   * no second sign-in. They see the onboarding checklist the next time they
+   * open the portal.
+   */
+  function convertToClient(lead) {
+    const tier = lead.tier ? TIER_BY_ID[lead.tier] : null;
+    confirm({
+      title: `Convert ${lead.name || lead.email} to a client?`,
+      message: tier
+        ? `Creates the client record for the ${tier.name} (${inrTier(tier.price)}), links their Google login to the portal, and opens Delivery so you can send the agreement.`
+        : "Creates the client record and links their Google login to the portal.",
+      onConfirm: async () => {
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          const client = await db.createAsync("clients", {
+            name: (lead.company || lead.name || lead.email || "New client").trim(),
+            contact: lead.name || "",
+            email: lead.email || "",
+            phone: lead.phone || "",
+            storeTier: lead.tier || null,
+            status: "onboarding",
+            onboardingStatus: "invited",
+            portalEnabled: true,
+            tier: "Tier 3",
+            lifetimeValue: tier?.price || 0,
+            leadId: lead.id,
+          });
+
+          if (lead.uid) {
+            await db.createAsync("clientUsers", {
+              id: `${lead.uid}_${client.id}`,
+              uid: lead.uid,
+              clientId: client.id,
+              email: lead.email || "",
+              role: "owner",
+            });
+          }
+
+          await db.createAsync("projects", {
+            name: `${client.name} — ${tier ? tier.name : "Store"}`,
+            client: client.name,
+            clientId: client.id,
+            type: "Store",
+            storeTier: lead.tier || null,
+            stage: "Mint",
+            value: tier?.price || 0,
+            kickoff: today,
+            owner: "Sumanth",
+          });
+
+          await db.updateAsync("leads", lead.id, {
+            status: "won",
+            clientId: client.id,
+            convertedAt: new Date().toISOString(),
+          });
+
+          ctx.toast(`${client.name} is now a client. Send them the agreement.`);
+          ctx.refreshSidebar();
+          ctx.navigate("/delivery/" + client.id);
+        } catch (err) {
+          console.error("[leads] convert", err);
+          ctx.toast(`Couldn't convert — ${err?.message || err}`, 4500);
+        }
+      },
+    });
   }
 
   function openForm(lead) {

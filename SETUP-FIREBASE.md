@@ -64,9 +64,6 @@ the browser, so it would be published on your Vercel URL the moment you deploy.
    **`firebase/config.js`**, replacing the three `PASTE_…_HERE` values.
    Check `storageBucket` matches too — older projects use `…appspot.com` and
    the two names are not interchangeable.
-5. Paste the same **`apiKey`** into **`script.js`** (search for
-   `FIREBASE_API_KEY`). The public contact form writes leads over the REST API
-   so the marketing page doesn't have to load the whole SDK.
 
 > **This config is not a secret.** `apiKey` identifies the project; it
 > authorises nothing. Google publishes it in every Firebase web app. The
@@ -151,28 +148,31 @@ Repeat for any teammate who should have full access.
 
 ---
 
-## Step 6 — Onboard your first client
+## Step 6 — How a client comes in
 
-The flow you'll run for every client from now on.
+There is no form and no invite. This is the flow every client goes through:
 
-1. **`/admin` → Onboarding → "+ Invite client"** — pick or create the client,
-   enter the email attached to their Google account.
-2. **Copy the message** the dialog gives you and send it however you normally
-   talk to them. Nothing is emailed automatically.
-3. **They open `/login`** and hit *Continue with Google*. On first sign-in the
-   app finds your invite and creates their membership — the rules only permit
-   that write because a matching invite exists for their **verified** email.
-   No password is ever created, sent, or stored.
-4. **They fill the brief** — five steps, autosaved. You watch the percentage
-   climb in the Onboarding table.
-5. **They submit** → it appears under "Needs you" on your dashboard.
-6. **You read it and hit "Kick off project"** → creates their project, five
-   standard milestones and a first message. Their portal turns from a form
-   into a live project view.
+1. **They pick a store on the home page** and hit *Choose*. That opens
+   `/login?tier=…` with the tier shown.
+2. **They sign in with Google.** By pressing the button they accept the
+   Privacy Policy and Terms (stated right under it); the newsletter is an
+   optional tick. Their profile gets `consent` and `selectedTier`, and a
+   **lead** is created with their `uid`, email and tier.
+3. **You see it the same minute** — dashboard "Needs you" and the Leads page,
+   with the tier and price. Their portal shows "we'll call you within a day."
+4. **You call them.** Then in Leads, hit **Convert to client**. That creates
+   the client record, links their Google login to the portal (no invite —
+   their `uid` is already on the lead), and opens Delivery.
+5. **In Delivery**, add the agreement as a deliverable of kind *Document to
+   sign* and hit *Send to client*; raise the 50% deposit invoice under
+   Invoices. Their portal now shows the onboarding checklist with both.
+6. **When they've signed**, mark *Agreement signed*. **When the deposit
+   lands**, mark *50% deposit received* — that flips them to **active** and
+   their portal becomes the live timeline: milestones, files to approve,
+   invoices, messages.
 
-Then: add deliverables under **Delivery**, hit *Send to client*; they approve
-or request changes; anything they say lands in your thread and badges your
-sidebar.
+The old invite path (Onboarding → *Invite client*) still works for someone
+you want to add by hand without them picking a tier first.
 
 ---
 
@@ -226,7 +226,7 @@ current version from
 <https://firebase.google.com/docs/web/setup#available-libraries> and reload.
 
 **Rotating the API key** isn't a security action — it's public. If you ever
-need to change it, it's in two files: `firebase/config.js` and `script.js`.
+need to change it, it's in one file: `firebase/config.js`.
 
 **The old Supabase project is now unused.** Nothing points at
 `ycdfgtljxqrhyobnwwbz` any more. Delete it when you're satisfied this works,

@@ -27,6 +27,7 @@ import {
   dateShort,
   inr,
 } from "/admin/components.js";
+import { TIER_BY_ID, inr as inrTier } from "/shared/tiers.js";
 
 const MILESTONE_STATUS = ["upcoming", "in_progress", "blocked", "done"];
 
@@ -365,6 +366,62 @@ export async function render(ctx) {
     return panel("Thread", unread ? `${unread} unread from them` : "Shared with the client", h("div", {}, [list, form]));
   }
 
+  /**
+   * The two gates between "converted" and "live": agreement signed, 50%
+   * deposit received. Both are your calls, recorded here; the client sees
+   * them tick off in their portal. When both are set the client goes active
+   * and their overview switches to the live timeline.
+   */
+  function buildOnboarding() {
+    const c = client();
+    if (!c || (c.status || "active") === "active") return null;
+    const tier = c.storeTier ? TIER_BY_ID[c.storeTier] : null;
+    const signed = !!c.agreementSignedAt;
+    const paid = !!c.depositPaidAt;
+
+    const gate = (label, done, when, onDone) =>
+      h("div", { class: "hstack", style: "justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px" }, [
+        h("div", {}, [
+          h("div", { text: label, style: "font-weight:600" }),
+          h("div", { class: "muted", style: "font-size:12.5px", text: done ? `Done · ${dateShort(when)}` : "Not yet" }),
+        ]),
+        done
+          ? pill("done")
+          : h("button", { class: "chip-btn", type: "button", text: "Mark done", onclick: onDone }),
+      ]);
+
+    return panel(
+      "Onboarding",
+      tier ? `${tier.name} · ${inrTier(tier.price)} + GST` : "Waiting on agreement and deposit",
+      h("div", { class: "vstack", style: "gap:8px" }, [
+        gate("Agreement signed", signed, c.agreementSignedAt, () => {
+          db.update("clients", c.id, { agreementSignedAt: new Date().toISOString() });
+          notifyClient({ projectId: null }, "Agreement received — thank you. The deposit invoice is on its way.");
+          paint();
+        }),
+        gate("50% deposit received", paid, c.depositPaidAt, () => {
+          confirm({
+            title: "Mark the deposit as received?",
+            message: "This switches the client to active. Their portal turns from the onboarding checklist into the live timeline.",
+            onConfirm: () => {
+              db.update("clients", c.id, {
+                depositPaidAt: new Date().toISOString(),
+                status: "active",
+                onboardingStatus: "complete",
+              });
+              notifyClient({ projectId: null }, "Deposit received. We're underway — your timeline is live.");
+              toast(`${c.name} is active.`);
+              paint();
+            },
+          });
+        }),
+        h("p", { class: "muted", style: "font-size:12.5px;margin:6px 2px 0" }, [
+          h("span", { text: "Send the agreement as a deliverable of kind “Document to sign”, and raise the deposit invoice under Invoices. Both show up in their portal immediately." }),
+        ]),
+      ])
+    );
+  }
+
   function buildSummary() {
     const c = client();
     const ms = milestones();
@@ -463,6 +520,7 @@ export async function render(ctx) {
           { value: "file", label: "File to download" },
           { value: "link", label: "Link to open" },
           { value: "preview", label: "Live preview" },
+          { value: "document", label: "Document to sign (agreement, SOW)" },
         ],
       }),
       projects.length
@@ -547,6 +605,8 @@ export async function render(ctx) {
     const picker = buildPicker();
     if (picker) root.appendChild(picker);
     root.appendChild(buildSummary());
+    const onboarding = buildOnboarding();
+    if (onboarding) root.appendChild(onboarding);
     root.appendChild(buildTimeline());
     root.appendChild(buildDeliverables());
     root.appendChild(buildThread());

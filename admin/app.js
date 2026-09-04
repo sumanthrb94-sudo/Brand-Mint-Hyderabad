@@ -30,10 +30,6 @@ const routes = {
   clients:   () => import("/admin/modules/clients.js"),
   delivery:  () => import("/admin/modules/delivery.js"),
   invoices:  () => import("/admin/modules/invoices.js"),
-  content:   () => import("/admin/modules/content.js"),
-  metrics:   () => import("/admin/modules/metrics.js"),
-  "brand-kit": () => import("/admin/modules/brand-kit.js"),
-  documents: () => import("/admin/modules/documents.js"),
   settings:  () => import("/admin/modules/settings.js"),
 };
 
@@ -141,10 +137,6 @@ const NAV_KEYS = {
   c: "clients",
   v: "delivery",
   i: "invoices",
-  n: "content",
-  m: "metrics",
-  b: "brand-kit",
-  u: "documents",
   s: "settings",
 };
 

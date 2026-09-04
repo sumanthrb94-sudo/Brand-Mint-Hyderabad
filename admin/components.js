@@ -498,25 +498,11 @@ const NAV = [
     items: [
       { id: "dashboard", label: "Dashboard", route: "#/dashboard", icon: iconGrid() },
       { id: "leads", label: "Leads", route: "#/leads", icon: iconInbox() },
-      { id: "pipeline", label: "Pipeline", route: "#/pipeline", icon: iconColumns() },
       { id: "onboarding", label: "Onboarding", route: "#/onboarding", icon: iconRocket() },
       { id: "clients", label: "Clients", route: "#/clients", icon: iconUsers() },
       { id: "delivery", label: "Delivery", route: "#/delivery", icon: iconCheckCircle() },
+      { id: "pipeline", label: "Pipeline", route: "#/pipeline", icon: iconColumns() },
       { id: "invoices", label: "Invoices", route: "#/invoices", icon: iconFile() },
-    ],
-  },
-  {
-    section: "Marketing",
-    items: [
-      { id: "content", label: "Content calendar", route: "#/content", icon: iconCalendar() },
-      { id: "metrics", label: "Metrics", route: "#/metrics", icon: iconChart() },
-    ],
-  },
-  {
-    section: "Brand",
-    items: [
-      { id: "brand-kit", label: "Brand kit", route: "#/brand-kit", icon: iconPalette() },
-      { id: "documents", label: "Documents", route: "#/documents", icon: iconBook() },
     ],
   },
   {
