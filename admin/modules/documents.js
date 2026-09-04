@@ -14,6 +14,7 @@ const DOCS = [
   { id: "company",   file: "01-COMPANY-OVERVIEW.md",     title: "Company overview",      group: "Overview" },
   { id: "brand",     file: "02-BRAND-STRATEGY.md",       title: "Brand strategy",        group: "Overview" },
   { id: "services",  file: "03-SERVICE-CATALOG.md",      title: "Service catalog",       group: "Go-to-market" },
+  { id: "ecommerce", file: "13-ECOMMERCE-CATALOG.md",    title: "E-commerce catalog",    group: "Go-to-market" },
   { id: "sales",     file: "04-SALES-PLAYBOOK.md",       title: "Sales playbook",        group: "Go-to-market" },
   { id: "ops",       file: "05-OPERATIONS-MANUAL.md",    title: "Operations manual",     group: "Delivery" },
   { id: "finance",   file: "06-FINANCIAL-MODEL.md",      title: "Financial model",       group: "Delivery" },
