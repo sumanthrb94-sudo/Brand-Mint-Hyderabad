@@ -9,11 +9,6 @@
  *
  * Copy is taken verbatim from the live brandmintstudios.in pricing page.
  * Prices are one-time, in INR, exclusive of 18% GST.
- *
- * ⚠️ The Growth Store's inclusions were cut off in the screenshot this was
- * built from — only the "Shipping and returns" group heading was visible.
- * The bullets under it are drafted to match the pattern of the other tiers.
- * Replace them with the live copy.
  */
 
 export const TIERS = [
@@ -86,26 +81,21 @@ export const TIERS = [
     includesPrevious: "Starter Store",
     featured: true,
     groups: [
-      // ⚠️ Drafted — see the note at the top of this file.
       {
         title: "Shipping and returns",
-        items: [
-          "Courier integration with live tracking (Shiprocket / Delhivery)",
-          "Pincode serviceability check on the product page",
-          "Self-serve returns and exchange requests",
-        ],
+        items: ["Courier API integration", "Live tracking", "Returns and Razorpay refunds"],
       },
       {
-        title: "Marketing automation",
-        items: [
-          "Abandoned-cart recovery on WhatsApp and email",
-          "Back-in-stock and order-update notifications",
-          "Discount codes and campaign landing pages",
-        ],
+        title: "Selling",
+        items: ["Coupons and discount codes", "Abandoned-cart recovery", "Order lifecycle emails"],
       },
       {
-        title: "Insight",
-        items: ["Sales and inventory dashboard", "Google Analytics and Meta pixel, server-side"],
+        title: "Quality and data",
+        items: [
+          "Sales reporting and low-stock alerts",
+          "GA4, Meta Pixel and conversion tracking",
+          "Playwright suite, SEO audit and Lighthouse pass",
+        ],
       },
     ],
   },
@@ -140,6 +130,28 @@ export const TIER_BY_ID = Object.fromEntries(TIERS.map((t) => [t.id, t]));
 export function inr(n) {
   return "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
+
+/** Monthly care plans, added after launch. Per month, exclusive of GST. */
+export const CARE_PLANS = [
+  {
+    id: "care",
+    name: "Care",
+    price: 12500,
+    body: "Hosting, SSL, security updates, backups, uptime monitoring and small fixes.",
+  },
+  {
+    id: "growth",
+    name: "Growth",
+    price: 25000,
+    body: "Everything in Care, plus content updates, a monthly report and one small feature each month.",
+  },
+  {
+    id: "managed",
+    name: "Managed Commerce",
+    price: 50000,
+    body: "Everything in Growth, plus catalogue operations, campaign management and priority support.",
+  },
+];
 
 /** What happens after someone picks a tier. Shown on the home page and in the portal. */
 export const STEPS = [

@@ -24,7 +24,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=clean2" />
+    <link rel="stylesheet" href="/styles.css?v=clean3" />
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
     <script>
@@ -117,10 +117,11 @@
             and a health report. Cancel with 30 days' notice.
           </p>
         </header>
+        <div class="care" id="care-plans"><!-- rendered from /shared/tiers.js --></div>
         <div class="care-note">
           <p>
-            Care plans are priced per tier and agreed on the call. Sale-event cover
-            (festive season, BFCM, your brand day) is quoted separately.
+            Per month, exclusive of GST. Sale-event cover (festive season, BFCM,
+            your brand day) is quoted separately.
           </p>
         </div>
       </section>
@@ -152,7 +153,7 @@
     </footer>
 
     <script type="module">
-      import { TIERS, STEPS, inr } from "/shared/tiers.js?v=clean1";
+      import { TIERS, STEPS, CARE_PLANS, inr } from "/shared/tiers.js?v=clean3";
 
       // ---- tier cards
       const host = document.getElementById("tiers");
@@ -185,6 +186,17 @@
           groups.append(h4, ul);
         }
         host.appendChild(card);
+      }
+
+      // ---- care plans
+      const care = document.getElementById("care-plans");
+      for (const c of CARE_PLANS) {
+        const el = document.createElement("article");
+        el.className = "care-plan";
+        el.innerHTML = `<h3></h3><p class="care-price"><span class="num">${inr(c.price)}</span><span>/month</span></p><p class="care-body"></p>`;
+        el.querySelector("h3").textContent = c.name;
+        el.querySelector(".care-body").textContent = c.body;
+        care.appendChild(el);
       }
 
       // ---- steps
