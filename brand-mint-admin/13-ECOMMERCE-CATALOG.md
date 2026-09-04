@@ -6,12 +6,15 @@ Custom Websites — this is that bullet, opened up.
 
 **Every quote is fixed-scope after the Mint workshop. GST extra. INR.**
 
-> **On the numbers below.** The tier structure and price floors follow the
-> ladder already set in `03-SERVICE-CATALOG.md` (Starter/Studio/Atelier at
-> ₹2 L / ₹3.5 L / ₹6 L). E-commerce carries more surface area than a marketing
-> site — payments, catalog, logistics, tax — so the floors sit above the
-> equivalent site tier. **Sanity-check against your actual delivery hours
-> before quoting.** Anything marked ⚠️ needs your call.
+**We lead with one product: The Store, in three tiers (§A).** Everything after
+it is an add-on, a standalone fix for a store we didn't build, or a retainer.
+
+> **On the numbers.** Prices are extrapolated from the ladder in
+> `03-SERVICE-CATALOG.md` (Starter/Studio/Atelier at ₹2 L / ₹3.5 L / ₹6 L),
+> not independently invented. E-commerce carries more surface than a marketing
+> site — payments, catalog, logistics, tax — so it sits above the equivalent
+> site tier. **Sanity-check against your real delivery hours before quoting.**
+> Anything marked ⚠️ needs your call.
 
 ---
 
@@ -43,81 +46,350 @@ site attached.
 
 ---
 
-# A. Storefront Build — `From ₹2.5 L`
+# A. The Store — three tiers
 
-## What it is
+**This is the one product we lead with.** One conversation, one page, three
+prices. Everything else in this catalogue (§B–§K) is either an add-on to a
+tier or a standalone engagement for a brand that already has a store.
 
-A new commerce site, designed and built from scratch. Not a bought theme with
-your logo dropped in.
+Sell the tier, not the component list. A founder can't evaluate "catalog
+architecture"; they can evaluate "which of these three am I?"
 
-## What's in scope (default)
+| | **Chat Store** | **Growth Store** | **Commerce Platform** |
+|---|---|---|---|
+| **One-time** | **₹1.5 L** | **₹6 L** | **₹12 L** |
+| **Care (monthly)** | ₹20 K/mo | ₹75 K/mo | ₹1.5 L/mo |
+| **Build time** | 2 weeks | 6–7 weeks | 12–14 weeks |
+| **Right for** | Testing demand, ₹0–50 L/yr online | Serious D2C, ₹50 L–₹10 Cr | ₹10 Cr+, B2B, or multi-channel |
+| **Sells through** | WhatsApp + link-in-bio page | Full storefront | Storefront + marketplaces + wholesale |
+| **Logins** | None — chat only | Customer accounts | Multi-role: staff, wholesale, warehouse |
+| **SKUs** | up to 60 | up to 300 | unlimited |
 
-**Strategy**
-- Mint workshop (90 min) → positioning, category structure, merchandising logic
-- Competitor teardown: 3 direct competitors, checkout flows walked end to end
-- Platform recommendation with a written rationale (see §Platform choice)
+The three tiers are deliberately far apart on price. A ladder with ₹1.5 L /
+₹2.5 L / ₹4 L invites haggling between rungs. This one makes the choice about
+*what the business is*, not about budget.
 
-**Design**
-- Custom design system — tokens, type, colour, component library
-- Up to 10 unique templates: home, collection, product, cart, checkout,
-  account, search, about, contact, policies
-- Mobile-first. In India, 70–85% of D2C traffic is mobile; we design that first
-  and treat desktop as the adaptation.
+---
 
-**Build**
-- Shopify (Liquid or Hydrogen) / Next.js + headless / WooCommerce — per the
-  platform call
-- Catalog import and structure (up to 200 SKUs; see Catalog Architecture for
-  deeper)
-- Payment gateway integration + test transactions in live mode
-- Shipping rules, tax configuration, order-confirmation flows
-- Analytics: GA4, Meta CAPI, server-side events where the platform allows
+## Tier 1 — Chat Store · `₹1.5 L`
+
+### What it is
+
+A shop that runs inside WhatsApp. No storefront to maintain, no theme, no
+apps. The customer browses a catalog in the chat they already have open,
+orders in the chat, pays through a link, and gets shipping updates in the same
+thread.
+
+For a large slice of Indian buyers this is not a downgrade from a website —
+it's the channel they'd have moved the conversation to anyway.
+
+### Who it's for
+
+- Bakeries, boutiques, studios, food brands, local services
+- Anyone with under ~60 SKUs and high-touch selling
+- A brand testing whether demand exists before committing to a real store
+- Someone currently taking orders in DMs on a personal number and losing them
+
+Jora Bakes is exactly this shape. So is most of the inbound we turn away
+because "they can't afford us."
+
+### What's in scope
+
+**WhatsApp**
+- WhatsApp Business Platform setup, Meta Business verification, green tick
+  application ⚠️ *verification is Meta's call and can take 1–3 weeks — say so
+  in the SOW and never promise the tick*
+- Product catalog inside WhatsApp, with images, prices and descriptions
+- Structured ordering flow: browse → select → quantity → address → pay
+- Automated replies for hours, menu, delivery areas, FAQs
+- Human handover — the flow stops and a person takes over when it should
+
+**Payments**
+- Razorpay (or Cashfree) payment links generated per order
+- UPI first, cards and netbanking behind it
+- Payment confirmation posted back into the thread
+
+**A page to link to**
+- One-page catalog site: products, prices, story, ordering CTA into WhatsApp
+- Fast, mobile-first, indexable so Google can find them
+- Custom domain, SSL, hosting configured
+
+**Order handling**
+- Orders land in a Google Sheet or a light admin — the client can actually
+  read it without training
+- Order status updates back to the customer on WhatsApp
+- Daily order summary to the owner
+
+**Included**
+- Up to 60 SKUs loaded
+- 1 round of catalog photography direction (production billed separately)
+- 90-minute handover training, recorded
+
+### What's *not* in scope
+
+- Full storefront, cart, or accounts — that's Tier 2
+- Courier aggregator integration — manual dispatch at this tier
+- Marketing automation beyond order notifications
+- **WhatsApp conversation charges** — Meta bills per conversation and the
+  client pays direct. Budget roughly ₹0.30–₹1 per conversation depending on
+  category ⚠️ *check Meta's current India rate card before quoting; it moves*
+
+### Timeline
+
+**2 weeks.** Week 1: catalog, flows, payments. Week 2: page, testing,
+handover.
+
+### Why this tier exists
+
+Be clear-eyed: **at ₹1.5 L this is close to break-even.** It exists as a
+ladder step, not a profit centre. Its job is to catch the brand we'd otherwise
+refer away and put them on our stack, so that when they hit ₹1 Cr they
+upgrade rather than shop around.
+
+**Track the conversion rate from Chat Store to Growth Store.** If it isn't
+30%+ within 18 months, the tier isn't doing its job and should be repriced or
+retired. ⚠️
+
+---
+
+## Tier 2 — Growth Store · `₹6 L`
+
+### What it is
+
+The real store, with every system needed to grow **evenly** already wired in.
+
+"Evenly" is the whole point and it's worth saying out loud to the client:
+most agencies sell traffic into a leaky store. Acquisition, conversion and
+retention get built at the same time here, because pouring ad spend into a
+store with no retention loop is how D2C brands go broke profitably.
+
+### Who it's for
+
+- D2C doing ₹50 L–₹10 Cr online, or offline brands going direct properly
+- Anyone on a template store that's now the constraint
+- Brands about to spend real money on ads — this is what the ads should land on
+
+### What's in scope
+
+**Store**
+- Custom design system and storefront: up to 10 templates
+- Platform per the decision matrix (usually Shopify; Next.js where SEO leads)
+- Catalog architecture: variants, metafields, collections, filters, search
+- Up to 300 SKUs loaded and structured
+
+**Getting paid** *(the §D module, included)*
+- Razorpay/Cashfree, UPI-first, cards, netbanking, wallets, EMI
+- **COD with gating** by pincode, cart value and customer history
+- COD confirmation over WhatsApp, and a prepaid nudge to shift the mix
+- GST: HSN codes, inter/intra-state rates, statutory invoice format
+- Abandoned-cart recovery on **both** email and WhatsApp
+
+**Getting it delivered** *(the §E module, included)*
+- Shiprocket or Delhivery integration, weight slabs and zones
+- **Pincode serviceability check on the product page**, before the cart
+- Branded tracking page — not the courier's
+- Self-serve returns and exchange portal
+- RTO reduction: address validation, delivery-window nudges, NDR workflow
+
+**Getting them back** *(this is the "evenly" part)*
+- 5 core lifecycle flows across email + WhatsApp: welcome, abandoned cart,
+  browse abandonment, post-purchase, win-back
+- Photo reviews with UGC capture
+- Back-in-stock alerts on WhatsApp
+- Quick reorder for consumables
+- Referral programme — the cheapest acquisition channel a D2C brand has
+
+**Knowing what happened**
+- GA4 + Meta CAPI **server-side**, not just the browser pixel
+- Google Merchant Center + Meta catalog feeds, ready for ads
+- Search Console, sitemap, schema, technical SEO foundation
+- A one-page dashboard the founder will actually open
 
 **Quality**
-- Lighthouse 90+ on mobile for home, collection and product templates
-  (commerce carries third-party scripts a brochure site doesn't — 95+ is a
-  headless-only promise, and we won't pretend otherwise)
-- WCAG AA pass
-- Cross-browser + real-device QA (iOS Safari, Chrome Android)
-- 30-day post-launch warranty
+- Lighthouse 90+ mobile on home, collection and product
+- WCAG AA, real-device QA
+- 60-day post-launch warranty *(double Tier 1 — this is a bigger surface)*
 
-## What's *not* in scope
+### What's *not* in scope
 
-- Product photography and retouching — art-directed by us, produced as add-on
-- Copywriting beyond 10 product descriptions — ₹25 K/page or supply your own
-- Ongoing merchandising after launch — that's the Care Plan
-- Ad account setup and spend — separate line
-- Platform subscription, app, and gateway fees — client pays direct
-- Migrating historical order and customer data — see Replatform
+- Subscriptions — add-on ₹2 L
+- Marketplace or ONDC listing — add-on from ₹1.5 L
+- Wholesale/B2B pricing — that's Tier 3
+- Photography production, ad spend, platform and app fees
 
-## Tiers
+### Timeline
 
-| Tier | SKUs | Templates | Integrations | Price floor |
-|---|---|---|---|---|
-| **Launch** | up to 50 | 6 | Payments + shipping | **₹2.5 L** |
-| **Growth** | up to 200 | 10 | + reviews, email, analytics | **₹4.5 L** |
-| **Scale** | up to 1,000 | 12+ | + ERP/OMS, subscriptions, multi-currency | **₹8 L+** |
+**6–7 weeks.** W1 workshop + catalog model. W2 design. W3–5 build and
+integrate. W6 data, QA, live payment testing. W7 launch and training.
 
-## Timeline
+### Why ₹6 L
 
-- **Launch** — 4 weeks
-- **Growth** — 5–6 weeks
-- **Scale** — 8–10 weeks
+Bought à la carte the same scope is ~₹9.5 L. It's ₹6 L because the scope is
+*fixed and repeatable* — we've built this stack before and will again, and
+that efficiency is real rather than a discount we're eating. Hold the line at
+₹6 L; if a client needs it cheaper, sell Tier 1 and upgrade them later.
 
-Week 1 workshop + IA + catalog model. Week 2 design. Weeks 3–4 build. Final
-week: data, QA, payment testing in production, launch.
+---
 
-## SOP
+## Tier 3 — Commerce Platform · `₹12 L`
 
-1. Proposal within 48 hrs of discovery
-2. 50% advance, 50% at launch
-3. Daily Loom for the first 10 days; Friday demo 4 PM IST
-4. 2 review rounds included; 3rd+ at ₹15 K/round
-5. Client owns the store, the repo, and every account from day 1
+### What it is
+
+Everything in Tier 2, plus the systems a business needs once it sells to more
+than one kind of buyer through more than one channel. This is where **multiple
+logins** stop being a feature and start being the architecture.
+
+### Who it's for
+
+- ₹10 Cr+ online, or offline brands with serious catalog depth
+- Anyone selling both retail **and** wholesale/B2B
+- Multi-channel: own store + marketplaces + quick commerce
+- Brands selling into the Gulf or UK as well as India
+
+### What's in scope, beyond Tier 2
+
+**Multi-role access — the "multiple logins" tier**
+
+Four distinct identities, each seeing a different store:
+
+| Role | Sees |
+|---|---|
+| **Retail customer** | Standard catalog, MRP, standard checkout |
+| **Wholesale / B2B buyer** | Tiered price lists, MOQs, credit terms, GST B2B invoices, quote requests |
+| **Staff** | Order management, refunds, inventory — scoped by permission |
+| **Warehouse / ops** | Pick lists, dispatch, stock counts, nothing financial |
+
+Built on the same pattern as your own admin/portal split: role in the
+database, enforced server-side, never in the client. A wholesale buyer
+literally cannot see retail pricing, and a warehouse login literally cannot
+see revenue.
+
+**B2B / wholesale portal**
+- Customer-specific price lists and discount tiers
+- Minimum order quantities and case packs
+- Quote request → approval → order flow
+- Credit terms, payment-on-account, statement of account
+- Reorder from order history
+
+**Multi-channel**
+- Amazon + Flipkart catalog, A+ content, listing optimisation
+- Quick commerce listing prep (Blinkit, Zepto, Instamart) ⚠️ *onboarding is
+  relationship-gated — we prepare, we don't guarantee approval*
+- ONDC via a seller app
+- Inventory sync across every channel (Unicommerce / EasyEcom)
+- Channel-level margin model, because marketplace fees change what's worth
+  selling
+
+**Subscriptions**
+- Plans, customer portal (skip/swap/pause), dunning
+- **RBI e-mandate handling** — UPI Autopay and card mandates with pre-debit
+  notification. This is why Indian subscription commerce is harder than the
+  US playbook implies.
+
+**Multi-market**
+- Multi-currency (INR / AED / USD / GBP), market-specific pricing
+- Market-specific tax and shipping rules
+- Multi-language storefront
+
+**Back-office**
+- ERP / OMS integration (Zoho, Unicommerce, or their existing system)
+- Multi-warehouse inventory and routing
+- Loyalty programme with tiers and store credit
+- **Store credit instead of cash refunds** — keeps the cash in the business
+
+**The AI layer** *(this is the differentiator — nobody in this price band
+in Hyderabad is shipping it)*
+- **Support agent** over their catalog, policies and live order status. It
+  answers "where is my order", "do you deliver to 500081", "what's your
+  return policy" — which is 70–80% of a D2C support inbox — and hands to a
+  human when it shouldn't answer.
+- **Catalog copy generation** at scale, human-edited, from product attributes
+- **Review summarisation** on product pages
+- **Merchandising assistant** — what to promote, what's dying, what to bundle,
+  from their own sales data
+
+**Custom ops console**
+- Their own dashboard, not the platform's admin
+- The metrics that matter to *this* business, including contribution margin
+  after COGS, shipping and RTO — not ROAS
+- Built on the same stack as this CRM
+
+**Reliability**
+- Performance budget enforced in CI, not checked once at launch
+- Error tracking and uptime monitoring
+- Sale-event readiness and on-call cover (BFCM, festive, brand day)
+- 90-day warranty
+
+### Timeline
+
+**12–14 weeks.** Phased: store live at week 8, B2B and channels at week 12,
+AI layer last. The client is trading before the whole thing is finished —
+never hold a launch for a feature.
+
+### Payment terms
+
+Over ₹8 L: **40 / 30 / 30** against milestones, not 50/50.
+
+---
+
+## Choosing between them — the questions that actually decide it
+
+Ask these four in discovery and the tier picks itself:
+
+1. **"How do your customers order today?"** — If the honest answer is
+   Instagram DMs and phone calls, that's Tier 1, whatever they think they want.
+2. **"What are you going to spend on ads next quarter?"** — Over ₹2 L/month
+   means Tier 2 minimum. Ads into a Tier 1 setup is money on fire.
+3. **"Does anyone buy from you at a different price?"** — Any yes (wholesale,
+   distributor, corporate, bulk) is Tier 3. That's the multi-login trigger.
+4. **"Where else do you sell?"** — Marketplaces, quick commerce or export
+   means Tier 3.
+
+**Don't upsell.** Selling Tier 3 to a Tier 1 business produces a client who
+resents the invoice and never refers anyone. Selling Tier 1 to a Tier 2
+business produces an upgrade in nine months and a reference.
+
+## Upgrade path
+
+The tiers are built to stack, not to be rebuilt:
+
+- **Chat Store → Growth Store**: WhatsApp flows, catalog and payment account
+  carry over. Upgrade credit of ₹75 K (half the Tier 1 fee) against the Tier 2
+  invoice, if within 18 months. ⚠️ *Your call on the credit — it costs margin
+  but makes Tier 1 a much easier yes.*
+- **Growth Store → Commerce Platform**: additive, no rebuild. Quote the delta,
+  currently ~₹6 L.
+
+## What every tier includes
+
+- Mint workshop, fixed scope after it
+- Client owns the store, the repo, and every account from day one
+- Daily Loom for the first 10 days; Friday demo 4 PM IST
+- 2 review rounds; 3rd+ at ₹15 K/round
+- Handover training, recorded
+- All prices GST extra
+
+---
+
+---
+
+# Everything below: add-ons and standalone engagements
+
+§B–§K are **not** things to quote alongside the three tiers in a first
+proposal — most are already inside Tier 2 or Tier 3. Use them for:
+
+- a brand that already has a store and wants one thing fixed
+- scope beyond a tier (subscriptions on a Tier 2, say)
+- retainers after a build
+
+Where a module is included in a tier, it's marked.
 
 ---
 
 # B. Replatform & Migration — `From ₹3.5 L`
+
+*Standalone. A replatform is a move, not a build — quote it instead of a tier,
+or alongside Tier 2 when they want a move and a redesign.*
 
 ## What it is
 
@@ -164,6 +436,8 @@ season — that's a hard rule, not a preference.
 
 # C. Catalog & Merchandising Architecture — `From ₹75 K`
 
+*Included in Tier 2 (300 SKUs) and Tier 3 (unlimited). Standalone only.*
+
 ## What it is
 
 How the products are modelled. Sold standalone to brands whose store works but
@@ -199,6 +473,8 @@ Unglamorous, and it's usually where the conversion is hiding.
 ---
 
 # D. Checkout, Payments & Tax — `From ₹1 L`
+
+*Included in Tier 2 and Tier 3. Standalone as a rescue for an existing store.*
 
 ## What it is
 
@@ -251,6 +527,8 @@ build or standalone as a rescue.
 
 # E. Logistics & Post-Purchase — `From ₹1 L`
 
+*Included in Tier 2 and Tier 3. Standalone for an existing store.*
+
 ## What it is
 
 Everything after "order placed." Brands underinvest here and then wonder why
@@ -279,6 +557,8 @@ their support inbox is 80% "where is my order."
 ---
 
 # F. Subscriptions & Retention — `From ₹2 L`
+
+*Included in Tier 3. Add-on to Tier 2 at ₹2 L.*
 
 ## What it is
 
@@ -309,6 +589,8 @@ supplements, personal care. Half our D2C inbound is one of those.
 ---
 
 # G. Headless & Custom Commerce — `From ₹10 L`
+
+*Above Tier 3. Only when a themed platform is genuinely the constraint.*
 
 ## What it is
 
@@ -354,6 +636,8 @@ theme architecture solves it, recommend that and take the smaller fee.
 
 # H. Conversion Rate Optimisation — `From ₹1 L/mo`
 
+*Retainer. Sell after a Tier 2 or Tier 3 build has traffic.*
+
 ## What it is
 
 A retainer that makes an existing store convert better. Research, hypotheses,
@@ -388,6 +672,8 @@ Minimum 3-month commitment; realistically 6 before the compounding shows.
 
 # I. D2C Growth Retainer — `From ₹1.75 L/mo`
 
+*Retainer. The natural second sale after any tier.*
+
 ## What it is
 
 Performance Media (§D in `03-SERVICE-CATALOG.md`), specialised for commerce.
@@ -418,6 +704,8 @@ Ad spend not included; client pays platforms direct. Minimum 3 months.
 
 # J. Marketplace & Channel Expansion — `From ₹1.5 L`
 
+*Included in Tier 3. Add-on to Tier 2 from ₹1.5 L.*
+
 ## What it is
 
 Selling everywhere the customer already is. Usually the second conversation
@@ -446,6 +734,8 @@ after the storefront is live.
 ---
 
 # K. Commerce Care Plan — `From ₹40 K/mo`
+
+*Every tier has a Care price. This section is the detail behind it.*
 
 ## What it is
 
@@ -518,20 +808,24 @@ the Mint workshop.
 
 # Bundles
 
-Standard 10% bundle discount applies to the smaller line item when 2+ services
-are in one SOW (per `03-SERVICE-CATALOG.md`). Don't exceed 10%.
+The three tiers already *are* the bundle — that's the point of them. Don't
+rebuild à-la-carte packages alongside; it reintroduces the haggling the tier
+structure exists to prevent.
 
-| Bundle | Contents | Indicative |
+The only combinations worth quoting:
+
+| Combination | Contents | Indicative |
 |---|---|---|
-| **Launch Kit** | Storefront (Launch) + Brand Mark + Checkout | ₹2.5 L + ₹1.5 L + ₹1 L → **₹4.75 L** |
-| **Growth Kit** | Storefront (Growth) + Catalog (Model) + Checkout+ | ₹4.5 L + ₹75 K + ₹1.75 L → **₹6.75 L** |
-| **Scale Kit** | Replatform (Lift+) + Catalog (Model+) + Subscriptions | ₹6 L + ₹1.75 L + ₹2 L → **₹9.4 L** |
-| **Always-on** | Care+ + CRO (Optimise) + Growth (Scale) | ₹75 K + ₹1 L + ₹1.75 L/mo → **₹3.4 L/mo** |
+| **Store + Brand** | Growth Store + Brand System (`03-SERVICE-CATALOG.md` §C) | ₹6 L + ₹3 L → **₹8.7 L** |
+| **Store + Move** | Replatform (Lift+) + Growth Store | ₹6 L + ₹6 L → **₹11.4 L** |
+| **Always-on** | Care+ + CRO (Optimise) + Growth retainer (Scale) | ₹75 K + ₹1 L + ₹1.75 L/mo → **₹3.4 L/mo** |
 
-Every storefront proposal should carry the Care Plan as a line item, not a
-footnote.
+Standard 10% bundle discount on the smaller line item when 2+ services are in
+one SOW. Don't exceed 10%.
 
----
+**Every tier proposal carries its Care line as a line item, not a footnote.**
+It's the highest-margin thing here and it's what turns a project into a
+relationship.
 
 # Add-ons
 
