@@ -24,7 +24,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=clean5" />
+    <link rel="stylesheet" href="/styles.css?v=clean6" />
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
     <script>
@@ -145,6 +145,24 @@
         </div>
       </section>
 
+      <!-- FREE WITH SIGN-IN + COMING SOON -->
+      <section class="section section--free" id="free">
+        <div class="free" data-reveal>
+          <div class="free-col">
+            <p class="kicker">Free, once you sign in</p>
+            <h2>Sign in and we'll do <em>these</em> for you.</h2>
+            <ul class="free-list" id="free-list"><!-- rendered from /shared/resources.js --></ul>
+            <p class="free-note">Ask on WhatsApp from your portal and we do it. No tier needed, nothing to pay.</p>
+            <a class="btn btn-primary" href="/login">Sign in with Google</a>
+          </div>
+          <div class="free-col free-col--soon">
+            <p class="kicker">Launching next</p>
+            <div class="soon" id="soon-list"><!-- rendered from /shared/resources.js --></div>
+            <p class="free-note">Pre-book a free trial from your portal.</p>
+          </div>
+        </div>
+      </section>
+
       <!-- FAQ -->
       <section class="section section--faq" id="faq">
         <header class="section-head" data-reveal>
@@ -191,6 +209,7 @@
     <script>document.documentElement.classList.add("js");</script>
     <script type="module">
       import { TIERS, STEPS, CARE_PLANS, FAQ, inr } from "/shared/tiers.js?v=clean5";
+      import { PERKS, PRODUCTS } from "/shared/resources.js?v=1";
 
       // ---- tier cards
       const host = document.getElementById("tiers");
@@ -257,6 +276,26 @@
         li.querySelector("p").textContent = s.body;
         steps.appendChild(li);
       });
+
+      // ---- free perks + coming soon
+      const freeList = document.getElementById("free-list");
+      for (const pk of PERKS) {
+        const li = document.createElement("li");
+        li.innerHTML = "<strong></strong><span></span>";
+        li.querySelector("strong").textContent = pk.title;
+        li.querySelector("span").textContent = pk.summary;
+        freeList.appendChild(li);
+      }
+      const soon = document.getElementById("soon-list");
+      for (const pr of PRODUCTS) {
+        const el = document.createElement("article");
+        el.className = "soon-item";
+        el.innerHTML = "<span class=\"soon-tag\"></span><h3></h3><p></p>";
+        el.querySelector(".soon-tag").textContent = pr.status;
+        el.querySelector("h3").textContent = pr.name;
+        el.querySelector("p").textContent = pr.summary;
+        soon.appendChild(el);
+      }
 
       // ---- faq
       const faq = document.getElementById("faq-list");

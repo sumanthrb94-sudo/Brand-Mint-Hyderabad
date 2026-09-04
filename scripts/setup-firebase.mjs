@@ -257,6 +257,13 @@ console.log(`Brand Mint · Firebase setup · project ${PID}${DRY ? " · DRY RUN"
 try {
   TOKEN = await accessToken();
   ok(`authenticated as ${sa.client_email}`);
+  if (args.only === "rules") {
+    // `--only rules`: republish firestore.rules and stop. Used after any
+    // rules change; every other step is left untouched.
+    await stepRules();
+    console.log("\nRules published. Nothing else was changed.");
+    process.exit(0);
+  }
   const cfg = await stepWebApp();
   await stepFirestore();
   await stepRules();

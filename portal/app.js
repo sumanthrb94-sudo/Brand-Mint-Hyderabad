@@ -15,9 +15,12 @@ import {
   postMessage,
   markThreadRead,
   watch,
+  sendRequest,
+  myRequests,
 } from "/portal/data.js";
 import { renderWizard, briefSummaryCard } from "/portal/wizard.js";
 import { TIERS, TIER_BY_ID, STEPS, CARE_PLANS, NEEDS, FAQ, inclusionsFor } from "/shared/tiers.js";
+import { PERKS, LESSONS, COMPLIANCE, COMPLIANCE_NOTE, PRODUCTS, WHATSAPP_DISPLAY, waLink } from "/shared/resources.js";
 import {
   h,
   mount,
@@ -106,6 +109,7 @@ const TABS = [
   { id: "files", label: "Files & approvals" },
   { id: "invoices", label: "Invoices" },
   { id: "messages", label: "Messages" },
+  { id: "resources", label: "Free resources" },
 ];
 
 function paintTabs() {
@@ -161,6 +165,7 @@ function paint() {
   if (activeTab === "files") return renderFiles();
   if (activeTab === "invoices") return renderInvoices();
   if (activeTab === "messages") return renderMessages();
+  if (activeTab === "resources") return renderResources();
 }
 
 /* ------------------------------------------------------------- lead state */
@@ -228,12 +233,132 @@ function renderLeadState() {
     hero,
     tier ? inclusionsCard(tier) : null,
     tier ? alternativesCard(tier) : allTiersCard(),
+    perksCard(),
     needsCard(),
     stepsCard(1),
+    lessonsCard(),
+    complianceCard(),
     careCard(),
+    productsCard(),
     faqCard()
   );
+  loadMyRequests();
   window.scrollTo(0, 0);
+}
+
+/* ------------------------------------------------- free resources (all states) */
+
+/** Members get the same perks, lessons, compliance and pre-booking on a tab. */
+function renderResources() {
+  mount(
+    view,
+    h("div", { class: "p-hero p-hero--slim" }, [
+      h("p", { class: "p-mono p-hero-kicker", text: "Free, because you signed in" }),
+      h("h1", { text: "Things we'll do for you, and things worth knowing." }),
+      h("p", { text: `Ask for any of these on WhatsApp (${WHATSAPP_DISPLAY}) and we do it — no charge, no tier required.` }),
+    ]),
+    perksCard(),
+    productsCard(),
+    lessonsCard(),
+    complianceCard()
+  );
+  loadMyRequests();
+}
+
+/** ids of things already requested, so buttons can show it. */
+let requested = new Set();
+async function loadMyRequests() {
+  try {
+    const rows = await myRequests();
+    requested = new Set(rows.map((r) => `${r.kind}:${r.item}`));
+    for (const el of view.querySelectorAll("[data-req]")) markRequested(el);
+  } catch (e) {
+    console.warn("[portal] requests", e);
+  }
+}
+function markRequested(el) {
+  const key = el.getAttribute("data-req");
+  if (!requested.has(key)) return;
+  el.classList.add("is-requested");
+  const kind = key.split(":")[0];
+  el.textContent = kind === "prebook" ? "Pre-booked ✓" : "Asked ✓ — check WhatsApp";
+  if (kind === "prebook") el.disabled = true;
+}
+
+async function record(kind, item, label, btn) {
+  const key = `${kind}:${item}`;
+  if (requested.has(key)) return true;
+  try {
+    await sendRequest({ kind, item, label });
+    requested.add(key);
+    if (btn) markRequested(btn);
+    return true;
+  } catch (e) {
+    console.error("[portal] request", e);
+    toast("Couldn't save that — but WhatsApp still works.");
+    return false;
+  }
+}
+
+function perksCard() {
+  return card("Free for you, right now", `Ask on WhatsApp ${WHATSAPP_DISPLAY} and we do it. No tier needed, nothing to pay.`,
+    h("div", { class: "p-perks" }, PERKS.map((pk) => {
+      const msg = `Hi Brand Mint — ${pk.ask} (signed in as ${profile.email})`;
+      const link = h("a", {
+        class: "p-btn p-btn-sm p-btn-primary", href: waLink(msg), target: "_blank", rel: "noopener",
+        "data-req": `perk:${pk.id}`, text: "Ask on WhatsApp",
+      });
+      // Record the ask, then let the link open WhatsApp as normal.
+      link.addEventListener("click", () => { record("perk", pk.id, pk.title, link); });
+      return h("article", { class: "p-perk" }, [
+        h("h3", { text: pk.title }),
+        h("p", { class: "p-perk-summary", text: pk.summary }),
+        h("p", { class: "p-muted", text: pk.detail }),
+        link,
+      ]);
+    })));
+}
+
+function lessonsCard() {
+  return card("Running a store in India", "The six things that surprise first-time store owners. Five minutes each.",
+    h("div", { class: "p-lessons" }, LESSONS.map((l) =>
+      h("details", { class: "p-lesson" }, [
+        h("summary", {}, [h("span", { class: "p-tag", text: l.tag }), h("span", { text: l.title })]),
+        h("p", { text: l.body }),
+      ])
+    )));
+}
+
+function complianceCard() {
+  return card("Compliance checklist for an Indian online store", COMPLIANCE_NOTE,
+    h("div", { class: "p-lessons" }, COMPLIANCE.map((c, i) =>
+      h("details", { class: "p-lesson", open: i === 0 }, [
+        h("summary", {}, [h("span", { class: "p-tag p-tag-num p-mono", text: String(i + 1).padStart(2, "0") }), h("span", { text: c.title })]),
+        h("p", { text: c.body }),
+        h("p", { class: "p-built" }, [h("strong", { text: "What we build in: " }), c.built]),
+      ])
+    )));
+}
+
+function productsCard() {
+  return card("Launching next from Brand Mint", "Pre-book a free trial. We'll message you on WhatsApp when it opens — nothing to pay.",
+    h("div", { class: "p-products" }, PRODUCTS.map((pr) => {
+      const btn = h("button", { class: "p-btn p-btn-sm p-btn-primary", type: "button", "data-req": `prebook:${pr.id}`, text: "Pre-book free trial" });
+      btn.addEventListener("click", async () => {
+        btn.disabled = true; btn.textContent = "Saving…";
+        const ok = await record("prebook", pr.id, `${pr.name} — free trial`, btn);
+        if (ok) toast(`You're on the list for ${pr.name}.`);
+        else { btn.disabled = false; btn.textContent = "Pre-book free trial"; }
+      });
+      markRequested(btn);
+      return h("article", { class: "p-product" }, [
+        h("span", { class: "p-tag", text: pr.status }),
+        h("h3", { text: pr.name }),
+        h("p", { class: "p-muted", text: pr.summary }),
+        h("p", { class: "p-product-trial", text: pr.trial }),
+        btn,
+      ]);
+    })));
 }
 
 function stat(value, label) {

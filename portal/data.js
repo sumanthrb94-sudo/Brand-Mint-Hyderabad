@@ -199,3 +199,34 @@ export async function watch(onChange) {
     }
   };
 }
+
+
+/* ----------------------------------------------------- perks + pre-booking */
+
+/** Ask for a free perk or pre-book a trial. Lands in Admin → Leads. */
+export async function sendRequest({ kind, item, label }) {
+  const fb = await getFirebase();
+  const { collection, addDoc } = fb.sdk;
+  const profile = await getProfile();
+  const now = new Date().toISOString();
+  await addDoc(collection(fb.db, "requests"), {
+    uid: profile.id,
+    name: profile.fullName || "",
+    email: profile.email || "",
+    kind,
+    item,
+    label,
+    status: "new",
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
+/** The caller's own requests, so the portal can show what's already asked for. */
+export async function myRequests() {
+  const fb = await getFirebase();
+  const { collection, query, where, getDocs } = fb.sdk;
+  const profile = await getProfile();
+  const snap = await getDocs(query(collection(fb.db, "requests"), where("uid", "==", profile.id)));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}

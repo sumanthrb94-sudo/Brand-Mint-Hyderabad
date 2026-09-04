@@ -35,6 +35,8 @@ const COLLECTIONS = [
   "milestones",
   "deliverables",
   "messages",
+  // Free perks + pre-bookings from the portal
+  "requests",
 ];
 
 // The singleton settings document lives at settings/singleton.
@@ -71,6 +73,7 @@ const cache = {
   milestones: [],
   deliverables: [],
   messages: [],
+  requests: [],
   settings: null,
 };
 

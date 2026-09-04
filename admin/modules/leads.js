@@ -5,19 +5,7 @@
  * Statuses: new → qualified → won / lost.
  */
 
-import {
-  h,
-  kpi,
-  table,
-  pill,
-  modal,
-  confirm,
-  field,
-  formToObject,
-  bindSubmit,
-  renderTopbar,
-  relTime,
-} from "/admin/components.js";
+import { h, kpi, table, pill, modal, confirm, field, formToObject, bindSubmit, renderTopbar, relTime } from "/admin/components.js";
 import { TIER_BY_ID, inr as inrTier } from "/shared/tiers.js";
 
 const STATUSES = ["new", "qualified", "won", "lost"];
@@ -232,6 +220,50 @@ export async function render(ctx) {
     }
 
     renderTable();
+    root.appendChild(requestsPanel());
+  }
+
+  /* Free perks and pre-bookings people asked for from the portal. Each one
+     is a WhatsApp follow-up; mark it done once you've sent it. */
+  function requestsPanel() {
+    const rows = db.list("requests").slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    const open = rows.filter((r) => r.status !== "done").length;
+    return h("section", { class: "card", style: "margin-top:24px" }, [
+      h("div", { class: "card-head" }, [
+        h("h3", { text: "Requests from the portal" }),
+        h("span", { class: "muted", text: open ? `${open} to send` : "All sent" }),
+      ]),
+      table({
+        columns: [
+          {
+            label: "Person",
+            cell: (r) => h("div", {}, [
+              h("div", { class: "strong", text: r.name || r.email || "—" }),
+              h("div", { class: "sub", text: r.email || "" }),
+            ]),
+          },
+          {
+            label: "Asked for",
+            cell: (r) => h("div", {}, [
+              h("div", { class: "strong", text: r.label || r.item }),
+              h("div", { class: "sub", text: r.kind === "prebook" ? "Pre-booked a free trial" : "Free perk — send on WhatsApp" }),
+            ]),
+          },
+          { label: "When", cell: (r) => relTime(r.createdAt) },
+          { label: "Status", cell: (r) => pill(r.status === "done" ? "done" : "new") },
+          {
+            label: "",
+            cell: (r) => h("button", {
+              class: "btn btn-sm",
+              text: r.status === "done" ? "Reopen" : "Mark sent",
+              onclick: (e) => { e.stopPropagation(); db.update("requests", r.id, { status: r.status === "done" ? "new" : "done" }); },
+            }),
+          },
+        ],
+        rows,
+        empty: { title: "No requests yet", body: "When someone asks for a free audit, checklist or a trial from their portal, it shows up here." },
+      }),
+    ]);
   }
 
   /**

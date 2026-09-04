@@ -238,6 +238,28 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    match /requests/{id} {
+      // A signed-in person asking for a free perk or pre-booking a trial.
+      // uid is pinned to the caller; the shape is pinned so this can't be
+      // used as free storage. The studio works these from Admin → Leads.
+      allow create: if signedIn()
+                    && request.resource.data.uid == uid()
+                    && request.resource.data.keys().hasOnly([
+                         'uid', 'name', 'email', 'kind', 'item', 'label',
+                         'status', 'createdAt', 'updatedAt'
+                       ])
+                    && request.resource.data.kind in ['perk', 'prebook']
+                    && request.resource.data.item is string
+                    && request.resource.data.item.size() <= 64
+                    && request.resource.data.label is string
+                    && request.resource.data.label.size() <= 120
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() <= 320
+                    && request.resource.data.status == 'new';
+      allow get, list: if isAdmin() || (signedIn() && resource.data.uid == uid());
+      allow update, delete: if isAdmin();
+    }
+
     /* --------------------------- content, settings ------------------------ */
     // Admin only. Settings carries bank details and GSTIN.
 

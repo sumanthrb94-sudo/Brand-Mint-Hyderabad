@@ -91,6 +91,15 @@ export async function render(ctx) {
   /* ---- Needs you: anything a client is currently waiting on ---- */
   const actions = [];
 
+  const requests = db.list("requests", (r) => r.status !== "done");
+  if (requests.length) {
+    actions.push({
+      text: `${requests.length} free-perk / trial request${requests.length > 1 ? "s" : ""} to send on WhatsApp`,
+      cta: "Open requests",
+      route: "/leads",
+    });
+  }
+
   const signups = db.list("leads", (l) => l.status === "new" && l.uid);
   if (signups.length) {
     actions.push({

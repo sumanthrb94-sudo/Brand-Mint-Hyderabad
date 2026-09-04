@@ -37,6 +37,7 @@ There is no contact form and no invite email. Sign-in **is** the form. Consent t
 | `admin.html` + `admin/` | Studio side. Hash router in `admin/app.js`; modules: dashboard, leads, onboarding, clients, delivery, pipeline, invoices, settings |
 | `admin/db.js` | Sync in-memory cache fed by one `onSnapshot` per collection; writes are fire-and-forget. Add new collections to `COLLECTIONS` and `cache` |
 | `shared/brief.js` | The onboarding questionnaire (portal renders it, admin reads it) |
+| `shared/resources.js` | Free perks (asked for on WhatsApp), `LESSONS`, `COMPLIANCE`, upcoming `PRODUCTS` (Modcon HR, Real Estate CRM). Portal renders them in every signed-in state; requests land in the `requests` collection and show in Admin → Leads |
 | `marketing/video/` | The video production kit — prompts, VO scripts, logo refs. Assets, not code. Keep. |
 | `brand-kit/` | Logo SVGs and brand guidelines (palette, type) |
 | `privacy.html`, `terms.html`, `404.html` | Legal pages the sign-in consent links to |
@@ -57,5 +58,6 @@ No tests, no linter. Verify changes by driving pages headlessly with the globall
 - **`clientUsers` doc id is `{uid}_{clientId}`** and **`invites` id is `{email}_{clientId}`** — rules check membership with a single `exists()` on those paths.
 - `clients.tier` is the old customer-value tier ("Tier 1/2/3"). The store tier is **`clients.storeTier`** / `projects.storeTier` / `leads.tier`. Don't conflate them.
 - The role lives in `profiles/{uid}.role`, never in a claim or anything the client writes. Rules pin new profiles to `client`; the first admin is set in the Firebase console.
+- After editing `firestore.rules`, republish with `node scripts/setup-firebase.mjs --only rules --key <service-account.json>`.
 - Demo data is **not** seeded on boot. `bm.seed()` in the admin console if you want the sample set.
 - The profile hint in localStorage (`bm.auth.profile.v1`) is a first-paint display hint only. Forging it shows a nav link and an empty dashboard.
