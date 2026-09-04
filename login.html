@@ -72,6 +72,39 @@
       .status.info { background: #f2f5f1; color: var(--ink-2); border: 1px solid var(--line); }
       .status[hidden] { display: none; }
 
+      /* ---- signing-in state: replaces the form while Google + Firestore work */
+      .card[data-state="signing"] .form { display: none; }
+      .signing { display: none; text-align: center; padding: 8px 0 4px; }
+      .card[data-state="signing"] .signing { display: block; }
+      .signing-mark { position: relative; width: 84px; height: 84px; margin: 6px auto 18px; }
+      .signing-mark .bm-mark { width: 84px; height: 84px; display: block; position: relative; z-index: 1; }
+      .signing-mark::before, .signing-mark::after {
+        content: ""; position: absolute; inset: -6px; border-radius: 50%;
+        border: 1.5px solid rgba(16,185,129,.45); animation: ripple 1.8s cubic-bezier(.2,.7,.2,1) infinite;
+      }
+      .signing-mark::after { animation-delay: .9s; }
+      @keyframes ripple { from { transform: scale(.9); opacity: .9; } to { transform: scale(1.5); opacity: 0; } }
+      .signing .bm-mark-m { stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw 1.6s cubic-bezier(.2,.7,.2,1) infinite; }
+      @keyframes draw { 0% { stroke-dashoffset: 100; } 55% { stroke-dashoffset: 0; } 85% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+      .signing h1 { font-size: 24px; }
+      .signing p.sub { margin-bottom: 18px; }
+      .stages { list-style: none; margin: 0 auto; padding: 0; max-width: 300px; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+      .stages li { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--faint); transition: color .2s; }
+      .stages li i { flex: none; width: 18px; height: 18px; border-radius: 50%; border: 1.6px solid var(--line); display: grid; place-items: center; transition: background-color .2s, border-color .2s; }
+      .stages li.active { color: var(--ink); }
+      .stages li.active i { border-color: var(--mint-deep); }
+      .stages li.active i::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--mint); animation: blink 1s ease-in-out infinite; }
+      @keyframes blink { 50% { opacity: .25; } }
+      .stages li.done { color: var(--ink-2); }
+      .stages li.done i { background: var(--mint-deep); border-color: var(--mint-deep); }
+      .stages li.done i::after { content: ""; width: 8px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: translateY(-1px) rotate(-45deg); }
+      .signing .cancel { display: inline-block; margin-top: 20px; font-size: 13px; color: var(--muted); background: none; border: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+      .signing .cancel[hidden] { display: none; }
+      @media (prefers-reduced-motion: reduce) {
+        .signing-mark::before, .signing-mark::after, .stages li.active i::after { animation: none; }
+        .signing .bm-mark-m { animation: none; stroke-dashoffset: 0; }
+      }
+
       .foot { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--faint); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
       .foot a { color: var(--muted); text-underline-offset: 3px; }
     </style>
@@ -80,6 +113,7 @@
     <main class="card">
       <div class="mark"><svg class="bm-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true" focusable="false"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="bm-mark-m" pathLength="100" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg> Brand Mint</div>
 
+      <div class="form">
       <h1 id="title">Continue with Google</h1>
       <p class="sub" id="subtitle">
         That's the whole sign-up. We get your email, you get a portal, and we
@@ -115,6 +149,19 @@
         <input type="checkbox" id="newsletter" checked />
         <span>Send me occasional notes on running an online store in India. No spam, unsubscribe any time.</span>
       </label>
+      </div>
+
+      <div class="signing" id="signing" role="status" aria-live="polite">
+        <div class="signing-mark"><svg class="bm-mark" viewBox="0 0 64 64" width="84" height="84" aria-hidden="true" focusable="false"><defs><linearGradient id="bmg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bmg2)"/><path class="bm-mark-m" pathLength="100" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+        <h1 id="signing-title">Signing you in</h1>
+        <p class="sub" id="signing-sub">A Google window opens next. Pick the account you want on your portal.</p>
+        <ol class="stages" id="stages">
+          <li><i></i><span>Talking to Google</span></li>
+          <li><i></i><span>Setting up your portal</span></li>
+          <li><i></i><span>Taking you in</span></li>
+        </ol>
+        <button class="cancel" id="cancel" type="button">Cancel</button>
+      </div>
 
       <div class="foot">
         <span>Brand Mint · Hyderabad</span>
@@ -141,6 +188,25 @@
       const statusEl = document.getElementById("status");
       const googleBtn = document.getElementById("google");
       const newsletter = document.getElementById("newsletter");
+
+      const cardEl = document.querySelector(".card");
+      const stagesEl = document.getElementById("stages");
+      const cancelBtn = document.getElementById("cancel");
+      const STAGE_COPY = [
+        ["Signing you in", "A Google window opens next. Pick the account you want on your portal."],
+        ["Almost in", "Saving your choice and building your portal."],
+        ["You're in", "Taking you to your portal."],
+      ];
+      function stage(n) {
+        if (n == null) { cardEl.removeAttribute("data-state"); return; }
+        cardEl.setAttribute("data-state", "signing");
+        [...stagesEl.children].forEach((li, i) => { li.classList.toggle("done", i < n); li.classList.toggle("active", i === n); });
+        document.getElementById("signing-title").textContent = STAGE_COPY[n][0];
+        document.getElementById("signing-sub").textContent = STAGE_COPY[n][1];
+        cancelBtn.hidden = n !== 0;
+      }
+      let cancelled = false;
+      cancelBtn.addEventListener("click", () => { cancelled = true; stage(null); googleBtn.disabled = false; say("Sign-in cancelled.", "info"); });
 
       function say(msg, kind = "info") {
         statusEl.textContent = msg;
@@ -175,24 +241,30 @@
       (async () => {
         cleanAuthParamsFromUrl();
         if (!peekSession()) return;
-        document.getElementById("subtitle").textContent = "Checking your session…";
+        stage(1);
         try {
           const profile = await getProfile({ force: true });
-          if (!profile) return;
+          if (!profile) { stage(null); return; }
           // A signed-in visitor picking a new tier still gets it recorded.
           if (tier) await recordSignup({ tier: tier.id, newsletter: newsletter.checked });
+          stage(2);
           location.replace(next && next.startsWith("/") ? next : homeFor(profile));
         } catch (e) {
           console.error("[login] session check", e);
+          stage(null);
         }
       })();
 
       googleBtn.addEventListener("click", async () => {
         googleBtn.disabled = true;
+        cancelled = false;
+        statusEl.hidden = true;
         track("signin_start", { tier: tier?.id || null });
-        say("Opening Google…", "info");
+        stage(0);
         try {
           await signInWithGoogle(next && next.startsWith("/") ? next : "/portal");
+          if (cancelled) return;
+          stage(1);
           const profile = await getProfile({ force: true });
           if (!profile) throw new Error("Signed in, but we couldn't load your profile.");
 
@@ -201,8 +273,12 @@
           await recordSignup({ tier: tier?.id || null, newsletter: newsletter.checked });
           track("signin_success", { tier: tier?.id || null, newsletter: newsletter.checked });
 
+          stage(2);
+          await new Promise((r) => setTimeout(r, 450)); // let "You're in" land
           location.replace(next && next.startsWith("/") ? next : homeFor(profile));
         } catch (e) {
+          if (cancelled) return;
+          stage(null);
           googleBtn.disabled = false;
           if (e?.code === "auth/popup-closed-by-user") return say("Sign-in cancelled.", "info");
           say(
