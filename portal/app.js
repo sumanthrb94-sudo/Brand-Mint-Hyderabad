@@ -349,7 +349,7 @@ function quizResult(r, repaint) {
   const ring = h("svg", { class: "p-ring", viewBox: "0 0 120 120", width: "120", height: "120", role: "img", "aria-label": `${r.score} out of 100` }, [
     h("circle", { cx: "60", cy: "60", r: "52", class: "p-ring-track" }),
     h("circle", { cx: "60", cy: "60", r: "52", class: "p-ring-fill", style: `stroke-dasharray:${circ};stroke-dashoffset:${circ * (1 - r.score / 100)}` }),
-    h("text", { x: "60", y: "58", class: "p-ring-num", "text-anchor": "middle", dominantBaseline: "central", text: String(r.score) }),
+    h("text", { x: "60", y: "58", class: "p-ring-num", "text-anchor": "middle", "dominant-baseline": "central", text: String(r.score) }),
     h("text", { x: "60", y: "80", class: "p-ring-sub", "text-anchor": "middle", text: "/ 100" }),
   ]);
   const chooseBtn = fit && !isCurrent

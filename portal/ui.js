@@ -11,7 +11,7 @@
  */
 
 const SVG_NS = "http://www.w3.org/2000/svg";
-const SVG_TAGS = /^(svg|path|circle|rect|g|line|polyline|polygon|ellipse)$/i;
+const SVG_TAGS = /^(svg|path|circle|rect|g|line|polyline|polygon|ellipse|text|tspan|defs|linearGradient|stop)$/i;
 
 export function h(tag, attrs = {}, children = []) {
   const el = SVG_TAGS.test(tag)
