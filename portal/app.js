@@ -23,7 +23,8 @@ import {
 import { renderWizard, briefSummaryCard } from "/portal/wizard.js";
 import { TIERS, TIER_BY_ID, STEPS, CARE_PLANS, NEEDS, FAQ, inclusionsFor } from "/shared/tiers.js";
 import { PERKS, LESSONS, COMPLIANCE, COMPLIANCE_NOTE, PRODUCTS, WHATSAPP_DISPLAY, waLink } from "/shared/resources.js";
-import { PLATFORM, PLATFORM_INCLUDES, PLATFORM_STEPS } from "/shared/platform.js";
+import { PLATFORM, PLATFORM_INCLUDES } from "/shared/platform.js";
+import { SERVICE_BY_ID } from "/shared/services.js";
 import { QUIZ, scoreQuiz, scoreLabel } from "/shared/quiz.js";
 import {
   h,
@@ -215,21 +216,24 @@ function renderLeadState() {
   tabsEl.innerHTML = "";
   document.getElementById("client-name").textContent = "Your request";
   const first = (profile.fullName || "").split(/\s+/)[0] || "there";
-  const onPlatform = profile.selectedTier === PLATFORM.id;
   const tier = profile.selectedTier ? TIER_BY_ID[profile.selectedTier] : null;
+  // A service category that isn't one of the four store tiers — Static
+  // Website, Site + CRM, Custom CRM or Modcon HR.
+  const svc = !tier && profile.selectedTier ? SERVICE_BY_ID[profile.selectedTier] : null;
+  const onPlatform = !!svc;
 
   const hero = h("div", { class: "p-hero" }, [
-    h("p", { class: "p-mono p-hero-kicker", text: onPlatform ? PLATFORM.name : tier ? `Tier ${tier.tier} · ${tier.name}` : "Signed in" }),
+    h("p", { class: "p-mono p-hero-kicker", text: svc ? svc.name : tier ? `Tier ${tier.tier} · ${tier.name}` : "Signed in" }),
     h("h1", { text: tier || onPlatform ? `Thanks, ${first} — we'll call you within one working day.` : `Welcome, ${first}. Pick the store that fits.` }),
-    h("p", { text: onPlatform
-      ? "Below is everything Site + CRM includes and what happens next. Nothing is due until the agreement is signed."
+    h("p", { text: svc
+      ? `Below is everything ${svc.name} includes and what happens next. Nothing is due until the agreement is signed.`
       : tier
       ? "Below is everything your store includes, what we'll need from you, and what happens next. Nothing is due until the agreement is signed."
       : "Everything we build is below, in detail. Choose one and we'll call you within one working day to confirm the scope." }),
-    onPlatform ? h("div", { class: "p-hero-stats" }, [
-      stat(inr(PLATFORM.setup), "setup, GST extra"),
-      stat(inr(PLATFORM.monthly) + "/mo", "GST extra"),
-      stat(PLATFORM.weeks, "to live"),
+    svc ? h("div", { class: "p-hero-stats" }, [
+      stat(inr(svc.from), svc.unit + ", GST extra"),
+      stat(svc.note || "—", svc.status || "what's included"),
+      stat(svc.id === PLATFORM.id ? PLATFORM.weeks : "On the call", svc.id === PLATFORM.id ? "to live" : "we scope it"),
     ]) : tier ? h("div", { class: "p-hero-stats" }, [
       stat(inr(tier.price), "one-time, GST extra"),
       stat(tier.weeks, "to launch"),
@@ -244,7 +248,7 @@ function renderLeadState() {
     view,
     hero,
     onPlatform ? null : quizCard(),
-    onPlatform ? platformCard() : tier ? inclusionsCard(tier) : null,
+    svc ? serviceCard(svc) : tier ? inclusionsCard(tier) : null,
     onPlatform ? null : tier ? alternativesCard(tier) : allTiersCard(),
     perksCard(),
     needsCard(),
@@ -571,18 +575,30 @@ function tierAlt(t, current) {
   ]);
 }
 
-/** What a Site + CRM sign-up gets, in full. */
-function platformCard() {
-  return card("Site + CRM, in full", `${inr(PLATFORM.setup)} setup + ${inr(PLATFORM.monthly)}/mo, GST extra · ${PLATFORM.weeks} to live`,
-    h("p", { class: "p-muted", style: "margin:0 0 16px", text: PLATFORM.blurb }),
-    h("div", { class: "p-incl-grid" }, PLATFORM_INCLUDES.map((f) =>
-      h("div", { class: "p-incl-group" }, [
-        h("h4", { text: f.title }),
-        h("p", { class: "p-muted", style: "font-size:13.5px;line-height:1.5;margin:0", text: f.body }),
-      ])
-    )),
-    h("p", { class: "p-muted", style: "margin-top:16px;font-size:13px", text:
-      "WhatsApp message charges and chat-agent usage are billed by Meta and the AI provider to your own accounts, never marked up by us." })
+/** What a service-category sign-up gets. Site + CRM has the fullest detail;
+ *  the rest render their headline points from shared/services.js. */
+function serviceCard(svc) {
+  const isPlatform = svc.id === PLATFORM.id;
+  const sub = isPlatform
+    ? `${inr(PLATFORM.setup)} setup + ${inr(PLATFORM.monthly)}/mo, GST extra · ${PLATFORM.weeks} to live`
+    : `${inr(svc.from)} ${svc.unit}${svc.note ? " · " + svc.note : ""}, GST extra`;
+  const body = isPlatform
+    ? PLATFORM_INCLUDES.map((f) =>
+        h("div", { class: "p-incl-group" }, [
+          h("h4", { text: f.title }),
+          h("p", { class: "p-muted", style: "font-size:13.5px;line-height:1.5;margin:0", text: f.body }),
+        ]))
+    : svc.points.map((pt) => h("div", { class: "p-incl-group" }, [h("h4", { text: pt })]));
+  return card(`${svc.name}, in full`, sub,
+    h("p", { class: "p-muted", style: "margin:0 0 16px", text: svc.blurb }),
+    h("div", { class: "p-incl-grid" }, body),
+    isPlatform
+      ? h("p", { class: "p-muted", style: "margin-top:16px;font-size:13px", text:
+          "WhatsApp message charges and chat-agent usage are billed by Meta and the AI provider to your own accounts, never marked up by us." })
+      : svc.status
+        ? h("p", { class: "p-muted", style: "margin-top:16px;font-size:13px", text:
+            `${svc.status}. You're on the list — we'll message you the moment it opens, and the call is still worth having now.` })
+        : null
   );
 }
 

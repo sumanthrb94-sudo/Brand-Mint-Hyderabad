@@ -178,19 +178,18 @@
         peekSession,
       } from "/auth/session.js?v=clean2";
       import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean5";
-      import { PLATFORM } from "/shared/platform.js?v=1";
+      import { SERVICE_BY_ID } from "/shared/services.js?v=1";
       import { track } from "/shared/analytics.js?v=1";
 
       const params = new URLSearchParams(location.search);
       const next = params.get("next");
       const tierId = params.get("tier");
-      // Store tiers and the Site + CRM service both arrive as ?tier=, so the
-      // one sign-in serves both lines.
+      // Store tiers and every other service category both arrive as ?tier=,
+      // so one sign-in serves the whole ladder.
+      const svc = tierId ? SERVICE_BY_ID[tierId] : null;
       const tier = tierId
         ? TIER_BY_ID[tierId] ||
-          (tierId === PLATFORM.id
-            ? { id: PLATFORM.id, name: PLATFORM.name, tier: "—", weeks: PLATFORM.weeks, price: PLATFORM.setup, monthly: PLATFORM.monthly }
-            : null)
+          (svc ? { id: svc.id, name: svc.name, from: svc.from, unit: svc.unit, note: svc.note } : null)
         : null;
 
       const statusEl = document.getElementById("status");
@@ -227,10 +226,12 @@
       if (tier) {
         document.getElementById("tier").hidden = false;
         document.getElementById("tier-name").textContent = tier.name;
-        document.getElementById("tier-weeks").textContent =
-          tier.monthly ? `Setup · ${tier.weeks} to live` : `Tier ${tier.tier} · ${tier.weeks}`;
-        document.getElementById("tier-price").textContent =
-          tier.monthly ? `${inr(tier.price)} + ${inr(tier.monthly)}/mo` : inr(tier.price);
+        document.getElementById("tier-weeks").textContent = svc
+          ? [svc.note, svc.status].filter(Boolean).join(" · ") || svc.unit
+          : `Tier ${tier.tier} · ${tier.weeks}`;
+        document.getElementById("tier-price").textContent = svc
+          ? `${inr(svc.from)} ${svc.unit}`
+          : inr(tier.price);
         document.getElementById("title").textContent = "Almost there";
         document.getElementById("subtitle").textContent =
           "Sign in with Google and we'll call you within one working day to get started.";

@@ -29,6 +29,7 @@ There is no contact form and no invite email. Sign-in **is** the form. Consent t
 | Path | Role |
 |---|---|
 | `index.html` + `styles.css` | Home page. Tier cards and steps are rendered from `shared/tiers.js` — **edit tiers there, not in HTML** |
+| `shared/services.js` | **The service ladder** — the five categories the home page lists (Static Website ₹14,999, Online Store from ₹49,999, Site + CRM ₹79,999 once, Custom CRM, Modcon HR), each with its starting price and CTA. A category id used as a CTA must also appear in the `tier in [...]` list on `leads` in `firestore.rules` |
 | `shared/tiers.js` | The four tiers (id, name, price, weeks, blurb, grouped inclusions), `CARE_PLANS`, `STEPS`, `FAQ`, `NEEDS`, and `inclusionsFor()`. Single source of truth for home, login, portal, admin |
 | `login.html` | Google sign-in. Reads `?tier=`, calls `recordSignup()` after auth |
 | `auth/session.js` | One Firebase Auth session for every surface. `requireRole()`, `getProfile()`, `recordSignup()`, `claimPendingInvites()` |

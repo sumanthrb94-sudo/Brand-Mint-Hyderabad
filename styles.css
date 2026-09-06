@@ -568,26 +568,61 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
 .feature h3 { font-size: 17px; font-weight: 600; }
 .feature p { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--muted); }
 
-/* The band on the home page that points at the other service line. */
-.crossline {
-  max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad);
+
+/* ---------------------------------------------------------- services ---- */
+
+.services { display: flex; flex-direction: column; gap: var(--s-4); }
+.service {
+  display: grid; grid-template-columns: minmax(240px, 0.85fr) 1.6fr; gap: var(--s-5) var(--s-7);
+  padding: clamp(22px, 3vw, 30px);
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
-.crossline-inner {
-  display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--s-6);
-  align-items: center; padding: clamp(28px, 4vw, 40px);
-  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
-  box-shadow: var(--shadow);
+.service:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(10,14,12,.04), 0 18px 40px rgba(10,14,12,.1); }
+.service--featured { background: var(--bm-ink); border-color: var(--bm-ink); color: var(--cream); box-shadow: var(--shadow-lg); }
+.service--featured:hover { box-shadow: 0 28px 70px rgba(6,20,15,.28); }
+
+.service-head { display: flex; flex-direction: column; align-items: flex-start; }
+.service-n { font: 500 11px var(--mono); letter-spacing: 0.16em; color: var(--faint); }
+.service--featured .service-n { color: var(--emerald); }
+.service h3 { margin-top: 6px; font-size: clamp(20px, 2.2vw, 25px); font-weight: 600; }
+.service-status {
+  margin-top: 10px; font: 600 10.5px/1.4 var(--sans); letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--mint-deep); background: var(--mint-wash); padding: 4px 9px; border-radius: 999px;
 }
-.crossline h2 { font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; margin-top: var(--s-3); line-height: 1.15; }
-.crossline p { margin-top: var(--s-3); color: var(--ink-2); font-size: 15.5px; max-width: 52ch; }
-.crossline-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-top: var(--s-4); }
-.crossline-price .num { font: 600 24px var(--mono); letter-spacing: -0.02em; }
-.crossline-price span:not(.num) { font-size: 13.5px; color: var(--muted); }
-.crossline-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 14px; }
-.crossline-list li { position: relative; padding-left: 22px; color: var(--ink-2); }
-.crossline-list li::before {
+.service--featured .service-status { color: var(--emerald); background: rgba(0,200,151,.16); }
+.service-price { margin-top: var(--s-4); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.service-price .from { font-size: 12px; color: var(--muted); }
+.service--featured .service-price .from, .service--featured .service-note { color: var(--cream-mute); }
+.service-price .num { font-size: clamp(24px, 2.6vw, 30px); font-weight: 600; letter-spacing: -0.02em; }
+.service-price .unit { font-size: 13px; color: var(--muted); }
+.service--featured .service-price .unit { color: var(--cream-mute); }
+.service-note { margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+.service-cta { margin-top: auto; padding-top: 0; }
+.service-head .service-cta { margin-top: var(--s-5); }
+.service--featured .btn-ghost { border-color: var(--cream-line); color: var(--cream); }
+
+.service-highlight {
+  font-family: var(--display); font-size: 15px; font-weight: 600; color: var(--mint-deep);
+  margin-bottom: 8px;
+}
+.service--featured .service-highlight { color: var(--emerald); }
+.service-blurb { font-size: 15px; line-height: 1.6; color: var(--ink-2); max-width: 58ch; }
+.service--featured .service-blurb { color: var(--cream-mute); }
+.service-points {
+  list-style: none; margin: var(--s-4) 0 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 7px var(--s-5);
+}
+.service-points li { position: relative; padding-left: 22px; font-size: 14px; line-height: 1.45; }
+.service-points li::before {
   content: ""; position: absolute; left: 0; top: 0.42em; width: 12px; height: 7px;
   border-left: 2px solid var(--mint-deep); border-bottom: 2px solid var(--mint-deep); transform: rotate(-45deg);
 }
-.crossline .btn { margin-top: var(--s-5); }
-@media (max-width: 860px) { .crossline-inner { grid-template-columns: 1fr; gap: var(--s-5); } }
+.service--featured .service-points li::before { border-color: var(--mint); }
+
+@media (max-width: 860px) {
+  .service { grid-template-columns: 1fr; gap: var(--s-4); }
+  .service-head .service-cta { margin-top: var(--s-4); width: 100%; }
+  .service-points { grid-template-columns: 1fr; }
+}

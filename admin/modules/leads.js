@@ -7,7 +7,7 @@
 
 import { h, kpi, table, pill, modal, confirm, field, formToObject, bindSubmit, renderTopbar, relTime } from "/admin/components.js";
 import { TIER_BY_ID, inr as inrTier } from "/shared/tiers.js";
-import { PLATFORM } from "/shared/platform.js";
+import { SERVICE_BY_ID, inr as inrSvc } from "/shared/services.js";
 import { QUIZ, scoreLabel } from "/shared/quiz.js";
 
 const STATUSES = ["new", "qualified", "won", "lost"];
@@ -134,10 +134,12 @@ export async function render(ctx) {
             {
               label: "Store",
               cell: (r) => {
-                if (r.tier === PLATFORM.id) {
+                // Store tiers first; every other service category second.
+                const svc = r.tier ? SERVICE_BY_ID[r.tier] : null;
+                if (svc && !TIER_BY_ID[r.tier]) {
                   return h("div", {}, [
-                    h("div", { class: "strong", text: PLATFORM.name }),
-                    h("div", { class: "sub mono", text: `${inrTier(PLATFORM.setup)} + ${inrTier(PLATFORM.monthly)}/mo` }),
+                    h("div", { class: "strong", text: svc.name }),
+                    h("div", { class: "sub mono", text: `${inrSvc(svc.from)} ${svc.unit}${svc.note ? " · " + svc.note : ""}` }),
                   ]);
                 }
                 const t = r.tier ? TIER_BY_ID[r.tier] : null;
