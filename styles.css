@@ -557,3 +557,37 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
 @media (max-width: 560px) {
   .free-list { grid-template-columns: 1fr; }
 }
+
+/* ----------------------------------------------------- platform page ---- */
+
+.features { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.feature {
+  padding: 22px 22px 20px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.feature h3 { font-size: 17px; font-weight: 600; }
+.feature p { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--muted); }
+
+/* The band on the home page that points at the other service line. */
+.crossline {
+  max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad);
+}
+.crossline-inner {
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--s-6);
+  align-items: center; padding: clamp(28px, 4vw, 40px);
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.crossline h2 { font-size: clamp(22px, 2.6vw, 30px); font-weight: 600; margin-top: var(--s-3); line-height: 1.15; }
+.crossline p { margin-top: var(--s-3); color: var(--ink-2); font-size: 15.5px; max-width: 52ch; }
+.crossline-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin-top: var(--s-4); }
+.crossline-price .num { font: 600 24px var(--mono); letter-spacing: -0.02em; }
+.crossline-price span:not(.num) { font-size: 13.5px; color: var(--muted); }
+.crossline-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 14px; }
+.crossline-list li { position: relative; padding-left: 22px; color: var(--ink-2); }
+.crossline-list li::before {
+  content: ""; position: absolute; left: 0; top: 0.42em; width: 12px; height: 7px;
+  border-left: 2px solid var(--mint-deep); border-bottom: 2px solid var(--mint-deep); transform: rotate(-45deg);
+}
+.crossline .btn { margin-top: var(--s-5); }
+@media (max-width: 860px) { .crossline-inner { grid-template-columns: 1fr; gap: var(--s-5); } }

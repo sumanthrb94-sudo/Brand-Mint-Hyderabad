@@ -23,6 +23,7 @@ import {
 import { renderWizard, briefSummaryCard } from "/portal/wizard.js";
 import { TIERS, TIER_BY_ID, STEPS, CARE_PLANS, NEEDS, FAQ, inclusionsFor } from "/shared/tiers.js";
 import { PERKS, LESSONS, COMPLIANCE, COMPLIANCE_NOTE, PRODUCTS, WHATSAPP_DISPLAY, waLink } from "/shared/resources.js";
+import { PLATFORM, PLATFORM_INCLUDES, PLATFORM_STEPS } from "/shared/platform.js";
 import { QUIZ, scoreQuiz, scoreLabel } from "/shared/quiz.js";
 import {
   h,
@@ -214,15 +215,22 @@ function renderLeadState() {
   tabsEl.innerHTML = "";
   document.getElementById("client-name").textContent = "Your request";
   const first = (profile.fullName || "").split(/\s+/)[0] || "there";
+  const onPlatform = profile.selectedTier === PLATFORM.id;
   const tier = profile.selectedTier ? TIER_BY_ID[profile.selectedTier] : null;
 
   const hero = h("div", { class: "p-hero" }, [
-    h("p", { class: "p-mono p-hero-kicker", text: tier ? `Tier ${tier.tier} · ${tier.name}` : "Signed in" }),
-    h("h1", { text: tier ? `Thanks, ${first} — we'll call you within one working day.` : `Welcome, ${first}. Pick the store that fits.` }),
-    h("p", { text: tier
+    h("p", { class: "p-mono p-hero-kicker", text: onPlatform ? PLATFORM.name : tier ? `Tier ${tier.tier} · ${tier.name}` : "Signed in" }),
+    h("h1", { text: tier || onPlatform ? `Thanks, ${first} — we'll call you within one working day.` : `Welcome, ${first}. Pick the store that fits.` }),
+    h("p", { text: onPlatform
+      ? "Below is everything Site + CRM includes and what happens next. Nothing is due until the agreement is signed."
+      : tier
       ? "Below is everything your store includes, what we'll need from you, and what happens next. Nothing is due until the agreement is signed."
       : "Everything we build is below, in detail. Choose one and we'll call you within one working day to confirm the scope." }),
-    tier ? h("div", { class: "p-hero-stats" }, [
+    onPlatform ? h("div", { class: "p-hero-stats" }, [
+      stat(inr(PLATFORM.setup), "setup, GST extra"),
+      stat(inr(PLATFORM.monthly) + "/mo", "GST extra"),
+      stat(PLATFORM.weeks, "to live"),
+    ]) : tier ? h("div", { class: "p-hero-stats" }, [
       stat(inr(tier.price), "one-time, GST extra"),
       stat(tier.weeks, "to launch"),
       stat("50%", "deposit to start"),
@@ -235,15 +243,17 @@ function renderLeadState() {
   mount(
     view,
     hero,
-    quizCard(),
-    tier ? inclusionsCard(tier) : null,
-    tier ? alternativesCard(tier) : allTiersCard(),
+    onPlatform ? null : quizCard(),
+    onPlatform ? platformCard() : tier ? inclusionsCard(tier) : null,
+    onPlatform ? null : tier ? alternativesCard(tier) : allTiersCard(),
     perksCard(),
     needsCard(),
     stepsCard(1),
-    lessonsCard(),
-    complianceCard(),
-    careCard(),
+    // The lessons, the compliance checklist and the care plans are about
+    // running an online store. A Site + CRM sign-up is not selling online.
+    onPlatform ? null : lessonsCard(),
+    onPlatform ? null : complianceCard(),
+    onPlatform ? null : careCard(),
     productsCard(),
     faqCard()
   );
@@ -559,6 +569,21 @@ function tierAlt(t, current) {
     h("ul", { class: "p-alt-list" }, t.groups.flatMap((g) => g.items).slice(0, 4).map((it) => h("li", { text: it }))),
     btn,
   ]);
+}
+
+/** What a Site + CRM sign-up gets, in full. */
+function platformCard() {
+  return card("Site + CRM, in full", `${inr(PLATFORM.setup)} setup + ${inr(PLATFORM.monthly)}/mo, GST extra · ${PLATFORM.weeks} to live`,
+    h("p", { class: "p-muted", style: "margin:0 0 16px", text: PLATFORM.blurb }),
+    h("div", { class: "p-incl-grid" }, PLATFORM_INCLUDES.map((f) =>
+      h("div", { class: "p-incl-group" }, [
+        h("h4", { text: f.title }),
+        h("p", { class: "p-muted", style: "font-size:13.5px;line-height:1.5;margin:0", text: f.body }),
+      ])
+    )),
+    h("p", { class: "p-muted", style: "margin-top:16px;font-size:13px", text:
+      "WhatsApp message charges and chat-agent usage are billed by Meta and the AI provider to your own accounts, never marked up by us." })
+  );
 }
 
 function needsCard() {

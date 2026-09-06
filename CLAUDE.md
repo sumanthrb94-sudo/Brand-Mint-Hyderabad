@@ -13,6 +13,7 @@ It is a **static HTML/CSS/JS site with no build step** — files are served as-i
 ```
 Home page → "Choose <tier>" → /login?tier=<id> → Google sign-in
   → profiles/{uid} gets consent + selectedTier, a leads doc is created (with uid)
+  → `?tier=platform` is the Site + CRM line and follows the same flow
   → portal shows the services review: tier in full (with inherited tiers), switch tier, needs, steps, care plans, FAQ
 Admin: Leads → Convert to client
   → clients doc (status: onboarding, storeTier), clientUsers/{uid}_{clientId}, projects stub
@@ -38,6 +39,7 @@ There is no contact form and no invite email. Sign-in **is** the form. Consent t
 | `admin/modules/analytics.js`, `heatmap.js` | Admin → Analytics (KPIs, daily line, tiers, sections, scroll depth, devices, referrers, portal actions) and Heat map (clicks + scroll depth over the real page in a same-origin iframe). Both read `events` on demand via `db.fetchEvents()`, never cached |
 | `admin/db.js` | Sync in-memory cache fed by one `onSnapshot` per collection; writes are fire-and-forget. Add new collections to `COLLECTIONS` and `cache` |
 | `shared/brief.js` | The onboarding questionnaire (portal renders it, admin reads it) |
+| `platform.html` + `shared/platform.js` | **Site + CRM** — the second service line, separate from the store tiers. Website + admin + lead CRM + WhatsApp API + chat agent + Meta lead import + analytics, ₹79,999 setup + ₹9,999/mo. The page body is static HTML on purpose (it is meant to rank); `shared/platform.js` is the source for the price used by `login.html`, the home-page band and admin leads. **Change a price in both.** |
 | `shared/analytics.js` | First-party analytics. Loaded by every public page and the portal; writes page views, clicks (with coordinates), scroll depth, section reach, time on page and `track()` events straight to Firestore REST (`events`). Off under DNT/GPC and inside the heat-map iframe (`?bm_nt=1`) |
 | `downloads/` | The three free PDFs (checklist, catalogue template, scope worksheet) + CSV. Sources in `downloads/src/`, regenerate with `node downloads/src/render.cjs` |
 | `shared/quiz.js` | The Store Readiness Score: 10 questions, `scoreQuiz()` → score/100, tier fit, three fixes. Saved to `profiles/{uid}.readiness`; admin shows it on the lead |

@@ -230,7 +230,7 @@ service cloud.firestore {
                     && request.resource.data.email is string
                     && request.resource.data.email.size() <= 320
                     && request.resource.data.tier is string
-                    && request.resource.data.tier in ['whatsapp', 'starter', 'growth', 'commerce']
+                    && request.resource.data.tier in ['whatsapp', 'starter', 'growth', 'commerce', 'platform']
                     && request.resource.data.status == 'new';
 
       // A person may read their own leads (the portal shows what they picked).

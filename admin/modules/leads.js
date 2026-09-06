@@ -7,6 +7,7 @@
 
 import { h, kpi, table, pill, modal, confirm, field, formToObject, bindSubmit, renderTopbar, relTime } from "/admin/components.js";
 import { TIER_BY_ID, inr as inrTier } from "/shared/tiers.js";
+import { PLATFORM } from "/shared/platform.js";
 import { QUIZ, scoreLabel } from "/shared/quiz.js";
 
 const STATUSES = ["new", "qualified", "won", "lost"];
@@ -133,6 +134,12 @@ export async function render(ctx) {
             {
               label: "Store",
               cell: (r) => {
+                if (r.tier === PLATFORM.id) {
+                  return h("div", {}, [
+                    h("div", { class: "strong", text: PLATFORM.name }),
+                    h("div", { class: "sub mono", text: `${inrTier(PLATFORM.setup)} + ${inrTier(PLATFORM.monthly)}/mo` }),
+                  ]);
+                }
                 const t = r.tier ? TIER_BY_ID[r.tier] : null;
                 if (!t) return h("span", { class: "muted", text: r.projectType || "—" });
                 return h("div", {}, [

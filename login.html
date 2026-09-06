@@ -178,12 +178,20 @@
         peekSession,
       } from "/auth/session.js?v=clean2";
       import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean5";
+      import { PLATFORM } from "/shared/platform.js?v=1";
       import { track } from "/shared/analytics.js?v=1";
 
       const params = new URLSearchParams(location.search);
       const next = params.get("next");
       const tierId = params.get("tier");
-      const tier = tierId ? TIER_BY_ID[tierId] : null;
+      // Store tiers and the Site + CRM service both arrive as ?tier=, so the
+      // one sign-in serves both lines.
+      const tier = tierId
+        ? TIER_BY_ID[tierId] ||
+          (tierId === PLATFORM.id
+            ? { id: PLATFORM.id, name: PLATFORM.name, tier: "—", weeks: PLATFORM.weeks, price: PLATFORM.setup, monthly: PLATFORM.monthly }
+            : null)
+        : null;
 
       const statusEl = document.getElementById("status");
       const googleBtn = document.getElementById("google");
@@ -219,8 +227,10 @@
       if (tier) {
         document.getElementById("tier").hidden = false;
         document.getElementById("tier-name").textContent = tier.name;
-        document.getElementById("tier-weeks").textContent = `Tier ${tier.tier} · ${tier.weeks}`;
-        document.getElementById("tier-price").textContent = inr(tier.price);
+        document.getElementById("tier-weeks").textContent =
+          tier.monthly ? `Setup · ${tier.weeks} to live` : `Tier ${tier.tier} · ${tier.weeks}`;
+        document.getElementById("tier-price").textContent =
+          tier.monthly ? `${inr(tier.price)} + ${inr(tier.monthly)}/mo` : inr(tier.price);
         document.getElementById("title").textContent = "Almost there";
         document.getElementById("subtitle").textContent =
           "Sign in with Google and we'll call you within one working day to get started.";
