@@ -1,7 +1,16 @@
+# Brand Mint — brandmintstudios.in
 User-agent: *
 Allow: /
+
+# Private surfaces. Nothing here is useful in search results.
 Disallow: /admin
 Disallow: /admin/
 Disallow: /admin.html
+Disallow: /portal
+Disallow: /portal/
+Disallow: /portal.html
+Disallow: /login
+Disallow: /login.html
+Disallow: /*?tier=
 
-Sitemap: https://brand-mint-sdmk.vercel.app/sitemap.xml
+Sitemap: https://brandmintstudios.in/sitemap.xml

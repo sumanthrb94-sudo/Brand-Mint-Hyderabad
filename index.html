@@ -1,20 +1,28 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-IN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1f1a" />
-    <title>Brand Mint — Online stores for Indian brands, built in Hyderabad</title>
+    <title>Ecommerce Website Development in Hyderabad — Brand Mint</title>
     <meta
       name="description"
-      content="Four store tiers, one price each, GST extra. Pick one, sign in with Google, and we call you the next day. Built in HITEC City, Hyderabad."
+      content="Online stores built end to end in Hyderabad — UPI, COD, GST invoices and WhatsApp orders. Four fixed prices from ₹49,999, GST extra. We call you the next day."
     />
-    <link rel="canonical" href="https://brand-mint-sdmk.vercel.app/" />
+    <link rel="canonical" href="https://brandmintstudios.in/" />
+    <!-- Google Search Console: paste the token from the "HTML tag" method here.
+         DNS TXT verification at the registrar is better — it covers www and
+         every subdomain and survives redeploys. See SEO.md.
+    <meta name="google-site-verification" content="PASTE_TOKEN_HERE" /> -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Brand Mint — Online stores for Indian brands" />
+    <meta property="og:title" content="Ecommerce Website Development in Hyderabad — Brand Mint" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Brand Mint — online stores for Indian brands, built in Hyderabad." />
     <meta property="og:description" content="Four store tiers from ₹49,999. Pick one, sign in with Google, we call you the next day." />
-    <meta property="og:url" content="https://brand-mint-sdmk.vercel.app/" />
-    <meta property="og:image" content="https://brand-mint-sdmk.vercel.app/og-image.png" />
+    <meta property="og:url" content="https://brandmintstudios.in/" />
+    <meta property="og:image" content="https://brandmintstudios.in/og-image.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -25,6 +33,190 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css?v=clean6" />
+
+    <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ProfessionalService",
+      "@id": "https://brandmintstudios.in/#org",
+      "name": "Brand Mint",
+      "url": "https://brandmintstudios.in",
+      "logo": "https://brandmintstudios.in/og-image.png",
+      "image": "https://brandmintstudios.in/og-image.png",
+      "description": "Brand Mint designs and builds online stores for Indian brands, in four fixed-price tiers. Based in HITEC City, Hyderabad.",
+      "telephone": "+91-77999-34943",
+      "priceRange": "₹49,999–₹3,00,000",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Hyderabad",
+        "addressRegion": "Telangana",
+        "addressCountry": "IN",
+        "streetAddress": "HITEC City"
+      },
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "India"
+        },
+        {
+          "@type": "City",
+          "name": "Hyderabad"
+        }
+      ],
+      "knowsAbout": [
+        "Ecommerce website development",
+        "Razorpay integration",
+        "GST invoicing",
+        "WhatsApp commerce",
+        "Shopify alternatives",
+        "Online store design"
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Online store tiers",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "position": 1,
+            "name": "WhatsApp Store",
+            "description": "A complete store you run from your phone. Orders, returns and customers handled on WhatsApp.",
+            "price": "49999",
+            "priceCurrency": "INR",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "WhatsApp Store",
+              "serviceType": "Ecommerce website development",
+              "provider": {
+                "@id": "https://brandmintstudios.in/#org"
+              }
+            },
+            "url": "https://brandmintstudios.in/#stores"
+          },
+          {
+            "@type": "Offer",
+            "position": 2,
+            "name": "Starter Store",
+            "description": "Everything in the WhatsApp Store, plus the operations layer: accounts, order emails, GST invoices.",
+            "price": "99000",
+            "priceCurrency": "INR",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Starter Store",
+              "serviceType": "Ecommerce website development",
+              "provider": {
+                "@id": "https://brandmintstudios.in/#org"
+              }
+            },
+            "url": "https://brandmintstudios.in/#stores"
+          },
+          {
+            "@type": "Offer",
+            "position": 3,
+            "name": "Growth Store",
+            "description": "Everything in Starter, plus courier integration, live tracking, refunds, coupons and cart recovery.",
+            "price": "200000",
+            "priceCurrency": "INR",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Growth Store",
+              "serviceType": "Ecommerce website development",
+              "provider": {
+                "@id": "https://brandmintstudios.in/#org"
+              }
+            },
+            "url": "https://brandmintstudios.in/#stores"
+          },
+          {
+            "@type": "Offer",
+            "position": 4,
+            "name": "Commerce Store",
+            "description": "Everything in Growth, plus staff roles, reviews, wishlist, loyalty and advanced reporting.",
+            "price": "300000",
+            "priceCurrency": "INR",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Commerce Store",
+              "serviceType": "Ecommerce website development",
+              "provider": {
+                "@id": "https://brandmintstudios.in/#org"
+              }
+            },
+            "url": "https://brandmintstudios.in/#stores"
+          }
+        ]
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://brandmintstudios.in/#website",
+      "url": "https://brandmintstudios.in",
+      "name": "Brand Mint",
+      "publisher": {
+        "@id": "https://brandmintstudios.in/#org"
+      },
+      "inLanguage": "en-IN"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://brandmintstudios.in/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What happens after I sign in?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We get your email and the store you picked, nothing else. Within one working day we call you for a 30-minute conversation: confirm the tier, walk the scope, agree a start date. No obligation, no pitch deck."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "When do I pay, and is GST included?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "50% when you sign the agreement, 50% before launch. Prices are exclusive of 18% GST and you get a GST invoice for every payment. There are no hourly bills or surprise extras inside a tier."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I own the store?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The domain, hosting and Razorpay account are set up in your business name, and the store lives on your accounts. If we part ways, you keep everything."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What do you need from me?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Your product list and photos, business and GST details, a logo if you have one. We send a catalogue template on the call. Timelines run from the day we receive your assets."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I start small and upgrade later?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Every tier includes everything in the one before it, so moving up is a scoped add-on rather than a rebuild."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the care plan, and can I cancel?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "An optional monthly plan with a defined scope: updates tested on staging, monitoring, security patches, fixes and a health report. Cancel with 30 days' notice."
+          }
+        }
+      ]
+    }
+  ]
+}
+    </script>
+
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
     <script>
