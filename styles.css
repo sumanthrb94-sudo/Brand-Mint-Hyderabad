@@ -599,6 +599,8 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
 .service-price .unit { font-size: 13px; color: var(--muted); }
 .service--featured .service-price .unit { color: var(--cream-mute); }
 .service-note { margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+.service-price--tbc { font-family: var(--display); font-size: 19px; font-weight: 600; color: var(--ink-2); }
+.service--featured .service-price--tbc { color: var(--cream); }
 .service-cta { margin-top: auto; padding-top: 0; }
 .service-head .service-cta { margin-top: var(--s-5); }
 .service--featured .btn-ghost { border-color: var(--cream-line); color: var(--cream); }

@@ -7,7 +7,7 @@
 
 import { h, kpi, table, pill, modal, confirm, field, formToObject, bindSubmit, renderTopbar, relTime } from "/admin/components.js";
 import { TIER_BY_ID, inr as inrTier } from "/shared/tiers.js";
-import { SERVICE_BY_ID, inr as inrSvc } from "/shared/services.js";
+import { SERVICE_BY_ID, priceLabel } from "/shared/services.js";
 import { QUIZ, scoreLabel } from "/shared/quiz.js";
 
 const STATUSES = ["new", "qualified", "won", "lost"];
@@ -139,7 +139,7 @@ export async function render(ctx) {
                 if (svc && !TIER_BY_ID[r.tier]) {
                   return h("div", {}, [
                     h("div", { class: "strong", text: svc.name }),
-                    h("div", { class: "sub mono", text: `${inrSvc(svc.from)} ${svc.unit}${svc.note ? " · " + svc.note : ""}` }),
+                    h("div", { class: "sub mono", text: `${priceLabel(svc)}${svc.note ? " · " + svc.note : ""}` }),
                   ]);
                 }
                 const t = r.tier ? TIER_BY_ID[r.tier] : null;

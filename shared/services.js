@@ -90,9 +90,10 @@ export const SERVICES = [
   {
     id: "hr",
     name: "Modcon HR",
-    from: 4999,
-    unit: "per month",
-    note: "up to 50 people",
+    // No price until it launches. Everything below reads hidePrice rather
+    // than inventing a number, so there is one place to set it later.
+    hidePrice: true,
+    note: "Free trial for early sign-ups",
     status: "Launching soon",
     blurb:
       "An HR tool for small and growing Indian teams: people records, attendance and leave, documents, and payroll-ready exports — without enterprise software pricing.",
@@ -111,4 +112,10 @@ export const SERVICE_BY_ID = Object.fromEntries(SERVICES.map((s) => [s.id, s]));
 /** "₹14,999" — Indian digit grouping, no decimals. */
 export function inr(n) {
   return "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
+}
+
+/** What to print where a price goes. Never invents one. */
+export function priceLabel(svc) {
+  if (!svc) return "";
+  return svc.hidePrice ? "Pricing at launch" : `${inr(svc.from)} ${svc.unit}`;
 }

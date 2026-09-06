@@ -24,7 +24,7 @@ import { renderWizard, briefSummaryCard } from "/portal/wizard.js";
 import { TIERS, TIER_BY_ID, STEPS, CARE_PLANS, NEEDS, FAQ, inclusionsFor } from "/shared/tiers.js";
 import { PERKS, LESSONS, COMPLIANCE, COMPLIANCE_NOTE, PRODUCTS, WHATSAPP_DISPLAY, waLink } from "/shared/resources.js";
 import { PLATFORM, PLATFORM_INCLUDES } from "/shared/platform.js";
-import { SERVICE_BY_ID } from "/shared/services.js";
+import { SERVICE_BY_ID, priceLabel } from "/shared/services.js";
 import { QUIZ, scoreQuiz, scoreLabel } from "/shared/quiz.js";
 import {
   h,
@@ -231,7 +231,7 @@ function renderLeadState() {
       ? "Below is everything your store includes, what we'll need from you, and what happens next. Nothing is due until the agreement is signed."
       : "Everything we build is below, in detail. Choose one and we'll call you within one working day to confirm the scope." }),
     svc ? h("div", { class: "p-hero-stats" }, [
-      stat(inr(svc.from), svc.unit + ", GST extra"),
+      stat(svc.hidePrice ? "Pricing at launch" : inr(svc.from), svc.hidePrice ? "we'll tell you first" : svc.unit + ", GST extra"),
       stat(svc.note || "—", svc.status || "what's included"),
       stat(svc.id === PLATFORM.id ? PLATFORM.weeks : "On the call", svc.id === PLATFORM.id ? "to live" : "we scope it"),
     ]) : tier ? h("div", { class: "p-hero-stats" }, [
@@ -581,7 +581,7 @@ function serviceCard(svc) {
   const isPlatform = svc.id === PLATFORM.id;
   const sub = isPlatform
     ? `${inr(PLATFORM.setup)} setup + ${inr(PLATFORM.monthly)}/mo, GST extra · ${PLATFORM.weeks} to live`
-    : `${inr(svc.from)} ${svc.unit}${svc.note ? " · " + svc.note : ""}, GST extra`;
+    : `${priceLabel(svc)}${svc.note ? " · " + svc.note : ""}`;
   const body = isPlatform
     ? PLATFORM_INCLUDES.map((f) =>
         h("div", { class: "p-incl-group" }, [

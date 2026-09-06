@@ -178,7 +178,7 @@
         peekSession,
       } from "/auth/session.js?v=clean2";
       import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean5";
-      import { SERVICE_BY_ID } from "/shared/services.js?v=1";
+      import { SERVICE_BY_ID, priceLabel } from "/shared/services.js?v=2";
       import { track } from "/shared/analytics.js?v=1";
 
       const params = new URLSearchParams(location.search);
@@ -230,7 +230,7 @@
           ? [svc.note, svc.status].filter(Boolean).join(" · ") || svc.unit
           : `Tier ${tier.tier} · ${tier.weeks}`;
         document.getElementById("tier-price").textContent = svc
-          ? `${inr(svc.from)} ${svc.unit}`
+          ? priceLabel(svc)
           : inr(tier.price);
         document.getElementById("title").textContent = "Almost there";
         document.getElementById("subtitle").textContent =

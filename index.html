@@ -32,7 +32,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=clean8" />
+    <link rel="stylesheet" href="/styles.css?v=clean9" />
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
     <script type="application/ld+json">
@@ -136,22 +136,6 @@
             "itemOffered": {
               "@type": "Service",
               "name": "Custom CRM",
-              "provider": {
-                "@id": "https://brandmintstudios.in/#org"
-              }
-            },
-            "url": "https://brandmintstudios.in/#services"
-          },
-          {
-            "@type": "Offer",
-            "position": 5,
-            "name": "Modcon HR",
-            "description": "An HR tool for small and growing Indian teams: people records, attendance and leave, documents and payroll-ready exports.",
-            "price": "4999",
-            "priceCurrency": "INR",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Modcon HR",
               "provider": {
                 "@id": "https://brandmintstudios.in/#org"
               }
@@ -431,7 +415,7 @@
     <script type="module">
       import { TIERS, STEPS, CARE_PLANS, FAQ, inr } from "/shared/tiers.js?v=clean5";
       import { PERKS, PRODUCTS } from "/shared/resources.js?v=1";
-      import { SERVICES } from "/shared/services.js?v=1";
+      import { SERVICES } from "/shared/services.js?v=2";
 
       // ---- service categories
       const svcHost = document.getElementById("services-list");
@@ -457,8 +441,15 @@
           </div>
         `;
         el.querySelector("h3").textContent = sv.name;
-        el.querySelector(".service-price .num").textContent = inr(sv.from);
-        el.querySelector(".service-price .unit").textContent = sv.unit;
+        if (sv.hidePrice) {
+          // No number until it launches — say so rather than guess.
+          const price = el.querySelector(".service-price");
+          price.classList.add("service-price--tbc");
+          price.textContent = "Pricing at launch";
+        } else {
+          el.querySelector(".service-price .num").textContent = inr(sv.from);
+          el.querySelector(".service-price .unit").textContent = sv.unit;
+        }
         el.querySelector(".service-note").textContent = sv.note || "";
         const hl = el.querySelector(".service-highlight");
         if (sv.highlight) hl.textContent = sv.highlight;
