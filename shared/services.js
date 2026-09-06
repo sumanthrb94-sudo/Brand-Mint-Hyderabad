@@ -72,12 +72,13 @@ export const SERVICES = [
   {
     id: "crm",
     name: "Custom CRM",
-    from: 49999,
-    unit: "setup",
-    note: "+ ₹4,999/month",
+    from: 99999,
+    unit: "once",
+    note: "then ₹4,999/mo maintenance",
     status: "Launching soon",
+    highlight: "Built once. Then only maintenance.",
     blurb:
-      "The CRM on its own, shaped to how your business actually works, without us rebuilding your website. Your stages, your fields, your team's logins.",
+      "The CRM on its own, shaped to how your business actually works, without us rebuilding your website. Your stages, your fields, your team's logins. Built and handed over one time — after that you only pay maintenance.",
     points: [
       "Your pipeline, your stage names, your fields",
       "WhatsApp desk and call logging",
