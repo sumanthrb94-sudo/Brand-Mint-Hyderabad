@@ -5,24 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1f1a" />
     <title>Ecommerce Website Development in Hyderabad — Brand Mint</title>
-    <meta
-      name="description"
-      content="Online stores built end to end in Hyderabad — UPI, COD, GST invoices and WhatsApp orders. Four fixed prices from ₹49,999, GST extra. We call you the next day."
-    />
+    <meta name="description" content="We build online stores and the systems behind them for Indian brands — UPI, COD, GST invoices, WhatsApp. Senior operators, fixed prices, HITEC City Hyderabad." />
     <link rel="canonical" href="https://brandmintstudios.in/" />
-    <!-- Google Search Console: paste the token from the "HTML tag" method here.
-         DNS TXT verification at the registrar is better — it covers www and
-         every subdomain and survives redeploys. See SEO.md.
-    <meta name="google-site-verification" content="PASTE_TOKEN_HERE" /> -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Ecommerce Website Development in Hyderabad — Brand Mint" />
     <meta property="og:locale" content="en_IN" />
+    <meta property="og:title" content="Ecommerce Website Development in Hyderabad — Brand Mint" />
+    <meta property="og:description" content="We build online stores and the systems behind them for Indian brands. Senior operators, fixed prices, Hyderabad." />
+    <meta property="og:url" content="https://brandmintstudios.in/" />
+    <meta property="og:image" content="https://brandmintstudios.in/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Brand Mint — online stores for Indian brands, built in Hyderabad." />
-    <meta property="og:description" content="Four store tiers from ₹49,999. Pick one, sign in with Google, we call you the next day." />
-    <meta property="og:url" content="https://brandmintstudios.in/" />
-    <meta property="og:image" content="https://brandmintstudios.in/og-image.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -32,7 +25,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=clean9" />
+    <link rel="stylesheet" href="/styles.css?v=v10" />
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
     <script type="application/ld+json">
@@ -213,7 +206,6 @@
 }
     </script>
 
-
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
     <script>
       (function () {
@@ -239,11 +231,10 @@
         <span class="brand-name">Brand Mint <em>— Hyderabad</em></span>
       </a>
       <nav class="nav-links" aria-label="Primary">
-        <a href="#stores">Stores</a>
-        <a href="#how">How it works</a>
+        <a href="#work">Work</a>
+        <a href="#services">What we do</a>
+        <a href="/pricing">Pricing</a>
         <a href="/platform">Site + CRM</a>
-        <a href="#care">After launch</a>
-        <a href="#faq">FAQ</a>
       </nav>
       <div class="nav-actions">
         <a class="btn btn-ghost" href="/login" data-auth-show="signed-out">Sign in</a>
@@ -254,149 +245,128 @@
 
     <main id="main">
       <!-- HERO -->
-      <section class="hero">
-        <p class="kicker" data-enter>Hyderabad · Now booking</p>
-        <h1 data-enter>From a simple website to the system that <em>runs</em> your sales.</h1>
-        <p class="lede" data-enter>
-          Five things we build, every one at a price you can read before you
-          call — a ₹14,999 website, an online store, a site with a CRM behind
-          it, the CRM on its own, and an HR tool. Pick where you are today,
-          sign in with Google, and we'll ring you tomorrow.
-        </p>
-        <div class="hero-actions" data-enter>
-          <a class="btn btn-primary btn-lg" href="#services">See what we build</a>
-          <a class="btn btn-ghost btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20an%20online%20store." rel="noopener">WhatsApp us</a>
+      <section class="hero hero--split">
+        <div class="hero-copy">
+          <p class="kicker" data-enter>Hyderabad · Now booking</p>
+          <h1 data-enter>We build the store, and the system that <em>sells</em> from it.</h1>
+          <p class="lede" data-enter>
+            Online stores and the software behind them, for Indian brands.
+            Everything a shop here actually needs — UPI, cash on delivery, GST
+            invoices, WhatsApp orders — built by senior people at a price
+            agreed before we start.
+          </p>
+          <div class="hero-actions" data-enter>
+            <a class="btn btn-primary btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">Book a call</a>
+            <a class="btn btn-ghost btn-lg" href="#work">See the work</a>
+          </div>
         </div>
-        <ul class="hero-proof" data-enter>
-          <li><span class="num">5</span> services</li>
-          <li><span class="num">₹14,999</span> to start</li>
-          <li><span class="num">2–12</span> weeks to launch</li>
-        </ul>
-        <ul class="trust" data-enter aria-label="Built for selling in India">
-          <li>Razorpay + UPI</li>
-          <li>Cash on delivery</li>
-          <li>GST invoices</li>
-          <li>WhatsApp orders</li>
-          <li>Your domain, your accounts</li>
-        </ul>
-      </section>
-
-      <!-- SERVICES -->
-      <section class="section" id="services">
-        <header class="section-head" data-reveal>
-          <p class="kicker">01 — What we do</p>
-          <h2>Five things we build. Pick where <em>you</em> are.</h2>
-          <p>
-            Every price below is what you pay us, in INR, exclusive of 18% GST.
-            No hourly billing, no discovery fee, and no quote that takes a week
-            to arrive. If a cheaper one on this list is the honest answer for
-            you, we'll say so on the call.
-          </p>
-        </header>
-        <div class="services" id="services-list" data-reveal-group><!-- rendered from /shared/services.js --></div>
-      </section>
-
-      <!-- STORES -->
-      <section class="section" id="stores">
-        <header class="section-head" data-reveal>
-          <p class="kicker">02 — Online store, in detail</p>
-          <h2>Four stores. Pick the one that fits <em>yours.</em></h2>
-          <p>
-            Each tier includes everything in the one before it. Prices are one-time,
-            in INR, exclusive of 18% GST. Every store comes with a monthly care plan
-            you can add after launch.
-          </p>
-        </header>
-        <div class="tiers" id="tiers" data-reveal-group><!-- rendered from /shared/tiers.js --></div>
-        <aside class="tier-guide" data-reveal aria-labelledby="guide-h">
-          <h3 id="guide-h">Not sure which one?</h3>
-          <ul>
-            <li><strong>Small catalogue, happy to run orders from your phone</strong> → WhatsApp Store</li>
-            <li><strong>Want accounts, order emails and GST invoices without you in the loop</strong> → Starter Store</li>
-            <li><strong>Shipping daily, running ads, or losing carts</strong> → Growth Store</li>
-            <li><strong>A team with roles, reviews, loyalty and volume</strong> → Commerce Store</li>
-          </ul>
-          <p>Still unsure? Pick the closest one — the call is where we confirm it, and moving up later is a scoped add-on.</p>
+        <aside class="hero-proof-panel" data-enter aria-label="Brand Mint in numbers">
+          <ul class="proof-stats" id="proof-stats"><!-- shared/work.js --></ul>
+          <div class="proof-clients">
+            <p class="kicker">Recently shipped</p>
+            <ul id="proof-clients"><!-- shared/work.js --></ul>
+          </div>
         </aside>
       </section>
 
-      <!-- HOW IT WORKS -->
-      <section class="section section--dark" id="how">
+      <!-- WORK -->
+      <section class="section" id="work">
+        <header class="section-head" data-reveal>
+          <p class="kicker">01 — The work</p>
+          <h2>Brands we have <em>shipped.</em></h2>
+          <p>
+            Every one of these is live. Open them, use them, put something in a
+            cart. That is the only portfolio worth showing.
+          </p>
+        </header>
+        <div class="work-grid" id="work-grid" data-reveal-group><!-- shared/work.js --></div>
+        <div class="building" id="building" data-reveal><!-- shared/work.js --></div>
+      </section>
+
+      <!-- WHAT WE DO -->
+      <section class="section section--dark" id="services">
+        <header class="section-head" data-reveal>
+          <p class="kicker">02 — What we do</p>
+          <h2>Three things, done <em>properly.</em></h2>
+          <p>
+            Each one is a fixed price agreed before we start. No hourly billing,
+            no discovery fee, no quote that takes a week to arrive.
+          </p>
+        </header>
+        <ol class="offer-lines" id="offer-lines" data-reveal-group><!-- shared/services.js --></ol>
+        <p class="offer-more" data-reveal>
+          <a class="btn btn-ghost" href="/pricing">See every price →</a>
+        </p>
+      </section>
+
+      <!-- HOW -->
+      <section class="section" id="how">
         <header class="section-head" data-reveal>
           <p class="kicker">03 — How it works</p>
           <h2>Three steps. No <em>forms.</em></h2>
         </header>
-        <ol class="steps" id="steps" data-reveal-group><!-- rendered from /shared/tiers.js --></ol>
+        <ol class="steps steps--light" id="steps" data-reveal-group><!-- shared/tiers.js --></ol>
       </section>
 
-      <!-- AFTER LAUNCH -->
-      <section class="section" id="care">
-        <header class="section-head" data-reveal>
-          <p class="kicker">04 — After launch</p>
-          <h2>The work does not stop at <em>launch.</em></h2>
-          <p>
-            Every store can continue on a monthly care plan. This is a defined scope
-            of work, not an hourly bucket — updates tested on staging, uptime and
-            speed monitoring, security patches, monthly merchandising, bug fixes,
-            and a health report. Cancel with 30 days' notice.
-          </p>
-        </header>
-        <div class="care" id="care-plans" data-reveal-group><!-- rendered from /shared/tiers.js --></div>
-        <div class="care-note">
-          <p>
-            Per month, exclusive of GST. Sale-event cover (festive season, BFCM,
-            your brand day) is quoted separately.
-          </p>
-        </div>
-      </section>
-
-      <!-- FREE WITH SIGN-IN + COMING SOON -->
-      <section class="section section--free" id="free">
-        <div class="free" data-reveal>
-          <div class="free-col">
-            <p class="kicker">05 — Free, once you sign in</p>
-            <h2>Sign in and we'll do <em>these</em> for you.</h2>
-            <ul class="free-list" id="free-list"><!-- rendered from /shared/resources.js --></ul>
-            <p class="free-note">Ask on WhatsApp from your portal and we do it. No tier needed, nothing to pay.</p>
-            <a class="btn btn-primary" href="/login">Sign in with Google</a>
+      <!-- WHO -->
+      <section class="section" id="who">
+        <div class="who" data-reveal>
+          <div>
+            <p class="kicker">04 — Who you work with</p>
+            <h2>An operator with <em>eight years</em>, not an intern with a template.</h2>
+            <p>
+              Brand Mint is a small, senior studio in HITEC City. Every
+              engagement is led by someone with 8+ years of building and running
+              this software, and that person is on the call, in the build, and
+              on WhatsApp when something breaks at 9pm. There is no account
+              manager between you and the person doing the work.
+            </p>
+            <p>
+              We take on a limited number of builds at a time on purpose. If we
+              are full, or if a cheaper option is the honest answer for you, we
+              will say so on the first call.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">Book a call</a>
+            </div>
           </div>
-          <div class="free-col free-col--soon">
-            <p class="kicker">Launching next</p>
-            <div class="soon" id="soon-list"><!-- rendered from /shared/resources.js --></div>
-            <p class="free-note">Pre-book a free trial from your portal.</p>
-          </div>
+          <aside class="who-free">
+            <p class="kicker">Free, once you sign in</p>
+            <ul class="free-list" id="free-list"><!-- shared/resources.js --></ul>
+            <a class="btn btn-ghost" href="/login">Sign in with Google</a>
+          </aside>
         </div>
       </section>
 
       <!-- FAQ -->
       <section class="section section--faq" id="faq">
         <header class="section-head" data-reveal>
-          <p class="kicker">06 — Before you ask</p>
+          <p class="kicker">05 — Before you ask</p>
           <h2>The questions every founder <em>asks.</em></h2>
         </header>
-        <div class="faq" id="faq-list" data-reveal-group><!-- rendered from /shared/tiers.js --></div>
+        <div class="faq" id="faq-list" data-reveal-group><!-- shared/tiers.js --></div>
       </section>
 
       <!-- CTA -->
       <section class="cta" data-reveal>
         <h2>Start with a <em>call,</em> not a quote.</h2>
         <p>
-          Pick a tier, sign in with Google, and we'll ring you within one working
-          day. If the honest answer is that you don't need us yet, we'll say so.
+          Thirty minutes, no pitch deck. We will tell you what it costs, how
+          long it takes, and whether you need us at all.
         </p>
         <div class="hero-actions">
-          <a class="btn btn-primary btn-lg" href="#stores">Choose a store</a>
-          <a class="btn btn-ghost btn-lg" href="/login">Sign in</a>
+          <a class="btn btn-primary btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">Book a call on WhatsApp</a>
+          <a class="btn btn-ghost btn-lg" href="/pricing">See the prices</a>
         </div>
       </section>
     </main>
 
     <div class="sticky-cta" id="sticky-cta" aria-hidden="true">
       <div>
-        <strong class="num">From ₹49,999</strong>
-        <span>one-time · GST extra</span>
+        <strong>Book a call</strong>
+        <span>30 minutes, no pitch deck</span>
       </div>
-      <a class="btn btn-primary" href="#stores" tabindex="-1">Choose a store</a>
+      <a class="btn btn-primary" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener" tabindex="-1">WhatsApp</a>
     </div>
 
     <footer class="footer">
@@ -405,6 +375,8 @@
         <span class="num">+91 77999 34943</span>
       </div>
       <nav class="footer-links" aria-label="Legal">
+        <a href="/pricing">Pricing</a>
+        <a href="/platform">Site + CRM</a>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
         <a href="/login">Sign in</a>
@@ -413,121 +385,103 @@
 
     <script>document.documentElement.classList.add("js");</script>
     <script type="module">
-      import { TIERS, STEPS, CARE_PLANS, FAQ, inr } from "/shared/tiers.js?v=clean5";
-      import { PERKS, PRODUCTS } from "/shared/resources.js?v=1";
-      import { SERVICES } from "/shared/services.js?v=2";
+      import { STEPS, FAQ, inr } from "/shared/tiers.js?v=v10";
+      import { SERVICE_BY_ID, priceLabel } from "/shared/services.js?v=v10";
+      import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v10";
+      import { PERKS } from "/shared/resources.js?v=v10";
 
-      // ---- service categories
-      const svcHost = document.getElementById("services-list");
-      SERVICES.forEach((sv, i) => {
-        const el = document.createElement("article");
-        el.className = "service" + (sv.featured ? " service--featured" : "");
-        el.innerHTML = `
-          <div class="service-head">
-            <p class="service-n num">0${i + 1}</p>
-            <h3></h3>
-            <p class="service-price">
-              <span class="from">from</span>
-              <span class="num"></span>
-              <span class="unit"></span>
-            </p>
-            <p class="service-note"></p>
-            <a class="btn service-cta"></a>
-          </div>
-          <div class="service-body">
-            <p class="service-highlight"></p>
-            <p class="service-blurb"></p>
-            <ul class="service-points"></ul>
-          </div>
-        `;
-        el.querySelector("h3").textContent = sv.name;
-        if (sv.hidePrice) {
-          // No number until it launches — say so rather than guess.
-          const price = el.querySelector(".service-price");
-          price.classList.add("service-price--tbc");
-          price.textContent = "Pricing at launch";
-        } else {
-          el.querySelector(".service-price .num").textContent = inr(sv.from);
-          el.querySelector(".service-price .unit").textContent = sv.unit;
-        }
-        el.querySelector(".service-note").textContent = sv.note || "";
-        const hl = el.querySelector(".service-highlight");
-        if (sv.highlight) hl.textContent = sv.highlight;
-        else hl.remove();
-        el.querySelector(".service-blurb").textContent = sv.blurb;
-        const ul = el.querySelector(".service-points");
-        for (const pt of sv.points) {
-          const li = document.createElement("li");
-          li.textContent = pt;
-          ul.appendChild(li);
-        }
-        const cta = el.querySelector(".service-cta");
-        cta.href = sv.cta.href;
-        cta.textContent = sv.cta.label;
-        cta.classList.add(sv.featured ? "btn-primary" : "btn-ghost");
-        if (sv.status) {
-          const tag = document.createElement("span");
-          tag.className = "service-status";
-          tag.textContent = sv.status;
-          el.querySelector(".service-head").insertBefore(tag, el.querySelector(".service-price"));
-        }
-        svcHost.appendChild(el);
-      });
-
-      // ---- tier cards
-      const host = document.getElementById("tiers");
-      for (const t of TIERS) {
-        const card = document.createElement("article");
-        card.className = "tier" + (t.featured ? " tier--featured" : "");
-        card.innerHTML = `
-          <p class="tier-kicker">Tier ${t.tier}</p>
-          <h3>${t.name}</h3>
-          <p class="tier-blurb"></p>
-          <div class="tier-price">
-            <span class="num">${inr(t.price)}</span>
-            <span class="tier-weeks num">${t.weeks}</span>
-          </div>
-          <details class="tier-groups"><summary>What's included</summary></details>
-          <a class="btn tier-cta ${t.featured ? "btn-primary" : ""}" href="/login?tier=${t.id}">Choose ${t.name}<span class="arrow" aria-hidden="true">→</span></a>
-        `;
-        card.querySelector(".tier-blurb").textContent = t.blurb;
-
-        const groups = card.querySelector(".tier-groups");
-        for (const g of t.groups) {
-          const h4 = document.createElement("h4");
-          h4.textContent = g.title;
-          const ul = document.createElement("ul");
-          for (const item of g.items) {
-            const li = document.createElement("li");
-            li.textContent = item;
-            ul.appendChild(li);
-          }
-          groups.append(h4, ul);
-        }
-        host.appendChild(card);
+      // ---- proof panel
+      const stats = document.getElementById("proof-stats");
+      for (const s of PROOF) {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong class="num"></strong><span></span>`;
+        li.querySelector(".num").textContent = s.value;
+        li.querySelector("span").textContent = s.label;
+        stats.appendChild(li);
+      }
+      const clients = document.getElementById("proof-clients");
+      for (const w of WORK) {
+        const li = document.createElement("li");
+        if (w.url) {
+          const a = document.createElement("a");
+          a.href = w.url; a.rel = "noopener"; a.target = "_blank"; a.textContent = w.name;
+          li.appendChild(a);
+        } else li.textContent = w.name;
+        clients.appendChild(li);
       }
 
-      // Inclusions fold away on phones only. Open them wherever there is
-      // room, and keep that in sync if the window is resized across 720px.
-      const wide = matchMedia("(min-width: 720px)");
-      const syncGroups = () => {
-        for (const d of host.querySelectorAll("details.tier-groups")) {
-          if (wide.matches) d.open = true;
-          else d.open = d.closest(".tier--featured") != null;
-        }
-      };
-      syncGroups();
-      wide.addEventListener("change", syncGroups);
+      // ---- work cards. A screenshot at /work/<id>.jpg replaces the
+      //      typographic card; a missing file falls back cleanly.
+      const grid = document.getElementById("work-grid");
+      for (const w of WORK) {
+        const card = document.createElement("article");
+        card.className = "work";
+        card.innerHTML = `
+          <div class="work-shot">
+            <span class="work-fallback"><span class="work-fallback-name"></span><span class="work-fallback-kind"></span></span>
+          </div>
+          <div class="work-meta">
+            <h3></h3>
+            <p class="work-kind"></p>
+            <p class="work-summary"></p>
+            <p class="work-result num"></p>
+            <span class="work-link"></span>
+          </div>
+        `;
+        card.querySelector(".work-fallback-name").textContent = w.name;
+        card.querySelector(".work-fallback-kind").textContent = w.kind || "";
+        card.querySelector("h3").textContent = w.name;
+        card.querySelector(".work-kind").textContent = w.kind || "";
+        const sum = card.querySelector(".work-summary");
+        if (w.summary) sum.textContent = w.summary; else sum.remove();
+        const res = card.querySelector(".work-result");
+        if (w.result) res.textContent = w.result; else res.remove();
+        const link = card.querySelector(".work-link");
+        if (w.url) {
+          const a = document.createElement("a");
+          a.href = w.url; a.rel = "noopener"; a.target = "_blank";
+          a.textContent = w.domain + " ↗";
+          link.appendChild(a);
+        } else link.remove();
 
-      // ---- care plans
-      const care = document.getElementById("care-plans");
-      for (const c of CARE_PLANS) {
-        const el = document.createElement("article");
-        el.className = "care-plan";
-        el.innerHTML = `<h3></h3><p class="care-price"><span class="num">${inr(c.price)}</span><span>/month</span></p><p class="care-body"></p>`;
-        el.querySelector("h3").textContent = c.name;
-        el.querySelector(".care-body").textContent = c.body;
-        care.appendChild(el);
+        const img = new Image();
+        img.alt = w.name + " — built by Brand Mint";
+        img.loading = "lazy";
+        img.addEventListener("load", () => card.querySelector(".work-shot").prepend(img));
+        img.src = `/work/${w.id}.jpg`;
+        grid.appendChild(card);
+      }
+
+      // ---- in development, kept honestly separate from shipped work
+      const building = document.getElementById("building");
+      if (BUILDING.length) {
+        building.innerHTML = `<p class="kicker">In our own workshop</p>`;
+        const ul = document.createElement("ul");
+        ul.className = "building-list";
+        for (const b of BUILDING) {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong></strong><span></span>`;
+          li.querySelector("strong").textContent = b.name;
+          li.querySelector("span").textContent = `${b.kind} · ${b.status}`;
+          ul.appendChild(li);
+        }
+        building.appendChild(ul);
+      }
+
+      // ---- three headline offers; the full ladder lives on /pricing
+      const lines = document.getElementById("offer-lines");
+      for (const id of ["website", "store", "platform"]) {
+        const sv = SERVICE_BY_ID[id];
+        if (!sv) continue;
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div><h3></h3><p></p></div>
+          <p class="offer-price"><span class="from">from</span> <span class="num"></span></p>
+        `;
+        li.querySelector("h3").textContent = sv.name;
+        li.querySelector("div p").textContent = sv.blurb;
+        li.querySelector(".offer-price .num").textContent = sv.hidePrice ? "—" : inr(sv.from);
+        lines.appendChild(li);
       }
 
       // ---- steps
@@ -540,24 +494,13 @@
         steps.appendChild(li);
       });
 
-      // ---- free perks + coming soon
+      // ---- free perks, compact
       const freeList = document.getElementById("free-list");
-      for (const pk of PERKS) {
+      for (const pk of PERKS.slice(0, 5)) {
         const li = document.createElement("li");
-        li.innerHTML = "<strong></strong><span></span>";
+        li.innerHTML = "<strong></strong>";
         li.querySelector("strong").textContent = pk.title;
-        li.querySelector("span").textContent = pk.summary;
         freeList.appendChild(li);
-      }
-      const soon = document.getElementById("soon-list");
-      for (const pr of PRODUCTS) {
-        const el = document.createElement("article");
-        el.className = "soon-item";
-        el.innerHTML = "<span class=\"soon-tag\"></span><h3></h3><p></p>";
-        el.querySelector(".soon-tag").textContent = pr.status;
-        el.querySelector("h3").textContent = pr.name;
-        el.querySelector("p").textContent = pr.summary;
-        soon.appendChild(el);
       }
 
       // ---- faq
@@ -571,9 +514,7 @@
         faq.appendChild(d);
       }
 
-      // ---- motion. Reveal on scroll, nav shadow, sticky CTA on phones.
-      // Everything here is additive: without JS or with reduced motion the
-      // page is fully visible and static (see styles.css).
+      // ---- motion, unchanged: additive, and off under reduced-motion
       const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
       const targets = [...document.querySelectorAll("[data-reveal]")];
       for (const g of document.querySelectorAll("[data-reveal-group]")) {
@@ -591,7 +532,7 @@
       const nav = document.querySelector(".nav");
       const hero = document.querySelector(".hero");
       const sticky = document.getElementById("sticky-cta");
-      const footer = document.querySelector(".cta");
+      const closing = document.querySelector(".cta");
       let pastHero = false, atEnd = false;
       const paint = () => {
         const show = pastHero && !atEnd;
@@ -600,7 +541,7 @@
         sticky.querySelector("a").tabIndex = show ? 0 : -1;
       };
       new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting && e.boundingClientRect.top < 0; nav.classList.toggle("is-scrolled", pastHero); paint(); }, { threshold: 0 }).observe(hero);
-      new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; paint(); }, { threshold: 0.2 }).observe(footer);
+      new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; paint(); }, { threshold: 0.2 }).observe(closing);
     </script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
   </body>

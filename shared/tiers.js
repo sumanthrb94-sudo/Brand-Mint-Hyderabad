@@ -205,12 +205,12 @@ export const CARE_PLANS = [
 /** What happens after someone picks a tier. Shown on the home page and in the portal. */
 export const STEPS = [
   {
-    title: "Pick a tier and sign in",
-    body: "Choose the store that fits and continue with Google. That's the whole form — we get your email, you get a portal.",
+    title: "Book a call",
+    body: "Thirty minutes on WhatsApp or a call. We confirm what you need, what it costs and when it can start. No pitch deck, no discovery fee.",
   },
   {
-    title: "We call you the next day",
-    body: "A 30-minute call to confirm the tier, walk the scope and agree a start date. No pitch deck.",
+    title: "A fixed price, in writing",
+    body: "You get the scope and the price in an agreement before anyone starts work. Nothing is due until you sign it.",
   },
   {
     title: "Sign, pay 50%, watch it happen",

@@ -28,7 +28,9 @@ There is no contact form and no invite email. Sign-in **is** the form. Consent t
 
 | Path | Role |
 |---|---|
-| `index.html` + `styles.css` | Home page. Tier cards and steps are rendered from `shared/tiers.js` — **edit tiers there, not in HTML** |
+| `index.html` + `styles.css` | **The landing page.** Hero with a proof panel, the work, three headline offers, how it works, who you work with, FAQ. Leads with work and books a call — it carries no price list |
+| `pricing.html` | Every price: the five categories, the four store tiers, the care plans. Linked from the nav and the home page |
+| `shared/work.js` | **The portfolio** — `WORK` (shipped brands), `BUILDING` (in development), `PROOF` (the numbers under the hero). Screenshots go in `work/<id>.jpg`; a missing one falls back to a typographic card. Never put a metric here that is not real |
 | `shared/services.js` | **The service ladder** — the five categories the home page lists (Static Website ₹14,999, Online Store from ₹49,999, Site + CRM ₹79,999 once, Custom CRM, Modcon HR), each with its starting price and CTA. A category id used as a CTA must also appear in the `tier in [...]` list on `leads` in `firestore.rules` |
 | `shared/tiers.js` | The four tiers (id, name, price, weeks, blurb, grouped inclusions), `CARE_PLANS`, `STEPS`, `FAQ`, `NEEDS`, and `inclusionsFor()`. Single source of truth for home, login, portal, admin |
 | `login.html` | Google sign-in. Reads `?tier=`, calls `recordSignup()` after auth |
