@@ -1,0 +1,31 @@
+# Uptime Kuma — monitors every site we run and every site we look after.
+#
+# Sized for the e2-micro free tier: 1 GB RAM total, so the container is capped
+# and only ever listens on loopback. Nothing is exposed to the internet
+# directly — a Cloudflare Tunnel fronts it, so no firewall port is opened and
+# no static IP is needed. See ../README.md.
+
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    # Loopback only. The tunnel reaches it; the internet cannot.
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - kuma-data:/app/data
+    environment:
+      - UPTIME_KUMA_DISABLE_FRAME_SAMEORIGIN=false
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  kuma-data:
