@@ -1,5 +1,8 @@
 /**
- * The portfolio. This is the most valuable content on the site — a stranger
+ * The portfolio.
+ *
+ * A `domain` that is a platform subdomain (something.vercel.app) is rendered
+ * as "Open the live app" rather than printed raw — the host is not the brand. This is the most valuable content on the site — a stranger
  * deciding whether to trust you with ₹2,00,000 believes work, not adjectives.
  *
  * ⚠️ FIELDS TO CONFIRM. Only `name`, `domain` and `url` are known facts.

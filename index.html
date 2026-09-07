@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v11" />
+<link rel="stylesheet" href="/styles.css?v=v12" />
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
     <script type="application/ld+json">
@@ -467,7 +467,10 @@
         if (w.url) {
           const a = document.createElement("a");
           a.href = w.url; a.rel = "noopener"; a.target = "_blank";
-          a.textContent = w.domain + " ↗";
+          // A vercel.app or netlify.app address is a host, not a brand —
+          // showing it raw makes shipped work look like a weekend demo.
+          const platform = /\.(vercel|netlify|pages)\.(app|dev)$/.test(w.domain || "");
+          a.textContent = (platform ? "Open the live app" : w.domain) + " ↗";
           link.appendChild(a);
         } else link.remove();
 
