@@ -43,8 +43,8 @@ export const WORK = [
   {
     id: "freshkart",
     name: "FreshKart",
-    domain: "",
-    url: "",
+    domain: "fresh-kart-six.vercel.app",
+    url: "https://fresh-kart-six.vercel.app/",
     kind: "B2B ordering platform",
     summary: "",
     result: "",
