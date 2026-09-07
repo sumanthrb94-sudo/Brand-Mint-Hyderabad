@@ -49,6 +49,16 @@
       .tier .price { font: 600 15px var(--mono); color: var(--mint-deep); white-space: nowrap; }
       .tier[hidden] { display: none; }
 
+      .perks { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+      .perks li { display: flex; flex-direction: column; gap: 1px; padding-left: 24px; position: relative; }
+      .perks li::before {
+        content: ""; position: absolute; left: 0; top: .45em; width: 12px; height: 7px;
+        border-left: 2px solid var(--mint-deep); border-bottom: 2px solid var(--mint-deep); transform: rotate(-45deg);
+      }
+      .perks strong { font-size: 14px; font-weight: 600; }
+      .perks span { font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+      .perks[hidden] { display: none; }
+
       .btn {
         width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
         padding: 13px 18px; border-radius: 12px; font: 600 15px/1.3 var(--sans); text-align: center; cursor: pointer;
@@ -114,11 +124,18 @@
       <div class="mark"><svg class="bm-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true" focusable="false"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="bm-mark-m" pathLength="100" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg> Brand Mint</div>
 
       <div class="form">
-      <h1 id="title">Continue with Google</h1>
+      <h1 id="title">Get the free store toolkit</h1>
       <p class="sub" id="subtitle">
-        That's the whole sign-up. We get your email, you get a portal, and we
-        call you within one working day.
+        Sign in with Google and we'll email it over straight away. Yours to
+        keep whether or not you ever work with us.
       </p>
+
+      <ul class="perks" id="perks">
+        <li><strong>Launch-readiness checklist</strong><span>The 20-point pass every store we build clears before it goes live.</span></li>
+        <li><strong>Product catalogue template</strong><span>Every field we ask a client for, as a PDF and a CSV.</span></li>
+        <li><strong>Scope worksheet</strong><span>Work out what you need before anyone quotes you.</span></li>
+        <li><strong>A free store audit</strong><span>We go through your store and send back what's losing you orders.</span></li>
+      </ul>
 
       <div class="tier" id="tier" hidden>
         <div>
@@ -147,7 +164,7 @@
       </p>
       <label class="opt">
         <input type="checkbox" id="newsletter" checked />
-        <span>Send me occasional notes on running an online store in India. No spam, unsubscribe any time.</span>
+        <span>Email me occasional notes on running an online store in India. No spam, one click to stop.</span>
       </label>
       </div>
 
@@ -224,6 +241,7 @@
       // Show which store they picked, so the sign-in feels like step one of
       // that choice rather than a generic login wall.
       if (tier) {
+        document.getElementById("perks").hidden = true;
         document.getElementById("tier").hidden = false;
         document.getElementById("tier-name").textContent = tier.name;
         document.getElementById("tier-weeks").textContent = svc
@@ -234,7 +252,7 @@
           : inr(tier.price);
         document.getElementById("title").textContent = "Almost there";
         document.getElementById("subtitle").textContent =
-          "Sign in with Google and we'll call you within one working day to get started.";
+          "Sign in with Google and we'll call you within one working day. You'll get the free toolkit either way.";
         document.getElementById("google-label").textContent = `Continue with Google — ${tier.name}`;
       }
 

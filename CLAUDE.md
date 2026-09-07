@@ -50,6 +50,8 @@ There is no contact form and no invite email. Sign-in **is** the form. Consent t
 | `marketing/video/` | The video production kit — prompts, VO scripts, logo refs. Assets, not code. Keep. |
 | `brand-kit/` | Logo SVGs and brand guidelines (palette, type) |
 | `privacy.html`, `terms.html`, `404.html` | Legal pages the sign-in consent links to |
+| `api/` | **The only server-side code.** Vercel serverless functions: `subscribe.js` (Resend contact + the free toolkit email, called after sign-in) and `book.js` (the booking form → email to the studio + confirmation). No npm deps, Node built-ins only. Keys are Vercel env vars — see `SETUP-EMAIL.md` |
+| `SETUP-EMAIL.md` | Resend + Vercel env var checklist. Until it is done the endpoints answer 200 with `skipped` and nothing breaks |
 | `SETUP-FIREBASE.md` | Operator checklist: paste config, create Firestore, publish rules, enable Google, promote first admin |
 
 ## Commands

@@ -736,3 +736,32 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
   .offer-lines li { grid-template-columns: 1fr; gap: var(--s-3); }
   .proof-stats { flex-direction: row; flex-wrap: wrap; gap: var(--s-4) var(--s-6); }
 }
+
+/* -------------------------------------------------------- booking ------ */
+
+.book { display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(28px, 4vw, 56px); align-items: start; }
+.book-copy h2 { max-width: 14ch; }
+.book-copy p { margin-top: var(--s-3); }
+.book-copy .btn { margin-top: var(--s-5); }
+.book-form { display: flex; flex-direction: column; gap: var(--s-3); }
+.book-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+.bf { display: flex; flex-direction: column; gap: 5px; }
+.bf > span { font: 600 11.5px/1.4 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cream-mute); }
+.bf > span i { font-style: normal; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.bf input, .bf select, .bf textarea {
+  font: 400 15px/1.4 var(--sans); color: var(--cream);
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm); padding: 11px 13px; width: 100%;
+}
+.bf textarea { resize: vertical; min-height: 62px; }
+.bf select option { color: var(--ink); }
+.bf input:focus, .bf select:focus, .bf textarea:focus { outline: 2px solid var(--emerald); outline-offset: 2px; border-color: transparent; }
+.book-form .btn { margin-top: var(--s-2); }
+.book-status { font-size: 14px; padding: 10px 12px; border-radius: var(--radius-sm); }
+.book-status.is-ok { background: rgba(0, 200, 151, 0.16); color: var(--emerald); }
+.book-status.is-err { background: rgba(226, 59, 59, 0.16); color: #ffb4b4; }
+.book-fine { font-size: 12.5px; color: var(--cream-mute); }
+@media (max-width: 860px) {
+  .book { grid-template-columns: 1fr; }
+  .book-row { grid-template-columns: 1fr; }
+}

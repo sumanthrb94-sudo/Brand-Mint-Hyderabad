@@ -101,6 +101,9 @@ export function identify(id, provider) {
 }
 export const analyticsEnabled = enabled;
 
+// Let inline page scripts record an event without importing the module.
+try { window.bmTrack = track; } catch {}
+
 /* ----------------------------------------------------- auto capture */
 if (enabled) {
   const utm = ["utm_source", "utm_medium", "utm_campaign"].map((k) => params.get(k) || "").join("|").replace(/\|+$/, "");

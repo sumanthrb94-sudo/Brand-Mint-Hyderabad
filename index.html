@@ -256,7 +256,7 @@
             agreed before we start.
           </p>
           <div class="hero-actions" data-enter>
-            <a class="btn btn-primary btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">Book a call</a>
+            <a class="btn btn-primary btn-lg" href="#book">Book a call</a>
             <a class="btn btn-ghost btn-lg" href="#work">See the work</a>
           </div>
         </div>
@@ -327,7 +327,7 @@
               will say so on the first call.
             </p>
             <div class="hero-actions">
-              <a class="btn btn-primary" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">Book a call</a>
+              <a class="btn btn-primary" href="#book">Book a call</a>
             </div>
           </div>
           <aside class="who-free">
@@ -347,18 +347,43 @@
         <div class="faq" id="faq-list" data-reveal-group><!-- shared/tiers.js --></div>
       </section>
 
-      <!-- CTA -->
-      <section class="cta" data-reveal>
-        <h2>Start with a <em>call,</em> not a quote.</h2>
-        <p>
-          Thirty minutes, no pitch deck. We will tell you what it costs, how
-          long it takes, and whether you need us at all.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">Book a call on WhatsApp</a>
-          <a class="btn btn-ghost btn-lg" href="/pricing">See the prices</a>
+      <!-- BOOK -->
+      <section class="cta book" id="book" data-reveal>
+        <div class="book-copy">
+          <h2>Start with a <em>call,</em> not a quote.</h2>
+          <p>
+            Thirty minutes, no pitch deck. We will tell you what it costs, how
+            long it takes, and whether you need us at all. Leave your number
+            and we ring you within one working day — or message us now and skip
+            the queue.
+          </p>
+          <a class="btn btn-ghost btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">WhatsApp us instead</a>
         </div>
+        <form class="book-form" id="book-form" novalidate>
+          <div class="book-row">
+            <label class="bf"><span>Your name</span><input name="name" required autocomplete="name" /></label>
+            <label class="bf"><span>Phone</span><input name="phone" required inputmode="tel" autocomplete="tel" placeholder="10-digit mobile" /></label>
+          </div>
+          <div class="book-row">
+            <label class="bf"><span>Email <i>(optional)</i></span><input name="email" type="email" autocomplete="email" /></label>
+            <label class="bf"><span>Interested in</span>
+              <select name="service">
+                <option value="">Not sure yet</option>
+                <option>Static Website</option>
+                <option>Online Store</option>
+                <option>Site + CRM</option>
+                <option>Custom CRM</option>
+                <option>Modcon HR</option>
+              </select>
+            </label>
+          </div>
+          <label class="bf"><span>Anything we should know <i>(optional)</i></span><textarea name="note" rows="2"></textarea></label>
+          <button class="btn btn-primary btn-lg" type="submit">Request a call</button>
+          <p class="book-status" id="book-status" hidden></p>
+          <p class="book-fine">We call, we don't spam. Your number is used for this call and nothing else.</p>
+        </form>
       </section>
+
     </main>
 
     <div class="sticky-cta" id="sticky-cta" aria-hidden="true">
@@ -366,7 +391,7 @@
         <strong>Book a call</strong>
         <span>30 minutes, no pitch deck</span>
       </div>
-      <a class="btn btn-primary" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener" tabindex="-1">WhatsApp</a>
+      <a class="btn btn-primary" href="#book" tabindex="-1">Request a call</a>
     </div>
 
     <footer class="footer">
@@ -514,6 +539,34 @@
         faq.appendChild(d);
       }
 
+      // ---- booking. Posts to /api/book, which is the only part of this site
+      //      that can reach a human who isn't looking at the admin.
+      const form = document.getElementById("book-form");
+      const status = document.getElementById("book-status");
+      const say = (msg, ok) => { status.hidden = false; status.textContent = msg; status.className = "book-status " + (ok ? "is-ok" : "is-err"); };
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = form.querySelector("button[type=submit]");
+        const data = Object.fromEntries(new FormData(form).entries());
+        if (!data.name?.trim() || !data.phone?.trim()) return say("Name and phone, please — that's all we need.", false);
+        btn.disabled = true; btn.textContent = "Sending…";
+        try {
+          const r = await fetch("/api/book", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "failed");
+          form.reset();
+          say("Got it. We'll call you within one working day.", true);
+          try { window.bmTrack?.("book_request", { service: data.service || null }); } catch {}
+        } catch (err) {
+          say("That didn't send. WhatsApp us on +91 77999 34943 and we'll sort it.", false);
+        } finally {
+          btn.disabled = false; btn.textContent = "Request a call";
+        }
+      });
+
       // ---- motion, unchanged: additive, and off under reduced-motion
       const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
       const targets = [...document.querySelectorAll("[data-reveal]")];
@@ -532,7 +585,7 @@
       const nav = document.querySelector(".nav");
       const hero = document.querySelector(".hero");
       const sticky = document.getElementById("sticky-cta");
-      const closing = document.querySelector(".cta");
+      const closing = document.getElementById("book");
       let pastHero = false, atEnd = false;
       const paint = () => {
         const show = pastHero && !atEnd;

@@ -285,6 +285,23 @@ export async function recordSignup({ tier = null, newsletter = false } = {}) {
     { merge: true }
   );
 
+  // Join the mailing list and get the free toolkit emailed over. Fire and
+  // forget on purpose: signing in must succeed even if Resend is down or
+  // isn't configured yet, so nothing here is awaited or thrown.
+  try {
+    fetch("/api/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: user.email || "",
+        name: user.displayName || "",
+        newsletter: !!newsletter,
+        source: tier ? `tier:${tier}` : "signin",
+      }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {}
+
   if (!tier) return;
 
   // One lead per person per tier. The uid is what lets the admin convert
