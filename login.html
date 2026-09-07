@@ -7,13 +7,15 @@
     <meta name="robots" content="noindex,nofollow" />
     <title>Sign in — Brand Mint</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap"
-      rel="stylesheet"
-    />
-    <style>
+    <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
+<style>
+      /* Self-hosted, SIL OFL — see fonts/README.md. */
+      @font-face { font-family: "Plus Jakarta Sans"; src: url("/fonts/plus-jakarta-sans.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+      @font-face { font-family: "Inter"; src: url("/fonts/inter.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+      @font-face { font-family: "JetBrains Mono"; src: url("/fonts/jetbrains-mono.woff2") format("woff2"); font-weight: 100 800; font-display: swap; }
+      /* JetBrains Mono has no ₹ — borrow Inter's for that codepoint. */
+      @font-face { font-family: "JetBrains Mono"; src: url("/fonts/inter.woff2") format("woff2"); unicode-range: U+20B9; font-weight: 100 900; font-display: swap; }
       :root {
         --ink: #0a0e0c; --ink-2: #3a423e; --muted: #5b625e; --faint: #6f7672;
         --line: rgba(10,14,12,.12); --mint: #10b981; --mint-deep: #047857; --mint-wash: #e6f7f0;

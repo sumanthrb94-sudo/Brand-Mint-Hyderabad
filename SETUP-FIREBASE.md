@@ -145,7 +145,7 @@ brand-mint-sdmk.vercel.app
 localhost
 ```
 
-Add your custom domain here too once `brandmint.studio` is pointed, or
+Add your custom domain here too once `brandmintstudios.in` is pointed, or
 sign-in will fail on it with `auth/unauthorized-domain`.
 
 ---

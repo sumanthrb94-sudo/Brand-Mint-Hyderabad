@@ -1,3 +1,40 @@
+/* =========================================================================
+   Fonts, self-hosted. SIL Open Font Licence — see fonts/README.md.
+   Subset to Latin + ₹ + arrows: 526 KB of source down to 133 KB.
+   ========================================================================= */
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/fonts/plus-jakarta-sans.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+/* JetBrains Mono ships no ₹. Without this every price falls back mid-number
+   to whatever the OS has. Borrow Inter's rupee for that one codepoint. */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/inter.woff2") format("woff2");
+  unicode-range: U+20B9;
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /**
  * Client portal styles.
  *

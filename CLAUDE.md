@@ -48,6 +48,7 @@ There is no contact form and no invite email. Sign-in **is** the form. Consent t
 | `shared/quiz.js` | The Store Readiness Score: 10 questions, `scoreQuiz()` → score/100, tier fit, three fixes. Saved to `profiles/{uid}.readiness`; admin shows it on the lead |
 | `shared/resources.js` | Free perks (asked for on WhatsApp), `LESSONS`, `COMPLIANCE`, upcoming `PRODUCTS` (Modcon HR, Real Estate CRM). Portal renders them in every signed-in state; requests land in the `requests` collection and show in Admin → Leads |
 | `marketing/video/` | The video production kit — prompts, VO scripts, logo refs. Assets, not code. Keep. |
+| `fonts/` | The three typefaces, self-hosted and subset (SIL OFL, pulled from their own GitHub repos). Google Fonts was the only third party the public pages touched — it is gone. **JetBrains Mono has no ₹**, so `styles.css` has a `unicode-range` rule serving Inter's rupee inside the mono family; do not remove it |
 | `brand-kit/` | Logo SVGs and brand guidelines (palette, type) |
 | `privacy.html`, `terms.html`, `404.html` | Legal pages the sign-in consent links to |
 | `api/` | **The only server-side code.** Vercel serverless functions: `subscribe.js` (Resend contact + the free toolkit email, called after sign-in) and `book.js` (the booking form → email to the studio + confirmation). No npm deps, Node built-ins only. Keys are Vercel env vars — see `SETUP-EMAIL.md` |
