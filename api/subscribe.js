@@ -11,7 +11,6 @@ import { sameOrigin, readEmail, clean, readJson, addContact, sendEmail, shell } 
 const FILES = [
   ["Store launch-readiness checklist", "/downloads/brand-mint-launch-readiness-checklist.pdf"],
   ["Product catalogue template (PDF)", "/downloads/brand-mint-product-catalogue-template.pdf"],
-  ["Product catalogue template (CSV)", "/downloads/brand-mint-product-catalogue-template.csv"],
   ["Scope worksheet", "/downloads/brand-mint-scope-worksheet.pdf"],
 ];
 
