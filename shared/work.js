@@ -34,8 +34,8 @@ export const WORK = [
   {
     id: "greenteam",
     name: "GreenTeam",
-    domain: "greenteam.in",
-    url: "https://greenteam.in",
+    domain: "thegreenteam.in",
+    url: "https://thegreenteam.in",
     kind: "Website",
     summary: "",
     result: "",
