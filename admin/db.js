@@ -37,6 +37,8 @@ const COLLECTIONS = [
   "messages",
   // Free perks + pre-bookings from the portal
   "requests",
+  // Call requests from the public booking form
+  "bookings",
   // Sign-in profiles (readiness score lives here)
   "profiles",
 ];
@@ -76,6 +78,7 @@ const cache = {
   deliverables: [],
   messages: [],
   requests: [],
+  bookings: [],
   profiles: [],
   settings: null,
 };

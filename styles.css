@@ -798,6 +798,8 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
 .book-status.is-ok { background: rgba(0, 200, 151, 0.16); color: var(--emerald); }
 .book-status.is-err { background: rgba(226, 59, 59, 0.16); color: #ffb4b4; }
 .book-fine { font-size: 12.5px; color: var(--cream-mute); }
+/* Off-screen rather than display:none — some bots skip hidden inputs. */
+.bf-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 @media (max-width: 860px) {
   .book { grid-template-columns: 1fr; }
   .book-row { grid-template-columns: 1fr; }

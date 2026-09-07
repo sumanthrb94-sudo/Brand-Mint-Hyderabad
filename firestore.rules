@@ -290,6 +290,34 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /bookings/{id} {
+      // Call requests from the public booking form. Nobody is signed in, so
+      // this is open to create with a hard-pinned shape and size — the same
+      // treatment as /events. Only the studio can ever read one back.
+      allow create: if request.resource.data.keys().hasOnly([
+                         'name', 'phone', 'email', 'service', 'when', 'note',
+                         'source', 'status', 'createdAt'
+                       ])
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.name.size() <= 80
+                    && request.resource.data.phone is string
+                    && request.resource.data.phone.size() > 0
+                    && request.resource.data.phone.size() <= 20
+                    && request.resource.data.email.size() <= 320
+                    // NOTE: `service` is a reserved word in this language
+                    // (`service cloud.firestore` above), so dot access on a
+                    // field of that name does not compile. Brackets do.
+                    && request.resource.data['service'].size() <= 60
+                    && request.resource.data.when.size() <= 60
+                    && request.resource.data.note.size() <= 1000
+                    && request.resource.data.status == 'new'
+                    && request.resource.data.createdAt is string
+                    && request.resource.data.createdAt.size() <= 40;
+      allow get, list: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
     /* --------------------------- content, settings ------------------------ */
     // Admin only. Settings carries bank details and GSTIN.
 

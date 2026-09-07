@@ -19,6 +19,9 @@ export default async function handler(req, res) {
   const service = clean(body.service, 60);
   const when = clean(body.when, 60);
   const note = clean(body.note, 1000);
+  // Honeypot, checked here as well: the browser is not a trustworthy place to
+  // enforce anything. A filled trap gets a 200 so the bot learns nothing.
+  if (clean(body.website, 200)) return res.status(200).json({ ok: true });
   if (!name || !phone) return res.status(400).json({ error: "name and phone required" });
 
   const studio = process.env.BOOKING_TO || "mintstudios823@gmail.com";

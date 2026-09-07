@@ -91,6 +91,15 @@ export async function render(ctx) {
   /* ---- Needs you: anything a client is currently waiting on ---- */
   const actions = [];
 
+  const calls = db.list("bookings", (r) => r.status !== "done");
+  if (calls.length) {
+    actions.push({
+      text: `${calls.length} call request${calls.length > 1 ? "s" : ""} from the site — ring them back`,
+      cta: "Open leads",
+      route: "/leads",
+    });
+  }
+
   const requests = db.list("requests", (r) => r.status !== "done");
   if (requests.length) {
     actions.push({

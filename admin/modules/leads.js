@@ -241,7 +241,61 @@ export async function render(ctx) {
     }
 
     renderTable();
+    root.appendChild(bookingsPanel());
     root.appendChild(requestsPanel());
+  }
+
+  /* Call requests from the booking form on the home page. These arrive from
+     people who are NOT signed in, so they are not leads yet — convert one and
+     it becomes a normal lead you can work. */
+  function bookingsPanel() {
+    const rows = db.list("bookings").slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    const open = rows.filter((r) => r.status !== "done").length;
+    return h("section", { class: "card", style: "margin-top:24px" }, [
+      h("div", { class: "card-head" }, [
+        h("h3", { text: "Call requests" }),
+        h("span", { class: "muted", text: open ? `${open} to call` : "All handled" }),
+      ]),
+      table({
+        columns: [
+          {
+            label: "Who",
+            cell: (r) => h("div", {}, [
+              h("div", { class: "strong", text: r.name || "—" }),
+              h("div", { class: "sub", text: [r.phone, r.email].filter(Boolean).join(" · ") }),
+            ]),
+          },
+          {
+            label: "Wants",
+            cell: (r) => h("div", {}, [
+              h("div", { class: "strong", text: r.service || "Not sure yet" }),
+              h("div", { class: "sub", text: r.note || "" }),
+            ]),
+          },
+          { label: "When", cell: (r) => relTime(r.createdAt) },
+          { label: "Status", cell: (r) => pill(r.status === "done" ? "done" : "new") },
+          {
+            label: "",
+            cell: (r) => h("div", { class: "hstack", style: "gap:6px;justify-content:flex-end" }, [
+              r.phone
+                ? h("a", {
+                    class: "btn btn-sm", target: "_blank", rel: "noopener",
+                    href: `https://wa.me/${String(r.phone).replace(/\D/g, "").replace(/^(?=\d{10}$)/, "91")}`,
+                    text: "WhatsApp", onclick: (e) => e.stopPropagation(),
+                  })
+                : null,
+              h("button", {
+                class: "btn btn-sm", type: "button",
+                text: r.status === "done" ? "Reopen" : "Mark called",
+                onclick: (e) => { e.stopPropagation(); db.update("bookings", r.id, { status: r.status === "done" ? "new" : "done" }); },
+              }),
+            ].filter(Boolean)),
+          },
+        ],
+        rows,
+        empty: { title: "No call requests yet", body: "The booking form on the home page lands here, and emails you at the same time." },
+      }),
+    ]);
   }
 
   /* Free perks and pre-bookings people asked for from the portal. Each one

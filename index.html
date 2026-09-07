@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v10" />
+<link rel="stylesheet" href="/styles.css?v=v11" />
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
     <script type="application/ld+json">
@@ -374,6 +374,11 @@
             </label>
           </div>
           <label class="bf"><span>Anything we should know <i>(optional)</i></span><textarea name="note" rows="2"></textarea></label>
+          <!-- Honeypot. Hidden from people, irresistible to bots. Never remove
+               the aria-hidden or the tabindex: a screen reader must skip it. -->
+          <div class="bf-trap" aria-hidden="true">
+            <label>Company website<input name="website" tabindex="-1" autocomplete="off" /></label>
+          </div>
           <button class="btn btn-primary btn-lg" type="submit">Request a call</button>
           <p class="book-status" id="book-status" hidden></p>
           <p class="book-fine">We call, we don't spam. Your number is used for this call and nothing else.</p>
@@ -410,6 +415,7 @@
       import { SERVICE_BY_ID, priceLabel } from "/shared/services.js?v=v10";
       import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v10";
       import { PERKS } from "/shared/resources.js?v=v10";
+      import { saveBooking } from "/shared/booking.js?v=1";
 
       // ---- proof panel
       const stats = document.getElementById("proof-stats");
@@ -539,28 +545,47 @@
       //      that can reach a human who isn't looking at the admin.
       const form = document.getElementById("book-form");
       const status = document.getElementById("book-status");
+      const shownAt = Date.now();
       const say = (msg, ok) => { status.hidden = false; status.textContent = msg; status.className = "book-status " + (ok ? "is-ok" : "is-err"); };
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = form.querySelector("button[type=submit]");
         const data = Object.fromEntries(new FormData(form).entries());
+
+        // Bots fill hidden fields and submit instantly. Both are silent
+        // rejections — telling a bot why it failed only helps it.
+        if (data.website || Date.now() - shownAt < 2500) {
+          say("Got it. We'll call you within one working day.", true);
+          form.reset();
+          return;
+        }
+        delete data.website;
+
         if (!data.name?.trim() || !data.phone?.trim()) return say("Name and phone, please — that's all we need.", false);
         btn.disabled = true; btn.textContent = "Sending…";
+
+        // Store it FIRST. The record has to survive the email failing —
+        // an enquiry that only ever existed in a failed send is a lost
+        // customer you never find out about.
+        const stored = await saveBooking(data);
+        let mailed = false;
         try {
           const r = await fetch("/api/book", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data),
           });
-          if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "failed");
+          mailed = r.ok;
+        } catch {}
+
+        if (stored || mailed) {
           form.reset();
           say("Got it. We'll call you within one working day.", true);
-          try { window.bmTrack?.("book_request", { service: data.service || null }); } catch {}
-        } catch (err) {
+          try { window.bmTrack?.("book_request", { service: data.service || null, stored, mailed }); } catch {}
+        } else {
           say("That didn't send. WhatsApp us on +91 77999 34943 and we'll sort it.", false);
-        } finally {
-          btn.disabled = false; btn.textContent = "Request a call";
         }
+        btn.disabled = false; btn.textContent = "Request a call";
       });
 
       // ---- motion, unchanged: additive, and off under reduced-motion
