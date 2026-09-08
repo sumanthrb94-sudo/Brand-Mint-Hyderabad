@@ -23,6 +23,16 @@ export function initClarity() {
   document.head.appendChild(script);
 }
 
+export function identifyUser(userId) {
+  if (!userId) return;
+  if (window.clarity) {
+    window.clarity("identify", userId);
+    console.log("[Clarity] User identified:", userId);
+  } else {
+    console.warn("[Clarity] Not yet loaded; identify will be called again on next page");
+  }
+}
+
 // Initialize on page load if not inside iframe (heatmap uses ?bm_nt=1 to disable tracking)
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initClarity);

@@ -26,6 +26,7 @@
 
 import { getFirebase, isConfigured } from "/firebase/app.js";
 import { firebaseConfig } from "/firebase/config.js";
+import { identifyUser } from "/shared/clarity.js";
 
 /**
  * Our own first-paint hint. We cache it rather than reading Firebase's
@@ -198,6 +199,8 @@ export async function getProfile({ force = false } = {}) {
       profileMissing: !data,
     };
     cacheProfile(_profile);
+    // Identify user in Clarity for session tracking
+    identifyUser(user.uid);
     return _profile;
   })();
 
