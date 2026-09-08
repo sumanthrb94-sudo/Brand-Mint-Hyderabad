@@ -26,7 +26,7 @@
 
 import { getFirebase, isConfigured } from "/firebase/app.js";
 import { firebaseConfig } from "/firebase/config.js";
-import { identifyUser } from "/shared/clarity.js";
+import { identifyUser } from "/shared/clarity.js?v=2";
 
 /**
  * Our own first-paint hint. We cache it rather than reading Firebase's

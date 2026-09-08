@@ -1,39 +1,61 @@
 /**
- * Microsoft Clarity integration — session recording, heatmaps, replays
- * Complements the custom analytics in shared/analytics.js
- * Get your project ID from https://clarity.microsoft.com/
+ * Microsoft Clarity — session replay and heat maps.
+ *
+ * This is a THIRD PARTY on the public pages: it ships behaviour to Microsoft.
+ * It is gated exactly like shared/analytics.js — off under Do Not Track or
+ * Global Privacy Control, off whenever the page is framed, and off inside the
+ * admin's own heat-map iframe (?bm_nt=1), so opening Admin → Heat map does not
+ * record a fake session against the studio's own uid.
+ *
+ * Project id comes from clarity.microsoft.com → Settings → Overview.
  */
 
-export function initClarity() {
-  const projectId = "yf5p3s2ntw"; // Brand Mint Clarity project
-  if (!projectId || projectId === "YOUR_CLARITY_PROJECT_ID") {
-    console.warn("[Clarity] Project ID not configured. Set it in shared/clarity.js");
-    return;
-  }
+const PROJECT_ID = "yf5p3s2ntw";
 
-  // Load Clarity script
+function enabled() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (window.self !== window.top) return false;
+    if (params.has("bm_nt")) return false;
+    if (params.has("bm_track")) return true;
+    if (navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return false;
+    if (/bot|crawl|spider|headless/i.test(navigator.userAgent)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function initClarity() {
+  if (!PROJECT_ID || !enabled() || window.clarity) return;
+
+  // Microsoft's own snippet, queue and all. The stub buffers calls made before
+  // the tag has loaded and the real library replays them, which is what makes
+  // identifyUser() safe to call the moment the profile resolves.
+  window.clarity = function () {
+    (window.clarity.q = window.clarity.q || []).push(arguments);
+  };
   const script = document.createElement("script");
   script.async = true;
-  script.type = "text/javascript";
-  script.src = `https://www.clarity.ms/tag/${projectId}?ref=bwt`;
-  script.onload = () => {
-    console.log("[Clarity] Initialized");
-    // Clarity object is now available globally as window.clarity
-  };
-  document.head.appendChild(script);
+  script.src = "https://www.clarity.ms/tag/" + PROJECT_ID;
+  const first = document.getElementsByTagName("script")[0];
+  if (first && first.parentNode) first.parentNode.insertBefore(script, first);
+  else document.head.appendChild(script);
 }
 
+/**
+ * Tie the session to the signed-in user, so a replay can be found by uid.
+ * A no-op when Clarity is switched off — never a reason for a page to break.
+ */
 export function identifyUser(userId) {
-  if (!userId) return;
-  if (window.clarity) {
+  if (!userId || typeof window.clarity !== "function") return;
+  try {
     window.clarity("identify", userId);
-    console.log("[Clarity] User identified:", userId);
-  } else {
-    console.warn("[Clarity] Not yet loaded; identify will be called again on next page");
+  } catch (e) {
+    console.warn("[clarity] identify", e);
   }
 }
 
-// Initialize on page load if not inside iframe (heatmap uses ?bm_nt=1 to disable tracking)
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initClarity);
 } else {
