@@ -11,10 +11,29 @@ Two different problems, and only one of them costs money:
 
 You do not need a paid mailbox for either. Do this:
 
-**1. Move the domain's DNS to Cloudflare** (free). Add the site at
-<https://dash.cloudflare.com>, and change the nameservers at your registrar to
-the two Cloudflare gives you. Nothing about the website changes — Vercel keeps
-serving it, Cloudflare only answers DNS.
+**1. Move the domain's DNS from GoDaddy to Cloudflare** (free).
+
+This is the only step that can take the website down if rushed, because it
+moves *all* DNS — not just mail. Do it in this order and nothing breaks:
+
+1. **Write down what exists today.** GoDaddy → My Products → your domain →
+   **DNS** → Manage Zones. Screenshot the whole record list. The ones that
+   matter most are whatever points the site at Vercel (an `A` record on `@`
+   and usually a `CNAME` on `www`) and any `TXT` verification records.
+2. **Add the site at Cloudflare.** <https://dash.cloudflare.com> → Add a site →
+   `brandmintstudios.in` → Free plan. Cloudflare scans your existing DNS and
+   imports what it finds.
+3. **Compare the two lists, record by record.** Cloudflare's scan is good but
+   not perfect. Anything on your GoDaddy screenshot that is missing here, add
+   it by hand. **Do not skip this** — a missing record is a dead website.
+4. **Set the Vercel records to "DNS only"** (grey cloud, not orange). Proxying
+   a Vercel site through Cloudflare works but needs its own SSL settings, and
+   you should not change two things at once. Get email working first.
+5. **Only now, switch the nameservers.** GoDaddy → your domain →
+   **Nameservers** → Change → *I'll use my own nameservers* → paste the two
+   Cloudflare gives you. Propagation is usually minutes, occasionally hours.
+6. Wait until Cloudflare shows the domain as **Active**, then load
+   `https://brandmintstudios.in` and confirm the site still works.
 
 **2. Cloudflare → Email → Email Routing.** Free, unlimited addresses. Create:
 
@@ -34,6 +53,18 @@ Cloudflare forwards to you. Enter it and you're done.
 
 You now send and receive on your own domain, for nothing, forever, with
 Gmail's deliverability behind it.
+
+**If you would rather not move nameservers at all:** ImprovMX has a free
+forwarding tier that works by adding two `MX` records and one `TXT` record at
+GoDaddy, leaving DNS exactly where it is. Less to go wrong on day one; you
+give a third party sight of forwarded mail, and you do not get Cloudflare's
+CDN later. GoDaddy also sells its own mailbox product — that is the monthly
+rent you said you did not want to pay.
+
+**A thing that does not exist:** GitHub has no email hosting. It can send
+notifications *to* you, and Actions can send mail through someone else's SMTP,
+but there is no GitHub mailbox for your domain. Nothing on the
+awesome-selfhosted list changes that either — see the section below.
 
 **Alternative if you would rather not move DNS:** ImprovMX has a free
 forwarding tier, and Zoho Mail has long had a free plan for one domain with
