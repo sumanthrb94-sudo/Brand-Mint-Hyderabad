@@ -2,6 +2,9 @@
 
 ## Step 0 — email at your own domain, for ₹0
 
+> Doing this on a phone? **`SETUP-EMAIL-MOBILE.md`** is the same thing as a
+> tap-by-tap checklist, and it is the one to reuse for client domains.
+
 Two different problems, and only one of them costs money:
 
 | | What it is | Cost |
