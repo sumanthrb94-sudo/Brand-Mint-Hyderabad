@@ -5,7 +5,7 @@
  */
 
 export function initClarity() {
-  const projectId = "n9fqz36rvb"; // Replace with your actual Clarity project ID from dashboard
+  const projectId = "yf5p3s2ntw"; // Brand Mint Clarity project
   if (!projectId || projectId === "YOUR_CLARITY_PROJECT_ID") {
     console.warn("[Clarity] Project ID not configured. Set it in shared/clarity.js");
     return;
