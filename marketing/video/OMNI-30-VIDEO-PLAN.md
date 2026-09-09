@@ -1,9 +1,30 @@
 # Brand Mint — 30 videos, 3 months, one paste each
 
-**Budget reality.** 1000 credits ÷ 30 = **33 generations**, not 33 videos. Expect
-to re-roll roughly one in four. Shoot in the order below: it runs highest-selling
-first, so if retries eat the budget the things you lose are the least valuable.
-Realistic finished count from 1000 credits: **22–26**.
+**Budget — corrected from the Flow app itself.** 1050 credits. Omni 1.1 Flash
+costs **12 credits per video**, not 30, so the real ceiling is **87 generations**.
+All 30 videos cost 360 credits and leave ~57 re-rolls. Nothing here is
+credit-constrained. (Veo 3.1 Lite is 10/video and Veo 3.1 Fast is 20 — Omni Flash
+at 12 is the sensible default; try one V01 on Veo Fast and compare before
+committing.)
+
+**Stills are free.** Nano Banana in the same app reports **0 credits** for image
+generation. So do not burn a video credit finding a composition: generate the
+opening frame as a still first, re-roll it as many times as you like for nothing,
+and only spend 12 credits animating a frame you already like. Order of work per
+video: *still (free, iterate) → upload as the asset → animate (12)*.
+
+**Set duration to 10s explicitly.** Flow defaults to 8s. 4/6/8/10 are the options
+and every prompt here is written for 10.
+
+**Output is 720p max** (720×1280 at 9:16). The overlay pack renders at 1080×1920,
+so composite on a 1080×1920 timeline and let the footage upscale — the type stays
+sharp, which is the part that matters. Meta re-encodes anyway.
+
+**Visible watermarking is mandatory in your region** — the toggle in Flow is
+locked. Every clip carries it. Do not plan a layout that fights it and do not try
+to remove it: synthetic-media labelling is a legal requirement in India, not a
+Flow preference. Check which corner it lands in on your first clip and keep the
+end-card lock-up and lower third clear of it.
 
 **Every block below is the complete prompt.** Paste it, generate, done. The
 `POST:` line underneath is for you in the editor — it never goes to Omni.
@@ -422,8 +443,9 @@ faces.
 | 5–8 | V11–V18 | Founder trust. Organic Reels, not paid — talking heads convert badly cold. |
 | 9–13 | V19–V30 | Education and objections. V26 only in festive run-up. V30 is a reusable outro. |
 
-**Generate in order.** If credits run out at V26 you will have lost the four
-least commercial concepts, not four of the first ten.
+**Generate in order anyway.** Not because credits run out — they do not — but
+because the first ten are the ones that sell, and you want them live while you
+are still enthusiastic about the other twenty.
 
 **Before any of these run as paid ads:** the render is text-free, so every claim
 enters in post — which means the claim rules are enforced by you in the editor,
