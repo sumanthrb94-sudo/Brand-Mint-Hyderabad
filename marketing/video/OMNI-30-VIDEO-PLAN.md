@@ -152,25 +152,27 @@ resolution offered.
 
 ```
 Product advertisement, 9:16 vertical, 10 seconds, single continuous shot with no
-cuts. The same room as the previous Brand Mint videos, now at night: the same
-dark polished walnut desk, the same deep olive-green wall, the same warm
+cuts. The same room as the previous Brand Mint videos, now late at night: the
+same dark polished walnut desk, the same deep olive-green wall, the same warm
 practical lamp glowing at the left of frame, the same plant softly out of focus
-at the right. A neat stack of plain kraft parcels sits at the back of the desk,
-already sealed. No person in frame at any point. In the foreground a matte black
-smartphone lies face-up on the desk beside a cup of chai with steam rising. The
-camera pushes in very slowly and steadily across the whole ten seconds. Three
-times, spaced unevenly, the phone vibrates gently against the wood and a soft
-blank mint-green glow pulses across its screen and fades. The steam keeps
-rising. 85mm lens at T2.0, very shallow depth of field, 24fps. The lamp is the
-only warm source; the rest of the room falls into deep green shadow. Filmic, low
-midtone contrast, calm and quiet. Colour: dark walnut, deep olive green, warm
-lamp gold, kraft brown, and the mint-green screen glow as the single saturated
-accent. Match the previous Brand Mint videos exactly — the same room, the same
-desk, the same lamp, the same plant, the same grade — treat it as the same
-location filmed the same evening. Absolutely no text, letters, numbers, icons,
-notifications, user interface, app windows, status bar, logos, watermarks,
-labels or printing anywhere in frame — the phone screen is pure blank glowing
-colour. No faces, no people.
+at the right. The lamp is the only light in the room; everything beyond it falls
+into deep green shadow. A neat stack of plain kraft parcels sits at the back of
+the desk, already sealed, exactly as they were left. No person in frame at any
+point. The shot opens wide on the quiet room and pushes in slowly and steadily
+across the whole ten seconds, ending tight on a matte black smartphone lying
+face-up on the desk beside a cup of chai with steam rising. Three times, spaced
+unevenly through the push-in, the phone vibrates gently against the wood and a
+soft blank mint-green glow blooms across its screen and fades. The final second
+holds close on that screen as it glows once more. 50mm lens opening to an 85mm
+framing, T2.0, very shallow depth of field, 24fps. Filmic, low midtone contrast,
+calm and quiet. Colour: dark walnut, deep olive green, warm lamp gold, kraft
+brown, and the mint-green screen glow as the single saturated accent. Match the
+previous Brand Mint videos exactly — the same room, the same desk, the same
+lamp, the same plant, the same grade — and treat it as the same location filmed
+the same evening. Absolutely no text, letters, numbers, icons, notifications,
+user interface, app windows, status bar, logos, watermarks, labels or printing
+anywhere in frame; the phone screen is pure blank glowing colour throughout. No
+faces, no people, no hands.
 ```
 
 ### The edit — 12s timeline, 1080×1920
