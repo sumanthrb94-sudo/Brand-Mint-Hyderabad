@@ -23,10 +23,10 @@ const FRAMES = [
   for (const [id, transparent] of FRAMES) {
     const el = await p.$("#" + id);
     if (!el) { console.error("MISSING", id); continue; }
-    const file = path.join(out, id + ".png");
+    const file = path.join(out, "brandmint-" + id + ".png");
     await el.screenshot({ path: file, omitBackground: transparent });
     const { width, height } = await el.boundingBox();
-    console.log(`  ${id}.png  ${width}x${height}  ${(fs.statSync(file).size / 1024).toFixed(0)} KB${transparent ? "  (alpha)" : ""}`);
+    console.log(`  brandmint-${id}.png  ${width}x${height}  ${(fs.statSync(file).size / 1024).toFixed(0)} KB${transparent ? "  (alpha)" : ""}`);
   }
   await b.close();
 })();

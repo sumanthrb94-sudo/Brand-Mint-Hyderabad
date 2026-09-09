@@ -14,7 +14,7 @@ the price becomes a tofu box.
 
 | File | Use |
 |---|---|
-| `style-board.png` | Style/colour reference. The prompts already describe the grade, so this is belt-and-braces. Never attach anything with a logo — it tempts the model into drawing letterforms, which every prompt forbids. |
+| `brandmint-style-board.png` | Style/colour reference. The prompts already describe the grade, so this is belt-and-braces. Never attach anything with a logo — it tempts the model into drawing letterforms, which every prompt forbids. |
 
 ## Composite in post — transparent, 1080×1920, drop straight on
 
@@ -23,20 +23,20 @@ legible over the bright cream-linen footage without looking like a caption box.
 
 | File | Copy |
 |---|---|
-| `ov-hook.png` | Your product deserves a *real* store. |
-| `ov-features.png` | UPI · Cash on delivery · GST invoices · WhatsApp orders |
-| `ov-price.png` | Online stores from ₹49,999 · fixed, GST extra |
-| `ov-proof.png` | 4 brands shipped · 8+ years on every build |
-| `ov-cta.png` | Talk to the person who *builds* it. + URL |
-| `ov-lower-third.png` | Name plate for the founder cuts (V11–V18). No scrim — it has its own panel. |
+| `brandmint-ov-hook.png` | Your product deserves a *real* store. |
+| `brandmint-ov-features.png` | UPI · Cash on delivery · GST invoices · WhatsApp orders |
+| `brandmint-ov-price.png` | Online stores from ₹49,999 · fixed, GST extra |
+| `brandmint-ov-proof.png` | 4 brands shipped · 8+ years on every build |
+| `brandmint-ov-cta.png` | Talk to the person who *builds* it. + URL |
+| `brandmint-ov-lower-third.png` | Name plate for the founder cuts (V11–V18). No scrim — it has its own panel. |
 
 ## End cards — opaque, full frame
 
 | File | Size |
 |---|---|
-| `endcard-9x16.png` | 1080×1920 — Reels, Stories |
-| `endcard-1x1.png` | 1080×1080 — feed |
-| `endcard-16x9.png` | 1920×1080 — in-stream, YouTube |
+| `brandmint-endcard-9x16.png` | 1080×1920 — Reels, Stories |
+| `brandmint-endcard-1x1.png` | 1080×1080 — feed |
+| `brandmint-endcard-16x9.png` | 1920×1080 — in-stream, YouTube |
 
 ## Still missing, and only you can make it
 
