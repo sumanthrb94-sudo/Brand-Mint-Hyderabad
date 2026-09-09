@@ -49,9 +49,11 @@ beyond four.
 
 Findings from the delivered file. These override earlier guesses.
 
-- **Output is 1080×1920, 24fps, H.264, with AAC audio** — not 720p. The overlay
-  pack is 1080×1920, so it drops on **natively, no scaling**. Ignore the earlier
-  note about compositing upscaled footage.
+- **Resolution varies by generation, so check it every time.** V00 came back
+  1080×1920; V02, generated from the same app at the 720p setting, came back
+  720×1280. Both 24fps H.264 with AAC. Composite everything on a **1080×1920**
+  timeline and upscale any 720p clip 1.5× — scaling the overlays down instead
+  costs you resolution on the type, which is the part people read.
 - **The no-text constraint held completely.** Nothing rendered a letterform.
   Keep the negative-constraint sentence on every prompt.
 - **The Flow watermark is a four-point sparkle at roughly x 830–960, y 1690–1770**
@@ -63,6 +65,58 @@ Findings from the delivered file. These override earlier guesses.
   dark walnut desk, soft key from camera left. It reads well. Do not fight it —
   every subsequent prompt should match *this*, because consistency now beats the
   original palette note.
+
+---
+
+## V03 — the order arrives
+
+Same room again, later in the day. V02 ended on nine sealed parcels; this opens
+on them still there in the dark. That is a campaign, not three unrelated clips —
+and the model has now twice proven it renders this space.
+
+After this, break the pattern: V04 should be a founder cut, so the feed
+alternates face / product / face rather than settling into one texture.
+
+**Flow:** 9:16 · **10s** · Omni 1.1 Flash · 12 credits · pick the highest
+resolution offered.
+
+```
+Product advertisement, 9:16 vertical, 10 seconds, single continuous shot with no
+cuts. The same room as the previous Brand Mint videos, now at night: the same
+dark polished walnut desk, the same deep olive-green wall, the same warm
+practical lamp glowing at the left of frame, the same plant softly out of focus
+at the right. A neat stack of plain kraft parcels sits at the back of the desk,
+already sealed. No person in frame at any point. In the foreground a matte black
+smartphone lies face-up on the desk beside a cup of chai with steam rising. The
+camera pushes in very slowly and steadily across the whole ten seconds. Three
+times, spaced unevenly, the phone vibrates gently against the wood and a soft
+blank mint-green glow pulses across its screen and fades. The steam keeps
+rising. 85mm lens at T2.0, very shallow depth of field, 24fps. The lamp is the
+only warm source; the rest of the room falls into deep green shadow. Filmic, low
+midtone contrast, calm and quiet. Colour: dark walnut, deep olive green, warm
+lamp gold, kraft brown, and the mint-green screen glow as the single saturated
+accent. Match the previous Brand Mint videos exactly — the same room, the same
+desk, the same lamp, the same plant, the same grade — treat it as the same
+location filmed the same evening. Absolutely no text, letters, numbers, icons,
+notifications, user interface, app windows, status bar, logos, watermarks,
+labels or printing anywhere in frame — the phone screen is pure blank glowing
+colour. No faces, no people.
+```
+
+### The edit — 12s timeline, 1080×1920
+
+| In | Out | Layer |
+|---|---|---|
+| 0.0 | 10.0 | The clip, upscaled to 1080×1920 if it renders at 720p |
+| 0.0 | 10.0 | `brandmint-ov-bug.png` — top-left |
+| 1.0 | 4.4 | `brandmint-ov-features.png` — UPI · COD · GST · WhatsApp |
+| 6.0 | 9.4 | `brandmint-ov-cta.png` |
+| 10.0 | 12.0 | `brandmint-endcard-9x16.png`, 0.3s dissolve |
+
+Time each buzz in the clip and land the overlay fades **between** them, not on
+them. Two things pulsing at once is noise.
+
+Silent, or one warm sustained pad. No voiceover — the shot is about quiet.
 
 ---
 
