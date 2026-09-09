@@ -83,11 +83,10 @@ Neatly groomed, hair tidy, beard trimmed and shaped. The look should read
 considered and senior, not corporate.
 ```
 
-**A caveat I cannot test from here:** I do not know whether Flow's avatar honours
-wardrobe direction in the prompt or locks appearance to whatever reference you
-enrolled it with. If the shirt comes back unchanged, the change has to happen at
-the avatar itself — re-enrol it wearing what you want. Generate one and look
-before spending twelve credits eight times.
+**Confirmed on V04: Flow honours wardrobe direction in the prompt.** The charcoal
+shirt, the open collar and the tidier grooming all came through, in the same room
+with the same light. The avatar does not need re-enrolling, so this paragraph is
+all it takes.
 
 Charcoal rather than cream: the room is warm olive with a practical lamp, and a
 light shirt sits in the same tonal band as the lamp spill. Dark separates.
