@@ -45,6 +45,54 @@ beyond four.
 
 ---
 
+## START HERE — V00, the avatar opener
+
+Shoot this one first. It is the checkout cut from V11, promoted to the front
+because a founder saying something specific is a better first post than product
+b-roll from an account nobody knows yet.
+
+**Flow settings:** 9:16 · 720p · **10s** (not the 8s default) · Omni 1.1 Flash ·
+12 credits · seed from `brandmint-set-founder`.
+
+```
+Talking-head advertisement, 9:16 vertical, 10 seconds, using my avatar. Seated
+at a dark wooden desk in a calm Hyderabad studio, one warm practical lamp
+visible behind, deep ink-green wall softly defocused. 50mm lens at T2.0,
+chest-up framing, locked-off camera, very slight push in across the ten seconds.
+Direct address to lens. Calm and unhurried, a small forward lean on the final
+line, one open-handed gesture and no more. Speaks this script verbatim: "Most
+Indian stores lose the order at the last screen. No U-P-I. No cash on delivery.
+We build the checkout first, and the pretty part second. Brand Mint, Hyderabad."
+Colour: deep green-black background, warm key light from camera left, one
+mint-green accent. Filmic, low midtone contrast. Match the uploaded Brand Mint
+reference assets exactly — the same studio, the same light direction, the same
+grade — and treat it as the same physical room as every other Brand Mint video.
+Absolutely no on-screen text, captions, subtitles, logos, watermarks, lower
+thirds or graphics in the render.
+```
+
+### The edit — 12s timeline, 1080×1920
+
+Ten seconds of footage plus a two-second tail. Upscale the 720p clip to fill;
+the type stays sharp, which is the half that shows.
+
+| In | Out | Layer |
+|---|---|---|
+| 0.0 | 10.0 | The generated clip, scaled to 1080×1920 |
+| 0.0 | 10.0 | `brandmint-ov-bug.png` — corner mark, top-left, keeps the brand present while a stranger decides whether to keep watching |
+| 0.6 | 4.2 | `brandmint-ov-lower-third.png` — slide in from left over 0.3s, hold, fade |
+| 0.4 | 9.6 | **Burned captions.** Not optional — Meta autoplays muted, and a silent talking head is a stranger mouthing nothing |
+| 10.0 | 12.0 | `brandmint-endcard-9x16.png`, cross-dissolve 0.3s |
+
+Caption text is the script, broken on the beats:
+`Most Indian stores lose the order` / `at the last screen.` / `No UPI.` /
+`No cash on delivery.` / `We build the checkout first —` / `and the pretty part second.`
+
+Do **not** add the price overlay to this one. It is an introduction; the number
+belongs on the b-roll cuts where it can sit still and be read.
+
+---
+
 ## MONTH 1 — the offer (V01–V10)
 
 ### V01 · Flagship · 10s · multi-beat

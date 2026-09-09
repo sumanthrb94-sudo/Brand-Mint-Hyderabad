@@ -10,6 +10,7 @@ const FRAMES = [
   ["ov-proof", true], ["ov-cta", true], ["ov-lower-third", true],
   ["endcard-9x16", false], ["endcard-1x1", false], ["endcard-16x9", false],
   ["style-board", false],
+  ["logo-mark", true], ["logo-lockup", true], ["logo-lockup-ink", true], ["ov-bug", true],
 ];
 
 (async () => {
