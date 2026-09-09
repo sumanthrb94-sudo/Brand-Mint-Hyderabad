@@ -45,6 +45,84 @@ beyond four.
 
 ---
 
+## WHAT V00 ACTUALLY PRODUCED — measured, not assumed
+
+Findings from the delivered file. These override earlier guesses.
+
+- **Output is 1080×1920, 24fps, H.264, with AAC audio** — not 720p. The overlay
+  pack is 1080×1920, so it drops on **natively, no scaling**. Ignore the earlier
+  note about compositing upscaled footage.
+- **The no-text constraint held completely.** Nothing rendered a letterform.
+  Keep the negative-constraint sentence on every prompt.
+- **The Flow watermark is a four-point sparkle at roughly x 830–960, y 1690–1770**
+  — lower right of centre, not a corner. The overlay safe band ends at y=1560 so
+  the pack clears it, but **burned captions must not sit bottom-right**. Push
+  caption blocks left, or above y=1650.
+- **The established look is warmer and more olive than the brief asked for**: a
+  sage/olive-green wall rather than ink-green #0B1F1A, warm practical lamp left,
+  dark walnut desk, soft key from camera left. It reads well. Do not fight it —
+  every subsequent prompt should match *this*, because consistency now beats the
+  original palette note.
+
+---
+
+## V02 — the second post
+
+Deliberately the opposite texture to V00: no person, no speech, product only. A
+feed of nothing but talking heads dies. Shot in **the same room** as V00 rather
+than a new workshop, which is the cheapest continuity there is — the model has
+already proven it renders that space.
+
+Single continuous shot. V00 proved a 10-second single take works; do not
+reintroduce cuts.
+
+**Flow:** 9:16 · **10s** · Omni 1.1 Flash · 12 credits · seed from a free Nano
+Banana still of the same desk.
+
+```
+Product advertisement, 9:16 vertical, 10 seconds, single continuous shot with no
+cuts. The same room as the previous Brand Mint video: a dark polished wooden
+desk, a deep olive-green wall behind, one warm practical lamp glowing at the
+left of frame, a plant softly out of focus on the right. No person visible.
+Opening on a macro close-up of the desk surface. Two hands enter frame and
+slowly fold and seal a plain kraft paper parcel with paper tape — fingers and
+forearms only, never a face, the movement unhurried and practised. As the seal
+completes the camera pulls back smoothly and steadily, revealing nine identical
+sealed parcels stacked in a neat grid on the same desk, ready to ship. One
+continuous move, slow and controlled, ending with the parcels low in frame and
+the olive-green wall filling the upper third. 50mm lens at T2.0, shallow depth
+of field, 24fps, natural motion blur. Warm key light from camera left matching
+the lamp, soft falloff into green shadow at the right. Filmic, low midtone
+contrast, warm and calm. Colour: kraft brown, dark walnut, deep olive green,
+warm lamp gold, one small mint-green object as the single saturated accent.
+Match the previous Brand Mint video exactly — the same room, the same desk, the
+same lamp, the same light direction, the same grade — and treat it as the same
+location filmed on the same day. Absolutely no text, letters, numbers, logos,
+watermarks, signage, packaging labels, barcodes, printing or screen interfaces
+anywhere in frame. Plain unmarked packaging only. No faces.
+```
+
+### The edit — 12s timeline, 1080×1920, no scaling needed
+
+| In | Out | Layer |
+|---|---|---|
+| 0.0 | 10.0 | The clip, dropped in at native size |
+| 0.0 | 10.0 | `brandmint-ov-bug.png` — top-left, away from the watermark |
+| 0.8 | 3.6 | `brandmint-ov-hook.png` — fade in 0.4s |
+| 5.4 | 9.2 | `brandmint-ov-price.png` — fade in 0.4s, hold to the cut |
+| 10.0 | 12.0 | `brandmint-endcard-9x16.png`, 0.3s dissolve |
+
+No speech in this one, so no captions. If you want a voice, Sarvam `bulbul:v2`,
+`en-IN`, pace 0.9, over 0.5–9.0:
+
+> Online stores for Indian brands. U-P-I, cash on delivery, G-S-T invoices...
+> from forty-nine thousand nine hundred ninety-nine rupees. Brand Mint. Hyderabad.
+
+Otherwise let it run silent under a warm sustained pad. Silence with good type
+outperforms a bad voiceover.
+
+---
+
 ## START HERE — V00, the avatar opener
 
 Shoot this one first. It is the checkout cut from V11, promoted to the front
