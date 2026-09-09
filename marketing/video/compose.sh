@@ -31,15 +31,15 @@ fi
 SUB="" ; [ -n "$ASS" ] && SUB=",subtitles=${ASS}${FONTS:+:fontsdir=$FONTS}"
 # 720p clips are upscaled rather than scaling the type down: the footage is soft
 # either way, but the words are what get read.
-BASE="[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,\
+BASE="[0:v]scale=1080:1920:force_original_aspect_ratio=decrease,\
+pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0x0B1F1A,\
 tpad=stop_mode=clone:stop_duration=2,fps=24,setpts=PTS-STARTPTS${SUB}[base]"
 BUG="[1:v]format=rgba,fade=t=in:st=0.3:d=0.5:alpha=1,fade=t=out:st=9.4:d=0.5:alpha=1[bug]"
 EC="scale=1080:1920,format=rgba,fade=t=in:st=10.0:d=0.35:alpha=1,setpts=PTS-STARTPTS[ec]"
 ov () { echo "[$1:v]format=rgba,fade=t=in:st=$2:d=0.4:alpha=1,fade=t=out:st=$3:d=0.4:alpha=1[$4]"; }
 
 case "$MODE" in
-  talking) L2="$A/brandmint-ov-lower-third.png" ; L3="" ;
-           F2=$(echo "[2:v]format=rgba,fade=t=in:st=0.6:d=0.35:alpha=1,fade=t=out:st=3.9:d=0.35:alpha=1[o2]") ; F3="" ;;
+  talking) L2="" ; L3="" ; F2="" ; F3="" ;;
   broll)   L2="$A/brandmint-ov-hook.png" ; L3="$A/brandmint-ov-price.png" ;
            F2=$(ov 2 0.8 3.2 o2) ; F3=$(ov 3 5.4 8.8 o3) ;;
   night)   L2="$A/brandmint-ov-features.png" ; L3="$A/brandmint-ov-cta.png" ;
@@ -48,13 +48,16 @@ case "$MODE" in
   *) echo "mode must be talking|broll|night" >&2 ; exit 1 ;;
 esac
 
-INPUTS=(-i "$CLIP" -loop 1 -framerate 24 -t 12 -i "$A/brandmint-ov-bug.png"
-        -loop 1 -framerate 24 -t 12 -i "$L2")
-CHAIN="$BASE;$BUG;[base][bug]overlay=0:0:shortest=0[b1];$F2;[b1][o2]overlay=0:0:shortest=0[b2]"
-LAST=b2 ; ECIDX=3
+INPUTS=(-i "$CLIP" -loop 1 -framerate 24 -t 12 -i "$A/brandmint-ov-bug.png")
+CHAIN="$BASE;$BUG;[base][bug]overlay=0:0:shortest=0[b1]"
+LAST=b1 ; ECIDX=2
+if [ -n "$L2" ]; then
+  INPUTS+=(-loop 1 -framerate 24 -t 12 -i "$L2")
+  CHAIN="$CHAIN;$F2;[b1][o2]overlay=0:0:shortest=0[b2]" ; LAST=b2 ; ECIDX=3
+fi
 if [ -n "$L3" ]; then
   INPUTS+=(-loop 1 -framerate 24 -t 12 -i "$L3")
-  CHAIN="$CHAIN;$F3;[b2][o3]overlay=0:0:shortest=0[b3]" ; LAST=b3 ; ECIDX=4
+  CHAIN="$CHAIN;$F3;[$LAST][o3]overlay=0:0:shortest=0[b3]" ; LAST=b3 ; ECIDX=4
 fi
 INPUTS+=(-loop 1 -framerate 24 -t 12 -i "$A/brandmint-endcard-9x16.png")
 CHAIN="$CHAIN;[$ECIDX:v]$EC;[$LAST][ec]overlay=0:0:enable='gte(t,9.9)':shortest=0[v]"
