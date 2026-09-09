@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Composite a raw Flow clip into a finished 12s post.
 #
-#   ./compose.sh <clip.mp4> <talking|broll> <out.mp4>
+#   ./compose.sh <clip.mp4> <talking|broll> <out.mp4> [captions.ass] [fontsdir]
 #
 # ffmpeg comes from pip: `pip install imageio-ffmpeg`. No system package needed.
 #
@@ -13,13 +13,16 @@
 set -euo pipefail
 
 CLIP="${1:?clip.mp4}" ; MODE="${2:?talking|broll}" ; OUT="${3:?out.mp4}"
+ASS="${4:-}" ; FONTS="${5:-}"
 FF=$(python3 -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
 A="$(cd "$(dirname "$0")/assets" && pwd)"
 
 # 720p clips are upscaled to 1080x1920 rather than scaling the type down: the
 # footage is soft either way, but the words stay sharp.
+SUB=""
+[ -n "$ASS" ] && SUB=",subtitles=${ASS}${FONTS:+:fontsdir=$FONTS}"
 BASE="[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,\
-tpad=stop_mode=clone:stop_duration=2,fps=24,setpts=PTS-STARTPTS[base]"
+tpad=stop_mode=clone:stop_duration=2,fps=24,setpts=PTS-STARTPTS${SUB}[base]"
 BUG="[1:v]format=rgba,fade=t=in:st=0.3:d=0.5:alpha=1,fade=t=out:st=9.4:d=0.5:alpha=1[bug]"
 AUD="[0:a]apad=whole_dur=12,afade=t=out:st=11.2:d=0.8[a]"
 EC="scale=1080:1920,format=rgba,fade=t=in:st=10.0:d=0.35:alpha=1,setpts=PTS-STARTPTS[ec]"
