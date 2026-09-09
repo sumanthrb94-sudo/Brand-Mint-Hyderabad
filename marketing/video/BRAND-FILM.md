@@ -108,6 +108,39 @@ No faces, no people, no hands.
 
 ---
 
+## Two ways to shoot it
+
+**Independent** — each fragment generated from its prompt alone, cut together
+afterwards. Continuity rests entirely on the prompt wording. Any shot can be
+re-rolled without disturbing the others, which is why the four Reels were made
+this way.
+
+**Continuation** — each fragment seeded with the last frame of the one before,
+so shot two physically begins where shot one ended and the camera reads as
+travelling through one continuous space. This is the theatrical version.
+
+```bash
+./seed-next.sh F1.mp4 seeds/f2-seed.png     # upload that as F2's start frame
+```
+
+The grab lands 0.15s before the true end on purpose: the last frames of a
+generation are usually its softest, and a soft seed propagates that softness
+through the whole next shot.
+
+The cost of continuation is composition. Seeded from a tight macro on a sealed
+seam, the next shot must open on that macro — it cannot start wide. So use it
+where the film should flow, and a hard cut where it should breathe:
+
+| | | |
+|---|---|---|
+| F1 → F2 | hard cut | night to day, dead screen to working screen. The cut *is* the argument |
+| F2 → F3 | continuation | one continuous move from the desk to the hands |
+| F3 → F4 | continuation | tight seam pulling back to the full spread |
+| F4 → end card | dissolve | already written |
+
+Seeded fragments still carry their full text prompt. The seed fixes where the
+shot starts; the prompt still directs where it goes.
+
 ## Assembly
 
 Generate all four at 10s, send them over, and the film is cut here: each
