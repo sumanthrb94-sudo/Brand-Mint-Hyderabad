@@ -68,6 +68,77 @@ Findings from the delivered file. These override earlier guesses.
 
 ---
 
+## WARDROBE LOCK — paste into every founder cut
+
+The V00 render put the avatar in a high-contrast grey plaid shirt. Against the
+olive wall it is visually noisy and pulls the eye off the face. Every founder
+cut from here uses this paragraph verbatim, so the eight of them look like one
+afternoon's shoot rather than eight separate days:
+
+```
+Wardrobe: a plain, well-fitted dark charcoal shirt with a soft collar — no
+pattern, no check, no stripe, no logo and no visible branding of any kind. Top
+button open, no tie, no jacket. Sleeves rolled once to just below the elbow.
+Neatly groomed, hair tidy, beard trimmed and shaped. The look should read
+considered and senior, not corporate.
+```
+
+**A caveat I cannot test from here:** I do not know whether Flow's avatar honours
+wardrobe direction in the prompt or locks appearance to whatever reference you
+enrolled it with. If the shirt comes back unchanged, the change has to happen at
+the avatar itself — re-enrol it wearing what you want. Generate one and look
+before spending twelve credits eight times.
+
+Charcoal rather than cream: the room is warm olive with a practical lamp, and a
+light shirt sits in the same tonal band as the lamp spill. Dark separates.
+
+---
+
+## V04 — the founder cut, what it costs
+
+Breaks the b-roll run, as planned. V00 named the problem; this one answers the
+only question that follows it.
+
+**Flow:** 9:16 · **10s** · Omni 1.1 Flash · 12 credits · highest resolution
+offered · seed from `brandmint-set-founder`.
+
+```
+Talking-head advertisement, 9:16 vertical, 10 seconds, using my avatar. Seated
+at the same dark walnut desk in the same calm Hyderabad studio as the previous
+Brand Mint videos, the same deep olive-green wall behind, the same warm
+practical lamp glowing at the left of frame, the same plant softly out of focus
+at the right. 50mm lens at T2.0, chest-up framing, locked-off camera, a very
+slight push in across the ten seconds. Wardrobe: a plain, well-fitted dark
+charcoal shirt with a soft collar — no pattern, no check, no stripe, no logo and
+no visible branding of any kind. Top button open, no tie, no jacket. Sleeves
+rolled once to just below the elbow. Neatly groomed, hair tidy, beard trimmed
+and shaped. The look should read considered and senior, not corporate. Direct
+address to lens, matter-of-fact and unhurried, no salesmanship, one small
+gesture on the middle line and no more. Speaks this script verbatim: "Forty nine
+thousand nine hundred ninety nine rupees. That is a full store — payments,
+G-S-T invoices, WhatsApp orders, your own domain. Fixed, agreed before we
+start." Colour: deep olive green, warm lamp gold, dark walnut, one mint-green
+accent. Filmic, low midtone contrast. Match the previous Brand Mint videos
+exactly — the same room, the same desk, the same lamp, the same light
+direction, the same grade — and treat it as the same location filmed the same
+day. Absolutely no on-screen text, captions, subtitles, logos, watermarks,
+lower thirds or graphics in the render.
+```
+
+### The edit
+
+Same 12-second shape as V00, and captions the same way — transcribe first, never
+assume the avatar said what you wrote:
+
+```bash
+./compose.sh clip.mp4 talking V04.mp4 v04.ass ./fonts
+```
+
+Add `brandmint-ov-price.png` at 1.2–4.0s if you want the number on screen while
+it is spoken. Skip it otherwise; the line carries it alone.
+
+---
+
 ## V03 — the order arrives
 
 Same room again, later in the day. V02 ended on nine sealed parcels; this opens
