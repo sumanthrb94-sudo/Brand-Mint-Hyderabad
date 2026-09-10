@@ -142,7 +142,7 @@ export default async function handler(req, res) {
         }
       } else {
         const errText = await geminiResponse.text().catch(() => "");
-        console.error("[wa-hook] gemini:", geminiResponse.status, errText.slice(0, 300));
+        console.error("[wa-hook] gemini error:", geminiResponse.status, errText);
       }
     } catch (e) {
       console.error("[wa-hook] gemini error:", e.message);
