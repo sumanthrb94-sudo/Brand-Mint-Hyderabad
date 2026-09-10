@@ -350,6 +350,74 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    match /formLeads/{id} {
+      // Form auto-saves and submissions from shared/form-automation.js. Anyone
+      // may create with a hard-pinned shape and size (same as /bookings and
+      // /events). Captures partial fills even if abandoned. Only the studio can
+      // read. Admin access from API endpoints keeps the rule open.
+      allow create: if request.resource.data.keys().hasOnly([
+                         'email', 'name', 'phone', 'service', 'message', 'when',
+                         'status', 'source', 'createdAt', 'updatedAt',
+                         'submittedAt', 'leadId'
+                       ])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() <= 320
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() <= 80
+                    && request.resource.data.phone is string
+                    && request.resource.data.phone.size() <= 20
+                    && request.resource.data.service is string
+                    && request.resource.data.service.size() <= 60
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() <= 1000
+                    && request.resource.data.when is string
+                    && request.resource.data.when.size() <= 60
+                    && request.resource.data.status is string
+                    && request.resource.data.status in ['draft', 'submitted']
+                    && request.resource.data.source is string
+                    && request.resource.data.source.size() <= 60
+                    && request.resource.data.createdAt is string
+                    && request.resource.data.createdAt.size() <= 40
+                    && request.resource.data.updatedAt is string
+                    && request.resource.data.updatedAt.size() <= 40
+                    && (!('submittedAt' in request.resource.data)
+                        || (request.resource.data.submittedAt is string
+                            && request.resource.data.submittedAt.size() <= 40))
+                    && (!('leadId' in request.resource.data)
+                        || (request.resource.data.leadId is string
+                            && request.resource.data.leadId.size() <= 20));
+      allow get, list: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /formWaMessages/{id} {
+      // WhatsApp messages triggered by form submissions, written by
+      // api/form-wa-trigger.js. Anonymous create with hard-pinned shape.
+      // Tracks outbound personalized messages sent via Evolution API.
+      allow create: if request.resource.data.keys().hasOnly([
+                         'leadId', 'phone', 'name', 'service', 'message',
+                         'status', 'source', 'createdAt'
+                       ])
+                    && request.resource.data.leadId is string
+                    && request.resource.data.leadId.size() <= 20
+                    && request.resource.data.phone is string
+                    && request.resource.data.phone.size() <= 20
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() <= 80
+                    && request.resource.data.service is string
+                    && request.resource.data.service.size() <= 60
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() <= 2000
+                    && request.resource.data.status is string
+                    && request.resource.data.status.size() <= 20
+                    && request.resource.data.source is string
+                    && request.resource.data.source.size() <= 60
+                    && request.resource.data.createdAt is string
+                    && request.resource.data.createdAt.size() <= 40;
+      allow get, list: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
     /* --------------------------- content, settings ------------------------ */
     // Admin only. Settings carries bank details and GSTIN.
 

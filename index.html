@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v13" />
+<link rel="stylesheet" href="/styles.css?v=v14" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -417,6 +417,7 @@
       import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v10";
       import { PERKS } from "/shared/resources.js?v=v10";
       import { saveBooking } from "/shared/booking.js?v=1";
+      import { initFormAutomation } from "/shared/form-automation.js?v=1";
 
       // ---- proof panel
       const stats = document.getElementById("proof-stats");
@@ -551,6 +552,10 @@
       const status = document.getElementById("book-status");
       const shownAt = Date.now();
       const say = (msg, ok) => { status.hidden = false; status.textContent = msg; status.className = "book-status " + (ok ? "is-ok" : "is-err"); };
+
+      // Auto-save form and trigger WhatsApp on submit
+      initFormAutomation("book-form", { whatsappTrigger: true });
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const btn = form.querySelector("button[type=submit]");
