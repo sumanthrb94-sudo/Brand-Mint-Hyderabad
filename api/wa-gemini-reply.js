@@ -143,7 +143,7 @@ async function sendReply(toNumber, message) {
 
   const headers = { "Content-Type": "application/json" };
   if (EVOLUTION_API_KEY) {
-    headers["Authorization"] = `Bearer ${EVOLUTION_API_KEY}`;
+    headers["apiKey"] = EVOLUTION_API_KEY;
   }
 
   const response = await fetch(`${EVOLUTION_API}/message/sendText/brandmintsupport`, {

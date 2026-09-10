@@ -410,7 +410,7 @@ async function sendCampaign(campaignId, campaign, ctx) {
 
       const headers = { "Content-Type": "application/json" };
       if (EVOLUTION_API_KEY) {
-        headers["Authorization"] = `Bearer ${EVOLUTION_API_KEY}`;
+        headers["apiKey"] = EVOLUTION_API_KEY;
       }
       await fetch(`${EVOLUTION_API}/message/sendText/brandmintsupport`, {
         method: "POST",
@@ -435,7 +435,7 @@ async function sendCampaign(campaignId, campaign, ctx) {
       try {
         const headers = { "Content-Type": "application/json" };
         if (EVOLUTION_API_KEY) {
-          headers["Authorization"] = `Bearer ${EVOLUTION_API_KEY}`;
+          headers["apiKey"] = EVOLUTION_API_KEY;
         }
         await fetch(`${EVOLUTION_API}/message/sendText/brandmintsupport`, {
           method: "POST",
