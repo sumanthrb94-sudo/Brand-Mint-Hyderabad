@@ -9,6 +9,9 @@ import { db } from "../../firebase/app.js";
 import { getProfile } from "../../auth/session.js";
 import firebaseConfig from "../../firebase/config.js";
 
+const EVOLUTION_API = "https://wa.brandmintstudios.in";
+const EVOLUTION_API_KEY = localStorage.getItem("evolution_api_key") || "";
+
 export async function render(ctx) {
   const profile = await getProfile();
   if (!profile || profile.role !== "admin") {
@@ -405,9 +408,13 @@ async function sendCampaign(campaignId, campaign, ctx) {
         .replace("{email}", "admin@brandmintstudios.in")
         .replace("{service}", "Test Service");
 
-      await fetch("http://localhost:8080/message/sendText/brandmintsupport", {
+      const headers = { "Content-Type": "application/json" };
+      if (EVOLUTION_API_KEY) {
+        headers["Authorization"] = `Bearer ${EVOLUTION_API_KEY}`;
+      }
+      await fetch(`${EVOLUTION_API}/message/sendText/brandmintsupport`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           number: testPhone,
           text: message,
@@ -426,9 +433,13 @@ async function sendCampaign(campaignId, campaign, ctx) {
         .replace("{service}", lead.service || "");
 
       try {
-        await fetch("http://localhost:8080/message/sendText/brandmintsupport", {
+        const headers = { "Content-Type": "application/json" };
+        if (EVOLUTION_API_KEY) {
+          headers["Authorization"] = `Bearer ${EVOLUTION_API_KEY}`;
+        }
+        await fetch(`${EVOLUTION_API}/message/sendText/brandmintsupport`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({
             number: lead.phone,
             text: message,

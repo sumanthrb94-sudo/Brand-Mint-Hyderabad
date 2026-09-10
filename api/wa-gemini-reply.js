@@ -7,6 +7,7 @@
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const EVOLUTION_API = "https://wa.brandmintstudios.in";
+const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY;
 
 const BRAND_MINT_CONTEXT = `You are a helpful customer support assistant for Brand Mint Studios, an online store design agency in India.
 
@@ -140,9 +141,14 @@ async function sendReply(toNumber, message) {
     text: message,
   };
 
+  const headers = { "Content-Type": "application/json" };
+  if (EVOLUTION_API_KEY) {
+    headers["Authorization"] = `Bearer ${EVOLUTION_API_KEY}`;
+  }
+
   const response = await fetch(`${EVOLUTION_API}/message/sendText/brandmintsupport`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(payload),
   });
 
