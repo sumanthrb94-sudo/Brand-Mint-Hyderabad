@@ -1,12 +1,13 @@
 /**
  * POST /api/wa-hook?k=<secret>
  *
- * Evolution API's webhook. Records an inbound WhatsApp message and drafts a
- * suggested reply via Gemini. It does NOT send anything back automatically —
- * auto-replying to every inbound message is the outbound pattern that gets
- * unofficial WhatsApp clients banned (see SETUP-WHATSAPP.md). The draft is
- * stored alongside the message; a human reviews and sends it from Admin →
- * Leads, which opens WhatsApp with the draft pre-filled.
+ * Evolution API's webhook. Records an inbound WhatsApp message, drafts a
+ * reply via Gemini, and — within a per-contact daily cap and a short random
+ * delay to avoid looking bot-paced — sends it back automatically through
+ * Evolution. This runs 24/7, no business-hours gate. Once a contact hits the
+ * daily cap the draft is still generated and stored, but the send is left to
+ * a human from Admin → Leads (same "Open chat (draft ready)" flow as before),
+ * so a long conversation doesn't loop forever unattended.
  *
  * This endpoint is public but guarded by a shared secret in the query string.
  * Firestore rules pin the shape so writes are bounded.
@@ -15,6 +16,10 @@ import { clean, readJson } from "./_lib.js";
 import { firebaseConfig } from "../firebase/config.js";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const EVOLUTION_BASE_URL = process.env.EVOLUTION_BASE_URL || "http://34.63.145.168:8080";
+const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || process.env.EVO_KEY;
+const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || "brandmint";
+const AUTOSEND_DAILY_CAP = parseInt(process.env.WA_AUTOSEND_DAILY_CAP || "5", 10);
 
 const SYSTEM_PROMPT = `You are drafting a WhatsApp reply on behalf of Brand Mint Studios, a web and app development studio in India. A human will review your draft before sending it.
 
@@ -39,6 +44,60 @@ const COMMIT = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.pr
 const DOC = `projects/${firebaseConfig.projectId}/databases/(default)/documents/waMessages/`;
 
 const str = (v, max) => ({ stringValue: clean(v, max) });
+const bool = (v) => ({ booleanValue: !!v });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const COUNTER_DOC = (id) =>
+  `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/waAutoSendCounters/${id}?key=${firebaseConfig.apiKey}`;
+
+/** How many auto-sends this contact has already had today. Best-effort: a
+ *  missed race under real-world (low) message volume just means one extra
+ *  send, not a security issue — this is a pacing guard, not an auth boundary. */
+async function sendsToday(phone) {
+  const day = new Date().toISOString().slice(0, 10);
+  const docId = `${phone}_${day}`;
+  try {
+    const r = await fetch(COUNTER_DOC(docId));
+    if (!r.ok) return { docId, count: 0 };
+    const doc = await r.json();
+    return { docId, count: parseInt(doc.fields?.count?.integerValue || "0", 10) };
+  } catch {
+    return { docId, count: 0 };
+  }
+}
+
+async function bumpSends(docId, count) {
+  try {
+    await fetch(COUNTER_DOC(docId), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fields: { count: { integerValue: String(count) }, updatedAt: str(new Date().toISOString(), 40) },
+      }),
+    });
+  } catch (e) {
+    console.error("[wa-hook] counter bump error:", e.message);
+  }
+}
+
+/** Sends through Evolution. A short random delay before calling paces the
+ *  reply like a person typing rather than a bot firing instantly. */
+async function autoSend(phone, text) {
+  if (!EVOLUTION_API_KEY) return false;
+  await sleep(1000 + Math.random() * 1500);
+  try {
+    const r = await fetch(`${EVOLUTION_BASE_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: EVOLUTION_API_KEY },
+      body: JSON.stringify({ number: phone, text }),
+    });
+    if (!r.ok) console.error("[wa-hook] evolution send:", r.status, await r.text().catch(() => ""));
+    return r.ok;
+  } catch (e) {
+    console.error("[wa-hook] evolution send error:", e.message);
+    return false;
+  }
+}
 
 async function draftReply(text) {
   if (!GEMINI_API_KEY) return "";
@@ -104,17 +163,34 @@ export default async function handler(req, res) {
   const waId = String(d.key?.id || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);
   if (!waId) return drop("no id");
 
+  const phone = jid.split("@")[0];
   const suggestedReply = await draftReply(text);
 
+  let autoSent = false;
+  let sentAt = "";
+  if (suggestedReply) {
+    const { docId, count } = await sendsToday(phone);
+    if (count < AUTOSEND_DAILY_CAP) {
+      autoSent = await autoSend(phone, suggestedReply);
+      if (autoSent) {
+        sentAt = new Date().toISOString();
+        await bumpSends(docId, count + 1);
+      }
+    }
+    // At or above the cap: draft stays in Firestore for a human to send
+    // manually from Admin → Leads, same as before auto-send existed.
+  }
+
   const fields = {
-    from: str(jid.split("@")[0], 20),
+    from: str(phone, 20),
     name: str(d.pushName || "", 80),
     text: str(text, 2000),
     waId: str(waId, 64),
     instance: str(body.instance || "", 40),
-    status: str("new", 20),
+    status: str(autoSent ? "done" : "new", 20),
     createdAt: str(new Date().toISOString(), 40),
     ...(suggestedReply ? { suggestedReply: str(suggestedReply, 1000) } : {}),
+    ...(autoSent ? { autoSent: bool(true), sentAt: str(sentAt, 40) } : {}),
   };
 
   try {

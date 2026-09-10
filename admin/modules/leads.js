@@ -275,20 +275,23 @@ export async function render(ctx) {
             cell: (r) => h("div", {}, [
               h("div", { class: "sub", text: r.text || "" }),
               r.suggestedReply
-                ? h("div", { class: "sub", style: "margin-top:4px;color:var(--accent,#047857)", text: `Draft: ${r.suggestedReply}` })
+                ? h("div", {
+                    class: "sub", style: `margin-top:4px;color:${r.autoSent ? "var(--muted,#5b625e)" : "var(--accent,#047857)"}`,
+                    text: r.autoSent ? `Auto-sent: ${r.suggestedReply}` : `Draft: ${r.suggestedReply}`,
+                  })
                 : null,
             ].filter(Boolean)),
           },
           { label: "When", cell: (r) => relTime(r.createdAt) },
-          { label: "Status", cell: (r) => pill(r.status === "done" ? "done" : "new") },
+          { label: "Status", cell: (r) => pill(r.autoSent ? "auto-sent" : r.status === "done" ? "done" : "new") },
           {
             label: "",
             cell: (r) => h("div", { class: "hstack", style: "gap:6px;justify-content:flex-end" }, [
               r.from
                 ? h("a", {
                     class: "btn btn-sm", target: "_blank", rel: "noopener",
-                    href: `https://wa.me/${String(r.from).replace(/\D/g, "")}${r.suggestedReply ? `?text=${encodeURIComponent(r.suggestedReply)}` : ""}`,
-                    text: r.suggestedReply ? "Open chat (draft ready)" : "Open chat",
+                    href: `https://wa.me/${String(r.from).replace(/\D/g, "")}${r.suggestedReply && !r.autoSent ? `?text=${encodeURIComponent(r.suggestedReply)}` : ""}`,
+                    text: r.autoSent ? "Open chat" : r.suggestedReply ? "Open chat (draft ready)" : "Open chat",
                     onclick: (e) => e.stopPropagation(),
                   })
                 : null,

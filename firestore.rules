@@ -327,9 +327,13 @@ service cloud.firestore {
       // only by the studio. A leaked secret then buys bounded junk rows, not
       // an arbitrary write. The doc id is the WhatsApp message id, so a
       // retried delivery collides instead of duplicating.
+      //
+      // status is 'done' when wa-hook.js already auto-sent the drafted reply
+      // (autoSent + sentAt then also present), or 'new' when the draft is
+      // still waiting on a human — same two states the admin panel expects.
       allow create: if request.resource.data.keys().hasOnly([
                          'from', 'name', 'text', 'waId', 'instance',
-                         'status', 'createdAt', 'suggestedReply'
+                         'status', 'createdAt', 'suggestedReply', 'autoSent', 'sentAt'
                        ])
                     && request.resource.data.from is string
                     && request.resource.data.from.size() > 0
@@ -343,14 +347,36 @@ service cloud.firestore {
                     && request.resource.data.waId.size() <= 64
                     && request.resource.data.instance is string
                     && request.resource.data.instance.size() <= 40
-                    && request.resource.data.status == 'new'
+                    && request.resource.data.status in ['new', 'done']
                     && request.resource.data.createdAt is string
                     && request.resource.data.createdAt.size() <= 40
                     && (!('suggestedReply' in request.resource.data)
                         || (request.resource.data.suggestedReply is string
-                            && request.resource.data.suggestedReply.size() <= 1000));
+                            && request.resource.data.suggestedReply.size() <= 1000))
+                    && (!('autoSent' in request.resource.data)
+                        || request.resource.data.autoSent is bool)
+                    && (!('sentAt' in request.resource.data)
+                        || (request.resource.data.sentAt is string
+                            && request.resource.data.sentAt.size() <= 40));
       allow get, list: if isAdmin();
       allow update, delete: if isAdmin();
+    }
+
+    match /waAutoSendCounters/{id} {
+      // Per-contact-per-day auto-send counters read and written by
+      // api/wa-hook.js to enforce WA_AUTOSEND_DAILY_CAP. Same anonymous
+      // caller as waMessages above; a count is not sensitive, so reads are
+      // open too — the server has no Firebase Auth token to read it back
+      // with otherwise. Shape hard-pinned like every other anonymous write.
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if request.resource.data.keys().hasOnly(['count', 'updatedAt'])
+                            && request.resource.data.count is int
+                            && request.resource.data.count >= 0
+                            && request.resource.data.count <= 1000
+                            && request.resource.data.updatedAt is string
+                            && request.resource.data.updatedAt.size() <= 40;
+      allow delete: if isAdmin();
     }
 
     match /formLeads/{id} {
