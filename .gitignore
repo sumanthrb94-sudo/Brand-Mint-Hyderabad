@@ -11,3 +11,6 @@ dist/
 *firebase-adminsdk*.json
 *service-account*.json
 *serviceAccount*.json
+
+# the template is not a secret; the .env it produces is
+!deploy/whatsapp/.env.example
