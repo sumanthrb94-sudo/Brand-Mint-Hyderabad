@@ -82,7 +82,7 @@ async function generateReply(userMessage, userName) {
     const fullPrompt = `${BRAND_MINT_CONTEXT}\n\nUser (${userName}): ${userMessage}\n\nRespond in a friendly, helpful way. Keep it brief.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -106,7 +106,7 @@ async function generateReply(userMessage, userName) {
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("[gemini] API error:", response.status, err);
+      console.error("[gemini] API error:", response.status, response.statusText, err);
       return getSmartFallback(userMessage);
     }
 
