@@ -398,7 +398,7 @@ async function sendCampaign(campaignId, campaign, ctx) {
 
     // Send test message if flagged
     if (campaign.test) {
-      const testPhone = "919999999999"; // Admin phone—replace with actual
+      const testPhone = "919700144003";
       const message = campaign.message
         .replace("{name}", "Admin")
         .replace("{phone}", testPhone)
