@@ -111,7 +111,7 @@ export default async function handler(req, res) {
       const fromPhone = jid.split("@")[0];
       const fullPrompt = `${SYSTEM_PROMPT}\n\nUser message: ${text}\n\nRespond with a helpful reply.`;
       const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/text-bison-001:generateText?key=${GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -123,7 +123,7 @@ export default async function handler(req, res) {
 
       if (geminiResponse.ok) {
         const geminiData = await geminiResponse.json();
-        const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const reply = geminiData.candidates?.[0]?.output || geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
         if (reply) {
           // Send reply via Evolution API

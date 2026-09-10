@@ -82,20 +82,12 @@ async function generateReply(userMessage, userName) {
     const fullPrompt = `${BRAND_MINT_CONTEXT}\n\nUser (${userName}): ${userMessage}\n\nRespond in a friendly, helpful way. Keep it brief.`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/text-bison-001:generateText?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: fullPrompt,
-                },
-              ],
-            },
-          ],
+          prompt: { text: fullPrompt },
         }),
       }
     );
@@ -108,7 +100,7 @@ async function generateReply(userMessage, userName) {
 
     const data = await response.json();
     const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      data?.candidates?.[0]?.output ||
       getSmartFallback(userMessage);
 
     return reply.trim();
