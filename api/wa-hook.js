@@ -1,21 +1,38 @@
 /**
  * POST /api/wa-hook?k=<secret>
  *
- * Evolution API's webhook. Records an inbound WhatsApp message so the studio
- * sees it in the admin rather than only on a phone.
+ * Evolution API's webhook. Records an inbound WhatsApp message, generates an
+ * automated response via Gemini API, and sends it back.
  *
- * This endpoint is public — Evolution posts from a GCP box, not from the site,
- * so sameOrigin() cannot guard it. The shared secret in the query string is
- * what stops anyone POSTing invented enquiries into the database, and
- * firestore.rules pins the shape so a bypass writes bounded junk rather than
- * whatever it likes.
- *
- * It does NOT reply. Auto-answering every inbound message is an outbound
- * pattern, and outbound patterns are what get unofficial WhatsApp clients
- * banned. Replies are a decision to make deliberately, per conversation.
+ * This endpoint is public but guarded by a shared secret in the query string.
+ * Firestore rules pin the shape so writes are bounded.
  */
 import { clean, readJson } from "./_lib.js";
 import { firebaseConfig } from "../firebase/config.js";
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const EVOLUTION_API_HOST = "http://localhost:8080";
+const EVOLUTION_API_KEY = process.env.EVO_KEY;
+
+const SYSTEM_PROMPT = `You are Brand Mint Studios, a web and app development studio in India.
+
+SERVICES:
+- Static Website (₹14,999): Branded landing page, fast, SEO-ready
+- Online Store (from ₹49,999): Full e-commerce with payments, inventory, orders
+- Site + CRM (₹79,999 setup + ₹9,999/month): Website + customer management + WhatsApp API
+- Custom CRM: Tailored business management system
+- Modcon HR: HR management software
+
+TONE: Professional, helpful, solution-focused. Answer questions about services, pricing, and timelines.
+GUIDELINES:
+- Be concise (under 100 words)
+- No sensitive data (bank details, personal info)
+- Direct booking/inquiry questions to: contact@brandmintstudios.com
+- Don't make promises, suggest a call: "Shall we discuss your needs?"
+- Always end with a CTA (call, email, or website)
+
+Respond helpfully to: "What do you do?", "How much?", "Can you build X?", "Timeline?"`;
+
 
 const COMMIT = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents:commit?key=${firebaseConfig.apiKey}`;
 const DOC = `projects/${firebaseConfig.projectId}/databases/(default)/documents/waMessages/`;
@@ -69,6 +86,7 @@ export default async function handler(req, res) {
     createdAt: str(new Date().toISOString(), 40),
   };
 
+  // Store message in Firestore
   try {
     const r = await fetch(COMMIT, {
       method: "POST",
@@ -77,7 +95,6 @@ export default async function handler(req, res) {
         writes: [{ update: { name: DOC + waId, fields }, currentDocument: { exists: false } }],
       }),
     });
-    // A duplicate is a success from our side: the row is already there.
     if (!r.ok) {
       const e = await r.text().catch(() => "");
       if (!/ALREADY_EXISTS|already exists/i.test(e)) {
@@ -85,10 +102,48 @@ export default async function handler(req, res) {
       }
     }
   } catch (e) {
-    console.error("[wa-hook]", e.message);
+    console.error("[wa-hook] firestore error:", e.message);
   }
 
-  // Always 200. Evolution retries anything else, and a retry storm against a
-  // 1 GB box is worse than a dropped message.
+  // Generate auto-reply via Gemini
+  if (GEMINI_API_KEY) {
+    try {
+      const fromPhone = jid.split("@")[0];
+      const geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: [{ parts: [{ text }] }],
+          }),
+        }
+      );
+
+      if (geminiResponse.ok) {
+        const geminiData = await geminiResponse.json();
+        const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        if (reply) {
+          // Send reply via Evolution API
+          await fetch(`${EVOLUTION_API_HOST}/message/sendText/${body.instance}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", apikey: EVOLUTION_API_KEY },
+            body: JSON.stringify({
+              number: fromPhone,
+              text: reply,
+            }),
+          }).catch(e => console.error("[wa-hook] evolution send error:", e.message));
+        }
+      } else {
+        console.error("[wa-hook] gemini:", geminiResponse.status);
+      }
+    } catch (e) {
+      console.error("[wa-hook] gemini error:", e.message);
+    }
+  }
+
+  // Always 200. Evolution retries anything else.
   return res.status(200).json({ ok: true });
 }
