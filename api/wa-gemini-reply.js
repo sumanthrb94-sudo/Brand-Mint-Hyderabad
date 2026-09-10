@@ -100,25 +100,38 @@ async function generateReply(userMessage, userName) {
     if (!response.ok) {
       const err = await response.text();
       console.error("[gemini] API error:", response.status, err);
-      return null;
+      return getSmartFallback(userMessage);
     }
 
     const data = await response.json();
-    console.log("[gemini] Response:", JSON.stringify(data).slice(0, 200));
-
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Thanks for reaching out! Tell me more about your project.";
-
-    if (!reply || reply === "Thanks for reaching out! Tell me more about your project.") {
-      console.log("[gemini] No text in response, using fallback");
-    }
+      getSmartFallback(userMessage);
 
     return reply.trim();
   } catch (e) {
     console.error("[gemini] Generation failed:", e.message);
-    return null;
+    return getSmartFallback(userMessage);
   }
+}
+
+function getSmartFallback(userMessage) {
+  const msg = userMessage.toLowerCase();
+
+  if (msg.includes("price") || msg.includes("cost") || msg.includes("how much")) {
+    return "Our services start at ₹14,999 for a website and ₹49,999+ for an online store. Happy to discuss a custom quote. Visit brandmintstudios.in or call us!";
+  }
+  if (msg.includes("store") || msg.includes("ecommerce") || msg.includes("shop")) {
+    return "We build online stores from ₹49,999 (8 weeks) with payment gateway & inventory. Interested? Let's chat about your store idea!";
+  }
+  if (msg.includes("website") || msg.includes("site") || msg.includes("web")) {
+    return "We create branded websites starting at ₹14,999 (5 weeks). Perfect for startups & professionals. What's your business?";
+  }
+  if (msg.includes("crm") || msg.includes("whatsapp") || msg.includes("automation")) {
+    return "Site + CRM is ₹79,999 (12 weeks) - website + client management + WhatsApp integration. Ideal for service businesses!";
+  }
+
+  return "Hi! We build online stores, websites & CRM systems for Indian brands. What can we help you with? Visit brandmintstudios.in 🚀";
 }
 
 async function sendReply(toNumber, message) {
