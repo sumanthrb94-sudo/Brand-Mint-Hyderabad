@@ -87,10 +87,8 @@ async function generateReply(userMessage, userName) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: BRAND_MINT_CONTEXT }] },
           contents: [
             {
-              role: "user",
               parts: [
                 {
                   text: fullPrompt,
