@@ -111,13 +111,12 @@ export default async function handler(req, res) {
       const fromPhone = jid.split("@")[0];
       const fullPrompt = `${SYSTEM_PROMPT}\n\nUser message: ${text}\n\nRespond with a helpful reply.`;
       const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: fullPrompt }] }],
-            generationConfig: { maxOutputTokens: 150, temperature: 0.7 },
           }),
         }
       );
