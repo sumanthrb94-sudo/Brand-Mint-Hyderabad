@@ -27,7 +27,51 @@ far more.
 outbound patterns, blocks and reports. Inbound-triggered replies barely
 register. Whatever else this does, it should not start conversations.
 
-## The VPS
+## On a Google Cloud Always Free instance
+
+If there is already a free e2-micro, start there and buy nothing. It is 1 GB of
+RAM against a stack that wants 2, so it needs three changes — and if it still
+thrashes after them, that is the signal to pay for a box, not before.
+
+**Add swap first.** On 1 GB, without it, the Node process is OOM-killed under
+any real load and the container restart loop begins.
+
+```bash
+sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+**Drop Redis and shrink Postgres.** Redis is a cache, not a requirement; at this
+volume it buys nothing and costs ~50 MB. In the compose file set
+`CACHE_REDIS_ENABLED=false`, delete the `redis` service, and cap Postgres:
+
+```yaml
+  postgres:
+    command: >
+      postgres -c shared_buffers=96MB -c max_connections=20
+               -c work_mem=2MB -c maintenance_work_mem=32MB
+```
+
+**GCP has two firewalls, and ufw is only one of them.** Ports opened with `ufw`
+stay shut until a matching **VPC firewall rule** exists in the console. Traffic
+dies silently at the VPC layer with nothing in any log on the box. Allow tcp
+80 and 443 to the instance's network tag.
+
+**Reserve a static external IP.** The default ephemeral address changes whenever
+the instance stops and starts, which points `wa.brandmintstudios.in` at nothing
+and breaks the ACME renewal with it. A static IP attached to a running instance
+is free; the charge only applies when it is reserved and unattached.
+
+**Watch the 1 GB monthly egress.** Text messages are negligible. Media is not —
+images and PDFs sent through the API count against it, and past the limit it
+bills. Set a budget alert at ₹100 so a surprise stays small.
+
+**Always Free e2-micro exists only in us-west1, us-central1 and us-east1.** No
+Indian region. Irrelevant here — nothing about relaying WhatsApp messages is
+latency-sensitive — but it rules the instance out for anything user-facing.
+
+## The VPS — if the free tier is not enough
 
 Hetzner CX22, ~€3.79/mo, Ubuntu 24.04. Anything with 2GB+ RAM and a persistent
 disk works; this needs an always-on process, which is why Vercel, Cloudflare
