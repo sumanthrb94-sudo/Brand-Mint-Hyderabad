@@ -268,8 +268,14 @@ Three things have to be done by hand, in this order:
 To check the whole chain: send a WhatsApp to the studio number from another
 phone, then open Admin → Leads. The row should appear within a second or two.
 If it does not, the Vercel function log says which of the three steps is missing
-— a 401 means the secret does not match, a Firestore `PERMISSION_DENIED` means
-the rules are not published.
+— a 401 means the key in the URL does not match `WA_HOOK_SECRET` (or the
+variable is not set at all: the endpoint answers 401 to both, deliberately, so
+a prober cannot tell whether a secret exists), and a Firestore
+`PERMISSION_DENIED` means the rules are not published.
+
+Note the host: `brandmintstudios.in` 307-redirects to `www.brandmintstudios.in`.
+Use the `www.` form in `WEBHOOK_URL` — whether a redirected POST keeps its body
+and query string is up to the client, and this one is not ours to bet on.
 
 ## Before spending anything
 
