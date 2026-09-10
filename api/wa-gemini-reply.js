@@ -72,20 +72,19 @@ export default async function handler(req, res) {
 
 async function generateReply(userMessage, userName) {
   try {
+    const fullPrompt = `${BRAND_MINT_CONTEXT}\n\nUser (${userName}): ${userMessage}\n\nRespond in a friendly, helpful way. Keep it brief.`;
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: BRAND_MINT_CONTEXT }],
-          },
           contents: [
             {
               parts: [
                 {
-                  text: `User (${userName}): ${userMessage}\n\nRespond in a friendly, helpful way. Keep it brief.`,
+                  text: fullPrompt,
                 },
               ],
             },
@@ -100,7 +99,7 @@ async function generateReply(userMessage, userName) {
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("[gemini] API error:", err);
+      console.error("[gemini] API error:", response.status, err);
       return null;
     }
 
