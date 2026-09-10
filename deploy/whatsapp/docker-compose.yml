@@ -16,6 +16,18 @@ services:
       - WEBHOOK_GLOBAL_ENABLED=true
       - WEBHOOK_GLOBAL_URL=${WEBHOOK_URL}
       - CONFIG_SESSION_PHONE_CLIENT=BrandMint
+      # Store nothing but the session itself. All nine of these default to
+      # true, so a linked device would write chats, contacts and the history
+      # WhatsApp syncs on pairing into Postgres on this box. The webhook
+      # forwards what matters to Firestore; the rest is personal data we have
+      # no reason to hold on a US server.
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=false
+      - DATABASE_SAVE_MESSAGE_UPDATE=false
+      - DATABASE_SAVE_DATA_CONTACTS=false
+      - DATABASE_SAVE_DATA_CHATS=false
+      - DATABASE_SAVE_DATA_LABELS=false
+      - DATABASE_SAVE_DATA_HISTORIC=false
     volumes:
       - evo_instances:/evolution/instances   # the WhatsApp session. Never drop this.
     expose: ["8080"]                          # docker network only, never the world
