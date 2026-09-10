@@ -1,0 +1,188 @@
+/**
+ * Admin → Form Leads
+ *
+ * View captured leads from form auto-saves and submissions.
+ * Track: partial fills, submissions, WhatsApp sent status, responses.
+ */
+
+import { db } from "../../firebase/app.js";
+import { getProfile } from "../../auth/session.js";
+
+export async function renderFormLeads() {
+  const root = document.createElement("div");
+  root.className = "module module-leads";
+
+  const profile = await getProfile();
+  if (!profile || profile.role !== "admin") {
+    root.innerHTML = "<p>Admin access required.</p>";
+    return root;
+  }
+
+  root.innerHTML = `
+    <div class="module-head">
+      <h2>Form Leads</h2>
+      <p>Auto-captured from website form submissions</p>
+    </div>
+
+    <div class="leads-filters">
+      <label>
+        <span>Status</span>
+        <select id="status-filter">
+          <option value="">All</option>
+          <option value="draft">Draft (abandoned)</option>
+          <option value="submitted">Submitted</option>
+        </select>
+      </label>
+      <label>
+        <span>Sort</span>
+        <select id="sort-filter">
+          <option value="recent">Most recent</option>
+          <option value="oldest">Oldest</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="leads-list" class="leads-table">
+      <div class="loading">Loading leads…</div>
+    </div>
+  `;
+
+  const listEl = root.querySelector("#leads-list");
+  const statusFilter = root.querySelector("#status-filter");
+  const sortFilter = root.querySelector("#sort-filter");
+
+  const renderLeads = async () => {
+    const status = statusFilter.value;
+    const sort = sortFilter.value;
+
+    try {
+      const url = new URL(
+        `https://firestore.googleapis.com/v1/projects/${db.projectId}/databases/(default)/documents/formLeads`,
+        location.origin
+      );
+      url.searchParams.set("key", db.apiKey);
+
+      if (status) {
+        url.searchParams.set(
+          "pageSize",
+          "100"
+        );
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      const docs = (data.documents || []).map((d) => ({
+        id: d.name.split("/").pop(),
+        ...Object.fromEntries(
+          Object.entries(d.fields).map(([k, v]) => [
+            k,
+            v.stringValue || v.booleanValue || v.integerValue || "",
+          ])
+        ),
+      }));
+
+      let filtered = docs;
+      if (status) {
+        filtered = docs.filter((d) => d.status === status);
+      }
+
+      if (sort === "oldest") {
+        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      } else {
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = "<p class='empty'>No leads found.</p>";
+        return;
+      }
+
+      listEl.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Service</th>
+              <th>Status</th>
+              <th>Submitted</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered
+              .map(
+                (d) => `
+              <tr>
+                <td>${d.name || "—"}</td>
+                <td><a href="https://wa.me/${d.phone}" target="_blank">${d.phone}</a></td>
+                <td>${d.email || "—"}</td>
+                <td>${d.service || "—"}</td>
+                <td><span class="badge badge-${d.status}">${d.status}</span></td>
+                <td>${d.submittedAt ? "✓" : "—"}</td>
+                <td>
+                  <button class="btn btn-sm btn-ghost" data-action="view" data-id="${d.id}">View</button>
+                  ${d.status === "submitted" ? `<button class="btn btn-sm btn-primary" data-action="campaign" data-id="${d.id}">Campaign</button>` : ""}
+                </td>
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      `;
+
+      listEl.querySelectorAll("[data-action]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const action = e.target.dataset.action;
+          const id = e.target.dataset.id;
+          if (action === "view") showLeadDetail(id, filtered);
+          if (action === "campaign") showCampaignModal(id, filtered);
+        });
+      });
+    } catch (e) {
+      console.error("[form-leads]", e.message);
+      listEl.innerHTML = `<p class='error'>Failed to load leads: ${e.message}</p>`;
+    }
+  };
+
+  statusFilter.addEventListener("change", renderLeads);
+  sortFilter.addEventListener("change", renderLeads);
+
+  renderLeads();
+  return root;
+}
+
+function showLeadDetail(id, leads) {
+  const lead = leads.find((l) => l.id === id);
+  if (!lead) return;
+
+  alert(`
+Lead: ${lead.name}
+Phone: ${lead.phone}
+Email: ${lead.email}
+Service: ${lead.service}
+Message: ${lead.message}
+Status: ${lead.status}
+Created: ${lead.createdAt}
+${lead.submittedAt ? `Submitted: ${lead.submittedAt}` : ""}
+  `.trim());
+}
+
+function showCampaignModal(id, leads) {
+  const lead = leads.find((l) => l.id === id);
+  if (!lead) return;
+
+  const msg = prompt(
+    `Send WhatsApp to ${lead.name}?\n\nDefaults to:\n\nHi ${lead.name}! Thanks for your interest in ${lead.service}. Ready to discuss? Reply here or call +91 77999 34943`,
+    `Hi ${lead.name}! Thanks for your interest in ${lead.service}. Ready to discuss? Reply here or call +91 77999 34943`
+  );
+
+  if (!msg) return;
+
+  // In a full implementation, this would trigger api/form-wa-trigger.js
+  console.log(`[campaign] Would send to ${lead.phone}:`, msg);
+  alert("Campaign ready. Integrate with Evolution API to send.");
+}
