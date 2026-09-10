@@ -6,7 +6,7 @@
  */
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const EVOLUTION_API = "http://localhost:8080";
+const EVOLUTION_API = "https://wa.brandmintstudios.in";
 
 const BRAND_MINT_CONTEXT = `You are a helpful customer support assistant for Brand Mint Studios, an online store design agency in India.
 
