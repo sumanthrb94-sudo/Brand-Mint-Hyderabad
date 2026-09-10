@@ -1,0 +1,6 @@
+# TLS is issued and renewed automatically. Requires the DNS record to be
+# grey-clouded in Cloudflare — behind the proxy the ACME challenge fails and
+# renewal stops silently about ninety days later.
+{$WA_HOST} {
+	reverse_proxy evolution:8080
+}
