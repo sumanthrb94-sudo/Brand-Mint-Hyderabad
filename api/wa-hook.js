@@ -141,7 +141,8 @@ export default async function handler(req, res) {
           }).catch(e => console.error("[wa-hook] evolution send error:", e.message));
         }
       } else {
-        console.error("[wa-hook] gemini:", geminiResponse.status);
+        const errText = await geminiResponse.text().catch(() => "");
+        console.error("[wa-hook] gemini:", geminiResponse.status, errText.slice(0, 300));
       }
     } catch (e) {
       console.error("[wa-hook] gemini error:", e.message);
