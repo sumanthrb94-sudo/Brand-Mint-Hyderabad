@@ -109,21 +109,22 @@ export default async function handler(req, res) {
   if (GEMINI_API_KEY) {
     try {
       const fromPhone = jid.split("@")[0];
-      const fullPrompt = `${SYSTEM_PROMPT}\n\nUser message: ${text}\n\nRespond with a helpful reply.`;
       const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/text-bison-001:generateText?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: fullPrompt }] }],
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: [{ role: "user", parts: [{ text }] }],
+            generationConfig: { maxOutputTokens: 150, temperature: 0.7 },
           }),
         }
       );
 
       if (geminiResponse.ok) {
         const geminiData = await geminiResponse.json();
-        const reply = geminiData.candidates?.[0]?.output || geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
         if (reply) {
           // Send reply via Evolution API
