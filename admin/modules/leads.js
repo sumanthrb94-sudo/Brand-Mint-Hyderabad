@@ -246,10 +246,13 @@ export async function render(ctx) {
     root.appendChild(requestsPanel());
   }
 
-  /* Inbound WhatsApp. api/wa-hook.js records what the Evolution box receives,
-     so an enquiry sent to the studio number is visible here and not only on
-     the phone. Nothing here replies — the reply is a link that opens the real
-     WhatsApp thread, which keeps the outbound side human. */
+  /* Inbound WhatsApp. api/wa-hook.js records what the Evolution box receives
+     and drafts a suggested reply via Gemini, so an enquiry sent to the studio
+     number is visible here and not only on the phone. Nothing here sends
+     automatically — auto-replying to every inbound message is the pattern
+     that gets unofficial WhatsApp clients banned. "Open chat" opens the real
+     WhatsApp thread with the draft pre-filled; a human reviews and hits send
+     there, which keeps the outbound side human. */
   function waPanel() {
     const rows = db.list("waMessages").slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     const open = rows.filter((r) => r.status !== "done").length;
@@ -267,7 +270,15 @@ export async function render(ctx) {
               h("div", { class: "sub", text: r.from ? `+${r.from}` : "" }),
             ]),
           },
-          { label: "Message", cell: (r) => h("div", { class: "sub", text: r.text || "" }) },
+          {
+            label: "Message",
+            cell: (r) => h("div", {}, [
+              h("div", { class: "sub", text: r.text || "" }),
+              r.suggestedReply
+                ? h("div", { class: "sub", style: "margin-top:4px;color:var(--accent,#047857)", text: `Draft: ${r.suggestedReply}` })
+                : null,
+            ].filter(Boolean)),
+          },
           { label: "When", cell: (r) => relTime(r.createdAt) },
           { label: "Status", cell: (r) => pill(r.status === "done" ? "done" : "new") },
           {
@@ -276,8 +287,9 @@ export async function render(ctx) {
               r.from
                 ? h("a", {
                     class: "btn btn-sm", target: "_blank", rel: "noopener",
-                    href: `https://wa.me/${String(r.from).replace(/\D/g, "")}`,
-                    text: "Open chat", onclick: (e) => e.stopPropagation(),
+                    href: `https://wa.me/${String(r.from).replace(/\D/g, "")}${r.suggestedReply ? `?text=${encodeURIComponent(r.suggestedReply)}` : ""}`,
+                    text: r.suggestedReply ? "Open chat (draft ready)" : "Open chat",
+                    onclick: (e) => e.stopPropagation(),
                   })
                 : null,
               h("button", {
@@ -291,7 +303,7 @@ export async function render(ctx) {
         rows,
         empty: {
           title: "No WhatsApp messages yet",
-          body: "Messages sent to the studio number land here once the webhook is live. Replies still happen in WhatsApp itself.",
+          body: "Messages sent to the studio number land here once the webhook is live, each with a Gemini-drafted reply. You review and send — nothing goes out automatically.",
         },
       }),
     ]);

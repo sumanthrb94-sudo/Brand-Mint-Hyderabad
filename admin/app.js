@@ -24,7 +24,7 @@ setToastHandle(toast);
 
 const routes = {
   dashboard: () => import("/admin/modules/dashboard.js"),
-  leads:     () => import("/admin/modules/leads.js?v=fb9"),
+  leads:     () => import("/admin/modules/leads.js?v=fb10"),
   formLeads: () => import("/admin/modules/form-leads.js?v=1"),
   campaigns: () => import("/admin/modules/campaigns-smart.js?v=1"),
   whatsapp:  () => import("/admin/modules/whatsapp-dashboard.js?v=1"),

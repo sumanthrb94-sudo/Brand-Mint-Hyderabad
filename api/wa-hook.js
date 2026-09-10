@@ -1,8 +1,12 @@
 /**
  * POST /api/wa-hook?k=<secret>
  *
- * Evolution API's webhook. Records an inbound WhatsApp message, generates an
- * automated response via Gemini API, and sends it back.
+ * Evolution API's webhook. Records an inbound WhatsApp message and drafts a
+ * suggested reply via Gemini. It does NOT send anything back automatically —
+ * auto-replying to every inbound message is the outbound pattern that gets
+ * unofficial WhatsApp clients banned (see SETUP-WHATSAPP.md). The draft is
+ * stored alongside the message; a human reviews and sends it from Admin →
+ * Leads, which opens WhatsApp with the draft pre-filled.
  *
  * This endpoint is public but guarded by a shared secret in the query string.
  * Firestore rules pin the shape so writes are bounded.
@@ -11,10 +15,8 @@ import { clean, readJson } from "./_lib.js";
 import { firebaseConfig } from "../firebase/config.js";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const EVOLUTION_API_HOST = process.env.EVOLUTION_API || "https://wa.brandmintstudios.in";
-const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY;
 
-const SYSTEM_PROMPT = `You are Brand Mint Studios, a web and app development studio in India.
+const SYSTEM_PROMPT = `You are drafting a WhatsApp reply on behalf of Brand Mint Studios, a web and app development studio in India. A human will review your draft before sending it.
 
 SERVICES:
 - Static Website (₹14,999): Branded landing page, fast, SEO-ready
@@ -33,11 +35,37 @@ GUIDELINES:
 
 Respond helpfully to: "What do you do?", "How much?", "Can you build X?", "Timeline?"`;
 
-
 const COMMIT = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents:commit?key=${firebaseConfig.apiKey}`;
 const DOC = `projects/${firebaseConfig.projectId}/databases/(default)/documents/waMessages/`;
 
 const str = (v, max) => ({ stringValue: clean(v, max) });
+
+async function draftReply(text) {
+  if (!GEMINI_API_KEY) return "";
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          contents: [{ role: "user", parts: [{ text }] }],
+          generationConfig: { maxOutputTokens: 150, temperature: 0.7 },
+        }),
+      }
+    );
+    if (!r.ok) {
+      console.error("[wa-hook] gemini error:", r.status, await r.text().catch(() => ""));
+      return "";
+    }
+    const data = await r.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  } catch (e) {
+    console.error("[wa-hook] gemini error:", e.message);
+    return "";
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
@@ -76,6 +104,8 @@ export default async function handler(req, res) {
   const waId = String(d.key?.id || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);
   if (!waId) return drop("no id");
 
+  const suggestedReply = await draftReply(text);
+
   const fields = {
     from: str(jid.split("@")[0], 20),
     name: str(d.pushName || "", 80),
@@ -84,9 +114,9 @@ export default async function handler(req, res) {
     instance: str(body.instance || "", 40),
     status: str("new", 20),
     createdAt: str(new Date().toISOString(), 40),
+    ...(suggestedReply ? { suggestedReply: str(suggestedReply, 1000) } : {}),
   };
 
-  // Store message in Firestore
   try {
     const r = await fetch(COMMIT, {
       method: "POST",
@@ -103,51 +133,6 @@ export default async function handler(req, res) {
     }
   } catch (e) {
     console.error("[wa-hook] firestore error:", e.message);
-  }
-
-  // Generate auto-reply via Gemini
-  if (GEMINI_API_KEY) {
-    try {
-      const fromPhone = jid.split("@")[0];
-      const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-            contents: [{ role: "user", parts: [{ text }] }],
-            generationConfig: { maxOutputTokens: 150, temperature: 0.7 },
-          }),
-        }
-      );
-
-      if (geminiResponse.ok) {
-        const geminiData = await geminiResponse.json();
-        const reply = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-        if (reply) {
-          // Send reply via Evolution API
-          const headers = { "Content-Type": "application/json" };
-          if (EVOLUTION_API_KEY) {
-            headers["apiKey"] = EVOLUTION_API_KEY;
-          }
-          await fetch(`${EVOLUTION_API_HOST}/message/sendText/${body.instance}`, {
-            method: "POST",
-            headers,
-            body: JSON.stringify({
-              number: fromPhone,
-              text: reply,
-            }),
-          }).catch(e => console.error("[wa-hook] evolution send error:", e.message));
-        }
-      } else {
-        const errText = await geminiResponse.text().catch(() => "");
-        console.error("[wa-hook] gemini error:", geminiResponse.status, errText);
-      }
-    } catch (e) {
-      console.error("[wa-hook] gemini error:", e.message);
-    }
   }
 
   // Always 200. Evolution retries anything else.

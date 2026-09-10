@@ -329,7 +329,7 @@ service cloud.firestore {
       // retried delivery collides instead of duplicating.
       allow create: if request.resource.data.keys().hasOnly([
                          'from', 'name', 'text', 'waId', 'instance',
-                         'status', 'createdAt'
+                         'status', 'createdAt', 'suggestedReply'
                        ])
                     && request.resource.data.from is string
                     && request.resource.data.from.size() > 0
@@ -345,7 +345,10 @@ service cloud.firestore {
                     && request.resource.data.instance.size() <= 40
                     && request.resource.data.status == 'new'
                     && request.resource.data.createdAt is string
-                    && request.resource.data.createdAt.size() <= 40;
+                    && request.resource.data.createdAt.size() <= 40
+                    && (!('suggestedReply' in request.resource.data)
+                        || (request.resource.data.suggestedReply is string
+                            && request.resource.data.suggestedReply.size() <= 1000));
       allow get, list: if isAdmin();
       allow update, delete: if isAdmin();
     }
