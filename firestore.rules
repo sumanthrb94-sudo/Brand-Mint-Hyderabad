@@ -366,8 +366,8 @@ service cloud.firestore {
                     && request.resource.data.name.size() <= 80
                     && request.resource.data.phone is string
                     && request.resource.data.phone.size() <= 20
-                    && request.resource.data.service is string
-                    && request.resource.data.service.size() <= 60
+                    && request.resource.data['service'] is string
+                    && request.resource.data['service'].size() <= 60
                     && request.resource.data.message is string
                     && request.resource.data.message.size() <= 1000
                     && request.resource.data.when is string
@@ -381,11 +381,9 @@ service cloud.firestore {
                     && request.resource.data.updatedAt is string
                     && request.resource.data.updatedAt.size() <= 40
                     && (!('submittedAt' in request.resource.data)
-                        || (request.resource.data.submittedAt is string
-                            && request.resource.data.submittedAt.size() <= 40))
+                        || request.resource.data.submittedAt.size() <= 40)
                     && (!('leadId' in request.resource.data)
-                        || (request.resource.data.leadId is string
-                            && request.resource.data.leadId.size() <= 20));
+                        || request.resource.data.leadId.size() <= 20);
       allow get, list: if isAdmin();
       allow update, delete: if isAdmin();
     }
@@ -404,8 +402,8 @@ service cloud.firestore {
                     && request.resource.data.phone.size() <= 20
                     && request.resource.data.name is string
                     && request.resource.data.name.size() <= 80
-                    && request.resource.data.service is string
-                    && request.resource.data.service.size() <= 60
+                    && request.resource.data['service'] is string
+                    && request.resource.data['service'].size() <= 60
                     && request.resource.data.message is string
                     && request.resource.data.message.size() <= 2000
                     && request.resource.data.status is string
