@@ -11,8 +11,8 @@ import { clean, readJson } from "./_lib.js";
 import { firebaseConfig } from "../firebase/config.js";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const EVOLUTION_API_HOST = "http://localhost:8080";
-const EVOLUTION_API_KEY = process.env.EVO_KEY;
+const EVOLUTION_API_HOST = process.env.EVOLUTION_API || "https://wa.brandmintstudios.in";
+const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY;
 
 const SYSTEM_PROMPT = `You are Brand Mint Studios, a web and app development studio in India.
 
@@ -110,7 +110,7 @@ export default async function handler(req, res) {
     try {
       const fromPhone = jid.split("@")[0];
       const geminiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent?key=${GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -127,9 +127,13 @@ export default async function handler(req, res) {
 
         if (reply) {
           // Send reply via Evolution API
+          const headers = { "Content-Type": "application/json" };
+          if (EVOLUTION_API_KEY) {
+            headers["apiKey"] = EVOLUTION_API_KEY;
+          }
           await fetch(`${EVOLUTION_API_HOST}/message/sendText/${body.instance}`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", apikey: EVOLUTION_API_KEY },
+            headers,
             body: JSON.stringify({
               number: fromPhone,
               text: reply,
