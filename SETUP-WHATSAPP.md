@@ -246,8 +246,11 @@ Three things have to be done by hand, in this order:
    `deploy/whatsapp/.env` so the webhook carries the key as a query parameter:
 
    ```
-   WEBHOOK_GLOBAL_URL=https://brandmintstudios.in/api/wa-hook?k=<the same secret>
+   WEBHOOK_URL=https://brandmintstudios.in/api/wa-hook?k=<the same secret>
    ```
+
+   (`WEBHOOK_URL` is the name in `.env`; `docker-compose.yml` passes it into
+   the container as `WEBHOOK_GLOBAL_URL`. Edit the one in `.env`.)
 
    Then `docker compose up -d --force-recreate evolution` — the container reads
    the URL at start, so a plain restart is not enough.
