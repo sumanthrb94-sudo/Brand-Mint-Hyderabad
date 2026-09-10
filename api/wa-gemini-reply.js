@@ -104,9 +104,15 @@ async function generateReply(userMessage, userName) {
     }
 
     const data = await response.json();
+    console.log("[gemini] Response:", JSON.stringify(data).slice(0, 200));
+
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Thanks for reaching out! Tell me more about your project.";
+
+    if (!reply || reply === "Thanks for reaching out! Tell me more about your project.") {
+      console.log("[gemini] No text in response, using fallback");
+    }
 
     return reply.trim();
   } catch (e) {
