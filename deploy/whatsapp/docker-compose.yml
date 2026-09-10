@@ -2,7 +2,7 @@
 # On a 4 GB box you can re-enable the cache and lift the Postgres limits.
 services:
   evolution:
-    image: atendai/evolution-api:v2.1.1
+    image: evoapicloud/evolution-api:v2.3.7
     restart: always
     depends_on: [postgres]
     environment:
