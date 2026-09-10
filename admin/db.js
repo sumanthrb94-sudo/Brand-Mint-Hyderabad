@@ -39,6 +39,8 @@ const COLLECTIONS = [
   "requests",
   // Call requests from the public booking form
   "bookings",
+  // Inbound WhatsApp, written by api/wa-hook.js from the Evolution box
+  "waMessages",
   // Sign-in profiles (readiness score lives here)
   "profiles",
 ];
@@ -79,6 +81,7 @@ const cache = {
   messages: [],
   requests: [],
   bookings: [],
+  waMessages: [],
   profiles: [],
   settings: null,
 };

@@ -8,7 +8,7 @@
  */
 
 import { auth } from "/admin/auth.js";
-import { db, seedIfEmpty, setToastHandle } from "/admin/db.js";
+import { db, seedIfEmpty, setToastHandle } from "/admin/db.js?v=fb9";
 import {
   renderSidebar,
   renderTopbar,
@@ -24,7 +24,7 @@ setToastHandle(toast);
 
 const routes = {
   dashboard: () => import("/admin/modules/dashboard.js"),
-  leads:     () => import("/admin/modules/leads.js"),
+  leads:     () => import("/admin/modules/leads.js?v=fb9"),
   pipeline:  () => import("/admin/modules/pipeline.js"),
   onboarding: () => import("/admin/modules/onboarding.js"),
   clients:   () => import("/admin/modules/clients.js"),

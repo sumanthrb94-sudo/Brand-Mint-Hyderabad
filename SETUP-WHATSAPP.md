@@ -222,12 +222,51 @@ re-scan.
 
 ## Wiring it into the site
 
-`WEBHOOK_GLOBAL_URL` points at a new `api/wa-hook.js` on Vercel. Same shape as
-`api/book.js`: verify the request, write the enquiry to Firestore so it lands in
-Admin → Leads, then reply through Evolution's `/message/sendText/brandmint`.
+`api/wa-hook.js` is the endpoint. Evolution posts every event to it; it keeps
+only inbound one-to-one messages and writes one row to the `waMessages`
+collection, which Admin → Leads renders above the call requests. It does **not**
+auto-reply: answering every inbound message automatically is the outbound
+pattern that gets unofficial WhatsApp clients banned, so the admin row carries
+an "Open chat" link and a human sends the reply.
 
-That endpoint is public, so it must verify the caller — an unauthenticated
-webhook is a way to write junk straight into our leads collection.
+The endpoint is public — Evolution posts from the GCP box, not from the site, so
+the same-origin check the other API routes use cannot apply. A shared secret in
+the query string is what stops anyone POSTing invented enquiries, and the
+`waMessages` block in `firestore.rules` pins the shape and size so a leaked
+secret buys bounded junk rows rather than an arbitrary write.
+
+Three things have to be done by hand, in this order:
+
+1. **Pick the secret and put it in Vercel.** Generate it on your own machine
+   (`openssl rand -hex 32`), add it as the `WA_HOOK_SECRET` environment variable
+   in the Vercel project, and redeploy. Never paste it into a chat window or a
+   commit.
+
+2. **Point Evolution at it, with the secret attached.** On the box, edit
+   `deploy/whatsapp/.env` so the webhook carries the key as a query parameter:
+
+   ```
+   WEBHOOK_GLOBAL_URL=https://brandmintstudios.in/api/wa-hook?k=<the same secret>
+   ```
+
+   Then `docker compose up -d --force-recreate evolution` — the container reads
+   the URL at start, so a plain restart is not enough.
+
+3. **Publish the rules.** The `waMessages` block ships in `firestore.rules` but
+   Firestore does not know about it until it is pushed:
+
+   ```bash
+   node scripts/setup-firebase.mjs --only rules --key <service-account.json>
+   ```
+
+   Until this runs the endpoint answers 200 and the Firestore write is denied —
+   messages arrive and vanish, with the rejection only in the Vercel logs.
+
+To check the whole chain: send a WhatsApp to the studio number from another
+phone, then open Admin → Leads. The row should appear within a second or two.
+If it does not, the Vercel function log says which of the three steps is missing
+— a 401 means the secret does not match, a Firestore `PERMISSION_DENIED` means
+the rules are not published.
 
 ## Before spending anything
 

@@ -241,8 +241,60 @@ export async function render(ctx) {
     }
 
     renderTable();
+    root.appendChild(waPanel());
     root.appendChild(bookingsPanel());
     root.appendChild(requestsPanel());
+  }
+
+  /* Inbound WhatsApp. api/wa-hook.js records what the Evolution box receives,
+     so an enquiry sent to the studio number is visible here and not only on
+     the phone. Nothing here replies — the reply is a link that opens the real
+     WhatsApp thread, which keeps the outbound side human. */
+  function waPanel() {
+    const rows = db.list("waMessages").slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    const open = rows.filter((r) => r.status !== "done").length;
+    return h("section", { class: "card", style: "margin-top:24px" }, [
+      h("div", { class: "card-head" }, [
+        h("h3", { text: "WhatsApp" }),
+        h("span", { class: "muted", text: open ? `${open} to answer` : "All answered" }),
+      ]),
+      table({
+        columns: [
+          {
+            label: "From",
+            cell: (r) => h("div", {}, [
+              h("div", { class: "strong", text: r.name || r.from || "\u2014" }),
+              h("div", { class: "sub", text: r.from ? `+${r.from}` : "" }),
+            ]),
+          },
+          { label: "Message", cell: (r) => h("div", { class: "sub", text: r.text || "" }) },
+          { label: "When", cell: (r) => relTime(r.createdAt) },
+          { label: "Status", cell: (r) => pill(r.status === "done" ? "done" : "new") },
+          {
+            label: "",
+            cell: (r) => h("div", { class: "hstack", style: "gap:6px;justify-content:flex-end" }, [
+              r.from
+                ? h("a", {
+                    class: "btn btn-sm", target: "_blank", rel: "noopener",
+                    href: `https://wa.me/${String(r.from).replace(/\D/g, "")}`,
+                    text: "Open chat", onclick: (e) => e.stopPropagation(),
+                  })
+                : null,
+              h("button", {
+                class: "btn btn-sm", type: "button",
+                text: r.status === "done" ? "Reopen" : "Mark answered",
+                onclick: (e) => { e.stopPropagation(); db.update("waMessages", r.id, { status: r.status === "done" ? "new" : "done" }); },
+              }),
+            ].filter(Boolean)),
+          },
+        ],
+        rows,
+        empty: {
+          title: "No WhatsApp messages yet",
+          body: "Messages sent to the studio number land here once the webhook is live. Replies still happen in WhatsApp itself.",
+        },
+      }),
+    ]);
   }
 
   /* Call requests from the booking form on the home page. These arrive from

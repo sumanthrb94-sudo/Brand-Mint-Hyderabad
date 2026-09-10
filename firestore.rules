@@ -318,6 +318,38 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    match /waMessages/{id} {
+      // Inbound WhatsApp messages, written by api/wa-hook.js from the
+      // Evolution box. That endpoint holds a shared secret, but it writes with
+      // the public web apiKey like every other REST write here, so as far as
+      // these rules are concerned the caller is anonymous — the same treatment
+      // as /bookings: open to create, shape and size hard-pinned, readable
+      // only by the studio. A leaked secret then buys bounded junk rows, not
+      // an arbitrary write. The doc id is the WhatsApp message id, so a
+      // retried delivery collides instead of duplicating.
+      allow create: if request.resource.data.keys().hasOnly([
+                         'from', 'name', 'text', 'waId', 'instance',
+                         'status', 'createdAt'
+                       ])
+                    && request.resource.data.from is string
+                    && request.resource.data.from.size() > 0
+                    && request.resource.data.from.size() <= 20
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() <= 80
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() > 0
+                    && request.resource.data.text.size() <= 2000
+                    && request.resource.data.waId is string
+                    && request.resource.data.waId.size() <= 64
+                    && request.resource.data.instance is string
+                    && request.resource.data.instance.size() <= 40
+                    && request.resource.data.status == 'new'
+                    && request.resource.data.createdAt is string
+                    && request.resource.data.createdAt.size() <= 40;
+      allow get, list: if isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
     /* --------------------------- content, settings ------------------------ */
     // Admin only. Settings carries bank details and GSTIN.
 
