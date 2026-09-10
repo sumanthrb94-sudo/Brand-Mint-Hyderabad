@@ -1,13 +1,15 @@
 /**
  * POST /api/wa-hook?k=<secret>
  *
- * Evolution API's webhook. Records an inbound WhatsApp message, drafts a
- * reply via Gemini, and — within a per-contact daily cap and a short random
- * delay to avoid looking bot-paced — sends it back automatically through
- * Evolution. This runs 24/7, no business-hours gate. Once a contact hits the
- * daily cap the draft is still generated and stored, but the send is left to
- * a human from Admin → Leads (same "Open chat (draft ready)" flow as before),
- * so a long conversation doesn't loop forever unattended.
+ * Evolution API's webhook. Records an inbound WhatsApp message and drafts a
+ * reply via Gemini. It does NOT send anything itself — a Vercel serverless
+ * function gets killed long before a human-paced (multi-minute) delay would
+ * elapse, so sending has to happen somewhere with no execution time limit.
+ * Instead this stores the draft with a `sendAfter` timestamp (now + a random
+ * few minutes), and a small worker script running on the Evolution VM
+ * (deploy/whatsapp/autosend-worker.mjs, on a 1-minute cron) polls Firestore
+ * for due drafts and sends them through Evolution's local API. See that
+ * file for the daily-cap and send logic.
  *
  * This endpoint is public but guarded by a shared secret in the query string.
  * Firestore rules pin the shape so writes are bounded.
@@ -16,10 +18,8 @@ import { clean, readJson } from "./_lib.js";
 import { firebaseConfig } from "../firebase/config.js";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const EVOLUTION_BASE_URL = process.env.EVOLUTION_BASE_URL || "http://34.63.145.168:8080";
-const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || process.env.EVO_KEY;
-const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || "brandmint";
-const AUTOSEND_DAILY_CAP = parseInt(process.env.WA_AUTOSEND_DAILY_CAP || "5", 10);
+const AUTOSEND_DELAY_MIN_MS = 3 * 60 * 1000;
+const AUTOSEND_DELAY_MAX_MS = 5 * 60 * 1000;
 
 const SYSTEM_PROMPT = `You are drafting a WhatsApp reply on behalf of Brand Mint Studios, a web and app development studio in India. A human will review your draft before sending it.
 
@@ -44,60 +44,6 @@ const COMMIT = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.pr
 const DOC = `projects/${firebaseConfig.projectId}/databases/(default)/documents/waMessages/`;
 
 const str = (v, max) => ({ stringValue: clean(v, max) });
-const bool = (v) => ({ booleanValue: !!v });
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-const COUNTER_DOC = (id) =>
-  `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/waAutoSendCounters/${id}?key=${firebaseConfig.apiKey}`;
-
-/** How many auto-sends this contact has already had today. Best-effort: a
- *  missed race under real-world (low) message volume just means one extra
- *  send, not a security issue — this is a pacing guard, not an auth boundary. */
-async function sendsToday(phone) {
-  const day = new Date().toISOString().slice(0, 10);
-  const docId = `${phone}_${day}`;
-  try {
-    const r = await fetch(COUNTER_DOC(docId));
-    if (!r.ok) return { docId, count: 0 };
-    const doc = await r.json();
-    return { docId, count: parseInt(doc.fields?.count?.integerValue || "0", 10) };
-  } catch {
-    return { docId, count: 0 };
-  }
-}
-
-async function bumpSends(docId, count) {
-  try {
-    await fetch(COUNTER_DOC(docId), {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fields: { count: { integerValue: String(count) }, updatedAt: str(new Date().toISOString(), 40) },
-      }),
-    });
-  } catch (e) {
-    console.error("[wa-hook] counter bump error:", e.message);
-  }
-}
-
-/** Sends through Evolution. A short random delay before calling paces the
- *  reply like a person typing rather than a bot firing instantly. */
-async function autoSend(phone, text) {
-  if (!EVOLUTION_API_KEY) return false;
-  await sleep(1000 + Math.random() * 1500);
-  try {
-    const r = await fetch(`${EVOLUTION_BASE_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", apikey: EVOLUTION_API_KEY },
-      body: JSON.stringify({ number: phone, text }),
-    });
-    if (!r.ok) console.error("[wa-hook] evolution send:", r.status, await r.text().catch(() => ""));
-    return r.ok;
-  } catch (e) {
-    console.error("[wa-hook] evolution send error:", e.message);
-    return false;
-  }
-}
 
 async function draftReply(text) {
   if (!GEMINI_API_KEY) return "";
@@ -166,20 +112,12 @@ export default async function handler(req, res) {
   const phone = jid.split("@")[0];
   const suggestedReply = await draftReply(text);
 
-  let autoSent = false;
-  let sentAt = "";
-  if (suggestedReply) {
-    const { docId, count } = await sendsToday(phone);
-    if (count < AUTOSEND_DAILY_CAP) {
-      autoSent = await autoSend(phone, suggestedReply);
-      if (autoSent) {
-        sentAt = new Date().toISOString();
-        await bumpSends(docId, count + 1);
-      }
-    }
-    // At or above the cap: draft stays in Firestore for a human to send
-    // manually from Admin → Leads, same as before auto-send existed.
-  }
+  // The worker picks this up once sendAfter has passed. No suggestedReply
+  // (Gemini unset/failed) means nothing to auto-send — the field is omitted
+  // and the worker's query (which requires suggestedReply) never matches it.
+  const sendAfter = suggestedReply
+    ? new Date(Date.now() + AUTOSEND_DELAY_MIN_MS + Math.random() * (AUTOSEND_DELAY_MAX_MS - AUTOSEND_DELAY_MIN_MS)).toISOString()
+    : "";
 
   const fields = {
     from: str(phone, 20),
@@ -187,10 +125,11 @@ export default async function handler(req, res) {
     text: str(text, 2000),
     waId: str(waId, 64),
     instance: str(body.instance || "", 40),
-    status: str(autoSent ? "done" : "new", 20),
+    status: str("new", 20),
     createdAt: str(new Date().toISOString(), 40),
-    ...(suggestedReply ? { suggestedReply: str(suggestedReply, 1000) } : {}),
-    ...(autoSent ? { autoSent: bool(true), sentAt: str(sentAt, 40) } : {}),
+    ...(suggestedReply
+      ? { suggestedReply: str(suggestedReply, 1000), sendAfter: str(sendAfter, 40), autoSendState: str("pending", 20) }
+      : {}),
   };
 
   try {

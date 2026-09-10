@@ -328,12 +328,14 @@ service cloud.firestore {
       // an arbitrary write. The doc id is the WhatsApp message id, so a
       // retried delivery collides instead of duplicating.
       //
-      // status is 'done' when wa-hook.js already auto-sent the drafted reply
-      // (autoSent + sentAt then also present), or 'new' when the draft is
-      // still waiting on a human — same two states the admin panel expects.
+      // status is 'done' once the autosend worker (deploy/whatsapp/
+      // autosend-worker.mjs) has sent the drafted reply, or 'new' while the
+      // draft is still pending/waiting on a human — same two states the
+      // admin panel expects. autoSendState tracks the worker's own pipeline
+      // ('pending' -> 'sent'/'skipped') separately from that display status.
       allow create: if request.resource.data.keys().hasOnly([
-                         'from', 'name', 'text', 'waId', 'instance',
-                         'status', 'createdAt', 'suggestedReply', 'autoSent', 'sentAt'
+                         'from', 'name', 'text', 'waId', 'instance', 'status', 'createdAt',
+                         'suggestedReply', 'sendAfter', 'autoSendState', 'autoSent', 'sentAt'
                        ])
                     && request.resource.data.from is string
                     && request.resource.data.from.size() > 0
@@ -347,19 +349,39 @@ service cloud.firestore {
                     && request.resource.data.waId.size() <= 64
                     && request.resource.data.instance is string
                     && request.resource.data.instance.size() <= 40
-                    && request.resource.data.status in ['new', 'done']
+                    && request.resource.data.status == 'new'
                     && request.resource.data.createdAt is string
                     && request.resource.data.createdAt.size() <= 40
                     && (!('suggestedReply' in request.resource.data)
                         || (request.resource.data.suggestedReply is string
                             && request.resource.data.suggestedReply.size() <= 1000))
+                    && (!('sendAfter' in request.resource.data)
+                        || (request.resource.data.sendAfter is string
+                            && request.resource.data.sendAfter.size() <= 40))
+                    && (!('autoSendState' in request.resource.data)
+                        || request.resource.data.autoSendState == 'pending')
                     && (!('autoSent' in request.resource.data)
                         || request.resource.data.autoSent is bool)
                     && (!('sentAt' in request.resource.data)
                         || (request.resource.data.sentAt is string
                             && request.resource.data.sentAt.size() <= 40));
       allow get, list: if isAdmin();
-      allow update, delete: if isAdmin();
+
+      // The autosend worker runs on the Evolution VM with no Firebase Auth
+      // token (same anonymous-write posture as wa-hook.js's create above),
+      // so it needs its own narrow allowance: it may only flip a 'pending'
+      // draft to 'sent' or 'skipped', touching nothing but these four
+      // fields. It can never create a doc, rewrite the message text, or
+      // touch a doc it didn't itself schedule.
+      allow update: if isAdmin()
+                    || (resource.data.autoSendState == 'pending'
+                        && changedKeys().hasOnly(['autoSendState', 'autoSent', 'sentAt', 'status'])
+                        && request.resource.data.autoSendState in ['sent', 'skipped']
+                        && (!('autoSent' in request.resource.data) || request.resource.data.autoSent is bool)
+                        && (!('sentAt' in request.resource.data)
+                            || (request.resource.data.sentAt is string && request.resource.data.sentAt.size() <= 40))
+                        && (!('status' in request.resource.data) || request.resource.data.status in ['new', 'done']));
+      allow delete: if isAdmin();
     }
 
     match /waAutoSendCounters/{id} {
