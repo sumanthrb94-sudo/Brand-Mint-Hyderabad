@@ -127,7 +127,7 @@ ufw enable        # note: 8080 is NOT opened — Caddy reaches it over the docke
 ```yaml
 services:
   evolution:
-    image: atendai/evolution-api:latest      # pin a real version tag in production
+    image: evoapicloud/evolution-api:v2.3.7   # not atendai - that org 404s
     restart: always
     depends_on: [postgres, redis]
     environment:
