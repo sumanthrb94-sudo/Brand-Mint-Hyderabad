@@ -27,6 +27,7 @@ const routes = {
   leads:     () => import("/admin/modules/leads.js?v=fb9"),
   formLeads: () => import("/admin/modules/form-leads.js?v=1"),
   campaigns: () => import("/admin/modules/campaigns-smart.js?v=1"),
+  whatsapp:  () => import("/admin/modules/whatsapp-dashboard.js?v=1"),
   analyticLeads: () => import("/admin/modules/analytics-leads.js?v=1"),
   pipeline:  () => import("/admin/modules/pipeline.js"),
   onboarding: () => import("/admin/modules/onboarding.js"),
@@ -137,6 +138,7 @@ window.addEventListener("hashchange", renderRoute);
 const NAV_KEYS = {
   d: "dashboard",
   e: "leads",
+  w: "whatsapp",
   p: "pipeline",
   o: "onboarding",
   c: "clients",

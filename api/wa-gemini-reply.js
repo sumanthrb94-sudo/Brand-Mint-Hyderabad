@@ -49,6 +49,9 @@ export default async function handler(req, res) {
 
       console.log(`[wa-gemini] Incoming from ${from} (${name}): ${text.slice(0, 50)}`);
 
+      // Log incoming message
+      await logMessage(from, name, text, "inbound");
+
       // Generate reply with Gemini
       const reply = await generateReply(text, name);
 
@@ -59,6 +62,9 @@ export default async function handler(req, res) {
 
       // Send reply via Evolution API
       await sendReply(from, reply);
+
+      // Log outgoing reply
+      await logMessage(from, name, reply, "outbound", text);
 
       console.log(`[wa-gemini] Sent reply to ${from}`);
       return res.status(200).json({ sent: true, reply });
@@ -159,4 +165,40 @@ async function sendReply(toNumber, message) {
   }
 
   return response.json();
+}
+
+async function logMessage(phone, name, text, direction, inboundText = null) {
+  try {
+    const firebaseKey = process.env.FIREBASE_API_KEY;
+    const projectId = "brandmintstudios-a5eb7";
+
+    if (!firebaseKey) {
+      console.log("[wa-gemini] Firebase key not available, skipping log");
+      return;
+    }
+
+    const docId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const payload = {
+      fields: {
+        phone: { stringValue: phone },
+        name: { stringValue: name || "Unknown" },
+        text: { stringValue: text.slice(0, 1000) },
+        inboundText: inboundText ? { stringValue: inboundText.slice(0, 1000) } : { nullValue: null },
+        direction: { stringValue: direction },
+        timestamp: { stringValue: new Date().toISOString() },
+        source: { stringValue: "gemini_auto_reply" },
+      }
+    };
+
+    await fetch(
+      `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/waMessages/${docId}?key=${firebaseKey}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+  } catch (e) {
+    console.error("[wa-gemini] Failed to log message:", e.message);
+  }
 }
