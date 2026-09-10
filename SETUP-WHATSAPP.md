@@ -27,6 +27,39 @@ far more.
 outbound patterns, blocks and reports. Inbound-triggered replies barely
 register. Whatever else this does, it should not start conversations.
 
+## Its own GCP project
+
+Not inside a client's project. Billing gets mixed, and if that client's work
+ever moves or is handed over, our WhatsApp instance is tangled in it. The free
+tier is per **billing account**, not per project, so a dedicated project keeps
+the same allowance.
+
+```bash
+gcloud compute instances delete OLD_NAME --zone=us-central1-a   # delete first:
+gcloud compute addresses list                                    # one e2-micro per
+                                                                 # billing account,
+                                                                 # so two would bill
+gcloud projects create brandmint-infra --name="Brand Mint Infra"
+gcloud config set project brandmint-infra
+gcloud billing accounts list
+gcloud billing projects link brandmint-infra --billing-account=XXXXXX-XXXXXX-XXXXXX
+gcloud services enable compute.googleapis.com     # new projects have no APIs on
+```
+
+Then create it with every free-tier condition stated rather than defaulted — the
+console's create flow defaults to `e2-medium` on a `pd-balanced` disk, and
+neither is free:
+
+```bash
+gcloud compute instances create brandmint-wa \
+  --zone=us-central1-a --machine-type=e2-micro \
+  --image-family=ubuntu-2404-lts-amd64 --image-project=ubuntu-os-cloud \
+  --boot-disk-type=pd-standard --boot-disk-size=30GB --tags=web
+```
+
+Release any reserved address left behind in the old project. A static IP is free
+while attached to a running instance and billed once it is not.
+
 ## On a Google Cloud Always Free instance
 
 If there is already a free e2-micro, start there and buy nothing. It is 1 GB of
