@@ -115,7 +115,7 @@ export default async function handler(req, res) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            system_prompt: SYSTEM_PROMPT,
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
             contents: [{ role: "user", parts: [{ text }] }],
             generationConfig: { maxOutputTokens: 150, temperature: 0.7 },
           }),
