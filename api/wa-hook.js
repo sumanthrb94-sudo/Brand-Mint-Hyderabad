@@ -3,13 +3,12 @@
  *
  * Evolution API's webhook. Records an inbound WhatsApp message and drafts a
  * reply via Gemini. It does NOT send anything itself — a Vercel serverless
- * function gets killed long before a human-paced (multi-minute) delay would
- * elapse, so sending has to happen somewhere with no execution time limit.
- * Instead this stores the draft with a `sendAfter` timestamp (now + a random
- * few minutes), and a small worker script running on the Evolution VM
- * (deploy/whatsapp/autosend-worker.mjs, on a 1-minute cron) polls Firestore
- * for due drafts and sends them through Evolution's local API. See that
- * file for the daily-cap and send logic.
+ * function can't safely hold a request open for the ~60s send delay, so
+ * sending has to happen somewhere with no execution time limit. Instead this
+ * stores the draft with a `sendAfter` timestamp (now + ~50-70s), and a small
+ * worker script running on the Evolution VM (deploy/whatsapp/
+ * autosend-worker.mjs, on a 1-minute poll loop) sends it through Evolution's
+ * local API once due. See that file for the daily-cap and send logic.
  *
  * This endpoint is public but guarded by a shared secret in the query string.
  * Firestore rules pin the shape so writes are bounded.
@@ -18,8 +17,8 @@ import { clean, readJson } from "./_lib.js";
 import { firebaseConfig } from "../firebase/config.js";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const AUTOSEND_DELAY_MIN_MS = 3 * 60 * 1000;
-const AUTOSEND_DELAY_MAX_MS = 5 * 60 * 1000;
+const AUTOSEND_DELAY_MIN_MS = 50 * 1000;
+const AUTOSEND_DELAY_MAX_MS = 70 * 1000;
 
 const SYSTEM_PROMPT = `You are drafting a WhatsApp reply on behalf of Brand Mint Studios, a web and app development studio in India. A human will review your draft before sending it.
 
