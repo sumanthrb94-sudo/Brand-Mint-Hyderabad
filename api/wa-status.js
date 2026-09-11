@@ -78,6 +78,44 @@ export default async function handler(req, res) {
     }
   }
 
+  // fetchInstances reads connectionStatus out of Evolution's database, which
+  // keeps saying 'open' long after the socket to WhatsApp has died. This asks
+  // the instance itself, which is the state that actually decides whether a
+  // message can be sent.
+  if (out.reachable) {
+    try {
+      const r = await call(out.reachable, `/instance/connectionState/${encodeURIComponent(EVOLUTION_INSTANCE)}`, { method: "GET" });
+      out.liveState = r.json?.instance || r.json || { status: r.status, body: r.body };
+    } catch (e) {
+      out.liveState = { error: why(e) };
+    }
+  }
+
+  // &restart=1 drops and rebuilds the socket without unlinking the device, so
+  // a session that is merely wedged recovers without a new QR scan. &connect=1
+  // is the next step up: it returns a fresh pairing code or QR for a session
+  // WhatsApp has actually logged out.
+  if (req.query?.restart && out.reachable) {
+    try {
+      const r = await call(out.reachable, `/instance/restart/${encodeURIComponent(EVOLUTION_INSTANCE)}`, { method: "POST" });
+      out.restart = { status: r.status, ok: r.status >= 200 && r.status < 300, detail: r.json || r.body };
+    } catch (e) {
+      out.restart = { ok: false, error: why(e) };
+    }
+  }
+  if (req.query?.connect && out.reachable) {
+    try {
+      const r = await call(out.reachable, `/instance/connect/${encodeURIComponent(EVOLUTION_INSTANCE)}`, { method: "GET" });
+      const j = r.json || {};
+      // The QR is a multi-kilobyte data URI; the pairing code is six letters
+      // that can be typed into the phone, so report that and leave the image
+      // to the Evolution manager UI.
+      out.connect = { status: r.status, pairingCode: j.pairingCode || null, hasQr: !!(j.base64 || j.code), detail: j.pairingCode ? null : (r.body || null) };
+    } catch (e) {
+      out.connect = { error: why(e) };
+    }
+  }
+
   // The webhook's own event subscription. Evolution only posts the events
   // named here, so a subscription missing MESSAGES_UPSERT delivers connection
   // churn perfectly while dropping every actual message — which looks exactly
