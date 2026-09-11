@@ -89,15 +89,17 @@ async function draftReply(text) {
       return "";
     }
     const data = await r.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    if (!text) {
+    // Not `text` — that is this function's own parameter, and shadowing it
+    // here puts the prompt's reference to it in the temporal dead zone.
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    if (!reply) {
       console.error(
         "[wa-hook] gemini returned no text, finishReason=",
         data.candidates?.[0]?.finishReason,
         JSON.stringify(data).slice(0, 400)
       );
     }
-    return text;
+    return reply;
   } catch (e) {
     console.error("[wa-hook] gemini error:", e.message);
     return "";
