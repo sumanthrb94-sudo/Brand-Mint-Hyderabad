@@ -72,7 +72,15 @@ async function draftReply(text) {
         body: JSON.stringify({
           system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
           contents: [{ role: "user", parts: [{ text }] }],
-          generationConfig: { maxOutputTokens: 150, temperature: 0.7 },
+          generationConfig: {
+            maxOutputTokens: 500,
+            temperature: 0.7,
+            // gemini-flash-latest points at a thinking model, which spends the
+            // output budget reasoning before it writes anything — at a low cap
+            // it returns a candidate with no text and no error. The reply is a
+            // short WhatsApp message; it needs no deliberation.
+            thinkingConfig: { thinkingBudget: 0 },
+          },
         }),
       }
     );
@@ -81,7 +89,15 @@ async function draftReply(text) {
       return "";
     }
     const data = await r.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    if (!text) {
+      console.error(
+        "[wa-hook] gemini returned no text, finishReason=",
+        data.candidates?.[0]?.finishReason,
+        JSON.stringify(data).slice(0, 400)
+      );
+    }
+    return text;
   } catch (e) {
     console.error("[wa-hook] gemini error:", e.message);
     return "";
@@ -173,7 +189,8 @@ export default async function handler(req, res) {
   // place.
   const secret = process.env.WA_HOOK_SECRET;
   const url = req.url || "";
-  if (!secret || !(req.query?.k === secret || url.includes(`k=${secret}`))) {
+  const header = req.headers?.["x-bm-key"];
+  if (!secret || !(req.query?.k === secret || url.includes(`k=${secret}`) || header === secret)) {
     console.log("[wa-hook] 401 url=", url.slice(0, 200));
     return res.status(401).json({ error: "no" });
   }

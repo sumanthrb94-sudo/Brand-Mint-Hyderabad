@@ -122,6 +122,10 @@ export default async function handler(req, res) {
           // nothing and survives a change to the global config.
           webhook: {
             url: `https://www.brandmintstudios.in/api/wa-hook?k=${secret}`,
+            // Some deliveries arrive with the query string stripped entirely,
+            // so the secret travels as a header as well — wa-hook accepts
+            // either, and a header survives whatever is losing the `?k=`.
+            headers: { "x-bm-key": secret },
             byEvents: false,
             base64: false,
             events: ["MESSAGES_UPSERT"],
@@ -197,8 +201,9 @@ export default async function handler(req, res) {
     const events = ["MESSAGES_UPSERT"];
     // v2 wraps the settings in a `webhook` object; older builds take them
     // flat and reject the wrapped form, so try one and fall back to the other.
-    for (const payload of [{ webhook: { enabled: true, url, webhookByEvents: false, webhookBase64: false, events } },
-                           { enabled: true, url, webhook_by_events: false, events }]) {
+    const headers = { "x-bm-key": secret };
+    for (const payload of [{ webhook: { enabled: true, url, headers, webhookByEvents: false, webhookBase64: false, events } },
+                           { enabled: true, url, headers, webhook_by_events: false, events }]) {
       try {
         const r = await call(out.reachable, `/webhook/set/${encodeURIComponent(EVOLUTION_INSTANCE)}`, {
           method: "POST",
