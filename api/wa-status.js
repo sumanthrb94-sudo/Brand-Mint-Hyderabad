@@ -103,14 +103,39 @@ export default async function handler(req, res) {
       out.restart = { ok: false, error: why(e) };
     }
   }
-  if (req.query?.connect && out.reachable) {
+  // &repair=<phone> is the whole re-pair in one request. Split across separate
+  // URLs it doesn't work in practice: a pairing code expires in well under the
+  // time it takes to read one response and open the next, and every expired
+  // attempt spends another of WhatsApp's rate-limited device links.
+  //
+  // The logout is what makes it work at all. Connecting on top of credentials
+  // WhatsApp has already revoked just resumes the same doomed retry loop —
+  // the instance has to be emptied before it will ask for a new pairing.
+  const repair = String(req.query?.repair || "").replace(/\D/g, "");
+  if (repair && out.reachable) {
+    out.repair = {};
     try {
-      const r = await call(out.reachable, `/instance/connect/${encodeURIComponent(EVOLUTION_INSTANCE)}`, { method: "GET" });
+      const r = await call(out.reachable, `/instance/logout/${encodeURIComponent(EVOLUTION_INSTANCE)}`, { method: "DELETE" });
+      out.repair.logout = { status: r.status, ok: r.status >= 200 && r.status < 300 };
+    } catch (e) {
+      out.repair.logout = { ok: false, error: why(e) };
+    }
+    await new Promise((r) => setTimeout(r, 3000));
+  }
+
+  if ((req.query?.connect || repair) && out.reachable) {
+    try {
+      // Without ?number Evolution answers with a QR image, which is no use in
+      // a JSON response; with it, it answers with a code that can be typed in.
+      const q = repair ? `?number=${repair}` : "";
+      const r = await call(out.reachable, `/instance/connect/${encodeURIComponent(EVOLUTION_INSTANCE)}${q}`, { method: "GET" });
       const j = r.json || {};
-      // The QR is a multi-kilobyte data URI; the pairing code is six letters
-      // that can be typed into the phone, so report that and leave the image
-      // to the Evolution manager UI.
-      out.connect = { status: r.status, pairingCode: j.pairingCode || null, hasQr: !!(j.base64 || j.code), detail: j.pairingCode ? null : (r.body || null) };
+      out.connect = {
+        status: r.status,
+        pairingCode: j.pairingCode || null,
+        hasQr: !!(j.base64 || j.code),
+        detail: j.pairingCode ? null : (r.body || JSON.stringify(j).slice(0, 300)),
+      };
     } catch (e) {
       out.connect = { error: why(e) };
     }

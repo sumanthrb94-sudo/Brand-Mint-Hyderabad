@@ -5,6 +5,9 @@
   "functions": {
     "api/wa-hook.js": {
       "maxDuration": 60
+    },
+    "api/wa-status.js": {
+      "maxDuration": 60
     }
   },
   "headers": [
