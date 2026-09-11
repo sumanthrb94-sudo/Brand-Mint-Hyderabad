@@ -139,6 +139,7 @@ async function markMessage(id, patch) {
 
 async function tick() {
   const due = await dueMessages();
+  console.log(`[autosend-worker] tick: ${due.length} due message(s)`, due.map((m) => m.id));
   for (const msg of due) {
     if (!msg.from || !msg.suggestedReply) {
       await markMessage(msg.id, { autoSendState: str("skipped", 20) });
