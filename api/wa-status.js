@@ -103,6 +103,43 @@ export default async function handler(req, res) {
       out.restart = { ok: false, error: why(e) };
     }
   }
+  // &create=<phone> builds the instance from nothing. After a database wipe
+  // there is no instance to repair — Evolution has to be told to make one
+  // before it can be paired, and doing it here keeps the whole recovery in
+  // the browser instead of sending someone back to a terminal.
+  const create = String(req.query?.create || "").replace(/\D/g, "");
+  if (create && out.reachable) {
+    try {
+      const r = await call(out.reachable, "/instance/create", {
+        method: "POST",
+        body: JSON.stringify({
+          instanceName: EVOLUTION_INSTANCE,
+          integration: "WHATSAPP-BAILEYS",
+          qrcode: false,
+          number: create,
+          // Belt and braces: the container's global webhook should already
+          // carry messages now, but an instance-level subscription costs
+          // nothing and survives a change to the global config.
+          webhook: {
+            url: `https://www.brandmintstudios.in/api/wa-hook?k=${secret}`,
+            byEvents: false,
+            base64: false,
+            events: ["MESSAGES_UPSERT"],
+          },
+        }),
+      });
+      const j = r.json || {};
+      out.create = { status: r.status, ok: r.status >= 200 && r.status < 300, detail: r.json ? null : r.body };
+      // Creating with a number usually returns the pairing code directly; when
+      // it doesn't, the connect call below picks it up.
+      if (j.qrcode?.pairingCode || j.pairingCode) {
+        out.connect = { status: r.status, pairingCode: j.qrcode?.pairingCode || j.pairingCode, hasQr: true, detail: null };
+      }
+    } catch (e) {
+      out.create = { ok: false, error: why(e) };
+    }
+  }
+
   // &repair=<phone> is the whole re-pair in one request. Split across separate
   // URLs it doesn't work in practice: a pairing code expires in well under the
   // time it takes to read one response and open the next, and every expired
@@ -123,11 +160,11 @@ export default async function handler(req, res) {
     await new Promise((r) => setTimeout(r, 3000));
   }
 
-  if ((req.query?.connect || repair) && out.reachable) {
+  if ((req.query?.connect || repair || (create && !out.connect?.pairingCode)) && out.reachable) {
     try {
       // Without ?number Evolution answers with a QR image, which is no use in
       // a JSON response; with it, it answers with a code that can be typed in.
-      const q = repair ? `?number=${repair}` : "";
+      const q = repair || create ? `?number=${repair || create}` : "";
       const r = await call(out.reachable, `/instance/connect/${encodeURIComponent(EVOLUTION_INSTANCE)}${q}`, { method: "GET" });
       const j = r.json || {};
       out.connect = {
