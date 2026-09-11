@@ -173,7 +173,13 @@ export default async function handler(req, res) {
   // our own sent messages. Only inbound one-to-one messages are enquiries;
   // anything else is answered 200 and dropped, or the volume is thousands of
   // rows a day for nothing. A non-2xx would make Evolution retry it forever.
-  const drop = (why) => res.status(200).json({ ignored: why });
+  const drop = (why) => {
+    // One line per ignored event. Evolution's traffic is otherwise invisible
+    // here, and knowing whether the box is sending connection churn or real
+    // messages is the difference between debugging this end and that end.
+    console.log("[wa-hook] ignored:", why, "event=" + (body.event || "?"));
+    return res.status(200).json({ ignored: why });
+  };
   if (body.event !== "messages.upsert") return drop("event");
 
   const d = body.data || {};
