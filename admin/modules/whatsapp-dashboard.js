@@ -5,7 +5,6 @@
  * and messaging pipeline from first message to conversion.
  */
 
-import { db } from "../../firebase/app.js";
 import { getProfile } from "../../auth/session.js";
 import firebaseConfig from "../../firebase/config.js";
 

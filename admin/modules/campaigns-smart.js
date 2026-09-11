@@ -5,7 +5,6 @@
  * Tracks: sends, delivery status, responses, conversion rate.
  */
 
-import { db } from "../../firebase/app.js";
 import { getProfile } from "../../auth/session.js";
 import firebaseConfig from "../../firebase/config.js";
 

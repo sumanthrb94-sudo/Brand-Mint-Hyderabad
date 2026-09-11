@@ -5,7 +5,6 @@
  * Track: sends, delivery, responses, conversion metrics.
  */
 
-import { db } from "../../firebase/app.js";
 import { getProfile } from "../../auth/session.js";
 
 export async function render(ctx) {

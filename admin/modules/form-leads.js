@@ -5,7 +5,7 @@
  * Track: partial fills, submissions, WhatsApp sent status, responses.
  */
 
-import { db } from "../../firebase/app.js";
+import { firebaseConfig } from "../../firebase/config.js";
 import { getProfile } from "../../auth/session.js";
 
 export async function renderFormLeads() {
@@ -57,10 +57,10 @@ export async function renderFormLeads() {
 
     try {
       const url = new URL(
-        `https://firestore.googleapis.com/v1/projects/${db.projectId}/databases/(default)/documents/formLeads`,
+        `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/formLeads`,
         location.origin
       );
-      url.searchParams.set("key", db.apiKey);
+      url.searchParams.set("key", firebaseConfig.apiKey);
 
       if (status) {
         url.searchParams.set(
