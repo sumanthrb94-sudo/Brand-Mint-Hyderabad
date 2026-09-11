@@ -23,6 +23,24 @@ const EVOLUTION_API_KEY = process.env.EVO_KEY;
 const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || "brandmint";
 const AUTOSEND_DAILY_CAP = parseInt(process.env.WA_AUTOSEND_DAILY_CAP || "5", 10);
 
+// Nothing outside the VM can read this container's logs, so mirror them to
+// api/wa-worker-log, which surfaces in Vercel's runtime logs. Derived from
+// WEBHOOK_URL rather than its own variable: same host, same shared secret.
+const REPORT_URL = (process.env.WEBHOOK_URL || "").replace("/api/wa-hook", "/api/wa-worker-log");
+
+async function report(event) {
+  if (!REPORT_URL.includes("/api/wa-worker-log")) return;
+  try {
+    await fetch(REPORT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ at: new Date().toISOString(), ...event }),
+    });
+  } catch {
+    // Reporting is diagnostics only — it must never break the send loop.
+  }
+}
+
 const str = (v, max) => ({ stringValue: String(v ?? "").slice(0, max) });
 const bool = (v) => ({ booleanValue: !!v });
 
@@ -48,7 +66,9 @@ async function dueMessages() {
     }),
   });
   if (!r.ok) {
-    console.error("[autosend-worker] query failed:", r.status, await r.text().catch(() => ""));
+    const detail = await r.text().catch(() => "");
+    console.error("[autosend-worker] query failed:", r.status, detail);
+    await report({ queryFailed: r.status, detail: detail.slice(0, 500) });
     return [];
   }
   const rows = await r.json();
@@ -93,7 +113,7 @@ async function bumpSends(docId, count) {
  *  alpine image. */
 function sendViaEvolution(phone, text) {
   return new Promise((resolve) => {
-    if (!EVOLUTION_API_KEY) return resolve(false);
+    if (!EVOLUTION_API_KEY) return resolve({ ok: false, error: "EVO_KEY unset" });
     const body = JSON.stringify({ number: phone, text });
     const req = http.request(
       {
@@ -114,14 +134,14 @@ function sendViaEvolution(phone, text) {
         res.on("end", () => {
           const ok = res.statusCode >= 200 && res.statusCode < 300;
           if (!ok) console.error("[autosend-worker] evolution send:", res.statusCode, data.slice(0, 300));
-          resolve(ok);
+          resolve({ ok, status: res.statusCode, error: ok ? "" : data.slice(0, 400) });
         });
       }
     );
     req.on("timeout", () => req.destroy(new Error("timeout")));
     req.on("error", (e) => {
       console.error("[autosend-worker] evolution send error:", e.message, e.code || "");
-      resolve(false);
+      resolve({ ok: false, error: `${e.code || ""} ${e.message}`.trim() });
     });
     req.write(body);
     req.end();
@@ -140,17 +160,20 @@ async function markMessage(id, patch) {
 async function tick() {
   const due = await dueMessages();
   console.log(`[autosend-worker] tick: ${due.length} due message(s)`, due.map((m) => m.id));
+  await report({ tick: due.length, ids: due.map((m) => m.id), instance: EVOLUTION_INSTANCE });
   for (const msg of due) {
     if (!msg.from || !msg.suggestedReply) {
       await markMessage(msg.id, { autoSendState: str("skipped", 20) });
+      await report({ skipped: msg.id, why: "no from/reply" });
       continue;
     }
     const { docId, count } = await sendsToday(msg.from);
     if (count >= AUTOSEND_DAILY_CAP) {
       await markMessage(msg.id, { autoSendState: str("skipped", 20) });
+      await report({ skipped: msg.id, why: `daily cap ${count}/${AUTOSEND_DAILY_CAP}` });
       continue;
     }
-    const ok = await sendViaEvolution(msg.from, msg.suggestedReply);
+    const { ok, status, error } = await sendViaEvolution(msg.from, msg.suggestedReply);
     if (ok) {
       await bumpSends(docId, count + 1);
       await markMessage(msg.id, {
@@ -160,9 +183,11 @@ async function tick() {
         status: str("done", 20),
       });
       console.log(`[autosend-worker] sent to ${msg.from}`);
+      await report({ sent: msg.from, id: msg.id });
     } else {
       // Leave it pending — retried next tick rather than lost.
       console.error(`[autosend-worker] send failed for ${msg.from}, will retry`);
+      await report({ sendFailed: msg.from, id: msg.id, status, error });
     }
   }
 }
