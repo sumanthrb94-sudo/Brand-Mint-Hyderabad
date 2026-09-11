@@ -328,10 +328,9 @@ service cloud.firestore {
       // an arbitrary write. The doc id is the WhatsApp message id, so a
       // retried delivery collides instead of duplicating.
       //
-      // status is 'done' once the autosend worker (deploy/whatsapp/
-      // autosend-worker.mjs) has sent the drafted reply, or 'new' while the
-      // draft is still pending/waiting on a human — same two states the
-      // admin panel expects. autoSendState tracks the worker's own pipeline
+      // status is 'done' once the drafted reply has been sent, or 'new' while
+      // it is still pending/waiting on a human — the same two states the
+      // admin panel expects. autoSendState tracks the send pipeline
       // ('pending' -> 'sent'/'skipped') separately from that display status.
       allow create: if request.resource.data.keys().hasOnly([
                          'from', 'name', 'text', 'waId', 'instance', 'status', 'createdAt',
@@ -367,18 +366,18 @@ service cloud.firestore {
                             && request.resource.data.sentAt.size() <= 40));
       allow get: if isAdmin();
 
-      // Admin sees everything; the autosend worker's query is bounded to
+      // Admin sees everything; a non-admin caller's query is bounded to
       // exactly the documents it's allowed to act on (still-pending drafts)
-      // by the same per-document check its update rule below uses — a
+      // by the same per-document check the update rule below uses — a
       // crafted query can never surface anything else, so this doesn't
       // widen what an anonymous caller can read beyond that narrow slice.
       allow list: if isAdmin() || resource.data.autoSendState == 'pending';
 
-      // The autosend worker runs on the Evolution VM with no Firebase Auth
-      // token (same anonymous-write posture as wa-hook.js's create above),
-      // so it needs its own narrow allowance: it may only flip a 'pending'
-      // draft to 'sent' or 'skipped', touching nothing but these four
-      // fields. It can never create a doc, rewrite the message text, or
+      // api/wa-hook.js writes with the public web apiKey and holds no
+      // Firebase Auth token (same anonymous posture as its create above), so
+      // marking a draft sent needs its own narrow allowance: it may only flip
+      // a 'pending' draft to 'sent' or 'skipped', touching nothing but these
+      // four fields. It can never create a doc, rewrite the message text, or
       // touch a doc it didn't itself schedule.
       allow update: if isAdmin()
                     || (resource.data.autoSendState == 'pending'
