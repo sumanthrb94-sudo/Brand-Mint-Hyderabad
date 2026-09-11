@@ -13,6 +13,8 @@
  * GCP firewall rule at all.
  */
 
+import http from "node:http";
+
 const PROJECT_ID = "brandmintstudios-a5eb7";
 const API_KEY = "AIzaSyBk1rF-GagRY_XIXfXdXq2ndXfI0hZc2KI";
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
@@ -82,20 +84,48 @@ async function bumpSends(docId, count) {
   }).catch((e) => console.error("[autosend-worker] counter bump error:", e.message));
 }
 
-async function sendViaEvolution(phone, text) {
-  if (!EVOLUTION_API_KEY) return false;
-  try {
-    const r = await fetch(`http://evolution:8080/message/sendText/${encodeURIComponent(EVOLUTION_INSTANCE)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", apikey: EVOLUTION_API_KEY },
-      body: JSON.stringify({ number: phone, text }),
+/** Node's global fetch (undici) collapses every network-level failure into
+ *  the single unhelpful message "fetch failed" with the real cause buried
+ *  in a non-enumerable .cause property nothing here was printing — so a
+ *  real bug looked identical to "can't reach Evolution at all". Node's
+ *  built-in http module reports the actual error (ECONNRESET, timeout,
+ *  etc.) directly and has no dependency on undici's behavior in a minimal
+ *  alpine image. */
+function sendViaEvolution(phone, text) {
+  return new Promise((resolve) => {
+    if (!EVOLUTION_API_KEY) return resolve(false);
+    const body = JSON.stringify({ number: phone, text });
+    const req = http.request(
+      {
+        hostname: "evolution",
+        port: 8080,
+        path: `/message/sendText/${encodeURIComponent(EVOLUTION_INSTANCE)}`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(body),
+          apikey: EVOLUTION_API_KEY,
+        },
+        timeout: 15_000,
+      },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          const ok = res.statusCode >= 200 && res.statusCode < 300;
+          if (!ok) console.error("[autosend-worker] evolution send:", res.statusCode, data.slice(0, 300));
+          resolve(ok);
+        });
+      }
+    );
+    req.on("timeout", () => req.destroy(new Error("timeout")));
+    req.on("error", (e) => {
+      console.error("[autosend-worker] evolution send error:", e.message, e.code || "");
+      resolve(false);
     });
-    if (!r.ok) console.error("[autosend-worker] evolution send:", r.status, await r.text().catch(() => ""));
-    return r.ok;
-  } catch (e) {
-    console.error("[autosend-worker] evolution send error:", e.message);
-    return false;
-  }
+    req.write(body);
+    req.end();
+  });
 }
 
 async function markMessage(id, patch) {
