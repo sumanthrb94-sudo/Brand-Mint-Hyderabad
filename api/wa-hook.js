@@ -193,7 +193,15 @@ export default async function handler(req, res) {
   const url = req.url || "";
   const header = req.headers?.["x-bm-key"];
   if (!secret || !(req.query?.k === secret || url.includes(`k=${secret}`) || header === secret)) {
-    console.log("[wa-hook] 401 url=", url.slice(0, 200));
+    // Evolution delivers each message through more than one path and only
+    // some carry the secret. Without knowing which caller a rejection came
+    // from, the fix is guesswork — so say who it was.
+    console.log(
+      "[wa-hook] 401 url=", url.slice(0, 200),
+      "ua=", String(req.headers?.["user-agent"] || "").slice(0, 60),
+      "x-bm-key=", header ? (header === secret ? "match" : "mismatch") : "absent",
+      "keys=", Object.keys(req.query || {}).join(",") || "none"
+    );
     return res.status(401).json({ error: "no" });
   }
 
