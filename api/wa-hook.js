@@ -164,8 +164,19 @@ async function markSent(waId, patch) {
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
+  // Evolution does not always deliver the query string intact — it has been
+  // seen appending to the URL after the `?k=`, which leaves req.query.k
+  // holding the secret plus a suffix and rejects a legitimate delivery. The
+  // check is possession of the secret, so matching it anywhere in the request
+  // URL is exactly as strong and survives that mangling. The 401 path logs the
+  // URL because silent rejection is what made this invisible in the first
+  // place.
   const secret = process.env.WA_HOOK_SECRET;
-  if (!secret || req.query?.k !== secret) return res.status(401).json({ error: "no" });
+  const url = req.url || "";
+  if (!secret || !(req.query?.k === secret || url.includes(`k=${secret}`))) {
+    console.log("[wa-hook] 401 url=", url.slice(0, 200));
+    return res.status(401).json({ error: "no" });
+  }
 
   const body = await readJson(req);
 
