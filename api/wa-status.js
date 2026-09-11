@@ -190,5 +190,33 @@ export default async function handler(req, res) {
   }
 
   console.log("[wa-status]", JSON.stringify(out).slice(0, 2000));
+
+  // A pairing code is good for about a minute, and hunting for it inside a
+  // wall of JSON burns most of that — then the expired attempt spends one of
+  // WhatsApp's rate-limited device links. In a browser, show the code alone,
+  // large, with the seconds ticking down.
+  if (out.connect?.pairingCode && String(req.headers?.accept || "").includes("text/html")) {
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    return res.status(200).send(`<!doctype html><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pairing code</title>
+<style>
+  body{margin:0;min-height:100vh;display:grid;place-items:center;gap:24px;
+       background:#0f1115;color:#f4f4f5;font:16px/1.5 system-ui,sans-serif;text-align:center;padding:24px}
+  .code{font:700 clamp(40px,16vw,88px)/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+        letter-spacing:.12em;color:#4ade80;word-break:break-all}
+  .t{font-size:14px;opacity:.7}
+</style>
+<div>
+  <p class="t">Type this into WhatsApp &rarr; Linked devices &rarr; Link with phone number</p>
+  <p class="code">${out.connect.pairingCode}</p>
+  <p class="t">expires in <b id="s">60</b>s &middot; reload this page for a new one</p>
+</div>
+<script>
+  let n = 60, el = document.getElementById("s");
+  setInterval(() => { el.textContent = Math.max(0, --n); }, 1000);
+</script>`);
+  }
+
   return res.status(200).json(out);
 }
