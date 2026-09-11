@@ -15,8 +15,14 @@
  * This endpoint is public but guarded by a shared secret in the query string.
  * Firestore rules pin the shape so writes are bounded.
  */
+import crypto from "node:crypto";
 import { clean, readJson } from "./_lib.js";
 import { firebaseConfig } from "../firebase/config.js";
+
+// How much of the conversation the model is shown. Long enough that it stops
+// re-introducing itself and stops asking what it was already told; short
+// enough that an old thread doesn't drown the message in front of it.
+const MAX_TURNS = 12;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -40,12 +46,23 @@ const REPLY_DELAY_MS = parseInt(process.env.WA_REPLY_DELAY_MS || "40000", 10);
 // lands in Admin -> Leads for a human to send.
 const AUTOSEND_DAILY_CAP = parseInt(process.env.WA_AUTOSEND_DAILY_CAP || "20", 10);
 
-const SYSTEM_PROMPT = `You are answering WhatsApp enquiries for Brand Mint Studios, a web and app development studio in India. Your reply is sent to the customer automatically — there is no human review — so it must read like a real person from the studio wrote it.
+const SYSTEM_PROMPT = `You are the person answering WhatsApp for Brand Mint Studios, a web and app development studio in India. Your reply is sent to the customer automatically, with no human review.
 
-SHAPE EVERY REPLY LIKE THIS, in three short paragraphs separated by blank lines:
-1. Greet them and thank them for reaching out to Brand Mint Studios.
-2. Say briefly what we build, picking the parts that fit what they asked.
-3. Ask what they are looking to build, and offer a call or contact@brandmintstudios.com.
+READ THE PERSON BEFORE YOU ANSWER.
+Every message carries a feeling as well as a question. Work out what they are feeling, answer that first in a clause or a sentence, then deal with the substance:
+- Sticker shock ("that is too much", going quiet after a price) — acknowledge it is real money, say what it buys, and honestly offer the cheaper tier.
+- Urgency ("I need it by Friday") — take the deadline seriously, never promise it, move to a call.
+- Doubt ("how do I know you will deliver") — answer plainly, offer to show work, never sound defensive.
+- Confusion ("what even is a CRM") — one plain sentence, no jargon.
+- Enthusiasm — match it briefly, then get concrete.
+- Frustration or anger — apologise once, no excuses, offer a person.
+Never name the emotion out loud. Do not write "I understand you are frustrated." Just answer like someone who noticed.
+
+WHERE YOU ARE IN THE CONVERSATION.
+The messages above are the real history: theirs and yours.
+- If there is no history, this is first contact. Greet them, thank them for reaching out to Brand Mint Studios, say what we build that fits what they asked, and ask what they want to build, offering a call or hello@brandmintstudios.in.
+- If there is history, you have already introduced yourself. Do not greet again, do not re-list the services, do not repeat the email every time. Answer what they just said and carry the thread forward.
+- Never ask for something they have already told you. If they gave you their business, their budget or their deadline, use it.
 
 WHAT WE BUILD:
 - Static Website (₹14,999): branded landing page, fast, SEO-ready
@@ -55,12 +72,14 @@ WHAT WE BUILD:
 - Modcon HR: HR management software
 
 RULES:
-- Under 100 words. Warm and professional, never slangy — answer a casual "what's up" with the same businesslike greeting.
-- Quote a price only when they ask about that service, and quote it exactly as listed.
-- Never promise a timeline, a discount, or custom scope. Offer a call instead.
-- Never ask for bank details, payment details or personal documents.
-- Plain text only — no markdown, no bullet characters, no emoji.
-- If you cannot answer, say the team will follow up and give the email.`;
+- Under 80 words. On WhatsApp, shorter reads as more human.
+- At most one question per message.
+- Quote a price only for the service they asked about, and exactly as listed.
+- Never promise a timeline, a discount, or scope beyond that list. Offer a call instead.
+- Never ask for bank details, payment details or documents.
+- Plain text only. No markdown, no bullet characters, no emoji.
+- Write like a person typing on a phone: contractions, short sentences, no corporate filler.
+- If you cannot answer, say a colleague will follow up, and give the email.`;
 
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
 const COMMIT = `${FIRESTORE}:commit?key=${firebaseConfig.apiKey}`;
@@ -69,7 +88,50 @@ const DOC = `projects/${firebaseConfig.projectId}/databases/(default)/documents/
 const str = (v, max) => ({ stringValue: clean(v, max) });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function draftReply(text) {
+/** The conversation document id. Firestore rules here authenticate nobody —
+ *  this endpoint writes with the public web key like every other server write
+ *  in the project — so a document id of the phone number would put a customer's
+ *  chat behind a guessable address. Hashing it with the shared secret makes the
+ *  id unguessable without the secret, which is the same thing that guards the
+ *  endpoint itself. */
+const convoId = (phone, secret) =>
+  crypto.createHash("sha256").update(`${phone}:${secret}`).digest("hex").slice(0, 40);
+
+async function loadTurns(id) {
+  try {
+    const r = await fetch(`${FIRESTORE}/waConversations/${id}?key=${firebaseConfig.apiKey}`);
+    if (!r.ok) return [];
+    const doc = await r.json();
+    const turns = JSON.parse(doc.fields?.turns?.stringValue || "[]");
+    return Array.isArray(turns) ? turns.slice(-MAX_TURNS) : [];
+  } catch {
+    // No history is a valid state — it just means first contact.
+    return [];
+  }
+}
+
+async function saveTurns(id, turns) {
+  const r = await fetch(
+    `${FIRESTORE}/waConversations/${id}?key=${firebaseConfig.apiKey}` +
+      "&updateMask.fieldPaths=turns&updateMask.fieldPaths=updatedAt",
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fields: {
+          turns: str(JSON.stringify(turns.slice(-MAX_TURNS)), 8000),
+          updatedAt: str(new Date().toISOString(), 40),
+        },
+      }),
+    }
+  ).catch((e) => {
+    console.error("[wa-hook] convo save:", why(e));
+    return null;
+  });
+  if (r && !r.ok) console.error("[wa-hook] convo save", r.status, (await r.text().catch(() => "")).slice(0, 200));
+}
+
+async function draftReply(text, turns = []) {
   if (!GEMINI_API_KEY) return "";
   try {
     const r = await fetch(
@@ -79,7 +141,16 @@ async function draftReply(text) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [{ role: "user", parts: [{ text }] }],
+          // Both sides of the thread, oldest first, then what they just said.
+          // Without our own replies in here the model cannot tell a first
+          // contact from a fifth message and greets everyone as a stranger.
+          contents: [
+            ...turns.map((t) => ({
+              role: t.r === "a" ? "model" : "user",
+              parts: [{ text: String(t.t || "").slice(0, 1000) }],
+            })),
+            { role: "user", parts: [{ text }] },
+          ],
           generationConfig: {
             maxOutputTokens: 500,
             temperature: 0.7,
@@ -230,9 +301,6 @@ export default async function handler(req, res) {
 
   const d = body.data || {};
   const jid = d.key?.remoteJid || "";
-  // Without this the reply we just sent comes straight back in and answers
-  // itself, forever.
-  if (d.key?.fromMe) return drop("outbound");
   if (!jid.endsWith("@s.whatsapp.net")) return drop("group or status");
 
   const m = d.message || {};
@@ -246,14 +314,32 @@ export default async function handler(req, res) {
     (m.documentMessage ? "[document]" : "");
   if (!text) return drop("no text");
 
+  const phone = jid.split("@")[0];
+  const cid = convoId(phone, secret);
+
+  // An outbound message is recorded and never answered. Answering it is how a
+  // bot ends up talking to itself forever; discarding it is how it forgets it
+  // ever spoke. Recording it also captures replies the studio types by hand
+  // from the phone, so the model stays in step with a human who stepped in.
+  if (d.key?.fromMe) {
+    const turns = await loadTurns(cid);
+    const last = turns[turns.length - 1];
+    // Our own auto-reply arrives back through this webhook moments after we
+    // save it below; recording it twice would double it in the history.
+    if (!(last?.r === "a" && last.t === text)) {
+      await saveTurns(cid, [...turns, { r: "a", t: text }]);
+    }
+    return drop("outbound recorded");
+  }
+
   // The WhatsApp message id becomes the document id, so Evolution retrying a
   // delivery writes the same row rather than a duplicate. currentDocument
   // exists:false makes the second attempt fail harmlessly.
   const waId = String(d.key?.id || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 64);
   if (!waId) return drop("no id");
 
-  const phone = jid.split("@")[0];
-  const suggestedReply = await draftReply(text);
+  const turns = await loadTurns(cid);
+  const suggestedReply = await draftReply(text, turns);
 
   const fields = {
     from: str(phone, 20),
@@ -291,6 +377,7 @@ export default async function handler(req, res) {
   }
 
   if (!suggestedReply) {
+    await saveTurns(cid, [...turns, { r: "u", t: text }]);
     console.log("[wa-hook] no draft for", phone, "— nothing to send");
     return res.status(200).json({ ok: true, sent: false, reason: "no draft" });
   }
@@ -307,6 +394,11 @@ export default async function handler(req, res) {
   await sleep(REPLY_DELAY_MS);
 
   const { ok, via, error } = await sendViaEvolution(phone, suggestedReply);
+  // Their message goes into the history either way; ours only if it was
+  // actually delivered, so a failed send doesn't leave the model believing it
+  // already answered.
+  await saveTurns(cid, ok ? [...turns, { r: "u", t: text }, { r: "a", t: suggestedReply }]
+                          : [...turns, { r: "u", t: text }]);
   if (ok) {
     await bumpSends(docId, count + 1);
     if (stored) {

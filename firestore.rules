@@ -391,6 +391,30 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /waConversations/{id} {
+      // The running thread with one contact — both sides of it — read back by
+      // api/wa-hook.js so the model can see where it is in a conversation
+      // instead of greeting a returning customer as a stranger.
+      //
+      // Same anonymous caller as waMessages: that endpoint holds a shared
+      // secret but writes with the public web apiKey, so these rules see no
+      // identity. What protects a thread here is its document id, which is a
+      // SHA-256 of the phone number and that same shared secret — unguessable
+      // without the secret, unlike the phone number itself. Reads are open
+      // because the server has no auth token to read with, and a caller who
+      // cannot derive an id cannot ask for one.
+      allow get: if true;
+      // Listing would hand back every conversation at once and defeat the
+      // unguessable id entirely.
+      allow list: if isAdmin();
+      allow create, update: if request.resource.data.keys().hasOnly(['turns', 'updatedAt'])
+                            && request.resource.data.turns is string
+                            && request.resource.data.turns.size() <= 8000
+                            && request.resource.data.updatedAt is string
+                            && request.resource.data.updatedAt.size() <= 40;
+      allow delete: if isAdmin();
+    }
+
     match /waAutoSendCounters/{id} {
       // Per-contact-per-day auto-send counters read and written by
       // api/wa-hook.js to enforce WA_AUTOSEND_DAILY_CAP. Same anonymous
