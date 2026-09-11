@@ -365,7 +365,14 @@ service cloud.firestore {
                     && (!('sentAt' in request.resource.data)
                         || (request.resource.data.sentAt is string
                             && request.resource.data.sentAt.size() <= 40));
-      allow get, list: if isAdmin();
+      allow get: if isAdmin();
+
+      // Admin sees everything; the autosend worker's query is bounded to
+      // exactly the documents it's allowed to act on (still-pending drafts)
+      // by the same per-document check its update rule below uses — a
+      // crafted query can never surface anything else, so this doesn't
+      // widen what an anonymous caller can read beyond that narrow slice.
+      allow list: if isAdmin() || resource.data.autoSendState == 'pending';
 
       // The autosend worker runs on the Evolution VM with no Firebase Auth
       // token (same anonymous-write posture as wa-hook.js's create above),
