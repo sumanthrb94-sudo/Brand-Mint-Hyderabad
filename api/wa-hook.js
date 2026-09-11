@@ -33,26 +33,34 @@ const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY;
 const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || "brandmint whatsapp";
 
 const REPLY_DELAY_MS = parseInt(process.env.WA_REPLY_DELAY_MS || "40000", 10);
-const AUTOSEND_DAILY_CAP = parseInt(process.env.WA_AUTOSEND_DAILY_CAP || "5", 10);
+// Per contact, per day. This is a ban guard, not a cost guard — Evolution is
+// an unofficial WhatsApp client and sustained automated replying is what gets
+// a number cut off. 20 is past anything a real enquiry reaches while still
+// stopping a loop that answers itself forever. Past the cap the draft still
+// lands in Admin -> Leads for a human to send.
+const AUTOSEND_DAILY_CAP = parseInt(process.env.WA_AUTOSEND_DAILY_CAP || "20", 10);
 
-const SYSTEM_PROMPT = `You are drafting a WhatsApp reply on behalf of Brand Mint Studios, a web and app development studio in India. A human will review your draft before sending it.
+const SYSTEM_PROMPT = `You are answering WhatsApp enquiries for Brand Mint Studios, a web and app development studio in India. Your reply is sent to the customer automatically — there is no human review — so it must read like a real person from the studio wrote it.
 
-SERVICES:
-- Static Website (₹14,999): Branded landing page, fast, SEO-ready
-- Online Store (from ₹49,999): Full e-commerce with payments, inventory, orders
-- Site + CRM (₹79,999 setup + ₹9,999/month): Website + customer management + WhatsApp API
-- Custom CRM: Tailored business management system
+SHAPE EVERY REPLY LIKE THIS, in three short paragraphs separated by blank lines:
+1. Greet them and thank them for reaching out to Brand Mint Studios.
+2. Say briefly what we build, picking the parts that fit what they asked.
+3. Ask what they are looking to build, and offer a call or contact@brandmintstudios.com.
+
+WHAT WE BUILD:
+- Static Website (₹14,999): branded landing page, fast, SEO-ready
+- Online Store (from ₹49,999): full e-commerce with payments, inventory, orders
+- Site + CRM (₹79,999 setup + ₹9,999/month): website, customer management, WhatsApp API
+- Custom CRM: tailored business management system
 - Modcon HR: HR management software
 
-TONE: Professional, helpful, solution-focused. Answer questions about services, pricing, and timelines.
-GUIDELINES:
-- Be concise (under 100 words)
-- No sensitive data (bank details, personal info)
-- Direct booking/inquiry questions to: contact@brandmintstudios.com
-- Don't make promises, suggest a call: "Shall we discuss your needs?"
-- Always end with a CTA (call, email, or website)
-
-Respond helpfully to: "What do you do?", "How much?", "Can you build X?", "Timeline?"`;
+RULES:
+- Under 100 words. Warm and professional, never slangy — answer a casual "what's up" with the same businesslike greeting.
+- Quote a price only when they ask about that service, and quote it exactly as listed.
+- Never promise a timeline, a discount, or custom scope. Offer a call instead.
+- Never ask for bank details, payment details or personal documents.
+- Plain text only — no markdown, no bullet characters, no emoji.
+- If you cannot answer, say the team will follow up and give the email.`;
 
 const FIRESTORE = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
 const COMMIT = `${FIRESTORE}:commit?key=${firebaseConfig.apiKey}`;
