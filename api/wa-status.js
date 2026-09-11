@@ -78,6 +78,40 @@ export default async function handler(req, res) {
     }
   }
 
+  // The webhook's own event subscription. Evolution only posts the events
+  // named here, so a subscription missing MESSAGES_UPSERT delivers connection
+  // churn perfectly while dropping every actual message — which looks exactly
+  // like a dead box from the receiving end.
+  if (out.reachable) {
+    try {
+      const r = await call(out.reachable, `/webhook/find/${encodeURIComponent(EVOLUTION_INSTANCE)}`, { method: "GET" });
+      out.webhook = r.json || { status: r.status, body: r.body };
+    } catch (e) {
+      out.webhook = { error: why(e) };
+    }
+  }
+
+  // &fixwebhook=1 re-subscribes to the events this site actually needs.
+  if (req.query?.fixwebhook && out.reachable) {
+    const url = `https://www.brandmintstudios.in/api/wa-hook?k=${secret}`;
+    const events = ["MESSAGES_UPSERT"];
+    // v2 wraps the settings in a `webhook` object; older builds take them
+    // flat and reject the wrapped form, so try one and fall back to the other.
+    for (const payload of [{ webhook: { enabled: true, url, webhookByEvents: false, webhookBase64: false, events } },
+                           { enabled: true, url, webhook_by_events: false, events }]) {
+      try {
+        const r = await call(out.reachable, `/webhook/set/${encodeURIComponent(EVOLUTION_INSTANCE)}`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        out.fixWebhook = { status: r.status, ok: r.status >= 200 && r.status < 300, detail: r.json || r.body };
+        if (out.fixWebhook.ok) break;
+      } catch (e) {
+        out.fixWebhook = { ok: false, error: why(e) };
+      }
+    }
+  }
+
   const to = String(req.query?.send || "").replace(/\D/g, "");
   if (to && out.reachable) {
     const text = String(req.query?.text || "Brand Mint test message").slice(0, 200);
