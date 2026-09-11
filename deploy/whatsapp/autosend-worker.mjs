@@ -85,7 +85,7 @@ async function bumpSends(docId, count) {
 async function sendViaEvolution(phone, text) {
   if (!EVOLUTION_API_KEY) return false;
   try {
-    const r = await fetch(`http://evolution:8080/message/sendText/${EVOLUTION_INSTANCE}`, {
+    const r = await fetch(`http://evolution:8080/message/sendText/${encodeURIComponent(EVOLUTION_INSTANCE)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: EVOLUTION_API_KEY },
       body: JSON.stringify({ number: phone, text }),
