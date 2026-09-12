@@ -77,7 +77,15 @@ function activeRoute() {
 async function renderRoute() {
   const route = activeRoute();
   const view = document.getElementById("view");
-  ctx.refreshSidebar();
+  // The sidebar counts every collection, so one bad row used to throw here —
+  // outside the try below, past the handler that would have said so, and out
+  // to boot()'s catch, which said nothing. A broken badge must not cost you
+  // the page it is a badge for.
+  try {
+    ctx.refreshSidebar();
+  } catch (err) {
+    console.error("[admin] sidebar failed", err);
+  }
 
   const loader = routes[route] || routes.dashboard;
   try {
@@ -190,7 +198,41 @@ boot().catch((err) => {
   // Firebase being unreachable. Say so instead of spinning forever.
   console.error("[admin] boot failed", err);
   const bootScreen = document.getElementById("boot");
-  if (!bootScreen) return;
+
+  // The boot screen is removed as soon as access is verified, and everything
+  // that can fail — hydrating from Firestore, the first render — happens
+  // after that. So this was the common case, and it returned in silence: a
+  // blank admin, no message on screen, the only trace in a console nobody
+  // opens on a phone. Say it where it can be seen.
+  if (!bootScreen) {
+    const view = document.getElementById("view");
+    const app = document.getElementById("app");
+    if (app) app.hidden = false;
+    if (view) {
+      view.innerHTML = "";
+      view.appendChild(
+        h("div", { class: "panel" }, [
+          h("h3", { text: "The admin couldn't finish loading" }),
+          h("p", {
+            class: "muted",
+            style: "font-size:13px;max-width:52ch",
+            text: err?.message || "Something failed after sign-in and before the first screen.",
+          }),
+          h("p", {
+            class: "muted",
+            style: "font-size:13px;max-width:52ch",
+            text: "This is usually Firestore being unreachable or a rule denying a read. Your sign-in is fine — it got this far.",
+          }),
+          h("div", { class: "hstack", style: "margin-top:12px" }, [
+            h("button", { class: "btn btn-primary", text: "Retry", onclick: () => location.reload() }),
+            h("a", { class: "btn btn-ghost", href: "/login", text: "Sign in again" }),
+          ]),
+        ])
+      );
+    }
+    return;
+  }
+
   bootScreen.innerHTML = "";
   bootScreen.appendChild(
     h("div", { class: "boot-inner" }, [
