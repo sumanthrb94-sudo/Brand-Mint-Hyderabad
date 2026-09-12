@@ -22,7 +22,8 @@ export const WORK = [
     domain: "simplysip.in",
     url: "https://simplysip.in",
     kind: "Online store",
-    summary: "",
+    summary:
+      "Sold through WhatsApp DMs. Now customers check out themselves — UPI, cards or cash on delivery — and every order arrives priced and recorded.",
     result: "",
   },
   {
@@ -31,7 +32,8 @@ export const WORK = [
     domain: "tresorcouture.in",
     url: "https://tresorcouture.in",
     kind: "Online store",
-    summary: "",
+    summary:
+      "Sold to whoever walked in. Now the label reaches past the shop floor, with its own checkout and a GST invoice on every order.",
     result: "",
   },
   {
@@ -40,7 +42,8 @@ export const WORK = [
     domain: "thegreenteam.in",
     url: "https://thegreenteam.in",
     kind: "Website",
-    summary: "",
+    summary:
+      "The pitch used to be a PDF catalogue, sent on request. Now the site does that part before the call, not after it.",
     result: "",
   },
   {
@@ -49,7 +52,8 @@ export const WORK = [
     domain: "fresh-kart-six.vercel.app",
     url: "https://fresh-kart-six.vercel.app/",
     kind: "B2B ordering platform",
-    summary: "",
+    summary:
+      "Wholesale orders came in by phone, one at a time. Now buyers place their own, priced correctly, without anyone picking up.",
     result: "",
   },
 ];

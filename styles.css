@@ -991,3 +991,24 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
 @media (max-width: 900px) {
   .hero-shot { height: clamp(160px, 42vw, 220px); }
 }
+
+/* Four pieces of work in a three-column grid leaves the fourth alone in a row
+   of its own. Two columns fill exactly. */
+@media (min-width: 760px) {
+  .work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Until a screenshot exists at work/<id>.jpg the typographic panel carries the
+   name and the kind, so the meta below states them a second time. Hide the
+   duplicates in that state; a card with a real screenshot keeps both. */
+.work:not(.work--shot) .work-meta h3,
+.work:not(.work--shot) .work-meta .work-kind { display: none; }
+.work:not(.work--shot) .work-summary { margin-top: 0; }
+
+/* A 16:10 panel at half the grid width is over 500px of empty green when it
+   holds nothing but a name. Until a screenshot fills it, the panel is only as
+   tall as the type it carries. */
+.work:not(.work--shot) .work-shot {
+  aspect-ratio: auto;
+  min-height: 0;
+  padding-block: var(--s-7);
+}

@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v17" />
+<link rel="stylesheet" href="/styles.css?v=v18" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -585,7 +585,13 @@
         const img = new Image();
         img.alt = w.name + " — built by Brand Mint";
         img.loading = "lazy";
-        img.addEventListener("load", () => card.querySelector(".work-shot").prepend(img));
+        // With a screenshot the card is picture + facts. Without one the
+        // typographic panel IS the identity, and repeating the name and kind
+        // underneath it made every card say itself twice.
+        img.addEventListener("load", () => {
+          card.querySelector(".work-shot").prepend(img);
+          card.classList.add("work--shot");
+        });
         img.src = `/work/${w.id}.jpg`;
         grid.appendChild(card);
       }
