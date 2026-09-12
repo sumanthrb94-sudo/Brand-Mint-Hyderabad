@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v18" />
+<link rel="stylesheet" href="/styles.css?v=v19" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -338,6 +338,44 @@
         <p class="offer-more" data-reveal>
           <a class="btn btn-ghost" href="/pricing">See every price →</a>
         </p>
+      </section>
+
+      <!-- SHOWCASE. A dark, rim-lit band in the register product launches use,
+           built rather than photographed: the device is CSS, the screen is our
+           own storefront, and nothing on it belongs to anybody else. It sits
+           between the objections and the prices because that is where a
+           visitor decides whether this will look like anything. -->
+      <section class="showcase" id="showcase" aria-labelledby="showcase-title">
+        <div class="showcase-glow" aria-hidden="true"></div>
+        <div class="showcase-inner">
+          <div class="showcase-copy" data-reveal>
+            <p class="kicker">Built for the phone it will be read on</p>
+            <h2 id="showcase-title">Your store, in <em>their pocket.</em></h2>
+            <p>
+              We design the phone screen first, not last. Checkout in one
+              thumb, UPI and cash on delivery side by side, and an order that
+              reaches you on WhatsApp the moment it is placed — because a phone
+              on mobile data is where your customer actually is.
+            </p>
+            <a class="btn btn-primary" href="#stores">See the four store tiers</a>
+          </div>
+
+          <!-- Drawn, not photographed. A phone rendered in CSS carries no
+               licence and no other company's trademark. -->
+          <div class="showcase-stage" data-reveal aria-hidden="true">
+            <div class="device">
+              <div class="device-screen">
+                <div class="ds-bar"><span></span><b>simplysip.in</b></div>
+                <div class="ds-hero"></div>
+                <div class="ds-row"><span class="ds-thumb"></span><span class="ds-line"></span><b class="num">₹499</b></div>
+                <div class="ds-row"><span class="ds-thumb"></span><span class="ds-line short"></span><b class="num">₹349</b></div>
+                <div class="ds-pay">UPI · Cards · Cash on delivery</div>
+                <div class="ds-cta">Order on WhatsApp</div>
+              </div>
+            </div>
+            <div class="device-floor"></div>
+          </div>
+        </div>
       </section>
 
       <!-- THE FOUR STORE TIERS -->

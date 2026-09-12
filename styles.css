@@ -1012,3 +1012,130 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
   min-height: 0;
   padding-block: var(--s-7);
 }
+
+/* ====================================================== showcase band ====
+   The register a phone launch uses — near-black ground, a coloured rim light,
+   the product standing in its own reflection. Everything here is drawn: a
+   photograph of a real handset would carry someone else's trademark and imply
+   a relationship that does not exist, and the screen is our own storefront.
+   ======================================================================== */
+.showcase {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 115%, var(--bm-ink-2), transparent 62%),
+    linear-gradient(180deg, var(--bm-ink-deep), var(--bm-ink) 55%, var(--bm-ink-deep));
+  color: var(--cream);
+  padding-block: clamp(56px, 9vw, 104px);
+}
+/* One light source, behind the device, in the brand's green. Spending the
+   colour in a single place is what keeps the section calm. */
+.showcase-glow {
+  position: absolute;
+  inset: auto -10% -30% auto;
+  right: 6%;
+  width: min(620px, 78vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 200, 151, 0.5), rgba(0, 200, 151, 0.12) 42%, transparent 68%);
+  filter: blur(46px);
+  z-index: -1;
+  pointer-events: none;
+}
+.showcase-inner {
+  max-width: var(--wrap, 1140px);
+  margin: 0 auto;
+  padding-inline: var(--s-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  gap: clamp(32px, 6vw, 72px);
+  align-items: center;
+}
+.showcase-copy .kicker { color: var(--emerald); }
+.showcase-copy h2 {
+  font-family: var(--display);
+  font-size: clamp(28px, 4.6vw, 46px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+  margin: var(--s-3) 0 0;
+  text-wrap: balance;
+}
+.showcase-copy h2 em { font-style: italic; color: var(--emerald); }
+.showcase-copy p {
+  margin: var(--s-4) 0 0;
+  max-width: 46ch;
+  color: var(--cream-mute);
+  line-height: 1.65;
+}
+.showcase-copy .btn { margin-top: var(--s-5); }
+
+/* ---- the device ---- */
+.showcase-stage { display: grid; justify-items: center; }
+.device {
+  width: min(268px, 66vw);
+  aspect-ratio: 9 / 19;
+  padding: 9px;
+  border-radius: 34px;
+  background: linear-gradient(145deg, #6d7c76, #1b2b25 42%, #0a1512);
+  box-shadow:
+    0 0 0 1px rgba(245, 241, 234, 0.08),
+    0 40px 80px rgba(0, 0, 0, 0.55),
+    0 0 90px rgba(0, 200, 151, 0.18);
+}
+.device-screen {
+  height: 100%;
+  border-radius: 26px;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 11px;
+  font-size: 10px;
+}
+.ds-bar { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9px; }
+.ds-bar span { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); flex: none; }
+.ds-bar b { font-weight: 600; letter-spacing: 0.01em; }
+.ds-hero {
+  height: 34%;
+  border-radius: 8px;
+  background: linear-gradient(150deg, var(--mint-wash), #cfe6da 60%, #bcd8cb);
+}
+.ds-row { display: flex; align-items: center; gap: 7px; }
+.ds-thumb { width: 26px; height: 26px; border-radius: 6px; background: var(--mint-wash); flex: none; }
+.ds-line { height: 6px; border-radius: 3px; background: rgba(10, 14, 12, 0.16); flex: 1; }
+.ds-line.short { max-width: 62%; }
+.ds-row b { font-size: 10px; font-weight: 600; }
+.ds-pay { margin-top: auto; color: var(--muted); font-size: 8.5px; letter-spacing: 0.01em; }
+.ds-cta {
+  background: var(--mint);
+  color: #052b20;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px;
+  border-radius: 999px;
+  font-size: 10px;
+}
+/* The reflection is what makes a product shot read as a product shot. */
+.device-floor {
+  width: min(268px, 66vw);
+  height: 54px;
+  margin-top: -2px;
+  border-radius: 0 0 30px 30px;
+  background: linear-gradient(180deg, rgba(0, 200, 151, 0.16), transparent 72%);
+  filter: blur(7px);
+  transform: scaleY(-1);
+  opacity: 0.55;
+}
+
+@media (max-width: 860px) {
+  .showcase-inner { grid-template-columns: 1fr; }
+  .showcase-stage { order: -1; }
+  .showcase-glow { right: 50%; transform: translateX(50%); bottom: auto; top: -12%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .showcase * { animation: none !important; }
+}
