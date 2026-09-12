@@ -8,6 +8,9 @@
     },
     "api/wa-status.js": {
       "maxDuration": 60
+    },
+    "api/wa-report.js": {
+      "maxDuration": 60
     }
   },
   "headers": [
@@ -193,6 +196,12 @@
           "value": "no-store"
         }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/wa-report",
+      "schedule": "0 3 * * *"
     }
   ]
 }
