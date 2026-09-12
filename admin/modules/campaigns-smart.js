@@ -6,7 +6,7 @@
  */
 
 import { getProfile } from "../../auth/session.js";
-import firebaseConfig from "../../firebase/config.js";
+import { firebaseConfig } from "../../firebase/config.js";
 
 const EVOLUTION_API = "https://wa.brandmintstudios.in";
 const EVOLUTION_API_KEY = localStorage.getItem("evolution_api_key") || "";

@@ -8,7 +8,9 @@
 import { firebaseConfig } from "../../firebase/config.js";
 import { getProfile } from "../../auth/session.js";
 
-export async function renderFormLeads() {
+// The router calls mod.render(ctx) — exported under any other name, the page
+// only ever shows "Module is missing a render() export".
+export async function render() {
   const root = document.createElement("div");
   root.className = "module module-leads";
 

@@ -1,0 +1,38 @@
+<!doctype html><meta charset="utf-8"><title>sim</title>
+<link rel="stylesheet" href="/admin/styles.css" />
+<div id="topbar"></div>
+<aside class="sidebar"><div class="sidebar-brand"></div><nav id="sidebar-nav"></nav><div id="sidebar-account"></div></aside>
+<div id="view"></div>
+<script type="module">
+  // Harness for scripts/sim — imports one admin module and renders it against
+  // stub data, so a module that throws is visible without a real login.
+  const SAMPLE = JSON.parse(document.getElementById("sample").textContent);
+  const match = (rows, q) =>
+    typeof q === "function" ? rows.filter(q)
+      : q ? rows.filter((r) => Object.entries(q).every(([k, v]) => r[k] === v))
+          : rows;
+  const db = {
+    list: (name, q) => match(SAMPLE[name] || [], q),
+    get: (name, id) => (SAMPLE[name] || []).find((r) => r.id === id) || null,
+    create: () => ({ id: "new" }), createAsync: async () => ({ id: "new" }),
+    update: () => {}, updateAsync: async () => {}, remove: () => {},
+    hydrate: async () => {}, onTable: () => () => {},
+    exportAll: () => "{}", importAll: () => {}, wipe: () => {},
+    fetchEvents: async () => [],
+  };
+  const ctx = {
+    db, auth: {}, profile: { uid: "u1", email: "admin@brandmintstudios.in", role: "admin" },
+    navigate() {}, toast() {}, refreshSidebar() {}, logout() {},
+  };
+  const name = new URLSearchParams(location.search).get("m");
+  try {
+    const mod = await import(`/admin/modules/${name}.js`);
+    if (typeof mod.render !== "function") throw new Error("no render() export");
+    const node = await mod.render(ctx);
+    if (node) document.getElementById("view").appendChild(node);
+    window.__simResult = { state: "ok", nodes: document.querySelectorAll("#view *").length };
+  } catch (e) {
+    window.__simResult = { state: "threw", message: String(e && e.message || e).split("\n")[0] };
+  }
+</script>
+<script type="application/json" id="sample">{"leads":[{"id":"l1","name":"Ravi Kumar","email":"ravi@x.in","phone":"9876500001","tier":"growth","status":"new","createdAt":"2026-09-11T10:00:00Z","source":"signin"},{"id":"l2","name":"Anita S","email":"anita@y.in","phone":"9876500002","tier":"website","status":"new","createdAt":"2026-09-12T04:00:00Z","source":"signin"},{"id":"l3","name":"Old Lead","email":"old@z.in","phone":"9876500003","tier":"starter","status":"won","createdAt":"2026-08-01T10:00:00Z"}],"bookings":[{"id":"b1","name":"Priya","phone":"919700144003","service":"Online Store","when":"Sat 13 Sep, 4pm","status":"new","source":"whatsapp","createdAt":"2026-09-12T04:30:00Z"},{"id":"b2","name":"Website form","phone":"919000000001","service":"","when":"Monday","status":"done","source":"site","createdAt":"2026-09-10T04:30:00Z"}],"requests":[{"id":"r1","name":"Karan","email":"k@a.in","kind":"perk","item":"checklist","label":"Store checklist","status":"new","createdAt":"2026-09-12T03:00:00Z"}],"waMessages":[{"id":"w1","from":"919700144003","name":"Priya","text":"how much for a store?","status":"new","createdAt":"2026-09-12T04:20:00Z","suggestedReply":"Online Store starts at 49,999."}],"clients":[{"id":"c1","name":"Verdant","status":"active","storeTier":"growth","tier":"Tier 2","createdAt":"2026-07-01T10:00:00Z"}],"projects":[{"id":"p1","clientId":"c1","name":"Verdant store","status":"in_progress","storeTier":"growth","createdAt":"2026-07-02T10:00:00Z"}],"invoices":[{"id":"i1","clientId":"c1","amount":50000,"status":"overdue","dueDate":"2026-09-01","createdAt":"2026-08-01T10:00:00Z"}],"milestones":[],"deliverables":[],"messages":[],"onboardingResponses":[],"clientUsers":[],"invites":[],"campaigns":[],"formLeads":[],"importedLeads":[],"formWaMessages":[],"content":[],"settings":[]}</script>

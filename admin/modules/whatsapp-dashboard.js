@@ -6,7 +6,7 @@
  */
 
 import { getProfile } from "../../auth/session.js";
-import firebaseConfig from "../../firebase/config.js";
+import { firebaseConfig } from "../../firebase/config.js";
 
 export async function render(ctx) {
   const profile = await getProfile();

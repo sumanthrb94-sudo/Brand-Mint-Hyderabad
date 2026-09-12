@@ -273,66 +273,41 @@ function renderBank(settings) {
 
 /* ---------- Security ---------- */
 
+/**
+ * This used to offer a passcode form, from before Google sign-in replaced the
+ * shared passcode. The three functions it called — auth.isPasscodeSet,
+ * auth.verify, auth.setPasscode — went away with it and were never removed
+ * here, so opening Settings threw before it drew anything.
+ *
+ * There is no secret to change any more: access is a Google account whose
+ * profiles/{uid}.role reads 'admin', and rules read that role server-side, so
+ * nothing on this page could grant or revoke it anyway.
+ */
 async function renderSecurity() {
-  const isSet = await auth.isPasscodeSet();
-  const status = h("div", {
-    class: "muted",
-    style: { fontSize: "12.5px", marginTop: "10px" },
-    text: isSet
-      ? "Custom passcode set."
-      : "Using default passcode — change it now.",
-  });
-
-  const form = h("form", { class: "vstack", style: { gap: "12px" } }, [
-    field({ label: "Current passcode", name: "current", type: "password" }),
-    field({ label: "New passcode (min 8 chars)", name: "next", type: "password" }),
-    field({ label: "Confirm new passcode", name: "confirm", type: "password" }),
-    h(
-      "div",
-      { class: "hstack", style: { justifyContent: "flex-end", marginTop: "8px" } },
-      [
-        h("button", {
-          type: "submit",
-          class: "btn btn-primary",
-          text: "Update passcode",
-        }),
-      ]
-    ),
-  ]);
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const { current, next, confirm: confirmPass } = formToObject(form);
-
-    const ok = await auth.verify(current || "");
-    if (!ok) {
-      toast("Current passcode is wrong.");
-      return;
-    }
-    if (next !== confirmPass) {
-      toast("New passcodes don't match.");
-      return;
-    }
-    if (!next || next.length < 8) {
-      toast("Passcode must be at least 8 characters.");
-      return;
-    }
-
-    await auth.setPasscode(next);
-    form.reset();
-    status.textContent = "Custom passcode set.";
-    toast("Passcode updated.");
-  });
+  const profile = auth.profile() || {};
+  const row = (label, value) =>
+    h("div", { class: "hstack", style: { gap: "10px", alignItems: "baseline" } }, [
+      h("div", { class: "muted", style: { fontSize: "12.5px", minWidth: "110px" }, text: label }),
+      h("div", { style: { fontSize: "14px", fontWeight: "600" }, text: value }),
+    ]);
 
   return h("section", { id: "security", class: "settings-card" }, [
-    h("h4", { text: "Passcode" }),
+    h("h4", { text: "Access" }),
     h("div", {
       class: "desc",
-      text:
-        "Used on the admin login screen. Default is `brandmint2026`. Change it on first login.",
+      text: "Admin access is a Google account, not a password. Roles live on the profile document and are enforced by Firestore rules, so they can only be changed in the Firebase console.",
     }),
-    form,
-    status,
+    h("div", { class: "vstack", style: { gap: "8px", marginTop: "12px" } }, [
+      row("Signed in as", auth.email() || "—"),
+      row("Role", profile.role || "—"),
+    ]),
+    h("div", { class: "hstack", style: { justifyContent: "flex-end", marginTop: "14px" } }, [
+      h("button", {
+        class: "btn btn-ghost",
+        text: "Sign out",
+        onclick: () => auth.endSession(),
+      }),
+    ]),
   ]);
 }
 
