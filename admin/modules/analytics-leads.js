@@ -6,6 +6,7 @@
  */
 
 import { getProfile } from "../../auth/session.js";
+import { renderTopbar } from "/admin/components.js";
 import { firebaseConfig } from "../../firebase/config.js";
 
 export async function render(ctx) {
@@ -14,13 +15,12 @@ export async function render(ctx) {
     return createEl("p", "Admin access required.");
   }
 
+  renderTopbar({ breadcrumb: "INSIGHT", title: "Lead analytics", actions: [] });
+
   const root = createEl("div", { class: "module module-analytics-leads" });
 
   root.innerHTML = `
-    <div class="module-head">
-      <h2>Lead Analytics</h2>
-      <p>Track form captures, WhatsApp sends, and response conversions</p>
-    </div>
+    <div class="module-head"><p>Track form captures, WhatsApp sends, and response conversions</p></div>
 
     <div class="analytics-grid">
       <div class="stat-card">

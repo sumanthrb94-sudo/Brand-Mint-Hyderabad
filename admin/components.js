@@ -275,6 +275,103 @@ export function kpi({ label, value, unit, delta, trend }) {
   ]);
 }
 
+/* ---------- Tiles ---------- */
+
+/**
+ * The counter row that sits at the top of a page so nothing that needs
+ * attention is below the fold. A tile is a button: it carries a number, says
+ * what the number is, and going there is one click.
+ *
+ * "New" is per-viewer and lives in localStorage rather than on the documents,
+ * because it means "since YOU last looked" — marking a shared row as seen
+ * would hide it from everyone else in the studio.
+ */
+const SEEN_KEY = "bm.admin.seen.v1";
+
+function seenMap() {
+  try {
+    return JSON.parse(localStorage.getItem(SEEN_KEY) || "{}");
+  } catch {
+    // A private window, or cleared site data. Everything simply reads as new.
+    return {};
+  }
+}
+
+/** How many of `items` arrived since this viewer last opened `key`. */
+export function newSince(key, items) {
+  if (!key || !items?.length) return 0;
+  const last = seenMap()[key];
+  // Never looked before: the badge would claim everything is new on a first
+  // visit, which is noise rather than news.
+  if (!last) return 0;
+  return items.filter((r) => (r.createdAt || "") > last).length;
+}
+
+export function markSeen(key) {
+  if (!key) return;
+  try {
+    const m = seenMap();
+    m[key] = new Date().toISOString();
+    localStorage.setItem(SEEN_KEY, JSON.stringify(m));
+  } catch {
+    // Losing the marker only means the badge lingers. Not worth breaking over.
+  }
+}
+
+/**
+ * tile({ label, value, sub, tone, items, seenKey, onclick })
+ *   tone     "attention" when the number is work waiting, "good" when it is
+ *            healthy, omitted when it is merely a fact.
+ *   items    the rows the number counts, so the tile can work out how many
+ *            arrived since this viewer last looked.
+ *   seenKey  stable id for that memory; omit and no "new" badge is shown.
+ */
+export function tile({ label, value, sub, tone = "", items, seenKey, onclick }) {
+  const fresh = newSince(seenKey, items);
+  const n = Number(value);
+  const empty = value === 0 || value === "0";
+  const node = h(
+    "button",
+    {
+      type: "button",
+      class: `tile${tone ? " tile--" + tone : ""}${empty ? " is-empty" : ""}${fresh ? " has-new" : ""}`,
+      // Screen readers get the whole story; the badge alone reads as a number
+      // floating next to another number.
+      "aria-label": `${label}: ${value}${fresh ? `, ${fresh} new` : ""}${sub ? `. ${sub}` : ""}`,
+      onclick: (e) => {
+        markSeen(seenKey);
+        node.classList.remove("has-new");
+        onclick?.(e);
+      },
+    },
+    [
+      h("span", { class: "tile-label", text: label }),
+      h("span", { class: "tile-value", text: Number.isFinite(n) ? formatShort(n) : String(value) }),
+      h("span", { class: "tile-sub", text: sub || "" }),
+      fresh ? h("span", { class: "tile-new", text: `${fresh} new` }) : null,
+    ]
+  );
+  return node;
+}
+
+/** The row itself. Tiles wrap and stay tappable down to a phone. */
+export function tileGrid(tiles) {
+  return h("div", { class: "tiles" }, tiles.filter(Boolean));
+}
+
+/** Scrolls a panel into view and gives it one pulse, so a tile click lands
+ *  somewhere obvious instead of jumping the page silently. */
+export function revealPanel(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.classList.remove("is-targeted");
+  // Reading offsetWidth restarts the animation when the same tile is clicked
+  // twice; without it the class is re-added in the same frame and nothing runs.
+  void el.offsetWidth;
+  el.classList.add("is-targeted");
+}
+
 /* ---------- Sparkline ---------- */
 
 export function sparkline(points, w = 200, hh = 30) {

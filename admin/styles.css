@@ -1758,3 +1758,432 @@ th.num {
 .heat-frame { display: block; border: 0; height: 1200px; background: #fff; pointer-events: none; }
 .heat-canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
 .heat-strip { position: absolute; right: 0; top: 0; pointer-events: none; }
+
+/* ---------- Tiles ---------- */
+/* The counter row at the top of a page. Same surface as .kpi so the two read
+   as one family, but a tile is a button: it is where you click to get there. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px 18px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.tile:hover {
+  border-color: rgba(10, 14, 12, 0.22);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.tile:focus-visible {
+  outline: 2px solid var(--mint-3);
+  outline-offset: 2px;
+}
+.tile-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  line-height: 1.3;
+  /* A two-word label wraps and a one-word label does not, which used to put
+     the numbers in a row at two different heights. Reserving both lines keeps
+     the figures on one line across the row, which is the whole point of it. */
+  min-height: 2.6em;
+}
+.tile-sub { min-height: 2.7em; }
+.tile-value {
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--ink);
+}
+.tile-sub {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.stat-label { line-height: 1.3; min-height: 2.6em; }
+/* Nothing waiting reads quieter than something waiting, so a glance across the
+   row lands on the tiles that want you. */
+.tile.is-empty .tile-value { color: var(--faint); }
+
+/* Work waiting. */
+.tile--attention { border-color: rgba(214, 161, 56, 0.45); }
+.tile--attention .tile-value { color: var(--warn); }
+.tile--attention.is-empty { border-color: var(--line); }
+.tile--attention.is-empty .tile-value { color: var(--faint); }
+/* Healthy, or money in. */
+.tile--good .tile-value { color: var(--mint-4); }
+.tile--good.is-empty .tile-value { color: var(--faint); }
+
+/* Arrived since this viewer last opened the thing the tile points at. */
+.tile-new {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--mint-1);
+  color: var(--mint-4);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.tile-new::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint-3);
+  animation: tile-pulse 2s ease-in-out infinite;
+}
+.tile.has-new { border-color: rgba(16, 185, 129, 0.5); }
+@keyframes tile-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.8); }
+}
+
+/* One pulse on the panel a tile just jumped to, so the scroll lands visibly. */
+.is-targeted {
+  animation: panel-flash 1.4s ease-out 1;
+}
+@keyframes panel-flash {
+  0% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35); }
+  100% { box-shadow: 0 0 0 3px rgba(16, 185, 129, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile, .tile-new::before, .is-targeted { transition: none; animation: none; }
+  .tile:hover { transform: none; }
+}
+
+@media (max-width: 560px) {
+  .tiles { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .tile { padding: 13px 14px 12px; }
+  .tile-value { font-size: 26px; }
+}
+
+/* ---------------------------------------------------------------------------
+   Form leads, Smart campaigns, Lead analytics, WhatsApp activity.
+
+   These four pages were written against class names that were never given any
+   CSS — 42 of the 48 they use had no rule anywhere, so they rendered as raw
+   unstyled HTML while every other page looked designed. This is that missing
+   stylesheet, built from the same tokens as the rest of the admin so the four
+   read as part of it rather than as a bolt-on.
+--------------------------------------------------------------------------- */
+
+.module-head {
+  margin-bottom: 18px;
+}
+.module-head h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+.module-head p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+/* ---- Stat cards: the same object as .tile, without the click ---- */
+.stats-grid,
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.stat-value {
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--ink);
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  order: -1;
+}
+.stat-detail {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.analytics-section {
+  margin-bottom: 26px;
+}
+.analytics-section h3 {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+/* ---- Simple key/value listings ---- */
+.stats-table {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.stats-table > * {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 16px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--line-2);
+}
+.stats-table > *:last-child { border-bottom: 0; }
+
+/* ---- Tabs ---- */
+.campaigns-tabs,
+.whatsapp-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+.tab-btn {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 9px 14px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--mint-3);
+  font-weight: 600;
+}
+/* Tab panels are toggled by an .active class; without this every panel on the
+   page showed at once, stacked. */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ---- Filters and search ---- */
+.leads-filters,
+.search-bar,
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.form-actions { justify-content: flex-end; }
+.leads-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.leads-filters span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.leads-filters select,
+.search-bar input,
+.campaign-form input,
+.campaign-form select,
+.campaign-form textarea {
+  padding: 8px 11px;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.search-bar input { flex: 1 1 220px; }
+.leads-filters select:focus,
+.search-bar input:focus,
+.campaign-form input:focus,
+.campaign-form select:focus,
+.campaign-form textarea:focus {
+  outline: 2px solid var(--mint-3);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.campaign-form {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 22px;
+}
+.campaign-form textarea { min-height: 90px; resize: vertical; }
+
+/* ---- Tables built with innerHTML on these pages ---- */
+.leads-table {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+.leads-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.leads-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.leads-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line-2);
+  vertical-align: middle;
+}
+.leads-table tr:last-child td { border-bottom: 0; }
+.leads-table a { color: var(--mint-4); }
+
+/* ---- Conversations and messages ---- */
+.conversations,
+.messages,
+.conversations-list,
+.messages-list,
+.messages-timeline,
+.campaigns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.conversation-item,
+.message-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.conversation-item { cursor: pointer; }
+.conversation-item:hover { border-color: rgba(10, 14, 12, 0.22); }
+.conv-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.conv-name,
+.msg-from { font-size: 14px; font-weight: 600; }
+.conv-time,
+.time { font-family: var(--mono); font-size: 11.5px; color: var(--faint); white-space: nowrap; }
+.conv-preview,
+.msg-text { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.conv-meta { display: flex; gap: 10px; font-size: 12px; color: var(--faint); }
+.phone { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+
+/* ---- Pipeline strip ---- */
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.pipeline-stage {
+  padding: 13px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.stage-count {
+  display: block;
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.stage-label {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* ---- States ---- */
+.loading,
+.empty,
+.error,
+.chart-placeholder {
+  padding: 26px 18px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.error { color: var(--danger); }
+.chart-placeholder {
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}

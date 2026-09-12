@@ -9,7 +9,6 @@
 
 import {
   h,
-  kpi,
   lineChart,
   barChart,
   table,
@@ -18,6 +17,8 @@ import {
   inr,
   dateShort,
   relTime,
+  tile,
+  tileGrid,
 } from "/admin/components.js";
 
 export async function render(ctx) {
@@ -62,8 +63,6 @@ export async function render(ctx) {
   const overdueValue = overdue.reduce((s, i) => s + (i.total || 0), 0);
 
   // Fake-but-realistic trend lines for the sparklines (last 7 weeks)
-  const trendPipeline = [4.2, 5.1, 5.8, 6.0, 6.3, 7.1, pipelineValue / 100000].map((n) => Math.round(n * 10) / 10);
-  const trendWon = [180, 220, 260, 310, 290, 340, wonThisMonth / 1000].map((n) => Math.round(n));
 
   /* ---- Revenue chart (last 6 months) ---- */
   const monthLabels = ["Dec", "Jan", "Feb", "Mar", "Apr", "May"];
@@ -99,6 +98,8 @@ export async function render(ctx) {
       route: "/leads",
     });
   }
+
+  const waOpen = db.list("waMessages", (r) => r.status !== "done").length;
 
   const requests = db.list("requests", (r) => r.status !== "done");
   if (requests.length) {
@@ -199,31 +200,72 @@ export async function render(ctx) {
     : null;
 
   return h("div", {}, [
-    needsYou,
-    h("div", { class: "kpi-grid" }, [
-      kpi({
-        label: "Pipeline value",
-        value: inr(pipelineValue),
-        delta: 12,
-        trend: trendPipeline,
-      }),
-      kpi({
-        label: "Won this month",
-        value: inr(wonThisMonth),
-        delta: 24,
-        trend: trendWon,
-      }),
-      kpi({
+    /* Every tile is a door. The old KPI row carried hardcoded deltas — "↑ 12%",
+       "↑ 24%", and one that flipped on a threshold — which were invented, not
+       measured, and read as real performance data on the first screen of the
+       business. Numbers here are counted from the rows behind them or not
+       shown at all; the charts below are where trend actually lives. */
+    tileGrid([
+      tile({
         label: "Leads to triage",
         value: toTriage,
-        delta: toTriage > 3 ? 33 : -8,
+        sub: toTriage ? "waiting on a first call" : "all triaged",
+        tone: "attention",
+        items: db.list("leads", (l) => l.status === "new"),
+        seenKey: "dash.leads",
+        onclick: () => ctx.navigate("/leads"),
       }),
-      kpi({
-        label: "Overdue invoices",
+      tile({
+        label: "Call requests",
+        value: calls.length,
+        sub: calls.length ? "ring them back" : "none waiting",
+        tone: "attention",
+        items: db.list("bookings"),
+        seenKey: "dash.bookings",
+        onclick: () => ctx.navigate("/leads"),
+      }),
+      tile({
+        label: "WhatsApp",
+        value: waOpen,
+        sub: waOpen ? "to answer" : "all answered",
+        tone: "attention",
+        items: db.list("waMessages"),
+        seenKey: "dash.whatsapp",
+        onclick: () => ctx.navigate("/whatsapp"),
+      }),
+      tile({
+        label: "Portal requests",
+        value: requests.length,
+        sub: requests.length ? "perks and pre-books" : "none waiting",
+        items: db.list("requests"),
+        seenKey: "dash.requests",
+        onclick: () => ctx.navigate("/leads"),
+      }),
+      tile({
+        label: "Pipeline",
+        value: inr(pipelineValue),
+        sub: "open and qualified",
+        onclick: () => ctx.navigate("/pipeline"),
+      }),
+      tile({
+        label: "Won this month",
+        value: inr(wonThisMonth),
+        sub: "signed and paid",
+        tone: "good",
+        onclick: () => ctx.navigate("/clients"),
+      }),
+      tile({
+        label: "Overdue",
         value: inr(overdueValue),
-        delta: overdueValue > 0 ? -100 : 0,
+        sub: overdueValue ? "chase these" : "nothing overdue",
+        tone: overdueValue ? "attention" : "",
+        items: db.list("invoices", { status: "overdue" }),
+        seenKey: "dash.overdue",
+        onclick: () => ctx.navigate("/invoices"),
       }),
     ]),
+
+    needsYou,
 
     h("div", { class: "two-col" }, [
       h("div", { class: "panel" }, [

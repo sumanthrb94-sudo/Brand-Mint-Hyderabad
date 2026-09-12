@@ -6,6 +6,7 @@
  */
 
 import { getProfile } from "../../auth/session.js";
+import { renderTopbar } from "/admin/components.js";
 import { firebaseConfig } from "../../firebase/config.js";
 
 export async function render(ctx) {
@@ -14,13 +15,12 @@ export async function render(ctx) {
     return createEl("p", "Admin access required.");
   }
 
+  renderTopbar({ breadcrumb: "WORKSPACE", title: "WhatsApp activity", actions: [] });
+
   const root = createEl("div", { class: "module module-whatsapp" });
 
   root.innerHTML = `
-    <div class="module-head">
-      <h2>WhatsApp Activity</h2>
-      <p>Real-time messaging, conversations, and engagement pipeline</p>
-    </div>
+    <div class="module-head"><p>Real-time messaging, conversations, and engagement pipeline</p></div>
 
     <div class="whatsapp-tabs">
       <button class="tab-btn active" data-tab="conversations">Conversations</button>

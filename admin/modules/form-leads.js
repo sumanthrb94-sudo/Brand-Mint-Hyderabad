@@ -6,6 +6,16 @@
  */
 
 import { firebaseConfig } from "../../firebase/config.js";
+import { h, renderTopbar, tile, tileGrid } from "/admin/components.js";
+
+/** firestore.rules lets anyone create a formLeads document — that is how an
+ *  abandoned form fill gets captured. Every field below is therefore written
+ *  by a stranger, and this page builds its table with innerHTML, so a name of
+ *  `<img onerror=...>` would run in the studio's own admin session. */
+const esc = (v) =>
+  String(v ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+  );
 import { getProfile } from "../../auth/session.js";
 
 // The router calls mod.render(ctx) — exported under any other name, the page
@@ -20,11 +30,16 @@ export async function render() {
     return root;
   }
 
+  // This page drew its own heading while every other page uses the shell's
+  // topbar, so it sat a little lower than the rest and had no breadcrumb.
+  renderTopbar({
+    breadcrumb: "WORKSPACE",
+    title: "Form leads",
+    actions: [],
+  });
+
   root.innerHTML = `
-    <div class="module-head">
-      <h2>Form Leads</h2>
-      <p>Auto-captured from website form submissions</p>
-    </div>
+    <div id="fl-tiles"></div>
 
     <div class="leads-filters">
       <label>
@@ -49,6 +64,7 @@ export async function render() {
     </div>
   `;
 
+  const tilesHost = root.querySelector("#fl-tiles");
   const listEl = root.querySelector("#leads-list");
   const statusFilter = root.querySelector("#status-filter");
   const sortFilter = root.querySelector("#sort-filter");
@@ -95,6 +111,43 @@ export async function render() {
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
 
+      const submitted = docs.filter((d) => d.status === "submitted");
+      const drafts = docs.filter((d) => d.status === "draft");
+      const setFilter = (v) => {
+        statusFilter.value = v;
+        renderLeads();
+      };
+      tilesHost.replaceChildren(
+        tileGrid([
+          tile({
+            label: "All leads",
+            value: docs.length,
+            sub: "captured from the site",
+            items: docs,
+            seenKey: "formLeads.all",
+            onclick: () => setFilter(""),
+          }),
+          tile({
+            label: "Submitted",
+            value: submitted.length,
+            sub: submitted.length ? "sent the form" : "none yet",
+            tone: "good",
+            items: submitted,
+            seenKey: "formLeads.submitted",
+            onclick: () => setFilter("submitted"),
+          }),
+          tile({
+            label: "Abandoned",
+            value: drafts.length,
+            sub: drafts.length ? "started, never sent" : "none",
+            tone: "attention",
+            items: drafts,
+            seenKey: "formLeads.draft",
+            onclick: () => setFilter("draft"),
+          }),
+        ])
+      );
+
       if (filtered.length === 0) {
         listEl.innerHTML = "<p class='empty'>No leads found.</p>";
         return;
@@ -118,15 +171,15 @@ export async function render() {
               .map(
                 (d) => `
               <tr>
-                <td>${d.name || "—"}</td>
-                <td><a href="https://wa.me/${d.phone}" target="_blank">${d.phone}</a></td>
-                <td>${d.email || "—"}</td>
-                <td>${d.service || "—"}</td>
-                <td><span class="badge badge-${d.status}">${d.status}</span></td>
+                <td>${esc(d.name) || "—"}</td>
+                <td><a href="https://wa.me/${esc(String(d.phone || "").replace(/\D/g, ""))}" target="_blank" rel="noopener">${esc(d.phone)}</a></td>
+                <td>${esc(d.email) || "—"}</td>
+                <td>${esc(d.service) || "—"}</td>
+                <td><span class="badge badge-${esc(d.status)}">${esc(d.status)}</span></td>
                 <td>${d.submittedAt ? "✓" : "—"}</td>
                 <td>
-                  <button class="btn btn-sm btn-ghost" data-action="view" data-id="${d.id}">View</button>
-                  ${d.status === "submitted" ? `<button class="btn btn-sm btn-primary" data-action="campaign" data-id="${d.id}">Campaign</button>` : ""}
+                  <button class="btn btn-sm btn-ghost" data-action="view" data-id="${esc(d.id)}">View</button>
+                  ${d.status === "submitted" ? `<button class="btn btn-sm btn-primary" data-action="campaign" data-id="${esc(d.id)}">Campaign</button>` : ""}
                 </td>
               </tr>
             `

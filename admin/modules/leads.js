@@ -5,7 +5,7 @@
  * Statuses: new → qualified → won / lost.
  */
 
-import { h, kpi, table, pill, modal, confirm, field, formToObject, bindSubmit, renderTopbar, relTime } from "/admin/components.js";
+import { h, table, pill, modal, confirm, field, formToObject, bindSubmit, renderTopbar, relTime, tile, tileGrid, revealPanel } from "/admin/components.js";
 import { TIER_BY_ID, inr as inrTier } from "/shared/tiers.js";
 import { SERVICE_BY_ID, priceLabel } from "/shared/services.js";
 import { QUIZ, scoreLabel } from "/shared/quiz.js";
@@ -39,19 +39,66 @@ export async function render(ctx) {
       ],
     });
 
-    /* KPIs */
+    /* The row of inboxes. Everything this page holds is counted here, so
+       nothing that needs answering is below the fold — the call requests and
+       the portal requests used to sit under a full-height table. */
     const count = (s) => all.filter((l) => l.status === s).length;
+    const waRows = db.list("waMessages");
+    const bookingRows = db.list("bookings");
+    const requestRows = db.list("requests");
+    const waOpen = waRows.filter((r) => r.status !== "done").length;
+    const callsOpen = bookingRows.filter((r) => r.status !== "done").length;
+    const reqOpen = requestRows.filter((r) => r.status !== "done").length;
+
     root.appendChild(
-      h("div", { class: "kpi-grid" }, [
-        kpi({ label: "New", value: String(count("new")), delta: null }),
-        kpi({ label: "Qualified", value: String(count("qualified")), delta: null }),
-        kpi({ label: "Won", value: String(count("won")), delta: null }),
-        kpi({ label: "Lost", value: String(count("lost")), delta: null }),
+      tileGrid([
+        tile({
+          label: "New leads",
+          value: count("new"),
+          sub: `${all.length} in total`,
+          tone: "attention",
+          items: all.filter((l) => l.status === "new"),
+          seenKey: "leads.new",
+          onclick: () => revealPanel("leads-table"),
+        }),
+        tile({
+          label: "WhatsApp",
+          value: waOpen,
+          sub: waOpen ? "to answer" : "all answered",
+          tone: "attention",
+          items: waRows,
+          seenKey: "leads.whatsapp",
+          onclick: () => revealPanel("leads-whatsapp"),
+        }),
+        tile({
+          label: "Call requests",
+          value: callsOpen,
+          sub: callsOpen ? "waiting on a call" : "none waiting",
+          tone: "attention",
+          items: bookingRows,
+          seenKey: "leads.bookings",
+          onclick: () => revealPanel("leads-bookings"),
+        }),
+        tile({
+          label: "Portal requests",
+          value: reqOpen,
+          sub: reqOpen ? "perks and pre-books" : "none waiting",
+          items: requestRows,
+          seenKey: "leads.requests",
+          onclick: () => revealPanel("leads-requests"),
+        }),
+        tile({
+          label: "Won",
+          value: count("won"),
+          sub: `${count("qualified")} qualified, ${count("lost")} lost`,
+          tone: "good",
+          onclick: () => revealPanel("leads-table"),
+        }),
       ])
     );
 
     /* Toolbar + table */
-    const tableWrap = h("div", { class: "table-wrap" });
+    const tableWrap = h("div", { id: "leads-table", class: "table-wrap" });
 
     const search = h("input", {
       type: "search",
@@ -256,7 +303,7 @@ export async function render(ctx) {
   function waPanel() {
     const rows = db.list("waMessages").slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     const open = rows.filter((r) => r.status !== "done").length;
-    return h("section", { class: "card", style: "margin-top:24px" }, [
+    return h("section", { id: "leads-whatsapp", class: "card", style: "margin-top:24px" }, [
       h("div", { class: "card-head" }, [
         h("h3", { text: "WhatsApp" }),
         h("span", { class: "muted", text: open ? `${open} to answer` : "All answered" }),
@@ -318,7 +365,7 @@ export async function render(ctx) {
   function bookingsPanel() {
     const rows = db.list("bookings").slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     const open = rows.filter((r) => r.status !== "done").length;
-    return h("section", { class: "card", style: "margin-top:24px" }, [
+    return h("section", { id: "leads-bookings", class: "card", style: "margin-top:24px" }, [
       h("div", { class: "card-head" }, [
         h("h3", { text: "Call requests" }),
         h("span", { class: "muted", text: open ? `${open} to call` : "All handled" }),
@@ -370,7 +417,7 @@ export async function render(ctx) {
   function requestsPanel() {
     const rows = db.list("requests").slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     const open = rows.filter((r) => r.status !== "done").length;
-    return h("section", { class: "card", style: "margin-top:24px" }, [
+    return h("section", { id: "leads-requests", class: "card", style: "margin-top:24px" }, [
       h("div", { class: "card-head" }, [
         h("h3", { text: "Requests from the portal" }),
         h("span", { class: "muted", text: open ? `${open} to send` : "All sent" }),

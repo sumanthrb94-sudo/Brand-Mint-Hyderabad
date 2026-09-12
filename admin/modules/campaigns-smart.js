@@ -6,6 +6,7 @@
  */
 
 import { getProfile } from "../../auth/session.js";
+import { renderTopbar } from "/admin/components.js";
 import { firebaseConfig } from "../../firebase/config.js";
 
 const EVOLUTION_API = "https://wa.brandmintstudios.in";
@@ -17,13 +18,12 @@ export async function render(ctx) {
     return createEl("p", "Admin access required.");
   }
 
+  renderTopbar({ breadcrumb: "GROWTH", title: "Smart campaigns", actions: [] });
+
   const root = createEl("div", { class: "module module-campaigns-smart" });
 
   root.innerHTML = `
-    <div class="module-head">
-      <h2>Smart Campaigns</h2>
-      <p>Bulk WhatsApp with scheduling, templating, and real-time analytics</p>
-    </div>
+    <div class="module-head"><p>Bulk WhatsApp with scheduling, templating, and real-time analytics</p></div>
 
     <div class="campaigns-tabs">
       <button class="tab-btn active" data-tab="create">New Campaign</button>

@@ -23,18 +23,18 @@ import { openPalette } from "/admin/palette.js";
 setToastHandle(toast);
 
 const routes = {
-  dashboard: () => import("/admin/modules/dashboard.js"),
-  leads:     () => import("/admin/modules/leads.js?v=fb10"),
-  formLeads: () => import("/admin/modules/form-leads.js?v=2"),
-  campaigns: () => import("/admin/modules/campaigns-smart.js?v=2"),
-  whatsapp:  () => import("/admin/modules/whatsapp-dashboard.js?v=2"),
-  analyticLeads: () => import("/admin/modules/analytics-leads.js?v=2"),
+  dashboard: () => import("/admin/modules/dashboard.js?v=2"),
+  leads:     () => import("/admin/modules/leads.js?v=fb11"),
+  formLeads: () => import("/admin/modules/form-leads.js?v=3"),
+  campaigns: () => import("/admin/modules/campaigns-smart.js?v=3"),
+  whatsapp:  () => import("/admin/modules/whatsapp-dashboard.js?v=3"),
+  analyticLeads: () => import("/admin/modules/analytics-leads.js?v=3"),
   pipeline:  () => import("/admin/modules/pipeline.js"),
   onboarding: () => import("/admin/modules/onboarding.js"),
   clients:   () => import("/admin/modules/clients.js"),
   delivery:  () => import("/admin/modules/delivery.js"),
   invoices:  () => import("/admin/modules/invoices.js"),
-  settings:  () => import("/admin/modules/settings.js"),
+  settings:  () => import("/admin/modules/settings.js?v=2"),
   analytics: () => import("/admin/modules/analytics.js"),
   heatmap:   () => import("/admin/modules/heatmap.js"),
 };
