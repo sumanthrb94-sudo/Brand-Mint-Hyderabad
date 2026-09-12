@@ -69,7 +69,11 @@ export const BUILDING = [
  * `value` shows as-is; keep them few and keep them real.
  */
 export const PROOF = [
-  { value: String(WORK.length), label: "brands shipped" },
+  // Delivered and publishable are different numbers, and pretending otherwise
+  // is what turns a good claim into a bad one the first time somebody asks to
+  // see the rest. WORK below is the four with live URLs; the count here is
+  // every build, including the ones a client would rather we did not name.
+  { value: "25+", label: "projects delivered" },
   { value: "8+ yrs", label: "senior operator on every build" },
-  { value: "Hyderabad", label: "HITEC City, in person" },
+  { value: "Hyderabad + UK", label: "India and the United Kingdom" },
 ];
