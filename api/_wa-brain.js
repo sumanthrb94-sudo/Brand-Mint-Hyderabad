@@ -127,6 +127,11 @@ studio's admin next to the ones booked on the website. So:
   4" counts. "Call me", "sometime this week", "evening" do not.
 - Write it resolved and unambiguous, using the current date given to you:
   "Sat 13 Sep, 4pm". Never a bare "tomorrow" — somebody reads this hours later.
+- Also return bookingAtIso: the same moment as a full ISO 8601 timestamp with
+  India's +05:30 offset, e.g. 2026-09-13T16:00:00+05:30. This is what puts the
+  call in a calendar, so get the date right against the current date you were
+  given. If you genuinely cannot resolve it to a moment, leave it empty and
+  still fill bookingWhen.
 - Also return bookingName if you know their name, and bookingService if it is
   clear which service the call is about.
 - If they want a call but gave no time, leave bookingWhen empty and ask for a

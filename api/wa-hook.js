@@ -16,7 +16,7 @@
  * Firestore rules pin the shape so writes are bounded.
  */
 import crypto from "node:crypto";
-import { clean, readJson } from "./_lib.js";
+import { clean, readJson, sendEmail, shell } from "./_lib.js";
 import { SYSTEM_PROMPT } from "./_wa-brain.js";
 import { firebaseConfig } from "../firebase/config.js";
 
@@ -110,7 +110,7 @@ async function saveTurns(id, turns) {
  *  customer named an actual day and time for a call, which is what turns a
  *  conversation into a booking. */
 async function draftReply(text, turns = []) {
-  const none = { reply: "", when: "", who: "", service: "" };
+  const none = { reply: "", when: "", iso: "", who: "", service: "" };
   if (!GEMINI_API_KEY) return none;
   try {
     const r = await fetch(
@@ -153,6 +153,7 @@ async function draftReply(text, turns = []) {
               properties: {
                 reply: { type: "STRING" },
                 bookingWhen: { type: "STRING" },
+                bookingAtIso: { type: "STRING" },
                 bookingName: { type: "STRING" },
                 bookingService: { type: "STRING" },
               },
@@ -190,6 +191,7 @@ async function draftReply(text, turns = []) {
     return {
       reply: out.reply || "",
       when: out.bookingWhen || "",
+      iso: out.bookingAtIso || "",
       who: out.bookingName || "",
       service: out.bookingService || "",
     };
@@ -207,6 +209,52 @@ async function draftReply(text, turns = []) {
  *  write asserts the document does not exist. That caps it at one booking per
  *  contact per day: a chat that circles back to timing twice cannot quietly
  *  file two call requests for the same person. */
+/** A one-tap "add to calendar" link, built from the ISO moment the model
+ *  resolved. Google's template URL wants UTC basic format with no punctuation.
+ *  Returns "" for a time it could not resolve, in which case the mail simply
+ *  carries the words the customer used. */
+function calendarLink({ name, phone, when, iso, service }) {
+  const start = new Date(iso);
+  if (!iso || Number.isNaN(start.getTime())) return "";
+  const stamp = (d) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  // Half an hour is what the site promises a first call takes.
+  const end = new Date(start.getTime() + 30 * 60 * 1000);
+  const q = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `Call — ${name || phone}${service ? ` (${service})` : ""}`,
+    dates: `${stamp(start)}/${stamp(end)}`,
+    details: `Booked over WhatsApp. They asked for: ${when}\nTheir number: +${phone}`,
+  });
+  return `https://calendar.google.com/calendar/render?${q}`;
+}
+
+/** Mails the studio the moment a call is agreed. Without this a WhatsApp
+ *  booking lands in Firestore in silence — the website's form has always sent
+ *  one, and a booking nobody is told about is the same as no booking. */
+async function notifyBooking({ phone, name, when, iso, service }) {
+  const cal = calendarLink({ phone, name, when, iso, service });
+  const row = (k, v) =>
+    v ? `<tr><td style="padding:6px 14px 6px 0;color:#5b625e;font-size:13px;white-space:nowrap">${k}</td><td style="padding:6px 0;font-size:14px;font-weight:600">${v}</td></tr>` : "";
+  try {
+    await sendEmail({
+      to: process.env.BOOKING_TO || "mintstudios823@gmail.com",
+      subject: `Call booked on WhatsApp — ${name || phone} — ${when}`,
+      html: shell(
+        "Someone booked a call",
+        `<table style="border-collapse:collapse;margin-bottom:18px">
+           ${row("When", when)}${row("Name", name)}${row("Phone", `+${phone}`)}${row("About", service)}
+         </table>
+         ${cal ? `<p style="margin:0 0 14px"><a href="${cal}">Add to Google Calendar</a></p>` : ""}
+         <p style="margin:0 0 8px"><a href="https://wa.me/${phone}">Open the chat on WhatsApp</a></p>
+         <p style="margin:0;font-size:13px;color:#5b625e">It is also in Admin &rarr; Leads. The auto-reply has already confirmed the time to them.</p>`
+      ),
+    });
+  } catch (e) {
+    // A booking that saved but could not be mailed is still a booking.
+    console.error("[wa-hook] booking mail:", why(e));
+  }
+}
+
 async function saveBooking(cid, { phone, name, when, service }) {
   const id = `wa_${cid.slice(0, 24)}_${new Date().toISOString().slice(0, 10)}`;
   const fields = {
@@ -412,12 +460,16 @@ export default async function handler(req, res) {
   // Filed before the send delay, not after: if the send fails or the daily cap
   // stops the reply, the studio should still know somebody asked for a call.
   if (draft.when) {
-    await saveBooking(cid, {
+    const booking = {
       phone,
       name: draft.who || d.pushName || "",
       when: draft.when,
+      iso: draft.iso,
       service: draft.service,
-    });
+    };
+    // Mail only on a first save, so the one-a-day dedupe covers the mail too
+    // and a chat that revisits timing doesn't send the studio a second one.
+    if (await saveBooking(cid, booking)) await notifyBooking(booking);
   }
 
   const fields = {
