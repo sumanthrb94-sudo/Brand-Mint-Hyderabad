@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v14" />
+<link rel="stylesheet" href="/styles.css?v=v16" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -222,6 +222,12 @@
 
   <body>
     <a class="skip" href="#main">Skip to content</a>
+    <!-- The one line above everything answers the objection that stops the
+         sale: an agency price that moves after you commit. -->
+    <aside class="announce">
+      <p>Hyderabad studio, HITEC City — <strong>fixed prices, in writing</strong>, before anyone starts work.</p>
+    </aside>
+
     <header class="nav">
       <a class="brand" href="/" aria-label="Brand Mint, Hyderabad — home">
         <svg class="bm-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true" focusable="false"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="bm-mark-m" pathLength="100" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -244,17 +250,17 @@
       <!-- HERO -->
       <section class="hero hero--split">
         <div class="hero-copy">
-          <p class="kicker" data-enter>Hyderabad · Now booking</p>
-          <h1 data-enter>We build the store, and the system that <em>sells</em> from it.</h1>
+          <p class="kicker" data-enter>Hyderabad · Web &amp; software studio</p>
+          <h1 data-enter>Your price, in writing. <em>Before anyone starts.</em></h1>
           <p class="lede" data-enter>
-            Online stores and the software behind them, for Indian brands.
-            Everything a shop here actually needs — UPI, cash on delivery, GST
-            invoices, WhatsApp orders — built by senior people at a price
-            agreed before we start.
+            Online stores and websites for Indian businesses. Fixed price,
+            fixed scope, four to twelve weeks. You watch it get built in your
+            own portal — and you own the domain, the hosting and the payment
+            account the day it ships.
           </p>
           <div class="hero-actions" data-enter>
-            <a class="btn btn-primary btn-lg" href="#book">Book a call</a>
-            <a class="btn btn-ghost btn-lg" href="#work">See the work</a>
+            <a class="btn btn-primary btn-lg" href="#stores">See the four store tiers</a>
+            <a class="btn btn-ghost btn-lg" href="#book">Book a 30-minute call</a>
           </div>
         </div>
         <aside class="hero-proof-panel" data-enter aria-label="Brand Mint in numbers">
@@ -266,14 +272,38 @@
         </aside>
       </section>
 
+      <!-- WHY PEOPLE HESITATE. Objection handling belongs above the work, not
+           buried in an FAQ nobody scrolls to. Each answer is something the
+           studio already does — it is in the FAQ in shared/tiers.js. -->
+      <section class="section section--fears" id="why">
+        <header class="section-head" data-reveal>
+          <p class="kicker">Why people hesitate</p>
+          <h2>You have been burned before, or you have <em>heard the stories.</em></h2>
+        </header>
+        <ul class="fears" data-reveal-group>
+          <li>
+            <h3>&ldquo;The price will keep moving.&rdquo;</h3>
+            <p>It cannot. Scope and price are in an agreement you sign before work begins. No hourly billing, no extras inside a tier.</p>
+          </li>
+          <li>
+            <h3>&ldquo;It will drag on for months.&rdquo;</h3>
+            <p>Four weeks for a WhatsApp Store, twelve for a Growth Store. The clock starts the day we have your products and photos.</p>
+          </li>
+          <li>
+            <h3>&ldquo;I will be stuck with them forever.&rdquo;</h3>
+            <p>The domain, the hosting and the Razorpay account are in your business&rsquo;s name. If we part ways, you keep all of it, running.</p>
+          </li>
+        </ul>
+      </section>
+
       <!-- WORK -->
       <section class="section" id="work">
         <header class="section-head" data-reveal>
-          <p class="kicker">01 — The work</p>
-          <h2>Brands we have <em>shipped.</em></h2>
+          <p class="kicker">Real work, real businesses</p>
+          <h2>Four live sites. <em>Open any of them.</em></h2>
           <p>
-            Every one of these is live. Open them, use them, put something in a
-            cart. That is the only portfolio worth showing.
+            Not mockups, not a template with a logo dropped in. These are
+            running businesses taking real orders — click through and check.
           </p>
         </header>
         <div class="work-grid" id="work-grid" data-reveal-group><!-- shared/work.js --></div>
@@ -283,11 +313,12 @@
       <!-- WHAT WE DO -->
       <section class="section section--dark" id="services">
         <header class="section-head" data-reveal>
-          <p class="kicker">02 — What we do</p>
-          <h2>Three things, done <em>properly.</em></h2>
+          <p class="kicker">Five things, five prices</p>
+          <h2>Pick the one that matches where your business <em>actually is.</em></h2>
           <p>
-            Each one is a fixed price agreed before we start. No hourly billing,
-            no discovery fee, no quote that takes a week to arrive.
+            Every price below is the price. There is no &ldquo;starting from&rdquo;
+            that quietly doubles, no discovery fee, and no quote that takes a
+            week to arrive. All prices exclude 18% GST.
           </p>
         </header>
         <ol class="offer-lines" id="offer-lines" data-reveal-group><!-- shared/services.js --></ol>
@@ -296,11 +327,27 @@
         </p>
       </section>
 
+      <!-- THE FOUR STORE TIERS -->
+      <section class="section section--stores" id="stores">
+        <header class="section-head" data-reveal>
+          <p class="kicker">Online stores</p>
+          <h2>Start where your operations are today. <em>Move up when they outgrow it.</em></h2>
+          <p>
+            Each tier includes everything in the one before it, so moving up
+            later is a scoped add-on — never a rebuild.
+          </p>
+        </header>
+        <ol class="tier-ladder" id="tier-list" data-reveal-group><!-- shared/tiers.js --></ol>
+        <p class="offer-more" data-reveal>
+          <a class="btn btn-ghost" href="/pricing">Every price, in full →</a>
+        </p>
+      </section>
+
       <!-- HOW -->
       <section class="section" id="how">
         <header class="section-head" data-reveal>
-          <p class="kicker">03 — How it works</p>
-          <h2>Three steps. No <em>forms.</em></h2>
+          <p class="kicker">Three steps, no surprises</p>
+          <h2>From first message to <em>live store.</em></h2>
         </header>
         <ol class="steps steps--light" id="steps" data-reveal-group><!-- shared/tiers.js --></ol>
       </section>
@@ -309,7 +356,7 @@
       <section class="section" id="who">
         <div class="who" data-reveal>
           <div>
-            <p class="kicker">04 — Who you work with</p>
+            <p class="kicker">Who you work with</p>
             <h2>An operator with <em>eight years</em>, not an intern with a template.</h2>
             <p>
               Brand Mint is a small, senior studio in HITEC City. Every
@@ -335,11 +382,24 @@
         </div>
       </section>
 
+      <!-- WHAT WE NEED -->
+      <section class="section section--needs" id="needs">
+        <header class="section-head" data-reveal>
+          <p class="kicker">Before the clock starts</p>
+          <h2>Four things from you, and we help with <em>two of them.</em></h2>
+          <p>
+            Timelines run from the day your assets arrive, so a ready catalogue
+            is the fastest way to launch sooner.
+          </p>
+        </header>
+        <ul class="needs" id="needs-list" data-reveal-group><!-- shared/tiers.js --></ul>
+      </section>
+
       <!-- FAQ -->
       <section class="section section--faq" id="faq">
         <header class="section-head" data-reveal>
-          <p class="kicker">05 — Before you ask</p>
-          <h2>The questions every founder <em>asks.</em></h2>
+          <p class="kicker">Before you book</p>
+          <h2>The four questions every founder <em>asks.</em></h2>
         </header>
         <div class="faq" id="faq-list" data-reveal-group><!-- shared/tiers.js --></div>
       </section>
@@ -347,12 +407,12 @@
       <!-- BOOK -->
       <section class="cta book" id="book" data-reveal>
         <div class="book-copy">
-          <h2>Start with a <em>call,</em> not a quote.</h2>
+          <h2>Tell us what you sell. <em>We will tell you what it costs.</em></h2>
           <p>
-            Thirty minutes, no pitch deck. We will tell you what it costs, how
-            long it takes, and whether you need us at all. Leave your number
-            and we ring you within one working day — or message us now and skip
-            the queue.
+            Thirty minutes, on WhatsApp or a call. You will leave it knowing the
+            tier, the price and the start date — whether or not you go ahead.
+            Leave your number and we ring you within one working day, or message
+            us now and skip the queue.
           </p>
           <a class="btn btn-ghost btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">WhatsApp us instead</a>
         </div>
@@ -389,11 +449,8 @@
     </main>
 
     <div class="sticky-cta" id="sticky-cta" aria-hidden="true">
-      <div>
-        <strong>Book a call</strong>
-        <span>30 minutes, no pitch deck</span>
-      </div>
-      <a class="btn btn-primary" href="#book" tabindex="-1">Request a call</a>
+      <a class="btn btn-primary" href="#book" tabindex="-1">Get your price</a>
+      <a class="btn btn-ghost" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener" tabindex="-1">WhatsApp us</a>
     </div>
 
     <footer class="footer">
@@ -412,12 +469,55 @@
 
     <script>document.documentElement.classList.add("js");</script>
     <script type="module">
-      import { STEPS, FAQ, inr } from "/shared/tiers.js?v=v10";
-      import { SERVICE_BY_ID, priceLabel } from "/shared/services.js?v=v10";
+      import { TIERS, STEPS, FAQ, NEEDS, inr } from "/shared/tiers.js?v=v11";
+      import { SERVICES } from "/shared/services.js?v=v11";
       import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v10";
       import { PERKS } from "/shared/resources.js?v=v10";
       import { saveBooking } from "/shared/booking.js?v=1";
       import { initFormAutomation } from "/shared/form-automation.js?v=1";
+
+      // ---- the four store tiers. Rendered from TIERS rather than written
+      //      into the HTML: a price that lives in two places eventually
+      //      disagrees with itself, and the wrong one is always the one a
+      //      customer read.
+      const tierList = document.getElementById("tier-list");
+      for (const t of TIERS) {
+        const li = document.createElement("li");
+        li.className = "rung" + (t.featured ? " rung--featured" : "");
+        li.innerHTML = `
+          <div class="rung-head">
+            <h3></h3>
+            <p class="rung-weeks"></p>
+          </div>
+          <p class="rung-price num"></p>
+          <div class="rung-body">
+            <p class="rung-blurb"></p>
+            <p class="rung-inherits"></p>
+            <a class="rung-cta"></a>
+          </div>
+        `;
+        li.querySelector("h3").textContent = t.name;
+        li.querySelector(".rung-price").textContent = inr(t.price);
+        li.querySelector(".rung-weeks").textContent = t.weeks;
+        li.querySelector(".rung-blurb").textContent = t.blurb;
+        const inh = li.querySelector(".rung-inherits");
+        if (t.includesPrevious) inh.textContent = "Includes everything in " + t.includesPrevious;
+        else inh.remove();
+        const cta = li.querySelector(".rung-cta");
+        cta.href = "/login?tier=" + t.id;
+        cta.textContent = "Choose " + t.name + " →";
+        tierList.appendChild(li);
+      }
+
+      // ---- what we need from a client before a build can start
+      const needsList = document.getElementById("needs-list");
+      for (const n of NEEDS) {
+        const li = document.createElement("li");
+        li.innerHTML = `<h3></h3><p></p>`;
+        li.querySelector("h3").textContent = n.title;
+        li.querySelector("p").textContent = n.body;
+        needsList.appendChild(li);
+      }
 
       // ---- proof panel
       const stats = document.getElementById("proof-stats");
@@ -500,19 +600,27 @@
         building.appendChild(ul);
       }
 
-      // ---- three headline offers; the full ladder lives on /pricing
+      // ---- the full service ladder. This used to be a hardcoded three of
+      //      the five, which quietly hid Custom CRM and Modcon HR — and
+      //      Modcon HR's free early trial is a real source of enquiries.
+      //      Reading SERVICES means adding a service adds it here too.
       const lines = document.getElementById("offer-lines");
-      for (const id of ["website", "store", "platform"]) {
-        const sv = SERVICE_BY_ID[id];
-        if (!sv) continue;
+      for (const sv of SERVICES) {
         const li = document.createElement("li");
         li.innerHTML = `
-          <div><h3></h3><p></p></div>
-          <p class="offer-price"><span class="from">from</span> <span class="num"></span></p>
+          <div><h3></h3><p class="offer-status"></p><p></p></div>
+          <p class="offer-price"><span class="from"></span> <span class="num"></span></p>
         `;
         li.querySelector("h3").textContent = sv.name;
-        li.querySelector("div p").textContent = sv.blurb;
-        li.querySelector(".offer-price .num").textContent = sv.hidePrice ? "—" : inr(sv.from);
+        li.querySelector("div p:last-of-type").textContent = sv.blurb;
+        const status = li.querySelector(".offer-status");
+        if (sv.status) status.textContent = sv.status; else status.remove();
+        // "from" belongs on a range, not on a fixed one-time price — saying it
+        // everywhere is what makes a published price stop being believed.
+        li.querySelector(".offer-price .from").textContent =
+          sv.hidePrice ? "" : /from/i.test(sv.note || "") || sv.id === "store" ? "from" : "";
+        li.querySelector(".offer-price .num").textContent =
+          sv.hidePrice ? "Free trial" : inr(sv.from);
         lines.appendChild(li);
       }
 

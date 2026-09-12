@@ -804,3 +804,173 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
   .book { grid-template-columns: 1fr; }
   .book-row { grid-template-columns: 1fr; }
 }
+
+/* ============================================================ home v2 ====
+   The announcement bar, the objections, the four tiers, and what a client
+   owes us before a build starts. Built from the tokens above — no new
+   colours, no new radii, no second type scale.
+   ======================================================================== */
+
+/* ---- Announcement bar. The first line on the page answers the objection
+        that stops the sale, rather than offering a discount. ---- */
+.announce {
+  background: var(--bm-ink);
+  color: var(--cream);
+  text-align: center;
+  padding: 10px 20px;
+}
+.announce p {
+  margin: 0 auto;
+  max-width: 62ch;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.announce strong { color: var(--mint-2); font-weight: 600; }
+
+/* ---- The three fears. Not cards: a fear is a claim and its answer, and a
+        border around each one would make three objects out of one idea. ---- */
+.section--fears { padding-block: var(--s-8); }
+.fears {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--s-6) var(--s-7);
+}
+.fears li { border-top: 2px solid var(--ink); padding-top: var(--s-4); }
+.fears h3 {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--s-2);
+  text-wrap: balance;
+}
+.fears p { margin: 0; font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+/* ---- The four store tiers, home-page treatment. Deliberately NOT .tier —
+        that class belongs to /pricing, where the job is comparing every
+        inclusion side by side. Here the job is reading a ladder in one pass,
+        and the two layouts collided when they shared a name. ---- */
+.tier-ladder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+.rung {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "head price" "body body";
+  column-gap: var(--s-5);
+  padding: var(--s-5) 0;
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+}
+.rung-head { grid-area: head; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-3); }
+.rung-head h3 {
+  font-family: var(--display);
+  font-size: clamp(19px, 2.6vw, 23px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.rung-weeks {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+  margin: 0;
+}
+.rung-price {
+  grid-area: price;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.rung-body { grid-area: body; }
+.rung-body p { margin: var(--s-3) 0 0; max-width: 60ch; color: var(--ink-2); line-height: 1.6; }
+.rung-inherits {
+  font-size: 13.5px !important;
+  color: var(--mint-deep);
+  font-weight: 500;
+}
+.rung-cta {
+  display: inline-block;
+  margin-top: var(--s-3);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+}
+.rung-cta:hover { border-bottom-color: var(--ink); }
+.rung-cta:focus-visible { outline: 2px solid var(--mint-deep); outline-offset: 3px; }
+/* The recommended rung carries weight, not a badge and not a box. */
+.rung--featured .rung-head h3,
+.rung--featured .rung-price { color: var(--mint-deep); }
+
+@media (max-width: 560px) {
+  .rung { grid-template-columns: 1fr; grid-template-areas: "head" "price" "body"; }
+  .rung-price { justify-self: start; margin-top: var(--s-1); }
+}
+
+/* ---- What we need. Numbered because it is a checklist of four, and the
+        count is the reassurance — it is four things, not an open list. ---- */
+.needs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: need;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--s-6) var(--s-7);
+}
+.needs li { counter-increment: need; }
+.needs li::before {
+  content: counter(need, decimal-leading-zero);
+  display: block;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--mint-deep);
+  margin-bottom: var(--s-2);
+}
+.needs h3 {
+  font-family: var(--display);
+  font-size: 16.5px;
+  font-weight: 600;
+  margin: 0 0 var(--s-2);
+  text-wrap: balance;
+}
+.needs p { margin: 0; font-size: 14.5px; color: var(--muted); line-height: 1.6; }
+
+/* ---- Sticky bar, two actions. A form is a commitment and a WhatsApp
+        message is not, which in India is what decides whether an enquiry
+        happens at all — so both are always one thumb away. ---- */
+.sticky-cta { padding: 10px; gap: var(--s-2); }
+.sticky-cta .btn { flex: 1; justify-content: center; text-align: center; padding: 12px 14px; }
+.sticky-cta .btn-ghost { color: var(--cream); border-color: var(--cream-line); }
+.sticky-cta .btn-ghost:hover { background: rgba(245, 241, 234, 0.1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sticky-cta { transition: none; }
+}
+
+/* "Launching soon" on a service that is not buyable yet. Small, factual, and
+   not a badge — the price beside it is the thing being read. */
+.offer-status {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 2px 0 0;
+}
