@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v16" />
+<link rel="stylesheet" href="/styles.css?v=v17" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -264,6 +264,12 @@
           </div>
         </div>
         <aside class="hero-proof-panel" data-enter aria-label="Brand Mint in numbers">
+          <!-- Above the fold, so it loads eagerly and reserves its own box —
+               a hero that reflows when the image lands is the first thing a
+               visitor sees the page do. -->
+          <img class="hero-shot" src="/images/hero-desk.jpg" width="896" height="1152"
+               loading="eager" fetchpriority="high" decoding="async"
+               alt="A desk with a phone showing a WhatsApp order, a printed GST invoice, packing tape and two wrapped parcels ready to ship." />
           <ul class="proof-stats" id="proof-stats"><!-- shared/work.js --></ul>
           <div class="proof-clients">
             <p class="kicker">Recently shipped</p>

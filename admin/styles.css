@@ -2187,3 +2187,58 @@ th.num {
   border: 1px dashed var(--line);
   border-radius: var(--radius);
 }
+
+/* ---------------------------------------------------------------------------
+   Phone topbar.
+
+   .topbar was a fixed-height single row that never wrapped: back button,
+   breadcrumb, title, sync pill, command palette and up to two page actions.
+   That is 279px of actions alone, which on a 390px phone ran 119px past the
+   right edge — so the document was wider than the screen, the page panned
+   sideways, and the browser offered a zoomed-out view of everything. The
+   tiles looked fine; the page they sat on did not fit.
+
+   Below 720px the bar becomes two rows: identity on top, actions underneath
+   sharing the full width.
+--------------------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .topbar {
+    height: auto;
+    min-height: var(--topbar-h);
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    row-gap: 10px;
+    column-gap: 10px;
+  }
+  .topbar h1 { font-size: 16px; }
+  .topbar .breadcrumb { font-size: 10.5px; }
+
+  .topbar-actions {
+    margin-left: 0;
+    width: 100%;
+    gap: 8px;
+  }
+  /* Every action shares the row and stays a comfortable tap target rather
+     than being squeezed until the last one falls off the edge. */
+  .topbar-actions > .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+  .sync-pill { flex: 0 0 auto; }
+
+  /* The palette is a keyboard affordance — it advertises Ctrl K and opens on
+     a keystroke. On a phone it is a wide button for a shortcut nobody can
+     press, and it was the widest thing in the row. */
+  .palette-trigger { display: none; }
+}
+
+/* Last line of defence. If a future panel, table or long word runs past the
+   edge again, it scrolls inside its own box instead of dragging the whole
+   document sideways and triggering a pinch-zoom. */
+@media (max-width: 720px) {
+  html, body { max-width: 100%; overflow-x: hidden; }
+  .view { min-width: 0; }
+}
