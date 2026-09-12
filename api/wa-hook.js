@@ -52,6 +52,15 @@ const COMMIT = `${FIRESTORE}:commit?key=${firebaseConfig.apiKey}`;
 const DOC = `projects/${firebaseConfig.projectId}/databases/(default)/documents/waMessages/`;
 
 const str = (v, max) => ({ stringValue: clean(v, max) });
+
+/** "Fri 12 Sep 2026, 2:15am" — India, where every customer and the studio are.
+ *  Node on Vercel runs in UTC, which is five and a half hours behind them. */
+const istNow = () =>
+  new Date().toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    weekday: "short", day: "numeric", month: "short", year: "numeric",
+    hour: "numeric", minute: "2-digit",
+  });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** The conversation document id. Firestore rules here authenticate nobody —
@@ -97,8 +106,12 @@ async function saveTurns(id, turns) {
   if (r && !r.ok) console.error("[wa-hook] convo save", r.status, (await r.text().catch(() => "")).slice(0, 200));
 }
 
+/** Returns { reply, when, who, service }. `when` is non-empty only when the
+ *  customer named an actual day and time for a call, which is what turns a
+ *  conversation into a booking. */
 async function draftReply(text, turns = []) {
-  if (!GEMINI_API_KEY) return "";
+  const none = { reply: "", when: "", who: "", service: "" };
+  if (!GEMINI_API_KEY) return none;
   try {
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
@@ -106,7 +119,11 @@ async function draftReply(text, turns = []) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+          // The date is appended per request rather than baked into the
+          // prompt: a warm serverless instance can live for hours, and a
+          // stale "today" turns "tomorrow at 4" into the wrong day in the
+          // studio's calendar.
+          system_instruction: { parts: [{ text: `${SYSTEM_PROMPT}\n\nRIGHT NOW IT IS ${istNow()} in Hyderabad. Resolve every "today", "tomorrow" and weekday against that.` }] },
           // Both sides of the thread, oldest first, then what they just said.
           // Without our own replies in here the model cannot tell a first
           // contact from a fifth message and greets everyone as a stranger.
@@ -125,6 +142,22 @@ async function draftReply(text, turns = []) {
             // it returns a candidate with no text and no error. The reply is a
             // short WhatsApp message; it needs no deliberation.
             thinkingConfig: { thinkingBudget: 0 },
+            // The same call decides what to say and whether a call was just
+            // agreed. A second round trip to classify the message would double
+            // the latency and could disagree with the reply the customer is
+            // actually reading. A flat schema rather than a nested one —
+            // nested objects come back malformed far more often.
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                reply: { type: "STRING" },
+                bookingWhen: { type: "STRING" },
+                bookingName: { type: "STRING" },
+                bookingService: { type: "STRING" },
+              },
+              required: ["reply"],
+            },
           },
         }),
       }
@@ -136,19 +169,87 @@ async function draftReply(text, turns = []) {
     const data = await r.json();
     // Not `text` — that is this function's own parameter, and shadowing it
     // here puts the prompt's reference to it in the temporal dead zone.
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    if (!reply) {
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    if (!raw) {
       console.error(
         "[wa-hook] gemini returned no text, finishReason=",
         data.candidates?.[0]?.finishReason,
         JSON.stringify(data).slice(0, 400)
       );
+      return none;
     }
-    return reply;
+    let out;
+    try {
+      out = JSON.parse(raw);
+    } catch {
+      // A schema is requested, not guaranteed. Plain prose is still a usable
+      // reply — losing it because it wasn't JSON would be the worse failure.
+      console.error("[wa-hook] gemini non-JSON response:", raw.slice(0, 200));
+      return { ...none, reply: raw };
+    }
+    return {
+      reply: out.reply || "",
+      when: out.bookingWhen || "",
+      who: out.bookingName || "",
+      service: out.bookingService || "",
+    };
   } catch (e) {
     console.error("[wa-hook] gemini error:", e.message);
-    return "";
+    return none;
   }
+}
+
+/** Writes a call request into the same `bookings` collection the website's
+ *  booking form uses, so a call agreed on WhatsApp lands in Admin next to one
+ *  booked on the site — no second inbox to remember to check.
+ *
+ *  The document id is derived from the conversation and the date, and the
+ *  write asserts the document does not exist. That caps it at one booking per
+ *  contact per day: a chat that circles back to timing twice cannot quietly
+ *  file two call requests for the same person. */
+async function saveBooking(cid, { phone, name, when, service }) {
+  const id = `wa_${cid.slice(0, 24)}_${new Date().toISOString().slice(0, 10)}`;
+  const fields = {
+    name: str(name || "WhatsApp enquiry", 80),
+    phone: str(phone, 20),
+    email: str("", 320),
+    // `service` is a reserved word in the rules language; the rule reads it
+    // with bracket access for that reason. It still has to be present.
+    service: str(service, 60),
+    when: str(when, 60),
+    note: str("Requested over WhatsApp.", 1000),
+    source: str("whatsapp", 60),
+    status: str("new", 20),
+    createdAt: str(new Date().toISOString(), 40),
+  };
+  try {
+    const r = await fetch(COMMIT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        writes: [
+          {
+            update: {
+              name: `projects/${firebaseConfig.projectId}/databases/(default)/documents/bookings/${id}`,
+              fields,
+            },
+            currentDocument: { exists: false },
+          },
+        ],
+      }),
+    });
+    if (r.ok) {
+      console.log("[wa-hook] booking saved", id, when);
+      return true;
+    }
+    const e = await r.text().catch(() => "");
+    // Already booked today is the dedupe working, not a failure.
+    if (/ALREADY_EXISTS|already exists/i.test(e)) return false;
+    console.error("[wa-hook] booking", r.status, e.slice(0, 300));
+  } catch (e) {
+    console.error("[wa-hook] booking error:", why(e));
+  }
+  return false;
 }
 
 /** Node's fetch reports every network-level failure as the single word
@@ -305,7 +406,19 @@ export default async function handler(req, res) {
   if (!waId) return drop("no id");
 
   const turns = await loadTurns(cid);
-  const suggestedReply = await draftReply(text, turns);
+  const draft = await draftReply(text, turns);
+  const suggestedReply = draft.reply;
+
+  // Filed before the send delay, not after: if the send fails or the daily cap
+  // stops the reply, the studio should still know somebody asked for a call.
+  if (draft.when) {
+    await saveBooking(cid, {
+      phone,
+      name: draft.who || d.pushName || "",
+      when: draft.when,
+      service: draft.service,
+    });
+  }
 
   const fields = {
     from: str(phone, 20),
