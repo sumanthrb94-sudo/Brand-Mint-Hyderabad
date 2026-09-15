@@ -123,3 +123,72 @@ Keep it short, no pitch. They are on a phone, mid-something.
 - One follow-up if there is no reply. Then stop, and mark the row dead.
 - If they ask to be left alone, remove the row. That is not optional, and in
   practice a person who is annoyed enough to say it will tell other people.
+
+---
+
+## The two messages, written out
+
+Economics they can check rather than a statistic worth inventing: the
+comparison is one lost customer against the price of the thing, and both
+numbers are theirs, not ours.
+
+Every message ends with a way to stop. That line is not politeness — a person
+who cannot make you stop reports you, and a report is what actually ends a
+WhatsApp number. It is cheaper than any pacing rule.
+
+### A — no web presence at all
+
+> Hi {name} — I'm Sumanth from Brand Mint, a small web studio in HITEC City.
+>
+> I was looking at {category}s in {area} and yours came up on Google with no
+> website. You've got {reviews} reviews, which is more than most {category}s
+> in {area}.
+>
+> Here's the thing that costs you and you never see it: someone searches,
+> finds your listing, looks for your prices or timings, finds nothing, and
+> calls the next one on the list. You don't get a missed call. You don't get
+> anything.
+>
+> If that happens to even one customer a month, over a year it costs more
+> than the website does once. A proper one is ₹14,999 — fixed price in
+> writing before we start, live in two weeks, domain in your name.
+>
+> Want me to send two we've built so you can see? If not, just say stop and I
+> won't message again.
+
+### B — running on Instagram or Justdial
+
+> Hi {name} — I'm Sumanth from Brand Mint, a small web studio in HITEC City.
+>
+> I found you on Google and saw the business runs off Instagram. {reviews}
+> reviews is a real reputation.
+>
+> Worth knowing: that page isn't yours. A boutique I know ran off Instagram
+> for two years, woke up to a locked account, and lost the photos, the prices
+> and every customer conversation in one morning. There was nobody to appeal
+> to.
+>
+> A site of your own is ₹14,999 — one time, domain in your name, live in two
+> weeks. Less than one lost month of orders, and you keep posting on
+> Instagram exactly as you do now.
+>
+> Want me to send two we've built? If not, just say stop and I won't message
+> again.
+
+Drop the `{reviews}` sentence entirely when the count is under 10 — praising
+three reviews reads as a script, which is the one thing that stops this
+working.
+
+### Sending rules
+
+- One at a time. Never two in the same minute, never a batch.
+- Five minutes between sends, varied — an exact five-minute rhythm is itself
+  a machine signature.
+- 10:00–20:00 IST only. The person woken at 2am is the person who reports you.
+- Stop at 40–60 in a day. The daily total matters less than the burst, but it
+  still matters.
+- The moment someone replies, stop the queue and talk to them. A live
+  conversation is worth more than the next thirty messages.
+- "stop", "don't message", "not interested" — remove the row and never send
+  again. No follow-up, no "just one more thing".
+- One follow-up only if there is no reply at all, after three days. Then done.
