@@ -28,7 +28,7 @@
  * pricing before a large run.
  */
 
-const KEY = process.env.GOOGLE_PLACES_KEY;
+const KEY = process.env.GOOGLE_PLACES_KEY || (process.argv.includes("--key") ? process.argv[process.argv.indexOf("--key") + 1] : "");
 const ENDPOINT = "https://places.googleapis.com/v1/places:searchText";
 
 // Only the fields this needs. The mask is also what you are billed on: asking
@@ -80,9 +80,20 @@ const OUT = arg("out", "prospects.csv");
 const ONLY_AREA = arg("area", "");
 
 if (!KEY) {
-  console.error("GOOGLE_PLACES_KEY is not set.\n" +
-    "  console.cloud.google.com -> enable 'Places API (New)' -> create an API key\n" +
-    "  export GOOGLE_PLACES_KEY=AIza...");
+  console.error(`No API key.
+
+  1. Enable the API (one click, the project is already yours):
+     https://console.cloud.google.com/apis/library/places-backend.googleapis.com
+
+  2. Create a key:
+     https://console.cloud.google.com/apis/credentials
+     -> Create credentials -> API key -> Copy
+
+  3. Run this, pasting the key at the end:
+     node scripts/find-prospects.mjs --limit 150 --key AIza...
+
+  The key is free to create and this run sits inside the free monthly
+  allowance. Nothing new to buy.`);
   process.exit(1);
 }
 
