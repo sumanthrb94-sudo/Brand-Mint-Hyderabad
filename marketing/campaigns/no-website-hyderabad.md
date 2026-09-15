@@ -179,6 +179,31 @@ Drop the `{reviews}` sentence entirely when the count is under 10 — praising
 three reviews reads as a script, which is the one thing that stops this
 working.
 
+### The posture, once they reply
+
+Concierge, not salesperson. The tone that works here is somebody happy to be
+of no use today.
+
+- **Match their length.** A paragraph answering "ok" reads as a machine that
+  did not notice.
+- **Never two messages in a row.** If they have not replied, there is nothing
+  to add. No "just following up", no "did you see this".
+- **Any irritation ends it.** Sharp tone, sarcasm, "why are you messaging me" —
+  apologise in under ten words, say they will not be messaged again, stop. No
+  last pitch. The apology is the whole message.
+- **"Who is this?" gets a straight answer**, not a pitch. We found the business
+  on Google, we build websites, they can tell us to stop whenever they like.
+- **Never tell them their business needs anything.** It is their business.
+- **When in doubt, they are not interested.**
+
+api/wa-hook.js enforces the hard end of this in code rather than in the
+prompt: a message matching stop, not interested, remove me, wrong number,
+nahi chahiye, mat bhejo, vaddu and the rest is recorded for the studio to see
+and never answered, and the whole thread is checked so a refusal three days
+ago still holds today. The patterns are deliberately narrow — "I want to stop
+paying for Shopify" is a hot lead, and a bare match on "stop" would have
+ghosted them.
+
 ### Sending rules
 
 - One at a time. Never two in the same minute, never a batch.

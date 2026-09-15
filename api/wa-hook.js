@@ -40,6 +40,27 @@ const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY;
 const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE || "brandmint whatsapp";
 
 const REPLY_DELAY_MS = parseInt(process.env.WA_REPLY_DELAY_MS || "40000", 10);
+
+/** Someone asking to be left alone. Checked in code rather than left to the
+ *  prompt: a model instruction is a strong preference, and this needs to be a
+ *  guarantee. A person who cannot make us stop reports us, and a report is
+ *  what actually ends a WhatsApp number — no amount of pacing survives one. */
+const STOP_RE = new RegExp(
+  [
+    // "stop" only as the whole message or as an instruction — never the verb.
+    // "I want to stop paying for Shopify" is a hot lead, and matching a bare
+    // \\bstop\\b would have silently ghosted them.
+    "^\\s*stop[\\s.!]*$",
+    "\\bstop (messaging|sending|texting|contacting|it)\\b",
+    "\\bunsubscribe\\b", "\\bremove me\\b", "\\bdo ?n.?t (message|msg|contact|text|call)\\b",
+    "\\bnot interested\\b", "^\\s*no,? thanks?[\\s.!]*$", "\\bleave me (alone|be)\\b",
+    "\\bwrong number\\b", "\\bthis is spam\\b", "\\bstop this\\b",
+    "\\b(will |am |i.?ll )?block(ing)? you\\b", "\\breport(ing)? (you|this)\\b",
+    // Hindi/Telugu-English as it is actually typed into WhatsApp here.
+    "\\bnahi chahiye\\b", "\\bmat bhejo\\b", "\\bband karo\\b", "\\bvaddu\\b", "\\bodhu\\b",
+  ].join("|"),
+  "i"
+);
 // Per contact, per day. This is a ban guard, not a cost guard — Evolution is
 // an unofficial WhatsApp client and sustained automated replying is what gets
 // a number cut off. 20 is past anything a real enquiry reaches while still
@@ -454,8 +475,19 @@ export default async function handler(req, res) {
   if (!waId) return drop("no id");
 
   const turns = await loadTurns(cid);
-  const draft = await draftReply(text, turns);
+
+  // Once asked, permanently — the whole thread is checked, not just this
+  // message, so a "not interested" three days ago still holds today. Gemini is
+  // never called: the reply that must not be sent is also the one not worth
+  // paying to generate.
+  const optedOut =
+    STOP_RE.test(text) || turns.some((t) => t.r === "u" && STOP_RE.test(String(t.t || "")));
+
+  const draft = optedOut
+    ? { reply: "", when: "", iso: "", who: "", service: "" }
+    : await draftReply(text, turns);
   const suggestedReply = draft.reply;
+  if (optedOut) console.log("[wa-hook] opted out, staying quiet:", phone);
 
   // Filed before the send delay, not after: if the send fails or the daily cap
   // stops the reply, the studio should still know somebody asked for a call.
