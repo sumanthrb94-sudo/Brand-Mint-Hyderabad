@@ -414,6 +414,27 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /outreach/{id} {
+      // The outbound campaign's whole state in one document: the queue of
+      // businesses still to contact, the send log, the daily counter and the
+      // search cursor. Written by api/wa-outreach.js.
+      //
+      // Identical trust model to waConversations above, and for the same
+      // reason: that endpoint holds a shared secret but writes with the public
+      // web apiKey, so these rules see no identity. The document id is a
+      // SHA-256 of the string "outreach:" and that secret, so it cannot be
+      // guessed — which matters more here than anywhere else in this file,
+      // because the document is a list of several hundred phone numbers.
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update: if request.resource.data.keys().hasOnly(['blob', 'updatedAt'])
+                            && request.resource.data.blob is string
+                            && request.resource.data.blob.size() <= 200000
+                            && request.resource.data.updatedAt is string
+                            && request.resource.data.updatedAt.size() <= 40;
+      allow delete: if isAdmin();
+    }
+
     match /waAutoSendCounters/{id} {
       // Per-contact-per-day auto-send counters read and written by
       // api/wa-hook.js to enforce WA_AUTOSEND_DAILY_CAP. Same anonymous

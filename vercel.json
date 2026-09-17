@@ -11,6 +11,9 @@
     },
     "api/wa-report.js": {
       "maxDuration": 60
+    },
+    "api/wa-outreach.js": {
+      "maxDuration": 60
     }
   },
   "headers": [

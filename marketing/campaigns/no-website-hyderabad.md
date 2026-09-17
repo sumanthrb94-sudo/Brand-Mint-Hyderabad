@@ -1,13 +1,18 @@
 # Awareness campaign — Hyderabad businesses with no website
 
-The list comes from `scripts/find-prospects.mjs`: businesses with a Google
-listing, a phone number, and no website. Two kinds, and they get different
-openings — the CSV's `currentPresence` column says which.
+WhatsApp only. No calls, no ads, no email. One message per business, sent from
+the studio number by `api/wa-outreach.js`.
+
+The list comes from the Google Places API — businesses with a listing, a
+**mobile** number, and no website. Two kinds, and they get different messages:
 
 - **none** — no web presence at all.
 - **social only** — running the business out of an Instagram bio, a Justdial
   page or a Google Business site. Usually the better prospect: they already
   tried, so they don't need convincing that being findable matters.
+
+Landlines are dropped on sight. An 040 number is a real business that will
+never see a WhatsApp message.
 
 ---
 
@@ -31,102 +36,37 @@ about *today* rather than a thing they might lose *someday*.
 
 ---
 
-## Channel, in order
+## What is actually running
 
-**1. Phone call — the list is built for this.**
-A call to a listed business number is ordinary B2B. Nobody's platform can ban
-you for it, and the CSV gives you a genuinely warm opener: name, trade, area,
-star rating, review count.
+```
+api/wa-outreach.js?find=1     Places API -> queue of businesses with no site
+api/wa-outreach.js?tick=1     sends at most ONE message, if the guards allow
+api/wa-outreach.js            the dashboard: queue, sent today, log, pause
+```
 
-> "Hi, is that <name>? I was looking at dental clinics in Kukatpally and yours
-> came up with 60-odd reviews and no website. Are you sending people to
-> WhatsApp for prices at the moment?"
+A cron on the Evolution VM calls `&tick=1` every two minutes. The pacing lives
+in the endpoint, not in the cron, so a missed minute or a double call changes
+nothing. Each tick checks, in order:
 
-Then stop talking. If the answer is yes, they have just described the problem
-themselves and you are not selling any more.
+| Guard | Default |
+|---|---|
+| paused | off |
+| inside the window | 10:00–19:00 IST, Mon–Sat |
+| time since the last send | 5 min + up to 3 min of jitter |
+| sent today | 40 |
+| the number is a mobile | required |
+| no conversation already exists with them | required |
 
-**2. WhatsApp — only after they reply.**
-The moment they message you, `api/wa-hook.js` takes over: Gemini answers with
-the real prices, books a call when they name a time, and files it in Admin.
-That system is built and working. It needs them to message first.
+The last one is the important one. If a thread exists, we either opened it
+before or they wrote to us first — and both mean don't send. It is also what
+makes "stop" permanent: `api/wa-hook.js` records the refusal in the thread,
+and the thread's existence is what blocks any further outbound.
 
-**3. Meta ads — the one place cold is fine.**
-Upload the CSV as a custom audience, build a lookalike, run the awareness
-creative below. Paid reach is the sanctioned way to reach people who have not
-contacted you.
-
-> **Do not bulk-message this list on WhatsApp.** The studio number runs on an
-> unofficial client (Evolution/Baileys). Messaging a hundred people who never
-> contacted you is the single most reliable way to lose that number, and the
-> ban attaches to the number rather than the session. It took three days to
-> get 7799934943 connected.
+**There is no follow-up.** If they don't reply, that is the answer.
 
 ---
 
-## Call opener — no web presence at all
-
-> Hi, is that <name>? I found you on Google — <trade> in <area>, <reviews>
-> reviews, which is a lot. Quick question: when someone searches and finds
-> your listing, where do they go to see your prices?
->
-> *(let them answer)*
->
-> Right — so they call or WhatsApp you, and you answer the same questions
-> every day. We build a small site that answers them for you: prices, hours,
-> photos, a WhatsApp button. ₹14,999, live in two weeks, fixed price in
-> writing before we start. Worth twenty minutes?
-
-## Call opener — social only
-
-> Hi, is that <name>? I saw you're running <business> off Instagram — the
-> page looks good. One thing worth knowing: that account isn't yours. If Meta
-> locks it tomorrow, your photos, your prices and your customers go with it,
-> and there is nobody to appeal to.
->
-> We build the thing you own — your domain, your site, your WhatsApp button —
-> and you keep posting on Instagram exactly as you do. ₹14,999, two weeks,
-> price fixed in writing. Can I send you two we've built?
-
-## WhatsApp — only after they reply
-
-Keep it short, no pitch. They are on a phone, mid-something.
-
-> Thanks for messaging. Here are two we built, both live — simplysip.in and
-> thegreenteam.in. A site like that is ₹14,999, about two weeks, and the
-> price is fixed in writing before anything starts. What does your business
-> do?
-
-## Meta ad — awareness, cold is fine here
-
-**Primary text**
-
-> Your shop is on Google Maps. A customer found it, looked for your prices,
-> found nothing, and called someone else.
->
-> You never saw it happen. That is the problem with not having a website —
-> it costs you quietly.
->
-> A proper one is ₹14,999 and takes two weeks. Hyderabad studio, fixed price
-> in writing before we start, and the domain is in your name from day one.
-
-**Headline** — Found on Google. Lost at the next click.
-**Description** — Websites from ₹14,999. HITEC City, Hyderabad.
-**CTA** — Send WhatsApp message
-
----
-
-## Rules for anything sent under this campaign
-
-- Never claim to have visited, bought from or been referred to them.
-- Every price exactly as it is on the site: ₹14,999 static, from ₹49,999 store,
-  GST extra. No opening discount — the whole pitch is that the price is fixed.
-- One follow-up if there is no reply. Then stop, and mark the row dead.
-- If they ask to be left alone, remove the row. That is not optional, and in
-  practice a person who is annoyed enough to say it will tell other people.
-
----
-
-## The two messages, written out
+## The two messages
 
 Economics they can check rather than a statistic worth inventing: the
 comparison is one lost customer against the price of the thing, and both
@@ -142,7 +82,7 @@ WhatsApp number. It is cheaper than any pacing rule.
 >
 > I was looking at {category}s in {area} and yours came up on Google with no
 > website. You've got {reviews} reviews, which is more than most {category}s
-> in {area}.
+> around {area}.
 >
 > Here's the thing that costs you and you never see it: someone searches,
 > finds your listing, looks for your prices or timings, finds nothing, and
@@ -160,8 +100,9 @@ WhatsApp number. It is cheaper than any pacing rule.
 
 > Hi {name} — I'm Sumanth from Brand Mint, a small web studio in HITEC City.
 >
-> I found you on Google and saw the business runs off Instagram. {reviews}
-> reviews is a real reputation.
+> I found you on Google while looking at {category}s in {area}, and saw the
+> business runs off Instagram. You've got {reviews} reviews, which is more
+> than most {category}s around {area}.
 >
 > Worth knowing: that page isn't yours. A boutique I know ran off Instagram
 > for two years, woke up to a locked account, and lost the photos, the prices
@@ -172,14 +113,20 @@ WhatsApp number. It is cheaper than any pacing rule.
 > weeks. Less than one lost month of orders, and you keep posting on
 > Instagram exactly as you do now.
 >
-> Want me to send two we've built? If not, just say stop and I won't message
-> again.
+> Want me to send two we've built so you can see? If not, just say stop and I
+> won't message again.
 
-Drop the `{reviews}` sentence entirely when the count is under 10 — praising
-three reviews reads as a script, which is the one thing that stops this
-working.
+The `{reviews}` sentence is dropped entirely below ten — praising three
+reviews reads as a script, which is the one thing that stops this working.
+The opening line rotates between three phrasings, because a hundred
+byte-identical messages is a fingerprint.
 
-### The posture, once they reply
+---
+
+## The posture, once they reply
+
+From here `api/wa-hook.js` takes over: Gemini answers with the real prices,
+books a call when they name a time, and files it in Admin → Leads.
 
 Concierge, not salesperson. The tone that works here is somebody happy to be
 of no use today.
@@ -196,7 +143,7 @@ of no use today.
 - **Never tell them their business needs anything.** It is their business.
 - **When in doubt, they are not interested.**
 
-api/wa-hook.js enforces the hard end of this in code rather than in the
+`api/wa-hook.js` enforces the hard end of this in code rather than in the
 prompt: a message matching stop, not interested, remove me, wrong number,
 nahi chahiye, mat bhejo, vaddu and the rest is recorded for the studio to see
 and never answered, and the whole thread is checked so a refusal three days
@@ -204,16 +151,33 @@ ago still holds today. The patterns are deliberately narrow — "I want to stop
 paying for Shopify" is a hot lead, and a bare match on "stop" would have
 ghosted them.
 
-### Sending rules
+---
 
-- One at a time. Never two in the same minute, never a batch.
-- Five minutes between sends, varied — an exact five-minute rhythm is itself
-  a machine signature.
-- 10:00–20:00 IST only. The person woken at 2am is the person who reports you.
-- Stop at 40–60 in a day. The daily total matters less than the burst, but it
-  still matters.
-- The moment someone replies, stop the queue and talk to them. A live
+## Standing rules
+
+- Never claim to have visited, bought from or been referred to them.
+- Every price exactly as it is on the site: ₹14,999 static, from ₹49,999 store,
+  GST extra. No opening discount — the whole pitch is that the price is fixed.
+- The moment someone replies, the queue is beside the point. A live
   conversation is worth more than the next thirty messages.
-- "stop", "don't message", "not interested" — remove the row and never send
-  again. No follow-up, no "just one more thing".
-- One follow-up only if there is no reply at all, after three days. Then done.
+- If they ask to be left alone, that is the end of it. `&drop=<phone>` makes it
+  permanent by hand; the webhook does it automatically.
+
+---
+
+## The risk, stated plainly
+
+The studio number runs on Evolution/Baileys, an unofficial WhatsApp client.
+Messaging people who never contacted you is against WhatsApp's terms however
+slowly it is done, and enough "block" or "report spam" taps will end the
+number — the ban attaches to the number, not the session, and it took three
+days to get 7799934943 connected.
+
+Everything above is built to keep that from happening: one at a time, a real
+reason for the message, an opt-out in every message, no follow-ups, and a hard
+stop the moment anyone objects. It lowers the odds. It does not remove them.
+
+If the number matters more than the campaign, the supported path is the
+WhatsApp Business API through a BSP, where outbound to non-contacts is a paid,
+template-approved, opt-in product. That is what `shared/platform.js` sells to
+clients, and it is the version that cannot get a number banned.
