@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Section-break band for the long home page.
+
+  FOR CREAM GROUNDS ONLY. It is a light wash with feathered edges, so over a
+  dark section (bm-ink #0b1f1a) it reads as a bright slab with a grey smear
+  at each edge rather than as light. Use it between cream sections; a dark
+  section wants its own variant, not this one tinted.
+
+  Deliberately SVG rather than a generated JPG: it is 3 KB instead of 200 KB,
+  stays crisp at any width from 390px to 2560px, and carries the exact brand
+  hexes from styles.css rather than a diffusion model's approximation of them.
+  A raster gradient also bands visibly on wide screens, which is the one thing
+  a background like this must not do.
+
+  Colours are the styles.css tokens, named here without their leading dashes
+  because a double hyphen is illegal inside an XML comment and silently kills
+  the whole file: paper #f5f1ea, mint-wash #d6f5e6, mint #10b981, gold #c9a14a.
+
+  Drawn 1600x160 and stretched with preserveAspectRatio="none", so it spans any
+  width without the streak changing angle. width/height are declared as well as
+  the viewBox: without an intrinsic size an SVG used as an img src or a CSS
+  background fails to decode in Chromium.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 160"
+     width="1600" height="160"
+     preserveAspectRatio="none" role="presentation" aria-hidden="true">
+  <defs>
+    <!-- Cream into the palest mint, left to right. -->
+    <linearGradient id="wash" x1="0" y1="0" x2="1" y2="0.6">
+      <stop offset="0%"   stop-color="#f5f1ea"/>
+      <stop offset="52%"  stop-color="#eaf6ef"/>
+      <stop offset="100%" stop-color="#d6f5e6"/>
+    </linearGradient>
+
+    <!-- One soft raking streak. Transparent at both ends so it reads as light
+         rather than as a drawn line. -->
+    <linearGradient id="streak" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#10b981" stop-opacity="0"/>
+      <stop offset="45%"  stop-color="#10b981" stop-opacity="0.22"/>
+      <stop offset="70%"  stop-color="#00c897" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="warm" x1="0" y1="1" x2="0.4" y2="0">
+      <stop offset="0%"   stop-color="#c9a14a" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#c9a14a" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Fine grain. Without it the gradient posterises into visible steps on a
+         wide display, which is exactly what this is meant to avoid. -->
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="n"/>
+      <feColorMatrix in="n" type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.055"/>
+      </feComponentTransfer>
+    </filter>
+
+    <!-- Feathers the top and bottom edges into whatever sits above and below,
+         so the band never shows a hard seam against the page. -->
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="22%"  stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="78%"  stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="edges">
+      <rect width="1600" height="160" fill="url(#fade)"/>
+    </mask>
+  </defs>
+
+  <g mask="url(#edges)">
+    <rect width="1600" height="160" fill="url(#wash)"/>
+    <rect width="1600" height="160" fill="url(#warm)"/>
+    <!-- The streak, tilted a few degrees off horizontal. -->
+    <rect x="-200" y="66" width="2000" height="26" fill="url(#streak)"
+          transform="rotate(-1.6 800 80)"/>
+    <rect width="1600" height="160" filter="url(#grain)" opacity="0.5"/>
+  </g>
+</svg>

@@ -1,0 +1,228 @@
+<!doctype html>
+<!--
+  Source for /og-image.png — the card that renders whenever a brandmintstudios.in
+  link is pasted into WhatsApp, LinkedIn, Slack or iMessage. It is the most-seen
+  image the studio owns, so everything on it has to be true.
+
+  It replaced a version carrying a mock dashboard reading "QUARTERLY REVENUE
+  +₹42.6 Cr" and "28.4k sessions". Both were invented, and the domain on it
+  (brandmint.studio) was not ours. Nothing here is a placeholder: the prices are
+  the ones in shared/services.js, and the three proof points are PROOF in
+  shared/work.js.
+
+  Regenerate after editing:
+      python3 -m http.server 8000
+      NODE_PATH=$(npm root -g) node brand-kit/templates/render-og.cjs
+
+  Exactly 1200x630 — the size declared in every page's og:image:width/height.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Brand Mint — share card</title>
+<style>
+  @font-face {
+    font-family: "Plus Jakarta Sans";
+    src: url("/fonts/plus-jakarta-sans.woff2") format("woff2");
+    font-weight: 200 800; font-display: block;
+  }
+  @font-face {
+    font-family: "Inter";
+    src: url("/fonts/inter.woff2") format("woff2");
+    font-weight: 100 900; font-display: block;
+  }
+  /* JetBrains Mono has no rupee glyph — the same unicode-range trick styles.css
+     uses, so ₹14,999 does not render as a box in the price rows. */
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("/fonts/jetbrains-mono.woff2") format("woff2");
+    font-weight: 100 800; font-display: block;
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("/fonts/inter.woff2") format("woff2");
+    unicode-range: U+20B9; font-weight: 100 800; font-display: block;
+  }
+
+  :root {
+    --paper: #f5f1ea;
+    --ink: #0a0e0c;
+    --muted: #5b625e;
+    --mint: #10b981;
+    --mint-deep: #047857;
+    --mint-wash: #d6f5e6;
+    --bm-ink: #0b1f1a;
+    --cream: #f5f1ea;
+    --emerald: #00c897;
+    --gold: #c9a14a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    width: 1200px; height: 630px; overflow: hidden;
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .card {
+    position: relative; width: 1200px; height: 630px;
+    padding: 56px 64px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    background:
+      radial-gradient(900px 520px at 88% -12%, rgba(16, 185, 129, 0.16), transparent 62%),
+      radial-gradient(620px 420px at -6% 108%, rgba(201, 161, 74, 0.10), transparent 60%),
+      var(--paper);
+  }
+
+  /* -------------------------------------------------------------- masthead */
+  .top { display: flex; align-items: center; gap: 14px; }
+  .mark { width: 46px; height: 46px; border-radius: 12px; display: block; }
+  .wordmark {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    /* Tight tracking is the display face's house style, but at this size it
+       closes the gap until "Brand Mint" reads as one word. The word-spacing
+       buys the space back without loosening the letters. */
+    font-weight: 600; font-size: 25px; letter-spacing: -0.02em;
+    word-spacing: 0.12em;
+  }
+  .kicker {
+    margin-left: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--mint-deep);
+    border: 1px solid rgba(4, 120, 87, 0.28);
+    background: rgba(214, 245, 230, 0.55);
+    border-radius: 999px; padding: 8px 16px;
+  }
+
+  /* ----------------------------------------------------------------- body */
+  .body { display: flex; gap: 52px; align-items: flex-start; }
+  .left { flex: 1 1 0; min-width: 0; }
+
+  h1 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 600; font-size: 60px; line-height: 1.04;
+    letter-spacing: -0.038em; text-wrap: balance;
+  }
+  h1 em {
+    display: block; font-style: italic; font-weight: 400;
+    color: var(--mint-deep);
+  }
+  .lede {
+    margin-top: 22px; font-size: 20px; line-height: 1.5;
+    color: var(--muted); max-width: 30ch;
+  }
+
+  /* The price panel. Real numbers from shared/services.js — nothing invented,
+     which is the entire reason this file exists. */
+  .panel {
+    flex: 0 0 366px;
+    background: var(--bm-ink);
+    border-radius: 20px; padding: 26px 28px;
+    box-shadow: 0 24px 64px rgba(6, 20, 15, 0.22);
+  }
+  .panel-head {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.13em; text-transform: uppercase;
+    color: rgba(245, 241, 234, 0.55);
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(245, 241, 234, 0.16);
+  }
+  .row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; padding: 15px 0;
+    border-bottom: 1px solid rgba(245, 241, 234, 0.1);
+  }
+  .row:last-child { border-bottom: 0; padding-bottom: 4px; }
+  .row-name { font-size: 16px; color: rgba(245, 241, 234, 0.82); }
+  .row-price {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 19px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--emerald); white-space: nowrap;
+  }
+  .row-price small {
+    font-size: 12px; font-weight: 400;
+    color: rgba(245, 241, 234, 0.5); margin-right: 5px;
+  }
+
+  /* ---------------------------------------------------------------- footer */
+  .foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 22px; border-top: 1px solid rgba(10, 14, 12, 0.14);
+  }
+  .domain {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 600; font-size: 18px; letter-spacing: -0.015em;
+  }
+  .proof { display: flex; gap: 30px; }
+  .proof span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .proof b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="top">
+      <svg class="mark" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#7CF6C8" />
+            <stop offset="100%" stop-color="#10B981" />
+          </linearGradient>
+        </defs>
+        <rect width="32" height="32" rx="8" fill="url(#g)" />
+        <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.6"
+              stroke-linecap="round" stroke-linejoin="round" fill="none" />
+      </svg>
+      <span class="wordmark">Brand Mint</span>
+      <span class="kicker">Hyderabad · Web &amp; software studio</span>
+    </div>
+
+    <div class="body">
+      <div class="left">
+        <h1>Your price, in writing.<em>Before anyone starts.</em></h1>
+        <p class="lede">
+          Online stores and websites for Indian businesses. Fixed price, fixed
+          scope, four to twelve weeks.
+        </p>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Fixed price · GST extra</div>
+        <div class="row">
+          <span class="row-name">Static website</span>
+          <span class="row-price">₹14,999</span>
+        </div>
+        <div class="row">
+          <span class="row-name">Online store</span>
+          <span class="row-price"><small>from</small>₹49,999</span>
+        </div>
+        <div class="row">
+          <span class="row-name">Site + CRM</span>
+          <span class="row-price">₹79,999</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span class="domain">brandmintstudios.in</span>
+      <div class="proof">
+        <span><b>25+</b> projects delivered</span>
+        <span><b>8+ yrs</b> senior operator</span>
+        <span><b>Hyderabad</b> + UK</span>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
