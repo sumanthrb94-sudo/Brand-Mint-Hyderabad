@@ -1187,3 +1187,29 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
 @media (max-width: 860px) {
   .hero-visual { margin-top: var(--s-6); border-radius: var(--radius); }
 }
+
+/* A full-width picture inside a section, between the heading and the content.
+   Capped and centred so it never outgrows the text it belongs to. */
+.section-figure {
+  margin: 0 0 clamp(28px, 4vw, 48px);
+  max-width: 1120px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  line-height: 0;
+  box-shadow: var(--shadow);
+}
+/* Cropped to a band rather than shown at its natural ratio. A 4:3 across
+   1120px is 840px tall — it fills the viewport on a laptop and pushes the
+   section's own heading and copy below the fold, which makes a supporting
+   picture outrank the message it supports. object-fit keeps the middle of
+   the frame, which is where these two are composed. */
+.section-figure img {
+  display: block;
+  width: 100%;
+  height: clamp(220px, 34vw, 420px);
+  object-fit: cover;
+}
+
+@media (max-width: 719px) {
+  .section-figure { border-radius: var(--radius); }
+}

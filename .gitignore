@@ -14,3 +14,9 @@ dist/
 
 # the template is not a secret; the .env it produces is
 !deploy/whatsapp/.env.example
+
+# Generated source art. The JPEGs beside them are what the pages load;
+# the PNGs are 2 MB of originals, regenerable with scripts/gen-image.mjs.
+images/studio-desk.png
+images/packing-bench.png
+images/crm-flow.png

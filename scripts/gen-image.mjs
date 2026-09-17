@@ -1,0 +1,158 @@
+#!/usr/bin/env node
+/**
+ * Generate site imagery with the Gemini image models.
+ *
+ * The studio already pays for a Gemini key (api/wa-hook.js uses it for the
+ * WhatsApp replies), so image generation costs nothing extra and has no daily
+ * cap to run into.
+ *
+ *   export GEMINI_API_KEY=...
+ *   node scripts/gen-image.mjs --list
+ *   node scripts/gen-image.mjs who
+ *   node scripts/gen-image.mjs --all --key AQ...
+ *
+ * Writes PNG to images/<id>.png. Convert to JPG afterwards with
+ * brand-kit/templates/render-og.cjs, which re-encodes through Chromium —
+ * there is no ImageMagick or sharp in this repo and no package.json to add
+ * one to.
+ *
+ * RULES THAT ARE NOT STYLE PREFERENCES:
+ *   - No people and no faces. A stock-looking stranger on a page that says
+ *     "an operator with eight years" reads as a lie about who you are.
+ *   - No legible text on any screen or sign. A generated word is a claim,
+ *     and generated words are usually misspelled anyway.
+ *   - Nothing that could pass as a screenshot of a client's site. The four
+ *     images in work/ must be real captures; see work/README.md.
+ */
+
+const KEY =
+  process.env.GEMINI_API_KEY ||
+  (process.argv.includes("--key") ? process.argv[process.argv.indexOf("--key") + 1] : "");
+
+const MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-3-pro-image";
+const API = "https://generativelanguage.googleapis.com/v1beta/models";
+
+/** The palette, repeated into every prompt so the set looks like one studio
+ *  shot it rather than four different stock libraries. */
+const PALETTE =
+  "Palette: warm cream #f5f1ea, deep forest green #0b1f1a, emerald #00c897, " +
+  "a single muted gold #c9a14a accent. Warm, calm, editorial, expensive. " +
+  "No people, no faces, no hands. No legible text, words, letters, numbers, " +
+  "logos or signage anywhere in the frame.";
+
+const SHOTS = {
+  who: {
+    file: "studio-desk",
+    aspect: "4:3",
+    where: "index.html #who — 'an operator with eight years, not an intern with a template'",
+    prompt:
+      "Documentary photograph of a working desk in a small design studio, low " +
+      "three-quarter angle. On the matte dark surface: an open laptop angled away " +
+      "so its screen is not readable, a paper notebook with pencil wireframe " +
+      "sketches reduced to plain boxes and lines, a mechanical pencil, a colour " +
+      "swatch fan, and a cup of chai on a saucer. One shaft of late-afternoon " +
+      "window light from the left, soft long shadows, shallow depth of field. " +
+      "Worked-in, not staged.",
+  },
+  crm: {
+    file: "crm-flow",
+    aspect: "16:9",
+    where: "platform.html #included — eight things, one login",
+    prompt:
+      "Minimal isometric conceptual illustration of a scattered inbox becoming an " +
+      "ordered list. LEFT: a loose disordered cloud of small rounded speech " +
+      "bubbles at many angles and sizes, tumbling. RIGHT: one large cream card " +
+      "tilted in isometric view, holding a single vertical stack of eight " +
+      "FULL-WIDTH HORIZONTAL ROWS, one above the other like an inbox — each row a " +
+      "long rounded bar spanning the card's width, with a small circle at its left " +
+      "end where an avatar would sit. Not a grid, not a keypad: one column of wide " +
+      "rows. The bubbles stream toward the card and the nearest ones flatten into " +
+      "the top rows. Three rows tinted emerald, the rest cream. Every surface " +
+      "blank — no text or symbols. Deep forest green ground, soft shadow under " +
+      "the card, generous empty space at the upper right.",
+  },
+  ship: {
+    file: "packing-bench",
+    aspect: "4:3",
+    where: "index.html #how — from first message to live store",
+    prompt:
+      "Overhead photograph of a small brand's packing bench: two kraft parcels " +
+      "taped and ready, a roll of tape, a stack of blank unprinted cards, scissors, " +
+      "and a phone lying face down beside them. Cream paper surface, deep green " +
+      "cloth at one edge, soft diffused daylight. Nothing branded, nothing written " +
+      "on the cards or parcels.",
+  },
+};
+
+function usage() {
+  console.log("Shots:\n");
+  for (const [id, s] of Object.entries(SHOTS)) {
+    console.log(`  ${id.padEnd(6)} images/${s.file}.png  (${s.aspect})  ${s.where}`);
+  }
+  console.log("\n  node scripts/gen-image.mjs <id> [<id>...]   |   --all");
+}
+
+async function generate(id) {
+  const shot = SHOTS[id];
+  if (!shot) throw new Error(`Unknown shot "${id}". Try --list.`);
+
+  const body = {
+    contents: [{ parts: [{ text: `${shot.prompt}\n\n${PALETTE}` }] }],
+    generationConfig: {
+      responseModalities: ["IMAGE"],
+      imageConfig: { aspectRatio: shot.aspect },
+    },
+  };
+
+  const r = await fetch(`${API}/${MODEL}:generateContent?key=${KEY}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(180_000),
+  });
+
+  const json = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    // Print Google's own message — it names the actual problem (quota, model
+    // not enabled, bad key) far better than any guess made here.
+    throw new Error(`${r.status} ${json?.error?.message || JSON.stringify(json).slice(0, 300)}`);
+  }
+
+  const parts = json?.candidates?.[0]?.content?.parts || [];
+  const img = parts.find((p) => p.inlineData?.data);
+  if (!img) {
+    const why = json?.candidates?.[0]?.finishReason || "no inlineData in response";
+    const text = parts.find((p) => p.text)?.text;
+    throw new Error(`no image returned (${why})${text ? `: ${text.slice(0, 200)}` : ""}`);
+  }
+
+  const fs = await import("node:fs");
+  const out = `images/${shot.file}.png`;
+  fs.writeFileSync(out, Buffer.from(img.inlineData.data, "base64"));
+  const kb = Math.round(fs.statSync(out).size / 1024);
+  console.log(`  ok  ${out}  ${kb} KB  ${shot.aspect}`);
+  return out;
+}
+
+const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KEY);
+const ids = process.argv.includes("--all") ? Object.keys(SHOTS) : args;
+
+if (process.argv.includes("--list") || !ids.length) {
+  usage();
+  process.exit(0);
+}
+if (!KEY) {
+  console.error("No GEMINI_API_KEY (or --key).");
+  process.exit(1);
+}
+
+let failed = 0;
+for (const id of ids) {
+  try {
+    await generate(id);
+  } catch (e) {
+    console.error(`  FAIL  ${id}: ${e.message}`);
+    failed += 1;
+  }
+}
+process.exit(failed ? 1 : 0);
