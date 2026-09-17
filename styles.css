@@ -1139,3 +1139,51 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
 @media (prefers-reduced-motion: reduce) {
   .showcase * { animation: none !important; }
 }
+
+/* ======================================================================
+   IMAGERY
+   ====================================================================== */
+
+/* A product shot anchoring a text-only hero. platform.html sells a ₹79,999
+   setup with nothing to look at above the fold, which is a lot to ask of
+   copy alone. Width and height are on the <img> so the hero never reflows
+   when it lands. */
+.hero-visual {
+  margin: var(--s-7) auto 0;
+  max-width: 980px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  line-height: 0;
+  box-shadow: var(--shadow-lg);
+}
+
+/* A split hero carrying a picture rather than the home page's proof panel.
+   Closer to even than .hero--split's 1.25/0.85, because a 16:9 shot squeezed
+   into the narrow column is too small to read as a product. */
+.hero--media { grid-template-columns: 1.05fr 1fr; align-items: center; }
+.hero--media .hero-visual { margin-top: 0; }
+
+/* This block sits after the 980px collapse further up the file, so it wins at
+   every width unless the collapse is repeated here. Without this the phone
+   keeps two columns and the headline wraps one word per line. */
+@media (max-width: 980px) {
+  .hero--media { grid-template-columns: 1fr; align-items: start; }
+  .hero--media .hero-visual { margin-top: var(--s-6); }
+}
+.hero-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Section break. The SVG is a light wash with feathered edges, so it only
+   works between cream sections — over .section--dark it reads as a bright
+   slab. Decorative: no role, no alt, hidden from the accessibility tree. */
+.band-break {
+  height: clamp(60px, 9vw, 104px);
+  background: url("/images/band-mint.svg") center / 100% 100% no-repeat;
+}
+
+@media (max-width: 860px) {
+  .hero-visual { margin-top: var(--s-6); border-radius: var(--radius); }
+}

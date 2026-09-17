@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v19" />
+<link rel="stylesheet" href="/styles.css?v=v22" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -393,6 +393,10 @@
           <a class="btn btn-ghost" href="/pricing">Every price, in full →</a>
         </p>
       </section>
+
+      <!-- A breath between the price ladder and the process. Decorative only,
+           so it is hidden from the accessibility tree. -->
+      <div class="band-break" aria-hidden="true"></div>
 
       <!-- HOW -->
       <section class="section" id="how">

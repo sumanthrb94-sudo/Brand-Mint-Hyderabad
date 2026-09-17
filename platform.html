@@ -18,7 +18,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v12" />
+<link rel="stylesheet" href="/styles.css?v=v22" />
 
     <!-- Prices mirror shared/platform.js — change both together. -->
     <script type="application/ld+json">
@@ -136,7 +136,12 @@
     </header>
 
     <main id="main">
-      <section class="hero">
+      <!-- Split, like the home page hero: the product shot has to be beside
+           the headline rather than under the trust chips, or it sits below
+           the fold on a laptop and does no work at all. Collapses to one
+           column at 980px, where the copy comes first. -->
+      <section class="hero hero--split hero--media">
+        <div class="hero-copy">
         <p class="kicker" data-enter>Site + CRM · Separate from the store tiers</p>
         <h1 data-enter>A website, and the system that <em>works</em> the leads it brings in.</h1>
         <p class="lede" data-enter>
@@ -161,6 +166,17 @@
           <li>Heat maps</li>
           <li>Search Console</li>
         </ul>
+        </div>
+
+        <!-- The page sells a ₹79,999 setup and had nothing to look at above
+             the fold. Generic hardware on purpose: no trademark on the
+             devices, and nothing on either screen claims to be a client's
+             site. -->
+        <figure class="hero-visual" data-enter>
+          <img src="/images/showcase-devices.jpg?v=1" width="1600" height="900"
+               loading="lazy" decoding="async"
+               alt="A laptop and a phone side by side, both showing the same shop — a product grid on the laptop, the same catalogue on the phone." />
+        </figure>
       </section>
 
       <section class="section" id="included">
