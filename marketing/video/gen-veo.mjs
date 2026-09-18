@@ -26,8 +26,15 @@
  *     drifted warmer and more olive than the original brief; the plan's own
  *     conclusion was to stop fighting it, because consistency across a series
  *     beats a palette note.
- *   - NO FACES. Hands only. A generated face in an ad for a studio that sells
- *     "you deal with the person doing the work" is the wrong promise.
+ *   - FACES ARE FINE HERE, under the rule the carousels settled on: a
+ *     generated person is stock photography and nobody believes the woman in
+ *     a bank's billboard banks there. What is never allowed is a generated
+ *     person doing EVIDENTIARY work — presented as studio staff, as a named
+ *     client, or saying "this worked for me". The voiceover is a narrator,
+ *     not the founder, so nothing here claims to be anyone. (The UGC set
+ *     below still has no face, and that is not this rule applied blindly —
+ *     a UGC ad IS a person saying "this worked for me", which is exactly the
+ *     fabricated testimonial we will not make.)
  *   - ONE CONTINUOUS SHOT PER CLIP. Asking for cuts inside 8 seconds returns
  *     mush.
  *
@@ -47,54 +54,63 @@ const API = "https://generativelanguage.googleapis.com/v1beta";
 /** Appended to every prompt. The negative constraints matter more than the
  *  positive ones — this is the sentence that keeps letterforms out. */
 const HOUSE =
-  "Shot on an 85mm lens at T2.0, very shallow depth of field, 24fps, filmic " +
-  "low-contrast grade. The room is a quiet studio in Hyderabad: a sage " +
-  "olive-green wall, a dark walnut desk, one warm practical lamp just out of " +
-  "frame at camera left throwing a soft key across the wood. " +
+  "Premium commercial brand film, 9:16 vertical, shot on a 50mm at T2.0, 24fps, " +
+  "clean and bright with a soft filmic grade — a D2C brand campaign, not " +
+  "documentary reportage and not a stock library. " +
+  "MODERN INDIAN BUSINESS, NOT A STREET STALL: contemporary Indian retail and " +
+  "studios — a designer boutique, a jewellery showroom, a specialty cafe, a " +
+  "clean packing room, a bright modern high street. Hyderabad and Indian in " +
+  "people, dress and styling, but well-designed and well-lit throughout. Never " +
+  "a crowded bazaar, never a cluttered kirana shop, nothing that reads as " +
+  "run-down. " +
+  "Generous soft daylight through large windows, pale wood, off-white walls, a " +
+  "little greenery, one small emerald-green accent somewhere in frame. Real " +
+  "Indian people with real skin texture, never CGI or plastic. " +
+  "ONE SINGLE CONTINUOUS SHOT, no cuts, no split screen, no seam or band " +
+  "across the frame, no second image composited in. " +
   "Absolutely no text, letters, numbers, words, signage, icons, notifications, " +
-  "user interface, logos, watermarks or printing anywhere in frame. No faces, " +
-  "no people visible above the wrist — hands only.";
+  "user interface, logos, watermarks or printing anywhere in frame, and no " +
+  "legible phone or laptop screens.";
 
 const SHOTS = {
+  // Beat 1, over "Your customers are already looking for you. They find a
+  // phone number, a WhatsApp, and nothing else."
   before: {
     n: 1,
-    title: "The before",
+    title: "Looking for you",
     prompt:
-      "Cinematic advertisement shot, 9:16 vertical, one continuous take with no " +
-      "cuts. A cluttered corner of the desk: a paper order book lying open with " +
-      "handwriting that is illegible and out of focus, a smartphone face-down " +
-      "beside it buzzing gently so it shivers against the wood, and three " +
-      "unlabelled brown paper parcels stacked unevenly behind. A hand reaches in, " +
-      "turns the phone over, and lets it fall face-down again. The camera holds " +
-      "nearly still, drifting a few centimetres closer across the shot. The lamp " +
-      "is the only warmth; the overall feeling is cold, cluttered and behind. No " +
-      "mint or green accent anywhere in this shot.",
+      "A young Indian woman stands on a clean modern Indian shopping street at " +
+      "golden hour, looking down at her phone, then lifts her eyes to a shopfront " +
+      "just off camera, waits a beat, and walks on out of frame. Well-designed " +
+      "shopfronts and a few passers-by softly out of focus behind her. Her phone " +
+      "screen is dark and blank. The camera holds nearly still and drifts a few " +
+      "centimetres with her. Warm, unhurried, faintly disappointed.",
   },
+  // Beat 2, over "So you answer the same four questions all day."
   build: {
     n: 2,
-    title: "The build",
+    title: "The same four questions",
     prompt:
-      "Cinematic advertisement shot, 9:16 vertical, one continuous take with no " +
-      "cuts. The same desk, now clear. Two monitors stand facing away from " +
-      "camera, casting a soft blank mint-green glow across the walnut and up the " +
-      "olive wall — their screens are not visible. A pair of hands rests on a " +
-      "low-profile keyboard in the foreground, framed from behind and slightly to " +
-      "one side, moving unhurriedly. A glass cup of chai sits beside them with " +
-      "steam rising through the lamplight. The camera pushes in very slowly. " +
-      "Focused, warm, deliberate — the feeling of careful work being done.",
+      "Inside a bright modern clothing boutique, the owner — an Indian woman in " +
+      "her thirties — stands behind a pale wood counter with a phone to her ear, " +
+      "mid-conversation, while a customer waits a little way behind her looking at " +
+      "a rail. She glances toward the waiting customer, then back down. Large " +
+      "windows, rails of clothes, a plant, one emerald cushion on a bench. The " +
+      "camera pushes in very slowly. Pulled in two directions at once, not frantic.",
   },
+  // Beat 3, over "We build the thing that answers them for you... orders
+  // straight to WhatsApp."
   after: {
     n: 3,
-    title: "The after",
+    title: "It runs itself",
     prompt:
-      "Cinematic advertisement shot, 9:16 vertical, one continuous take with no " +
-      "cuts. The same desk at the end of a day. A hand places a neatly wrapped " +
-      "brown paper parcel down onto a tidy stack of three identical parcels, each " +
-      "tied with the same twine, then withdraws. Beside them a smartphone lies " +
-      "face-up, its screen a soft blank mint-green glow with no interface or text " +
-      "on it. Steam has gone from the chai cup. The camera pulls back a few " +
-      "centimetres, opening the frame. Calm, ordered, finished — the mint glow is " +
-      "the brightest thing on the desk.",
+      "A styled packing bench in a bright clean room: an Indian woman folds goods " +
+      "into a premium plain box with tissue paper and sets it onto a neat row of " +
+      "three identical finished parcels, then reaches for the next. Daylight from " +
+      "a large window, pale wood, a small emerald vase at the edge of the bench. " +
+      "At the far edge of frame a delivery rider steps in and lifts the first " +
+      "parcel away. The camera pulls back slowly, opening the frame. Calm, " +
+      "ordered, plenty happening without anyone rushing.",
   },
 };
 

@@ -177,11 +177,16 @@ function chunk(words, maxWords, maxChars) {
   return out;
 }
 
-function ass(lines, font, maxWords, maxChars) {
+function ass(lines, font, maxWords, maxChars, until) {
   let out = header(font);
   for (const phrase of lines)
   for (const ln of chunk(phrase.words, maxWords, maxChars).map((ws) => ({
         words: ws, start: ws[0].start, end: ws.at(-1).start + ws.at(-1).dur }))) {
+    // The reel hands over to a static end card at 24s, and that card already
+    // carries the wordmark, the domain and the number. Subtitling the "Brand
+    // Mint. Hyderabad." the voiceover says over it prints the name twice, on
+    // top of itself. Anything starting after the handover is dropped.
+    if (until && ln.start >= until) continue;
     // \k takes centiseconds. Rounding each word independently drifts the line
     // out of step with the audio, so the remainder is carried forward.
     let carried = 0;
@@ -209,7 +214,7 @@ const phrases = SCRIPTS[which].split("|").map((p) => p.replace(/\s+/g, " ").trim
 const segs = segments(audio);
 const lines = align(phrases, segs);
 
-fs.writeFileSync(outFile, ass(lines, font, +arg("words", 3), +arg("chars", 22)));
+fs.writeFileSync(outFile, ass(lines, font, +arg("words", 3), +arg("chars", 22), +arg("until", 0)));
 console.log(`  ${phrases.length} phrases over ${segs.length} speech segments, ${lines[0].spoken.toFixed(1)}s of speech`);
 for (const l of lines) console.log(`  ${l.start.toFixed(2).padStart(6)} → ${l.end.toFixed(2).padStart(6)}  ${l.text}`);
 console.log(`\n  wrote ${path.relative(ROOT, outFile)}`);
