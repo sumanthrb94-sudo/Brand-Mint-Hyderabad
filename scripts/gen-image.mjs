@@ -194,19 +194,65 @@ const HOOKS = {
       "Other buildings on the street are normal size around him." },
 };
 
+
+/* --------------------------- CAROUSEL COVER PLATES ------------------------
+   Backgrounds for the loud covers in marketing/social/. These are not
+   pictures with type added — they are plates built to be typed on, which is a
+   different brief:
+
+     - DARK AND LOW CONTRAST. The type is cream and emerald at 248px. Anything
+       bright or busy under it turns the headline into noise.
+     - INTEREST ON THE RIGHT, AIR ON THE LEFT. The type block is left-aligned
+       and fills the left two thirds, so the photograph has to carry its
+       subject to the right of frame or it gets covered up.
+     - NO PEOPLE FACING CAMERA. A face under a headline fights it, and this is
+       not the presenter slot.
+
+   4:5 to match the slide. carousel.html lays a two-ended scrim over the top
+   regardless, so these can afford to be a stop brighter than feels right. */
+const COVER =
+  "Vertical 4:5 photograph, cinematic and underexposed, deep shadow across the " +
+  "left half of the frame with the subject and what light there is pushed to " +
+  "the right third. Muted desaturated palette of deep forest green, near-black " +
+  "and warm lamp amber, with one small emerald-green light source. Shallow " +
+  "depth of field, soft film grain, no hard highlights. Quiet, still, " +
+  "atmospheric — a backdrop, not a picture that wants attention. " +
+  "The photograph fills the entire frame edge to edge, full bleed — no border, " +
+  "no frame, no matte, no letterboxing, no grey bars, no vignette ring. " +
+  "No text, letters, numbers, words, signage, logos or watermarks anywhere in " +
+  "frame. No faces, no person looking at the camera.";
+
+const COVERS = {
+  "bg-reply": { file: "bg-reply", aspect: "4:5", where: "cover plate — reply machine",
+    prompt: "A small shop counter late at night, lit only by a phone lying face-up " +
+      "on the wood at the right of frame, its blank screen throwing hard green-white " +
+      "light upward. Beside it an impossibly tall, precarious stack of small paper " +
+      "order chits, leaning. The rest of the shop falls away into darkness." },
+  "bg-own": { file: "bg-own", aspect: "4:5", where: "cover plate — own it or rent it",
+    prompt: "A modest closed shopfront at night with its metal shutter half down, " +
+      "seen from across a wet empty street at the right of frame. A single unplugged " +
+      "cable hangs loose from the wall beside it. Everything else is darkness and " +
+      "reflected light on wet ground. Abandoned, quiet, slightly ominous." },
+  "bg-price": { file: "bg-price", aspect: "4:5", where: "cover plate — fixed price",
+    prompt: "A single printed agreement lying on a dark walnut desk at the right of " +
+      "frame, one warm lamp raking across it from the far right, a pen resting on " +
+      "top. The paper is angled away so nothing on it is readable. Deep shadow " +
+      "everywhere else. Calm, serious, settled." },
+};
+
 function usage() {
   console.log("Shots:\n");
-  for (const [id, s] of Object.entries({ ...SHOTS, ...AVATARS, ...HOOKS })) {
+  for (const [id, s] of Object.entries({ ...SHOTS, ...AVATARS, ...HOOKS, ...COVERS })) {
     console.log(`  ${id.padEnd(6)} images/${s.file}.png  (${s.aspect})  ${s.where}`);
   }
   console.log("\n  node scripts/gen-image.mjs <id> [<id>...]   |   --all");
 }
 
 async function generate(id) {
-  const shot = SHOTS[id] || AVATARS[id] || HOOKS[id];
+  const shot = SHOTS[id] || AVATARS[id] || HOOKS[id] || COVERS[id];
   if (!shot) throw new Error(`Unknown shot "${id}". Try --list.`);
 
-  const house = AVATARS[id] ? PRESENTER : HOOKS[id] ? SCALE : PALETTE;
+  const house = AVATARS[id] ? PRESENTER : HOOKS[id] ? SCALE : COVERS[id] ? COVER : PALETTE;
   const body = {
     contents: [{ parts: [{ text: `${shot.prompt}\n\n${house}` }] }],
     generationConfig: {
@@ -249,6 +295,7 @@ const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KE
 const ids = process.argv.includes("--all") ? Object.keys(SHOTS)
   : process.argv.includes("--avatars") ? Object.keys(AVATARS)
   : process.argv.includes("--hooks") ? Object.keys(HOOKS)
+  : process.argv.includes("--covers") ? Object.keys(COVERS)
   : args;
 
 if (process.argv.includes("--list") || !ids.length) {

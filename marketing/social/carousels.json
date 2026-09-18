@@ -23,7 +23,8 @@
           "huge": "REPLY|MACHINE",
           "accent": true,
           "sub": "You answer the same four questions all day. A website answers them once.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/bg-reply.png"
         },
         {
           "kind": "statement",
@@ -70,12 +71,12 @@
       "slides": [
         {
           "kind": "loud",
-          "light": true,
           "tag": "Read this first",
           "huge": "THAT PAGE|ISN'T|YOURS",
           "accent": true,
           "sub": "If the Instagram account goes tomorrow, the business goes with it.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/bg-own.png"
         },
         {
           "kind": "statement",
@@ -127,7 +128,8 @@
           "accent": true,
           "num": false,
           "sub": "One time. GST extra. Price and scope in writing before anyone starts.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/bg-price.png"
         },
         {
           "kind": "statement",

@@ -72,7 +72,11 @@
      top and bottom, because a headline sitting directly on a photograph is
      unreadable the moment the photograph changes. */
   .slide.photo{padding:0;background:#06140f}
-  .photo .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  /* scale(1.05) crops ~2.5% off every edge. Gemini keeps drawing a thin grey
+     frame or matte into these plates whatever the prompt says, and one dark
+     hairline along a slide edge is the kind of thing that only becomes obvious
+     once it is posted. Cheaper to crop than to keep re-rolling. */
+  .photo .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.05)}
   .photo .scrim{position:absolute;inset:0;
     background:linear-gradient(180deg, rgba(6,20,15,.78) 0%, rgba(6,20,15,.30) 34%,
                rgba(6,20,15,.10) 52%, rgba(6,20,15,.72) 88%, rgba(6,20,15,.90) 100%)}
@@ -95,7 +99,7 @@
      No condensed face is licensed here, so scaleX fakes one. Real condensed
      type would be better; this is close enough at 1080px and costs nothing. */
   .slide.loud{padding:0;background:var(--bm-deep);overflow:hidden}
-  .loud .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .loud .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.05)}
   .loud .veil{position:absolute;inset:0;background:linear-gradient(180deg,
       rgba(6,20,15,.55) 0%, rgba(6,20,15,.15) 40%, rgba(6,20,15,.70) 100%)}
   .loud .inner{position:absolute;inset:0;padding:56px 48px;display:flex;

@@ -54,8 +54,13 @@ const only = process.argv.slice(2).filter((a) => !a.startsWith("--"));
       // Catch a headline that has overflowed its slide — it renders happily and
       // only shows up as a clipped word in the posted image.
       const over = await page.evaluate(() => {
+        // Measure the CONTENT box, not the slide. Photo and loud slides hold a
+        // background image scaled past the frame on purpose (to crop the grey
+        // hairline Gemini draws into the plates), and measuring the slide
+        // counted that deliberate overflow as a layout failure on every cover.
         const el = document.getElementById("slide");
-        return Math.max(0, el.scrollHeight - 1350);
+        const box = el.querySelector(".inner") || el;
+        return Math.max(0, box.scrollHeight - box.clientHeight);
       });
       if (over > 2) warnings.push(`${car.id} slide ${i + 1}: content overflows by ${over}px`);
 
