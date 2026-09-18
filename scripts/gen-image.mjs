@@ -84,20 +84,75 @@ const SHOTS = {
   },
 };
 
+
+/* ---------------------------- PRESENTER AVATARS ---------------------------
+   These deliberately break the "no people, no faces" rule above, and the
+   distinction matters.
+
+   A generated person saying "Brand Mint built my store and it doubled my
+   orders" is a fabricated testimonial — an endorsement from a customer who
+   does not exist. That is never made.
+
+   A presenter speaking AS the studio, delivering the studio's own copy, is
+   what an actor does in any advertisement. That is what these are for. They
+   must never be captioned, framed or scripted as a client, a customer or a
+   member of staff, and they must never say "I" about work the studio did.
+
+   ANY VIDEO USING ONE OF THESE CARRIES A VISIBLE AI-GENERATED LABEL.
+   marketing/video/OMNI-30-VIDEO-PLAN.md records that synthetic-media
+   labelling is a legal requirement in India, not a preference, and a
+   synthetic human on screen is the case it exists for.
+
+   The chosen still becomes the reference frame for Veo image-to-video, which
+   is what keeps one face across every clip instead of a new stranger each
+   generation. Re-roll these as many times as you like — stills are cheap and
+   video is not. */
+const PRESENTER =
+  "Photographic portrait for a video advertisement, vertical 9:16, medium " +
+  "close-up from mid-chest up, eye level, subject looking straight down the " +
+  "lens with a calm open expression and the faintest smile — mid-sentence, " +
+  "about to speak, not posed. Soft daylight from a large window at camera " +
+  "left, gentle falloff, 50mm lens at f2.0, shallow but not extreme depth of " +
+  "field. Background: a real working studio wall in soft focus, sage olive " +
+  "green, with one out-of-focus plant. Natural skin texture, no retouching, " +
+  "no beauty filter, no makeup sheen. Centred with headroom above and clear " +
+  "space at the bottom third for captions. " +
+  "No text, letters, logos or watermarks anywhere in frame.";
+
+const AVATARS = {
+  "host-a": { file: "avatar-host-a", aspect: "9:16", where: "presenter option A",
+    prompt: "An Indian man in his early thirties, short neat black hair, trimmed " +
+      "stubble, warm and unpolished rather than corporate. Plain dark forest-green " +
+      "crew-neck t-shirt. Looks like a founder who does the work, not a spokesman." },
+  "host-b": { file: "avatar-host-b", aspect: "9:16", where: "presenter option B",
+    prompt: "An Indian woman in her early thirties, dark hair tied back loosely, " +
+      "small gold stud earrings, direct and friendly. Plain cream linen shirt, " +
+      "sleeves rolled. Calm, capable, the person who actually runs things." },
+  "host-c": { file: "avatar-host-c", aspect: "9:16", where: "presenter option C",
+    prompt: "An Indian man in his late thirties, slight grey at the temples, " +
+      "clean-shaven, quietly authoritative and easy. Charcoal shirt, top button " +
+      "open, no tie. The senior person you would want on the call." },
+  "host-d": { file: "avatar-host-d", aspect: "9:16", where: "presenter option D",
+    prompt: "An Indian woman in her late twenties, shoulder-length hair worn down, " +
+      "bright and quick, a little more energy than the others — closer to a creator " +
+      "than a presenter. Muted sage green sweatshirt." },
+};
+
 function usage() {
   console.log("Shots:\n");
-  for (const [id, s] of Object.entries(SHOTS)) {
+  for (const [id, s] of Object.entries({ ...SHOTS, ...AVATARS })) {
     console.log(`  ${id.padEnd(6)} images/${s.file}.png  (${s.aspect})  ${s.where}`);
   }
   console.log("\n  node scripts/gen-image.mjs <id> [<id>...]   |   --all");
 }
 
 async function generate(id) {
-  const shot = SHOTS[id];
+  const shot = SHOTS[id] || AVATARS[id];
   if (!shot) throw new Error(`Unknown shot "${id}". Try --list.`);
 
+  const house = AVATARS[id] ? PRESENTER : PALETTE;
   const body = {
-    contents: [{ parts: [{ text: `${shot.prompt}\n\n${PALETTE}` }] }],
+    contents: [{ parts: [{ text: `${shot.prompt}\n\n${house}` }] }],
     generationConfig: {
       responseModalities: ["IMAGE"],
       imageConfig: { aspectRatio: shot.aspect },
@@ -135,7 +190,9 @@ async function generate(id) {
 }
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KEY);
-const ids = process.argv.includes("--all") ? Object.keys(SHOTS) : args;
+const ids = process.argv.includes("--all") ? Object.keys(SHOTS)
+  : process.argv.includes("--avatars") ? Object.keys(AVATARS)
+  : args;
 
 if (process.argv.includes("--list") || !ids.length) {
   usage();
