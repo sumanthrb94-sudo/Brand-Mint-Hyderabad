@@ -31,36 +31,36 @@
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{width:1080px;height:1350px;overflow:hidden;font-family:"Inter",sans-serif;
-       color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+       color:var(--cream);background:var(--bm-deep);-webkit-font-smoothing:antialiased}
 
-  .slide{position:relative;width:1080px;height:1350px;padding:86px 78px;
-         display:flex;flex-direction:column;
-         background:radial-gradient(760px 520px at 88% -10%, rgba(16,185,129,.14), transparent 62%), var(--paper)}
-  .slide.dark{background:radial-gradient(760px 560px at 50% 22%, #14352d, var(--bm-ink) 58%, var(--bm-deep));color:var(--cream)}
+  /* Every slide is dark. The covers are dark and loud; a cream interior behind
+     one reads as a different post entirely, and that drop is where the swipe
+     stops. One ground throughout, with the gradient origin moved per slide so
+     the set still has rhythm. */
+  .slide{position:relative;width:1080px;height:1350px;padding:78px 68px;
+         display:flex;flex-direction:column;color:var(--cream);
+         background:radial-gradient(820px 620px at 86% 8%, #14352d, var(--bm-ink) 56%, var(--bm-deep))}
+  .slide.dark{background:radial-gradient(760px 560px at 50% 22%, #14352d, var(--bm-ink) 58%, var(--bm-deep))}
 
-  .kicker{font:600 20px/1.4 "Inter";letter-spacing:.2em;text-transform:uppercase;color:var(--mint-deep)}
-  .dark .kicker{color:var(--emerald)}
+  .kicker{font:700 22px/1.4 "Inter";letter-spacing:.2em;text-transform:uppercase;color:var(--emerald)}
 
-  h1{font-family:"Plus Jakarta Sans";font-weight:600;letter-spacing:-.035em;line-height:1.03;
-     font-size:96px;margin-top:26px;text-wrap:balance}
-  h1.sm{font-size:76px}
-  h1 em{display:block;font-style:italic;font-weight:400;color:var(--mint-deep)}
-  .dark h1 em{color:var(--emerald)}
+  h1{font-family:"Plus Jakarta Sans";font-weight:700;letter-spacing:-.04em;line-height:.98;
+     font-size:132px;margin-top:30px;text-wrap:balance}
+  h1.sm{font-size:104px}
+  h1 em{display:block;font-style:italic;font-weight:500;color:var(--emerald)}
 
-  .body{margin-top:32px;font-size:30px;line-height:1.5;color:var(--muted);max-width:22ch}
-  .dark .body{color:rgba(245,241,234,.72)}
+  .body{margin-top:36px;font-size:36px;line-height:1.42;color:rgba(245,241,234,.78);max-width:24ch}
 
-  ul{list-style:none;margin-top:44px;display:flex;flex-direction:column;gap:22px}
-  li{display:flex;gap:20px;align-items:flex-start;font-size:33px;line-height:1.35}
-  li b{flex:none;width:44px;height:44px;border-radius:12px;background:var(--mint-wash);
-       color:var(--mint-deep);font:700 21px/44px "JetBrains Mono";text-align:center}
-  .dark li b{background:rgba(0,200,151,.18);color:var(--emerald)}
+  ul{list-style:none;margin-top:52px;display:flex;flex-direction:column;gap:34px}
+  li{display:flex;gap:26px;align-items:baseline;font-size:41px;line-height:1.26;
+     font-weight:600;color:var(--cream)}
+  li b{flex:none;font:700 52px/1 "JetBrains Mono";color:var(--emerald);
+       letter-spacing:-.04em;min-width:88px}
+  li span{flex:1}
 
-  .price{font-family:"JetBrains Mono";font-weight:500;font-variant-numeric:tabular-nums;
-         font-size:132px;letter-spacing:-.04em;line-height:1;margin-top:30px;color:var(--mint-deep)}
-  .dark .price{color:var(--emerald)}
-  .price-sub{margin-top:14px;font:400 26px/1.4 "Inter";color:var(--muted)}
-  .dark .price-sub{color:rgba(245,241,234,.6)}
+  .price{font-family:"JetBrains Mono";font-weight:700;font-variant-numeric:tabular-nums;
+         font-size:196px;letter-spacing:-.06em;line-height:.92;margin-top:34px;color:var(--emerald)}
+  .price-sub{margin-top:20px;font:600 30px/1.4 "Inter";color:rgba(245,241,234,.66)}
 
   /* The content block is centred between the top padding and the footer
      rather than top-aligned. Top-aligned left a third of every slide empty
@@ -134,15 +134,12 @@
   .loud.light .swipe,.loud.light .dot{color:var(--mint-deep)}
 
   .foot{display:flex;align-items:center;justify-content:space-between;
-        padding-top:30px;border-top:1px solid rgba(10,14,12,.14);font-size:24px}
-  .dark .foot{border-top-color:rgba(245,241,234,.18)}
+        padding-top:30px;border-top:1px solid rgba(245,241,234,.2);font-size:24px}
   .brand{display:flex;align-items:center;gap:14px;font-family:"Plus Jakarta Sans";
          font-weight:600;font-size:28px;letter-spacing:-.02em;word-spacing:.12em}
   .mark{width:46px;height:46px;border-radius:12px;display:block}
-  .swipe{font:500 24px/1 "JetBrains Mono";letter-spacing:.08em;color:var(--mint-deep)}
-  .dark .swipe{color:var(--emerald)}
-  .dot{font:500 22px/1 "JetBrains Mono";color:var(--muted)}
-  .dark .dot{color:rgba(245,241,234,.55)}
+  .swipe{font:600 26px/1 "JetBrains Mono";letter-spacing:.08em;color:var(--emerald)}
+  .dot{font:600 24px/1 "JetBrains Mono";color:rgba(245,241,234,.6)}
 </style>
 </head>
 <body>
@@ -182,7 +179,7 @@
 
   // The headline runs smaller when it is long enough to wrap past three lines
   // at full size — measured on the rendered slide, not guessed from a count.
-  const headClass = (S.head || "").length > 34 ? "sm" : "";
+  const headClass = (S.head || "").length > 26 ? "sm" : "";
 
   const shell = (inner) => S.kind === "photo"
     ? `<img class="shot" src="${S.img}" alt=""><div class="scrim"></div><div class="inner">${inner}</div>`

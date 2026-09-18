@@ -85,12 +85,12 @@ clearest signal to the ranker that a post is not worth showing to anyone local.
 
 **Alt text, per slide** — Instagram reads this for accessibility and search.
 
-1. Dark green slide: "You're not running a business. You're running a reply machine."
-2. Cream slide asking "Price?" with the other three questions shops answer daily.
-3. Cream slide: a customer searched, found nothing, and called a competitor.
-4. Cream slide listing four things a website answers: prices, delivery, payment methods, WhatsApp orders.
-5. Cream slide: static website ₹14,999 one time, GST extra; online stores from ₹49,999.
-6. Dark green slide: book a 30-minute call with Brand Mint, HITEC City Hyderabad.
+1. Dark slide: "You're not running a business. You're running a reply machine."
+2. Dark slide asking "Price?" with the other three questions shops answer daily.
+3. Dark slide: a customer searched, found nothing, and called a competitor.
+4. Dark slide listing four things a website answers: prices, delivery, payment methods, WhatsApp orders.
+5. Dark slide: static website ₹14,999 one time, GST extra; online stores from ₹49,999.
+6. Dark slide: book a 30-minute call with Brand Mint, HITEC City Hyderabad.
 
 ---
 
@@ -129,12 +129,12 @@ clearest signal to the ranker that a post is not worth showing to anyone local.
 
 **Alt text, per slide**
 
-1. Dark green slide: "That page isn't yours."
-2. Cream slide: if the account goes, the photos, prices and customer conversations go with it.
-3. Cream slide listing what you own with Brand Mint: domain, hosting, payment account, customer records.
-4. Cream slide: keep posting on Instagram exactly as you do now.
-5. Cream slide: online stores from ₹49,999, GST extra, four to twelve weeks.
-6. Dark green slide: see the four store tiers at brandmintstudios.in.
+1. Dark slide: "That page isn't yours."
+2. Dark slide: if the account goes, the photos, prices and customer conversations go with it.
+3. Dark slide listing what you own with Brand Mint: domain, hosting, payment account, customer records.
+4. Dark slide: keep posting on Instagram exactly as you do now.
+5. Dark slide: online stores from ₹49,999, GST extra, four to twelve weeks.
+6. Dark slide: see the four store tiers at brandmintstudios.in.
 
 ---
 
@@ -173,12 +173,12 @@ clearest signal to the ranker that a post is not worth showing to anyone local.
 
 **Alt text, per slide**
 
-1. Dark green slide: "Your price. In writing."
-2. Cream slide: the usual story — started at one number, ended at three.
-3. Cream slide listing four terms: signed scope and price, 50/50 payment, GST invoices, no hourly billing.
-4. Cream slide: the person on the call is the person building it, 8+ years on every build.
-5. Cream slide: Site + CRM ₹79,999 setup then ₹9,999 a month, GST extra.
-6. Dark green slide: WhatsApp +91 77999 34943 to ask what yours would cost.
+1. Dark slide: "Your price. In writing."
+2. Dark slide: the usual story — started at one number, ended at three.
+3. Dark slide listing four terms: signed scope and price, 50/50 payment, GST invoices, no hourly billing.
+4. Dark slide: the person on the call is the person building it, 8+ years on every build.
+5. Dark slide: Site + CRM ₹79,999 setup then ₹9,999 a month, GST extra.
+6. Dark slide: WhatsApp +91 77999 34943 to ask what yours would cost.
 
 ---
 
@@ -252,12 +252,12 @@ people can tell.
 **Alt text, per slide**
 
 1. A giant man kneeling in an old Hyderabad street beside a small shopfront. "Before you pay anyone for a website."
-2. Cream slide: the problem is never the code, it is what was never agreed in writing.
-3. Cream slide, four ownership questions: domain, hosting, payment account, data export.
-4. Cream slide, four cost questions: fixed or hourly, signed agreement, GST, mid-project changes.
-5. Cream slide: "Who do I call when it breaks at 9pm?"
+2. Dark slide: the problem is never the code, it is what was never agreed in writing.
+3. Dark slide, four ownership questions: domain, hosting, payment account, data export.
+4. Dark slide, four cost questions: fixed or hourly, signed agreement, GST, mid-project changes.
+5. Dark slide: "Who do I call when it breaks at 9pm?"
 6. A giant man sitting on Charminar. Ten questions, no wrong answers, only honest ones.
-7. Dark green slide: Brand Mint answers all ten in writing. Prices and WhatsApp number.
+7. Dark slide: Brand Mint answers all ten in writing. Prices and WhatsApp number.
 
 **Why this one is the lead post.** It is the only carousel in the set that is
 useful to someone who never hires us, which is exactly why it gets saved and
