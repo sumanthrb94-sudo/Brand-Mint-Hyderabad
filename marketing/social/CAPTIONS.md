@@ -207,9 +207,9 @@ Instagram ranking has no primary source behind it.
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Shopkeeper on the phone behind his counter. "REPLY MACHINE". You answer the same four questions all day. A website answers them once.
+1. Boutique owner on the phone among the rails. "REPLY MACHINE". You answer the same four questions all day. A website answers them once.
 2. Cream slide. "SAME FOUR QUESTIONS EVERY DAY". Price. Timing. Do you deliver. Where are you. A page answers all four once — ₹14,999, one time, GST extra.
-3. Customer walking away from a lit shop. Someone searched. Found nothing. Called the next shop.
+3. Customer walking out of a bright boutique. Someone searched. Found nothing. Called the next shop.
 4. Dark slide. Four questions, answered once. Prices, on the page; Delivery and timing, stated; UPI, cards, cash on delivery; Orders straight to WhatsApp
 5. Dark slide. Static website ₹14,999, one time · GST extra
 6. A parcel handed across a counter. Book a 30-minute call. Or just comment your question.
@@ -256,13 +256,13 @@ Instagram ranking has no primary source behind it.
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Boutique owner in her doorway at dusk. "THAT PAGE ISN'T YOURS". If the Instagram account goes tomorrow, the business goes with it.
+1. Skincare founder in her studio. "THAT PAGE ISN'T YOURS". If the Instagram account goes tomorrow, the business goes with it.
 2. Cream slide. "GONE IN ONE MORNING". Your photos, your prices, every customer conversation — on a platform you don't control. A domain in your own name cannot be taken away.
-3. A closed shutter on an empty night street. The account goes. The business goes with it.
+3. A closed modern storefront at night. The account goes. The business goes with it.
 4. Dark slide. In your name, from day one. The domain; The hosting; The payment account; Every order and customer record
-5. A Hyderabad market lane at dusk. Keep posting exactly as you do.
+5. A modern Indian shopping street at golden hour. Keep posting exactly as you do.
 6. Dark slide. Online store from ₹49,999, GST extra · four tiers
-7. Shopkeeper rolling up his shutter. See the four tiers. Comment your trade and we'll say which.
+7. Owner unlocking her boutique in the morning. See the four tiers. Comment your trade and we'll say which.
 
 ---
 
@@ -305,9 +305,9 @@ Instagram ranking has no primary source behind it.
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Two men talking across a shop counter. "A WEBSITE ₹14,999". One time. GST extra. Price and scope in writing before anyone starts.
+1. Two people over a document at a bright table. "A WEBSITE ₹14,999". One time. GST extra. Price and scope in writing before anyone starts.
 2. Cream slide. "ONE NUMBER THEN THREE". Every website story ends the same way. This one doesn't — the scope and the price are signed before a rupee moves.
-3. Papers and a calculator under a desk lamp. It started at one number and ended at three.
+3. Papers and a laptop on a tidy desk. It started at one number and ended at three.
 4. Dark slide. Agreed before anyone starts. Scope and price in a signed agreement; 50% to start, 50% before launch; GST invoice for every payment; No hourly billing, no extras inside a tier
 5. Two pairs of hands over a sheet of paper. The person on the call is the person building it.
 6. Dark slide. Site + CRM ₹79,999, setup · then ₹9,999/mo · GST extra
@@ -360,12 +360,12 @@ Instagram ranking has no primary source behind it.
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Man reading his phone sceptically. "10 QUESTIONS". Ask these before you pay anyone to build your website.
+1. Man reading a quote on a tablet in a café. "10 QUESTIONS". Ask these before you pay anyone to build your website.
 2. Cream slide. "WOULD YOURS PASS ALL TEN?". Ten questions that decide whether a website build goes well. Any honest studio in Hyderabad answers all ten — including us.
-3. Papers and a calculator under a desk lamp. The problem is never the code.
+3. Papers and a laptop on a tidy desk. The problem is never the code.
 4. Dark slide. Who owns what? Is the domain registered in MY business name?; Is the hosting account mine, or theirs?; Is the payment account in my name?; Can I export my orders and customers?
 5. Dark slide. What does it actually cost? Is the price fixed, or hourly?; Is it in a signed agreement before work starts?; Is GST included or extra?; What happens if I want a change midway?
-6. Shop owner sitting alone after hours. "Who do I call when it breaks at 9pm?"
+6. Founder sitting alone in her studio. "Who do I call when it breaks at 9pm?"
 7. Cream slide. "NO WRONG ANSWERS. ONLY HONEST". Screenshot it and ask any studio you are talking to. We answer all ten in writing before a rupee moves.
 8. Two pairs of hands over a sheet of paper. We answer all ten, in writing. Which one would yours fail?
 
@@ -417,7 +417,7 @@ The four fixed hashtags are unchanged. The fifth is listed with each post.
 | 2 | `search-your-shop` | `why-49999` |
 | 3 | `open-the-work` | `not-in-the-quote` |
 | 4 | `whatsapp-catalogue` | `after-you-say-yes` |
-| 5 | `before-after` | `what-9999-runs` |
+| 5 | `before-after` | `who-fixes-it` |
 | 6 | `free-checklist` | `what-we-need` |
 
 **Screenshots.** `open-the-work` and `before-after` are the two posts that get
@@ -462,10 +462,10 @@ Fifth tag: `#webdesign`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Shopkeeper straightening stock on a high shelf. "WHAT ₹14,999 BUYS". Not a range. Not 'starting from'. The whole list, and what is not on it.
+1. Owner arranging stock in a lifestyle store. "WHAT ₹14,999 BUYS". Not a range. Not 'starting from'. The whole list, and what is not on it.
 2. Cream slide. "FIVE PAGES ONE PRICE". A static website for ₹14,999, one time and GST extra. Everything below is included in that number.
 3. Dark slide. What you get. Up to 5 pages, written and built with you; Your domain, SSL and email set up; WhatsApp and call buttons that work on a phone; Google Search Console verified and submitted; Visitor analytics from day one
-4. A small shop before opening. What it is not.
+4. A merchandised store before opening. What it is not.
 5. Dark slide. Static website ₹14,999, one time · GST extra
 6. A parcel handed across a counter. Ask what yours would cost. How many pages do you actually need?
 
@@ -505,12 +505,12 @@ Fifth tag: `#onlinestore`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Boutique owner parcelling a garment. "₹14,999 OR ₹49,999". Same studio, same care. So why does one cost three times the other?
+1. Fashion label owner parcelling a garment. "₹14,999 OR ₹49,999". Same studio, same care. So why does one cost three times the other?
 2. Cream slide. "IT IS NOT MORE PAGES". A store costs more because four things start existing: money changing hands, stock, orders and invoices. Each one has to be right every single time.
 3. Dark slide. Four things that change. It takes money — UPI, cards, cash on delivery; It knows stock, and stops selling what's gone; Every order becomes a record you can act on; A GST invoice goes out, correctly, on its own
-4. Stocked shelves in a kirana shop. If nobody pays you on the page, don't buy a store.
+4. Merchandised shelving in a lifestyle store. If nobody pays you on the page, don't buy a store.
 5. Dark slide. Online store from ₹49,999, GST extra · four tiers
-6. Woman packing orders into parcels. Both prices are on the site. Do people pay you before they arrive?
+6. Woman packing orders into premium boxes. Both prices are on the site. Do people pay you before they arrive?
 
 ---
 
@@ -552,57 +552,63 @@ Fifth tag: `#businessowner`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Man frowning at a printed bill. "NOT IN THE QUOTE". Eight charges that turn up after you have signed. Every one of them is normal, and every one should have been stated.
+1. Woman frowning at a printed invoice. "NOT IN THE QUOTE". Eight charges that turn up after you have signed. Every one of them is normal, and every one should have been stated.
 2. Cream slide. "THE BILL COMES LATER". None of these are scams. They are real costs that a quote can quietly leave out — so the number you compared was never the number you pay.
 3. Dark slide. Things that run out. Domain renewal, every year, forever; Hosting — whose account is it, really?; SSL certificate renewal; Email hosting, per mailbox, per month
 4. Dark slide. Things billed per unit. Per extra page, after the first few; Per product uploaded to the catalogue; Content and photography, if you don't supply it; Handover — being given your own accounts
-5. Papers and a calculator under a desk lamp. The number is the number.
+5. Papers and a laptop on a tidy desk. The number is the number.
 6. Dark slide. Static website ₹14,999, stores from ₹49,999
 7. Two pairs of hands over a sheet of paper. Send us a quote to read. Which of the eight caught you?
 
 ---
 
-## 8 · ₹9,999 a month · `what-9999-runs` — 6 slides
+## 8 · Who fixes it when it breaks · `who-fixes-it` — 6 slides
 Fifth tag: `#whatsappbusiness`
 
-> Site + CRM in Hyderabad: ₹79,999 setup, then ₹9,999 a month — what the monthly actually pays for.
+> Who fixes your website in Hyderabad when it breaks? Nobody, usually — and that is the whole problem.
 >
-> There is a monthly because the thing keeps running. WhatsApp and Meta
-> connections break when tokens expire and somebody has to fix them. A
-> one-time fee for a living system is how you end up with a dead one.
+> Most websites don't break on launch day. They break quietly, later, with
+> nobody watching. The WhatsApp connection drops. A payment webhook stops
+> firing. A certificate lapses. None of it announces itself — you find out when
+> a customer tells you.
 >
-> The ₹9,999 covers:
+> That is the honest reason there is a monthly. A one-time fee for a living
+> system is how you end up with a dead one.
+>
+> The ₹9,999 a month covers:
 > — Hosting, and the site staying up
 > — Security updates and patches
 > — Support from a person, not a ticket form
 > — The WhatsApp and Meta connections kept alive
 >
+> Site + CRM is ₹79,999 to set up and then ₹9,999 a month, GST extra on both.
+> We state both numbers together because one without the other isn't a price —
+> and a cheap monthly with a fee you find out about later is the exact thing we
+> tell people to watch for.
+>
 > What is yours regardless: the domain, the website, the data, and the WhatsApp
 > and ad accounts all sit in your business's name. Export your leads whenever
-> you like. Meta bills its own message fees to your card, not ours — so you
-> keep the account if you ever leave us.
+> you like.
 >
-> GST extra on both.
+> Has a site of yours ever gone quiet without you noticing? **Comment what
+> broke and how you found out.** If a customer was the one who told you, that
+> is exactly what the monthly exists to prevent.
 >
-> Honest question: would you rather pay once and risk it quietly dying?
-> **Comment your answer.** Plenty of people say yes and for some businesses
-> that genuinely is the right call — we'll tell you which one you are.
->
-> The whole page is public at brandmintstudios.in/platform.
+> brandmintstudios.in/platform
 >
 > #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
 > #smallbusinessindia #whatsappbusiness
 
-**Meta description** · Site + CRM ₹79,999 setup then ₹9,999/month: hosting, security, support and the WhatsApp and Meta connections. Hyderabad.
+**Meta description** · Websites break quietly, not on launch day. Site + CRM ₹79,999 setup then ₹9,999/month, both stated together. Hyderabad.
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Woman thinking at a laptop in a back office. "₹9,999 A MONTH". There is a monthly because the thing keeps running. Here is exactly what that pays for.
+1. A closed modern storefront at night. "WHO FIXES IT WHEN IT BREAKS?". Most websites don't break on launch day. They break quietly, later, with nobody watching.
 2. Cream slide. "TOKENS EXPIRE". WhatsApp and Meta connections break when tokens expire, and someone has to fix them. A one-time fee for a living system is how you end up with a dead one.
-3. Dark slide. What keeps running. Hosting, and the site staying up; Security updates and patches; Support — a person, not a ticket form; WhatsApp and Meta connections kept alive
-4. An empty counter lit by one bulb. The accounts are in your name.
+3. Founder thinking at a laptop in a bright office. Nobody is watching it.
+4. Dark slide. Someone is watching it. Hosting, and the site staying up; Security updates and patches; Support from a person, not a ticket form; WhatsApp and Meta connections kept alive
 5. Dark slide. Site + CRM ₹79,999, setup · then ₹9,999/mo · GST extra
-6. A parcel handed across a counter. The whole page is public. Would you rather pay once and risk it dying?
+6. A parcel handed across a counter. The whole page is public. Has a site of yours ever gone quiet?
 
 ---
 
@@ -638,13 +644,13 @@ Fifth tag: `#webdesign`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Young man holding out his phone. "OPEN THE WORK". Four live sites you can open right now, on your own phone, without asking us for anything.
+1. Man in a modern store holding out his phone. "OPEN THE WORK". Four live sites you can open right now, on your own phone, without asking us for anything.
 2. Cream slide. "LIVE SITES NOT SCREENSHOTS". Anyone can show you a mockup. These are addresses — put them in your browser and see what actually loads.
-3. Woman packing orders into parcels. SimplySip
-4. Stocked shelves in a kirana shop. Trésor Couture
-5. Papers and a calculator under a desk lamp. GreenTeam
-6. Delivery rider pulling away at night. FreshKart
-7. A Hyderabad market lane at dusk. Open them. Then talk to us. Which one is closest to your business?
+3. Woman packing orders into premium boxes. SimplySip
+4. Merchandised shelving in a lifestyle store. Trésor Couture
+5. Papers and a laptop on a tidy desk. GreenTeam
+6. Delivery rider loading parcels outside a store. FreshKart
+7. A modern Indian shopping street at golden hour. Open them. Then talk to us. Which one is closest to your business?
 
 ---
 
@@ -683,12 +689,12 @@ Fifth tag: `#onlinestore`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Older shopkeeper looking up, half-smiling. "BEFORE AFTER". Not what we promise. What actually changed for four businesses after the site went live.
+1. Jewellery showroom owner behind a display case. "BEFORE AFTER". Not what we promise. What actually changed for four businesses after the site went live.
 2. Cream slide. "NO FAKE METRICS HERE". You will not find a revenue figure or a percentage on this post. What you will find is what the owner used to do, and what they do now.
 3. Dark slide. From DMs to checkout. Before — every sale negotiated in a WhatsApp DM; After — customers check out themselves; UPI, cards or cash on delivery; Every order arrives priced and recorded
 4. Dark slide. Past the shop floor. Before — sold to whoever walked in; After — the label reaches beyond the shop; Its own checkout, not a DM thread; A GST invoice on every single order
 5. Dark slide. The catalogue, before the call. Before — a PDF, sent on request; After — the site does that part first; The call starts further along; Nobody waits on an email attachment
-6. Delivery rider pulling away at night. Nobody picks up the phone any more.
+6. Delivery rider loading parcels outside a store. Nobody picks up the phone any more.
 7. A parcel handed across a counter. All four are live. Go and look. What would 'after' look like for you?
 
 ---
@@ -726,12 +732,12 @@ Fifth tag: `#businessowner`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Two men shaking hands over a counter. "AFTER YOU SAY YES". What actually happens between the first message and a live site.
+1. Two people shaking hands over a counter. "AFTER YOU SAY YES". What actually happens between the first message and a live site.
 2. Cream slide. "NO DISCOVERY FEE". Thirty minutes on WhatsApp or a call. You leave that call with a scope and a price whether or not you go ahead.
 3. Dark slide. Three steps, that's all. Book a call — 30 minutes, no pitch deck, no fee; A fixed price in writing, before you pay; Sign, pay 50%, and your portal goes live
 4. Two pairs of hands over a sheet of paper. You watch it happen.
 5. Dark slide. All of it, before you pay. Exactly what is being built, page by page; The price, and that it does not move; What is not included, written down; Whose name the domain and accounts go in
-6. Papers and a calculator under a desk lamp. 50% to start, 50% before launch.
+6. Papers and a laptop on a tidy desk. 50% to start, 50% before launch.
 7. A parcel handed across a counter. Book the 30 minutes. What's stopping you starting?
 
 ---
@@ -770,12 +776,12 @@ Fifth tag: `#onlinestore`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Woman photographing a product on a table. "WHAT WE NEED FROM YOU". Four things. If you have none of them, say so — that is a normal answer and it changes nothing.
+1. Woman shooting a product flat-lay. "WHAT WE NEED FROM YOU". Four things. If you have none of them, say so — that is a normal answer and it changes nothing.
 2. Cream slide. "FOUR THINGS THAT'S ALL". A build almost never runs late because of code. It runs late waiting for product photos. Here is the whole list, up front.
 3. Dark slide. Your side of it. Product list and photos, with prices and stock; Business and GST details — name, address, GSTIN
 4. Dark slide. Accounts and assets. Logo and brand assets — whatever you have; Your domain, and a Razorpay account in your name
-5. A small shop before opening. That is a normal answer.
-6. Woman packing orders into parcels. Fill in the catalogue template early.
+5. A merchandised store before opening. That is a normal answer.
+6. Woman packing orders into premium boxes. Fill in the catalogue template early.
 7. A parcel handed across a counter. Ask for the template now. Which of the four don't you have?
 
 ---
@@ -817,13 +823,13 @@ Fifth tag: `#localbusiness`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Woman on a night street looking at her phone. "SEARCH YOUR OWN SHOP". Open Google. Type your shop name and your area. Look at what a customer sees.
+1. Woman on a modern high street with her phone. "SEARCH YOUR OWN SHOP". Open Google. Type your shop name and your area. Look at what a customer sees.
 2. Cream slide. "TRY IT BEFORE YOU SWIPE ON". Whatever comes up is what a customer decides on. It is rarely what you would have chosen for them.
 3. Dark slide. Exactly what a customer types. Your shop name plus your area; What you sell plus 'near me'; What you sell plus your suburb; Your shop name plus 'price'
-4. Woman on a lit pavement with her phone. A map pin and nothing else.
-5. Customer walking away from a lit shop. There is no missed call for this.
-6. Stocked shelves in a kirana shop. A page with the answers on it.
-7. A Hyderabad market lane at dusk. We'll search it with you. What came up when you searched?
+4. Woman on a sunlit street with her phone. A map pin and nothing else.
+5. Customer walking out of a bright boutique. There is no missed call for this.
+6. Merchandised shelving in a lifestyle store. A page with the answers on it.
+7. A modern Indian shopping street at golden hour. We'll search it with you. What came up when you searched?
 
 ---
 
@@ -861,11 +867,11 @@ Fifth tag: `#whatsappbusiness`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Man scrolling photos among unsent parcels. "YOUR CATALOGUE ISN'T A SHOP". It works, right up until the day it doesn't. Here is where the line is.
+1. Bakery owner scrolling photos at the counter. "YOUR CATALOGUE ISN'T A SHOP". It works, right up until the day it doesn't. Here is where the line is.
 2. Cream slide. "IT WORKS UNTIL IT DOESN'T". Nobody is telling you to stop selling on WhatsApp. The question is what happens on the days you cannot answer it.
 3. Dark slide. Four things it will never do. Take the money while you're asleep; Stop selling something you've run out of; Send a GST invoice on its own; Tell you what people looked at and didn't buy
-4. Hands on a phone beside a ledger at night. You are the checkout.
-5. People waiting at a shop counter. WhatsApp stays.
+4. A phone face up on a desk at night. You are the checkout.
+5. People waiting at a busy store counter. WhatsApp stays.
 6. Dark slide. WhatsApp Store ₹49,999, GST extra · run from your phone
 7. A parcel handed across a counter. Ask before you spend anything. How many orders a week are you at?
 
@@ -906,13 +912,13 @@ Fifth tag: `#festiveseason`
 
 **Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Shopkeeper in a doorway strung with festival lights. "THE RUSH YOU CAN'T SERVE". Your busiest season is the one where you lose the most customers.
+1. Owner in a festive-dressed clothing store. "THE RUSH YOU CAN'T SERVE". Your busiest season is the one where you lose the most customers.
 2. Cream slide. "YOU CAN SERVE ONE AT A TIME". Everyone else is waiting, scrolling, or already messaging the shop down the road. A page serves all of them at once.
-3. Customer walking away from a lit shop. The ones who gave up never told you.
-4. People waiting at a shop counter. You can't hire your way out of a rush.
+3. Customer walking out of a bright boutique. The ones who gave up never told you.
+4. People waiting at a busy store counter. You can't hire your way out of a rush.
 5. Dark slide. It doesn't queue. Takes the order while you're serving someone else; Stops selling what you've run out of; Sends the GST invoice on its own; Keeps taking orders after you've closed
 6. Dark slide. WhatsApp Store ₹49,999, GST extra · four tiers
-7. A Hyderabad market lane at dusk. Ask before your busy season. What do you sell most of?
+7. A modern Indian shopping street at golden hour. Ask before your busy season. What do you sell most of?
 
 ---
 
@@ -959,7 +965,7 @@ Fifth tag: `#smallbusinesstips`
 3. Dark slide. Before anything goes live. Lighthouse across all four axes; Real-device mobile QA, not a browser resize; Cross-browser check; WCAG AA accessibility
 4. Dark slide. The things that break quietly. End-to-end form and checkout tests; Link-preview validation; DNS and SSL verification; Analytics firing before launch, not after
 5. Two pairs of hands over a sheet of paper. Including on our own work.
-6. Papers and a calculator under a desk lamp. The other free ones.
+6. Papers and a laptop on a tidy desk. The other free ones.
 7. A parcel handed across a counter. Message the word CHECKLIST. Which of the three do you want?
 
 ---

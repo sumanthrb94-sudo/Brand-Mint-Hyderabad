@@ -478,18 +478,18 @@
       ]
     },
     {
-      "id": "what-9999-runs",
-      "title": "₹9,999 a month",
+      "id": "who-fixes-it",
+      "title": "Who fixes it when it breaks",
       "batch": "price",
       "slides": [
         {
           "kind": "loud",
           "tag": "Site + CRM",
-          "huge": "₹9,999|A MONTH",
+          "huge": "WHO FIXES IT|WHEN IT|BREAKS?",
           "accent": true,
-          "sub": "There is a monthly because the thing keeps running. Here is exactly what that pays for.",
+          "sub": "Most websites don't break on launch day. They break quietly, later, with nobody watching.",
           "foot": "Swipe →",
-          "img": "/images/ppl-crm.png"
+          "img": "/images/sc-shutter.png"
         },
         {
           "kind": "loud",
@@ -500,38 +500,38 @@
           "sub": "WhatsApp and Meta connections break when tokens expire, and someone has to fix them. A one-time fee for a living system is how you end up with a dead one."
         },
         {
+          "kind": "statement",
+          "kicker": "How a site actually dies",
+          "img": "/images/ppl-crm.png",
+          "head": "Nobody is watching it.",
+          "body": "The WhatsApp connection drops. A payment webhook stops firing. A certificate lapses. None of it announces itself — you find out when a customer tells you."
+        },
+        {
           "kind": "list",
           "kicker": "What the monthly covers",
-          "head": "What keeps running.",
+          "head": "Someone is watching it.",
           "items": [
             "Hosting, and the site staying up",
             "Security updates and patches",
-            "Support — a person, not a ticket form",
+            "Support from a person, not a ticket form",
             "WhatsApp and Meta connections kept alive"
           ]
         },
         {
-          "kind": "statement",
-          "kicker": "What is yours regardless",
-          "head": "The accounts are in your name.",
-          "body": "Domain, website, data, WhatsApp and ad accounts all sit in your business's name. Export your leads whenever you like. Meta bills its own message fees to your card, not ours.",
-          "img": "/images/sc-counter.png"
-        },
-        {
           "kind": "price",
-          "kicker": "Built once, then maintenance",
+          "kicker": "Both halves, stated together",
           "head": "Site + CRM",
           "price": "₹79,999",
           "sub": "setup · then ₹9,999/mo · GST extra",
-          "body": "Your site, your admin dashboard, the lead CRM and the WhatsApp and Meta connections behind them. Ask for the full breakdown on WhatsApp before you decide."
+          "body": "Your site, your admin dashboard, the lead CRM and the WhatsApp and Meta connections behind them. Both numbers, up front, because one without the other is not a price."
         },
         {
           "kind": "cta",
           "kicker": "brandmintstudios.in/platform",
           "head": "The whole page is public.",
-          "em": "Would you rather pay once and risk it dying?",
-          "body": "Genuine question — comment your answer. Plenty of people say yes, and for some businesses that is the right call. We'll tell you which you are.",
-          "img": "/images/sc-handoff.png"
+          "em": "Has a site of yours ever gone quiet?",
+          "img": "/images/sc-handoff.png",
+          "body": "Comment what broke and how you found out. If it was a customer telling you, that is the thing the monthly exists to prevent."
         }
       ]
     },
