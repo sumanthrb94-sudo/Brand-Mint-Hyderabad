@@ -543,10 +543,12 @@
     <script>document.documentElement.classList.add("js");</script>
     <script type="module">
       import { TIERS, STEPS, FAQ, NEEDS, inr } from "/shared/tiers.js?v=v11";
-      import { WHATSAPP } from "/shared/resources.js?v=v11";
       import { SERVICES } from "/shared/services.js?v=v11";
       import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v10";
-      import { PERKS } from "/shared/resources.js?v=v10";
+      // One import, one URL. Two imports of the same module under different
+      // ?v= strings are two different URLs to the browser: it downloads the
+      // file twice and instantiates two copies of the module graph.
+      import { PERKS, WHATSAPP } from "/shared/resources.js?v=v10";
       import { saveBooking } from "/shared/booking.js?v=1";
       import { initFormAutomation } from "/shared/form-automation.js?v=1";
 
