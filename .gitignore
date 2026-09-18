@@ -37,3 +37,4 @@ reports/
 # scripts/gen-image.mjs --people followed by scripts/autocrop.cjs.
 images/ppl-*.png
 images/sc-*.png
+images/.gen-log.tsv

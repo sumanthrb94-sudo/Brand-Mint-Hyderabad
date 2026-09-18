@@ -293,6 +293,14 @@ async function generate(id) {
   const out = `images/${shot.file}.png`;
   fs.writeFileSync(out, Buffer.from(img.inlineData.data, "base64"));
   const kb = Math.round(fs.statSync(out).size / 1024);
+
+  // Append to a ledger, because "how much have we spent on images" turned out
+  // to be answerable only by reading back through a chat transcript. One line
+  // per generation, including the ones that get thrown away — the discarded
+  // ones are most of the bill.
+  fs.appendFileSync("images/.gen-log.tsv",
+    `${new Date().toISOString()}\t${MODEL}\t${id}\t${shot.aspect}\t${kb}\n`);
+
   console.log(`  ok  ${out}  ${kb} KB  ${shot.aspect}`);
   return out;
 }
@@ -417,6 +425,10 @@ if (!KEY) {
   process.exit(1);
 }
 
+/** $0.134 per 1K-2K image on gemini-3-pro-image, Sept 2026. Imagen 4 Fast is
+ *  $0.02 if a run is only about composition and not final quality. */
+const USD_PER_IMAGE = Number(process.env.GEMINI_IMAGE_USD || 0.134);
+
 let failed = 0;
 for (const id of ids) {
   try {
@@ -426,4 +438,11 @@ for (const id of ids) {
     failed += 1;
   }
 }
+const made = ids.length - failed;
+const fsx = await import("node:fs");
+const total = fsx.existsSync("images/.gen-log.tsv")
+  ? fsx.readFileSync("images/.gen-log.tsv", "utf8").trim().split("\n").filter(Boolean).length
+  : made;
+console.log(`\n  ${made} generated this run  ~$${(made * USD_PER_IMAGE).toFixed(2)}`);
+console.log(`  ${total} in images/.gen-log.tsv all time  ~$${(total * USD_PER_IMAGE).toFixed(2)}`);
 process.exit(failed ? 1 : 0);
