@@ -56,12 +56,28 @@ done
 
 V="scale=1080:1920:flags=lanczos,fps=24,format=yuv420p,setpts=PTS-STARTPTS"
 
-# The voiceover is optional. Without one the reel keeps the clips' own room
-# tone at full level; with one, that tone drops to a bed under the voice.
-# BED_VOL is deliberately low — Veo's ambience is atmosphere, not sound design,
-# and anything above about 0.2 fights the read on a phone speaker.
-VO="${2:-marketing/video/out/vo-charon.wav}"
-BED_VOL="${BED_VOL:-0.16}"
+# THE CLIPS' OWN AUDIO IS DISCARDED WHEN THERE IS A VOICEOVER, and that is not
+# a taste call. Veo 3.1 generates native audio, and what it generated here was
+# not room tone — it was synthetic DIALOGUE. Transcribed from the three clips:
+#
+#   "Yes, absolutely. We can have that shipped out by Tuesday. Just one moment
+#    please, let me confirm the tracking details." — "Welcome. Here is the
+#    first package."
+#
+# Two invented voices under the read, one of them making a delivery promise
+# this studio never made, at a level low enough to be heard as mumbling rather
+# than recognised as words. Lowering it does not fix that; it only makes the
+# fabrication harder to notice. BED_VOL=0 drops the bed entirely.
+#
+# Set BED_VOL to something above 0 only after transcribing the clips and
+# confirming there is no speech in them:
+#   python3 scripts/vo-transcribe.py <clip.wav>
+#
+# That leaves the reel as voice over silence. For Reels that is the right
+# default anyway — add music in the Instagram composer, where it is licensed
+# for the platform and viewers can mute it.
+VO="${2:-marketing/video/out/vo-alnilam-tight.wav}"
+BED_VOL="${BED_VOL:-0}"
 
 VIDEO_FC="\
 [0:v]$V[v0];[1:v]$V[v1];[2:v]$V[v2];\
@@ -72,12 +88,23 @@ if [ -f "$VO" ]; then
   VO_IN=(-i "$VO")
   # normalize=0 on amix, or it halves both inputs to avoid clipping and the
   # voice ends up quieter than the bed it is supposed to sit over.
-  AUDIO_FC="\
+  if [ "$BED_VOL" = "0" ]; then
+    # No amix at all: the clips' audio is never routed in, so there is nothing
+    # to leak through at some later edit.
+    AUDIO_FC="\
+[4:a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=30,\
+afade=t=out:st=28.6:d=1.4,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+    echo "  voiceover: $VO  (clips' own audio discarded)"
+  else
+    # normalize=0 on amix, or it halves both inputs to avoid clipping and the
+    # voice ends up quieter than the bed it is supposed to sit over.
+    AUDIO_FC="\
 [0:a][1:a][2:a]concat=n=3:v=0:a=1,aresample=48000,aformat=channel_layouts=stereo,\
 apad=whole_dur=30,volume=$BED_VOL[bed];\
 [4:a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=30[vo];\
 [bed][vo]amix=inputs=2:duration=first:normalize=0,afade=t=out:st=28.6:d=1.4,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
-  echo "  voiceover: $VO  (bed at $BED_VOL)"
+    echo "  voiceover: $VO  (bed at $BED_VOL — CHECK the clips for speech)"
+  fi
 else
   VO_IN=()
   AUDIO_FC="\
