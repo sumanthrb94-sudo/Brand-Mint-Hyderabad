@@ -23,31 +23,78 @@ prices, `25+ projects`, `8+ years` and `Hyderabad + UK` — all of which are on
 
 ---
 
-## Hashtags
+## Hashtags — five, and only five
 
-Instagram weights relevance over volume, and thirty generic tags now reads as
-spam to both the ranker and the reader. **Eight to twelve, mostly local**, is
-the right shape: the buyer is a shop owner within twenty kilometres, not a
-global design audience. Put them in the caption, not the first comment —
-Instagram has said the difference does not matter, and the caption survives
-being reposted.
+**Instagram hard-capped hashtags at five per post and Reel on 19 December 2025.**
+This is enforced by the platform, not advice: over five and Instagram either
+blocks publishing or strips the extras. Caption and first comment draw on the
+*same* five slots, so splitting them buys nothing. Every guide recommending
+11, 20 or 30 tags — including the earlier version of this file — predates the
+cap and is now impossible to follow.
 
-**Core set — use on every post**
+Instagram's stated reason: "using fewer (up to 5) more targeted hashtags,
+rather than many generic ones, can improve both your content's performance and
+people's experience." Read together with Mosseri's position that hashtags do
+not drive reach, the honest reading is that hashtags are now a **topic
+classification signal, not a distribution lever**. Do not expect tags to find
+you an audience.
+
+**The cap is good news here.** With thirty slots the equilibrium was to pad
+with broad national terms that dragged in impressions from people who will
+never buy. With five, spending all of them locally is unambiguously correct —
+the scarcity enforces the focus this account wants anyway.
+
+**Four fixed, one swapped per post.**
 
 ```
-#hyderabadbusiness #hitechcity #smallbusinessindia #hyderabadsmallbusiness
-#websitedesignhyderabad #ecommerceindia #shoplocalhyderabad #brandmint
+#hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness #smallbusinessindia
 ```
 
-**Swap in by topic**
+Fifth slot, by topic:
 
-- Reply-machine post: `#whatsappbusiness #onlinestore #d2cindia`
-- Own-it post: `#instagramshop #smallbusinesstips #onlinepresence`
-- Fixed-price post: `#webdesign #startupindia #businessowner`
+| Post | Fifth tag |
+|---|---|
+| Before you pay anyone | `#businessowner` |
+| A website ₹14,999 | `#webdesign` |
+| Reply machine | `#whatsappbusiness` |
+| That page isn't yours | `#instagramshop` |
 
-**Do not use** `#follow4follow`, `#explorepage`, `#viral`, `#f4f` or any
-engagement-bait tag. They pull in accounts that will never buy and they are the
-clearest signal to the ranker that a post is not worth showing to anyone local.
+Dropped from the earlier list because there is no room and they pull the wrong
+people: `#ecommerceindia`, `#shoplocalhyderabad`, `#hitechcity`, `#brandmint`,
+`#startupindia`, `#onlinestore`, `#d2cindia`, `#smallbusinesstips`,
+`#onlinepresence`. `#brandmint` in particular was spending a scarce slot on a
+term nobody searches.
+
+Never use `#follow4follow`, `#explorepage`, `#viral` or any engagement-bait
+tag. At five slots the cost of a wasted one is now enormous.
+
+---
+
+## Two changes worth more than the hashtags
+
+**1. The name field.** The field under your username is indexed by Instagram
+search and is the single highest-leverage permanent edit available. Set it to:
+
+```
+Brand Mint | Web Design Hyderabad
+```
+
+That matches what a shop owner actually types. It is one change, it applies to
+every post ever made, and it costs nothing.
+
+**2. Write captions for Google as well.** Since 10 July 2025 Instagram allows
+public content from **professional accounts** (18+) to be indexed by Google by
+default. Google queries carry local commercial intent in a way Instagram's
+recommender does not — "website designer in Hyderabad price" is a Google query,
+not an Explore swipe. So the first line of a caption should read like something
+a person would search, and the account must be a professional account for any
+of this to apply.
+
+Two caveats worth stating plainly. The exact list of fields Instagram's own
+search indexes is **not documented by Instagram** — every source describing it
+is a vendor blog, possibly all descended from one ancestor. And alt text is
+worth writing for accessibility and for Google, but the claim that it improves
+Instagram ranking has no primary source behind it.
 
 ---
 
@@ -74,9 +121,8 @@ clearest signal to the ranker that a post is not worth showing to anyone local.
 > HITEC City, Hyderabad. WhatsApp +91 77999 34943 and ask what yours would cost.
 > If a cheaper option is the honest answer, we will say so.
 >
-> #hyderabadbusiness #hitechcity #smallbusinessindia #hyderabadsmallbusiness
-> #websitedesignhyderabad #ecommerceindia #shoplocalhyderabad #brandmint
-> #whatsappbusiness #onlinestore #d2cindia
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #whatsappbusiness
 
 **Meta description** (155 chars, for the landing page this post points at)
 
@@ -118,9 +164,8 @@ clearest signal to the ranker that a post is not worth showing to anyone local.
 > Every price in full at brandmintstudios.in — no form, no discovery call to find
 > out what it costs.
 >
-> #hyderabadbusiness #hitechcity #smallbusinessindia #hyderabadsmallbusiness
-> #websitedesignhyderabad #ecommerceindia #shoplocalhyderabad #brandmint
-> #instagramshop #smallbusinesstips #onlinepresence
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #instagramshop
 
 **Meta description**
 
@@ -162,9 +207,8 @@ clearest signal to the ranker that a post is not worth showing to anyone local.
 > WhatsApp +91 77999 34943 and ask what yours would cost. Straight answer on the
 > first message.
 >
-> #hyderabadbusiness #hitechcity #smallbusinessindia #hyderabadsmallbusiness
-> #websitedesignhyderabad #ecommerceindia #shoplocalhyderabad #brandmint
-> #webdesign #startupindia #businessowner
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #webdesign
 
 **Meta description**
 
@@ -240,9 +284,8 @@ people can tell.
 >
 > brandmintstudios.in · WhatsApp +91 77999 34943
 >
-> #hyderabadbusiness #hitechcity #smallbusinessindia #hyderabadsmallbusiness
-> #websitedesignhyderabad #shoplocalhyderabad #brandmint #businessowner
-> #smallbusinesstips #startupindia
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #businessowner
 
 **Meta description**
 
