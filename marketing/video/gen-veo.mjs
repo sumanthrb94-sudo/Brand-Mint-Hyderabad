@@ -100,17 +100,43 @@ const SHOTS = {
   },
   // Beat 3, over "We build the thing that answers them for you... orders
   // straight to WhatsApp."
+  //
+  // The first version of this shot handed a parcel from her hands to his, and
+  // the parcel did not survive the journey: a floppy blob at 5.8s, a flat slab
+  // at 6.4s, a thin disc at 7.0s, a sheet of paper by 7.6s. An object passing
+  // between two pairs of hands is the hardest thing to ask of these models —
+  // it has to stay the same object while both its supports change. So the
+  // handoff is gone. She sets the box down, he lifts it; the box is only ever
+  // held by one person at a time, and the prompt nails its shape down hard.
   after: {
     n: 3,
     title: "It runs itself",
     prompt:
-      "A styled packing bench in a bright clean room: an Indian woman folds goods " +
-      "into a premium plain box with tissue paper and sets it onto a neat row of " +
-      "three identical finished parcels, then reaches for the next. Daylight from " +
-      "a large window, pale wood, a small emerald vase at the edge of the bench. " +
-      "At the far edge of frame a delivery rider steps in and lifts the first " +
-      "parcel away. The camera pulls back slowly, opening the frame. Calm, " +
-      "ordered, plenty happening without anyone rushing.",
+      "A bright clean packing room. An Indian woman in her thirties places ONE " +
+      "rigid brown corrugated cardboard shipping box, closed and taped, down " +
+      "onto a pale wood bench beside three identical finished boxes, and takes " +
+      "her hands away. A delivery rider then steps in from the right and lifts " +
+      "that same box off the bench. Only one person touches the box at a time — " +
+      "she has fully let go before he takes it, and there is no moment where " +
+      "both are holding it. " +
+      "THE BOX IS RIGID AND KEEPS ITS EXACT SHAPE, SIZE, PROPORTIONS AND COLOUR " +
+      "for every frame: a firm cubic cardboard carton with square corners and " +
+      "flat faces. It never becomes soft, floppy, flat, thin, a disc, a tray, a " +
+      "sheet of paper or a bag, and it never changes size. " +
+      "The courier is a young Indian man in plain ordinary clothes — a simple " +
+      "dark polo shirt and trousers. NO helmet, NO crash helmet, NO large " +
+      "insulated food-delivery backpack, NO bright blue or branded uniform, no " +
+      "food-delivery livery of any kind. He is collecting a parcel, not " +
+      "delivering a meal. What he wears stays identical throughout; nothing " +
+      "appears or disappears. " +
+      "She is working, not posing — she places her box, straightens the row and " +
+      "turns back to the next one. " +
+      "The room is the warm premium one from the rest of this film: generous " +
+      "golden daylight through a large window, pale wood bench, off-white walls, " +
+      "greenery, one small emerald-green glass vase on the bench. Warm and " +
+      "inviting, never a cold white clinical warehouse, never flat bright " +
+      "fluorescent light. " +
+      "The camera pulls back slowly, opening the frame. Calm and ordered.",
   },
 };
 
