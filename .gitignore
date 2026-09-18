@@ -25,7 +25,12 @@ images/crm-flow.png
 # with cut-30.sh; 10 MB of mp4 does not belong in git history.
 marketing/video/out/
 images/avatar-host-*.png
-marketing/social/out/
+# The rendered slides ARE the deliverable — 1080x1350 PNGs the studio posts.
+# They were ignored as "regenerable", which is true and beside the point: a
+# regenerable file still has to exist somewhere the person posting it can
+# reach, and 200 MB of images will not go through a chat upload or a Drive
+# tool that takes base64 inline. Committed, they are one download from GitHub.
+# The 4K SOURCES stay ignored — those are 7 MB each and genuinely regenerable.
 images/hook-*.png
 images/bg-*.png
 
