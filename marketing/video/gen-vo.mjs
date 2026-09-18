@@ -37,7 +37,29 @@ const API = "https://generativelanguage.googleapis.com/v1beta";
    brief says about duration, so asking for "about twenty-six seconds" does
    nothing on its own. 57 words is what fits. Speeding a long read up with
    atempo was the alternative and it is audible on a voice this exposed. */
-const SCRIPT = `Read this as a calm, warm Indian English voiceover for a premium advertisement. \
+const SCRIPTS = {};
+
+/* UGC register. A different job from the brand film: this one is a person
+   talking to their own phone, not a narrator. Faster (UGC reads land nearer
+   2.6 words a second), first person, contractions, and it opens mid-thought
+   because a UGC ad that opens politely gets scrolled past. */
+SCRIPTS.ugc = `Read this as a real person talking straight into their phone camera — Indian \
+English, casual, quick, slightly amused. Not an announcer. Run the sentences together the way \
+people actually talk, and only pause where there is a full stop. Energetic but not shouty.
+
+Okay — if you run a shop in Hyderabad and you're still taking orders on WhatsApp, watch this.
+
+Same four questions. All day. Price. Timing. Do you deliver.
+
+You're not running a business. You're running a reply machine.
+
+So — a proper store. Your own domain. UPI, cash on delivery, GST invoice, automatic.
+
+Fixed price, in writing, before anyone starts.
+
+Brand Mint. Hyderabad.`;
+
+SCRIPTS.brand = `Read this as a calm, warm Indian English voiceover for a premium advertisement. \
 Unhurried and confident, never salesy. Take a real pause at every full stop and a longer one at \
 each paragraph break.
 
@@ -52,11 +74,20 @@ Fixed price, in writing, before anyone starts.
 
 Brand Mint. Hyderabad.`;
 
+const WHICH = process.argv.includes("--script")
+  ? process.argv[process.argv.indexOf("--script") + 1]
+  : "brand";
+const SCRIPT = SCRIPTS[WHICH];
+if (!SCRIPT) { console.error(`Unknown --script "${WHICH}". Try: ${Object.keys(SCRIPTS).join(", ")}`); process.exit(1); }
+
 /** Two candidates rather than one pick. A voice is the most subjective thing
  *  in the reel and costs almost nothing to try twice. */
 const VOICES = {
-  sulafat: "Sulafat", // warm
-  charon: "Charon", // informative, measured
+  sulafat: "Sulafat",             // warm       — brand film
+  charon: "Charon",               // measured   — brand film
+  puck: "Puck",                   // upbeat     — UGC
+  zubenelgenubi: "Zubenelgenubi", // casual     — UGC
+  sadachbia: "Sadachbia",         // lively     — UGC
 };
 
 /** Gemini TTS returns headerless signed 16-bit little-endian PCM. Written
@@ -141,14 +172,19 @@ async function speak(id) {
   const pcm = Buffer.from(part.inlineData.data, "base64");
   const fs = await import("node:fs");
   fs.mkdirSync("marketing/video/out", { recursive: true });
-  const out = `marketing/video/out/vo-${id}.wav`;
+  const out = `marketing/video/out/vo-${WHICH}-${id}.wav`;
   fs.writeFileSync(out, wav(pcm, rate));
   const secs = (pcm.length / 2 / rate).toFixed(1);
   console.log(`  ok  ${out}  ${secs}s  ${rate} Hz mono  (${voiceName})`);
   return out;
 }
 
-const ids = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KEY);
+// --script and --key both take a value, so drop the word after each of them
+// or it gets read as a voice id.
+const _argv = process.argv.slice(2);
+const _skip = new Set();
+_argv.forEach((a, i) => { if (a === "--script" || a === "--key") _skip.add(i + 1); });
+const ids = _argv.filter((a, i) => !a.startsWith("--") && !_skip.has(i));
 if (!KEY) {
   console.error("No GEMINI_API_KEY (or --key).");
   process.exit(1);

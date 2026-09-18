@@ -98,8 +98,68 @@ const SHOTS = {
   },
 };
 
+
+/* ------------------------------ UGC SHOT SET ------------------------------
+   A different film entirely: phone-shot, handheld, daylight, no grade. Cut at
+   about four seconds a shot rather than eight, because that is the rhythm the
+   format runs at.
+
+   No face here either, and that is not the no-faces house rule being applied
+   blindly — it is the whole reason this is POV. A UGC ad is normally a person
+   to camera saying "this worked for me", and a generated person saying that
+   about Brand Mint is a fabricated testimonial. POV is the other native UGC
+   grammar and it costs nothing in authenticity. */
+const UGC_HOUSE =
+  "Shot on a phone held in one hand: natural handheld micro-shake, vertical 9:16, " +
+  "daylight from a window, no colour grade, slightly blown highlights, ordinary " +
+  "amateur framing that is a little off-centre. It should look filmed by the person " +
+  "it is happening to, not by a crew. " +
+  "Absolutely no text, letters, numbers, words, signage, icons, notifications, " +
+  "readable user interface, logos or watermarks anywhere in frame. No faces, no " +
+  "people visible above the wrist — hands only.";
+
+const UGC = {
+  scroll: { n: 1, title: "The reply machine", prompt:
+    "Handheld point-of-view looking down at a hand holding a phone. On the screen, a " +
+    "long column of blank grey and pale-green message bubbles, no readable text in any " +
+    "of them, and a thumb flicking upward fast so the column blurs. The other hand is " +
+    "half in frame holding a pen. Cluttered counter underneath, daylight." },
+  counter: { n: 2, title: "Juggling", prompt:
+    "Handheld point-of-view over a small shop counter in daylight: stacked cardboard " +
+    "cartons of stock, a roll of tape, a calculator, and a phone lying face-up with a " +
+    "blank screen. A hand reaches in, picks the phone up, puts it down again, then " +
+    "picks up the pen instead. Slightly rushed camera movement." },
+  book: { n: 3, title: "The order book", prompt:
+    "Handheld point-of-view straight down onto a paper order book on a counter, its " +
+    "pages covered in dense illegible out-of-focus handwriting. A hand flips two pages " +
+    "back and forth quickly looking for something, then taps the page with a pen. " +
+    "Daylight, a little camera wobble." },
+  store: { n: 4, title: "The store", prompt:
+    "Handheld point-of-view of two hands holding a phone in daylight. The screen shows " +
+    "a clean, simple shop layout: a grid of soft blank product tiles and one rounded " +
+    "mint-green button near the bottom, all of it wordless with no readable text. A " +
+    "thumb scrolls the grid slowly and steadily. Calm after the earlier rush." },
+  pack: { n: 5, title: "Going out", prompt:
+    "Handheld point-of-view down onto a counter as two hands pull a strip of tape from " +
+    "a tape gun and press it across a brown paper parcel, then slide it onto a neat " +
+    "stack of identical parcels. Quick, practised, unfussy. Daylight." },
+  done: { n: 6, title: "Done", prompt:
+    "Handheld point-of-view of a hand placing a phone face-up onto a clear counter " +
+    "beside a stack of wrapped parcels, screen glowing a soft blank mint green with " +
+    "nothing written on it, then the hand withdraws out of frame. The camera settles " +
+    "and steadies for the first time. Daylight, calm." },
+};
+
 const AR = "9:16";
 const SECONDS = 8;
+
+const SET = process.argv.includes("--set")
+  ? process.argv[process.argv.indexOf("--set") + 1]
+  : "film";
+const SHOTSETS = { film: { shots: SHOTS, house: HOUSE, prefix: "" },
+                   ugc:  { shots: UGC,   house: UGC_HOUSE, prefix: "ugc-" } };
+if (!SHOTSETS[SET]) { console.error(`Unknown --set "${SET}". Try: film, ugc`); process.exit(1); }
+const ACTIVE = SHOTSETS[SET];
 
 /** Veo answers 503 with an empty body under load, often enough that a single
  *  attempt is not a fair test of a prompt. Three tries with backoff; anything
@@ -148,7 +208,7 @@ async function curlPost(url, bodyObj) {
 
 async function start(shot, attempt = 1) {
   const r = await curlPost(`${API}/models/${MODEL}:predictLongRunning?key=${KEY}`, {
-      instances: [{ prompt: `${shot.prompt}\n\n${HOUSE}` }],
+      instances: [{ prompt: `${shot.prompt}\n\n${ACTIVE.house}` }],
       parameters: {
         aspectRatio: AR,
         durationSeconds: SECONDS,
@@ -253,15 +313,15 @@ async function download(uri, out) {
 }
 
 async function make(id) {
-  const shot = SHOTS[id];
-  if (!shot) throw new Error(`Unknown shot "${id}"`);
-  const label = `${shot.n}/3 ${id}`;
+  const shot = ACTIVE.shots[id];
+  if (!shot) throw new Error(`Unknown shot "${id}" in set ${SET}`);
+  const label = `${shot.n}/${Object.keys(ACTIVE.shots).length} ${id}`;
   const op = await start(shot);
   const done = await wait(op, label);
   const uri = videoUri(done);
   const fs = await import("node:fs");
   fs.mkdirSync("marketing/video/out", { recursive: true });
-  const out = `marketing/video/out/${id}.mp4`;
+  const out = `marketing/video/out/${ACTIVE.prefix}${id}.mp4`;
   const kb = await download(uri, out);
   process.stdout.write("\r".padEnd(50) + "\r");
   console.log(`  ok  ${out}  ${kb} KB  ${SECONDS}s ${AR}  (${shot.title})`);
@@ -311,7 +371,11 @@ if (!KEY) {
   process.exit(1);
 }
 
-const ids = argv.includes("--all") ? Object.keys(SHOTS) : argv.filter((a) => !a.startsWith("--") && a !== KEY);
+const _skip = new Set();
+argv.forEach((a, i) => { if (a === "--set" || a === "--key") _skip.add(i + 1); });
+const ids = argv.includes("--all")
+  ? Object.keys(ACTIVE.shots)
+  : argv.filter((a, i) => !a.startsWith("--") && !_skip.has(i));
 let failed = 0;
 for (const id of ids) {
   try {
