@@ -74,7 +74,8 @@
           "em": "Or just comment your question.",
           "body": "Tell us the one question you answer most and we'll show you where it lives on a page. We'll also tell you if you don't need us yet."
         }
-      ]
+      ],
+      "batch": "shipped"
     },
     {
       "id": "own-it",
@@ -124,7 +125,7 @@
           "kicker": "Fixed price, in writing",
           "head": "Online store",
           "price": "from ₹49,999",
-          "sub": "GST extra · four to twelve weeks",
+          "sub": "GST extra · four to twelve+ weeks",
           "body": "Four tiers. Each includes everything in the one before it, so moving up later is an add-on, never a rebuild. Ask which one fits on WhatsApp."
         },
         {
@@ -134,7 +135,8 @@
           "em": "Comment your trade and we'll say which.",
           "body": "Boutique, bakery, gym, wholesale — comment what you sell and we'll tell you which tier is the honest answer, here in the replies."
         }
-      ]
+      ],
+      "batch": "shipped"
     },
     {
       "id": "fixed-price",
@@ -195,7 +197,8 @@
           "em": "Or post the last quote you got.",
           "body": "No names, just the number and what it covered — comment it and we'll tell you what's missing from it. If a cheaper option is the honest one, we'll say so."
         }
-      ]
+      ],
+      "batch": "shipped"
     },
     {
       "id": "before-you-pay",
@@ -265,6 +268,730 @@
           "head": "We answer all ten, in writing.",
           "em": "Which one would yours fail?",
           "body": "Comment the number — 1 to 10 — and we'll tell you what to ask next. Static site ₹14,999. Stores from ₹49,999. GST extra."
+        }
+      ],
+      "batch": "shipped"
+    },
+    {
+      "id": "inside-14999",
+      "title": "What ₹14,999 buys",
+      "batch": "price",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Line by line",
+          "huge": "WHAT|₹14,999|BUYS",
+          "accent": true,
+          "sub": "Not a range. Not 'starting from'. The whole list, and what is not on it.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Two weeks, one price",
+          "huge": "FIVE PAGES|TWO WEEKS|ONE PRICE",
+          "accent": true,
+          "sub": "A static website, live in two weeks, ₹14,999 one time and GST extra. Everything below is included in that number."
+        },
+        {
+          "kind": "list",
+          "kicker": "Everything in the ₹14,999",
+          "head": "What you get.",
+          "items": [
+            "Up to 5 pages, written and built with you",
+            "Your domain, SSL and email set up",
+            "WhatsApp and call buttons that work on a phone",
+            "Google Search Console verified and submitted",
+            "Visitor analytics from day one"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "Said plainly",
+          "head": "What it is not.",
+          "body": "It does not take payments and it does not hold stock. If you need to sell online, you need a store — that starts at ₹49,999, and we will say so on the call rather than after it."
+        },
+        {
+          "kind": "price",
+          "kicker": "One time, GST extra",
+          "head": "Static website",
+          "price": "₹14,999",
+          "sub": "live in two weeks",
+          "body": "Scope and price signed before anyone starts. Not sure this is the one you need? Ask on WhatsApp first."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask what yours would cost.",
+          "em": "How many pages do you actually need?",
+          "body": "Comment the number — 3, 5, 10 — and we'll tell you whether ₹14,999 covers it or whether you are being sold too much."
+        }
+      ]
+    },
+    {
+      "id": "why-49999",
+      "title": "₹14,999 or ₹49,999",
+      "batch": "price",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "The four things that change",
+          "huge": "₹14,999|OR|₹49,999",
+          "accent": true,
+          "sub": "Same studio, same care. So why does one cost three times the other?",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "It is not more pages",
+          "huge": "IT IS NOT|MORE|PAGES",
+          "accent": true,
+          "sub": "A store costs more because four things start existing: money changing hands, stock, orders and invoices. Each one has to be right every single time."
+        },
+        {
+          "kind": "list",
+          "kicker": "What a store adds",
+          "head": "Four things that change.",
+          "items": [
+            "It takes money — UPI, cards, cash on delivery",
+            "It knows stock, and stops selling what's gone",
+            "Every order becomes a record you can act on",
+            "A GST invoice goes out, correctly, on its own"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "The honest version",
+          "head": "If nobody pays you on the page, don't buy a store.",
+          "body": "Plenty of businesses need five good pages and a WhatsApp button. We would rather sell you that than a store you don't use."
+        },
+        {
+          "kind": "price",
+          "kicker": "Four tiers, GST extra",
+          "head": "Online store",
+          "price": "from ₹49,999",
+          "sub": "four to twelve+ weeks",
+          "body": "Each tier includes everything in the one before it, so moving up later is an add-on and never a rebuild. Ask which one fits on WhatsApp."
+        },
+        {
+          "kind": "cta",
+          "kicker": "brandmintstudios.in",
+          "head": "Both prices are on the site.",
+          "em": "Do people pay you before they arrive?",
+          "body": "Comment yes or no — that single answer decides which of the two you need, and we'll tell you which in the replies."
+        }
+      ]
+    },
+    {
+      "id": "not-in-the-quote",
+      "title": "Not in the quote",
+      "batch": "price",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Read your quote again",
+          "huge": "NOT IN|THE|QUOTE",
+          "accent": true,
+          "sub": "Eight charges that turn up after you have signed. Every one of them is normal, and every one should have been stated.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Ask before you sign",
+          "huge": "THE BILL|COMES|LATER",
+          "accent": true,
+          "sub": "None of these are scams. They are real costs that a quote can quietly leave out — so the number you compared was never the number you pay."
+        },
+        {
+          "kind": "list",
+          "kicker": "Turns up later · 1 of 2",
+          "head": "Things that run out.",
+          "items": [
+            "Domain renewal, every year, forever",
+            "Hosting — whose account is it, really?",
+            "SSL certificate renewal",
+            "Email hosting, per mailbox, per month"
+          ]
+        },
+        {
+          "kind": "list",
+          "kicker": "Turns up later · 2 of 2",
+          "head": "Things billed per unit.",
+          "items": [
+            "Per extra page, after the first few",
+            "Per product uploaded to the catalogue",
+            "Content and photography, if you don't supply it",
+            "Handover — being given your own accounts"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "What we do instead",
+          "head": "The number is the number.",
+          "body": "Scope and price in a signed agreement before anyone starts. No hourly billing, no extras inside a tier, and a GST invoice for every payment."
+        },
+        {
+          "kind": "price",
+          "kicker": "One time, GST extra",
+          "head": "Static website",
+          "price": "₹14,999",
+          "sub": "stores from ₹49,999",
+          "body": "Domain, SSL and email setup are in that number. Renewals are yours and in your name, which is the point of them being yours."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Send us a quote to read.",
+          "em": "Which of the eight caught you?",
+          "body": "Comment the one that turned up on your last invoice. If you have a live quote, send it over — no names, and we'll mark what is missing."
+        }
+      ]
+    },
+    {
+      "id": "what-9999-runs",
+      "title": "₹9,999 a month",
+      "batch": "price",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Site + CRM",
+          "huge": "₹9,999|A MONTH",
+          "accent": true,
+          "sub": "There is a monthly because the thing keeps running. Here is exactly what that pays for.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "The honest reason",
+          "huge": "TOKENS|EXPIRE",
+          "accent": true,
+          "sub": "WhatsApp and Meta connections break when tokens expire, and someone has to fix them. A one-time fee for a living system is how you end up with a dead one."
+        },
+        {
+          "kind": "list",
+          "kicker": "What the monthly covers",
+          "head": "What keeps running.",
+          "items": [
+            "Hosting, and the site staying up",
+            "Security updates and patches",
+            "Support — a person, not a ticket form",
+            "WhatsApp and Meta connections kept alive"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "What is yours regardless",
+          "head": "The accounts are in your name.",
+          "body": "Domain, website, data, WhatsApp and ad accounts all sit in your business's name. Export your leads whenever you like. Meta bills its own message fees to your card, not ours."
+        },
+        {
+          "kind": "price",
+          "kicker": "Built once, then maintenance",
+          "head": "Site + CRM",
+          "price": "₹79,999",
+          "sub": "setup · then ₹9,999/mo · GST extra",
+          "body": "Six weeks to live. 12-month minimum on the monthly. Ask for the full breakdown on WhatsApp before you decide."
+        },
+        {
+          "kind": "cta",
+          "kicker": "brandmintstudios.in/platform",
+          "head": "The whole page is public.",
+          "em": "Would you rather pay once and risk it dying?",
+          "body": "Genuine question — comment your answer. Plenty of people say yes, and for some businesses that is the right call. We'll tell you which you are."
+        }
+      ]
+    },
+    {
+      "id": "open-the-work",
+      "title": "Open the work",
+      "batch": "proof",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Not mockups",
+          "huge": "OPEN|THE|WORK",
+          "accent": true,
+          "sub": "Four live sites you can open right now, on your own phone, without asking us for anything.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Type them in yourself",
+          "huge": "LIVE SITES|NOT|SCREENSHOTS",
+          "accent": true,
+          "sub": "Anyone can show you a mockup. These are addresses — put them in your browser and see what actually loads."
+        },
+        {
+          "kind": "statement",
+          "kicker": "Online store",
+          "head": "SimplySip",
+          "body": "simplysip.in — sold through WhatsApp DMs. Now customers check out themselves: UPI, cards or cash on delivery, and every order arrives priced and recorded."
+        },
+        {
+          "kind": "statement",
+          "kicker": "Online store",
+          "head": "Trésor Couture",
+          "body": "tresorcouture.in — sold to whoever walked in. Now the label reaches past the shop floor, with its own checkout and a GST invoice on every order."
+        },
+        {
+          "kind": "statement",
+          "kicker": "Website",
+          "head": "GreenTeam",
+          "body": "thegreenteam.in — the pitch used to be a PDF catalogue, sent on request. Now the site does that part before the call, not after it."
+        },
+        {
+          "kind": "statement",
+          "kicker": "B2B ordering platform",
+          "head": "FreshKart",
+          "body": "Wholesale orders came in by phone, one at a time. Now buyers place their own, priced correctly, without anyone picking up."
+        },
+        {
+          "kind": "cta",
+          "kicker": "25+ projects · Hyderabad and the UK",
+          "head": "Open them. Then talk to us.",
+          "em": "Which one is closest to your business?",
+          "body": "Comment the name and we'll tell you what that build cost, how long it took and what we'd do differently for you."
+        }
+      ]
+    },
+    {
+      "id": "before-after",
+      "title": "What changed",
+      "batch": "proof",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Four real businesses",
+          "huge": "BEFORE|AFTER",
+          "accent": true,
+          "sub": "Not what we promise. What actually changed for four businesses after the site went live.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "No numbers we can't show you",
+          "huge": "NO FAKE|METRICS|HERE",
+          "accent": true,
+          "sub": "You will not find a revenue figure or a percentage on this post. What you will find is what the owner used to do, and what they do now."
+        },
+        {
+          "kind": "list",
+          "kicker": "SimplySip · online store",
+          "head": "From DMs to checkout.",
+          "items": [
+            "Before — every sale negotiated in a WhatsApp DM",
+            "After — customers check out themselves",
+            "UPI, cards or cash on delivery",
+            "Every order arrives priced and recorded"
+          ]
+        },
+        {
+          "kind": "list",
+          "kicker": "Trésor Couture · online store",
+          "head": "Past the shop floor.",
+          "items": [
+            "Before — sold to whoever walked in",
+            "After — the label reaches beyond the shop",
+            "Its own checkout, not a DM thread",
+            "A GST invoice on every single order"
+          ]
+        },
+        {
+          "kind": "list",
+          "kicker": "GreenTeam · website",
+          "head": "The catalogue, before the call.",
+          "items": [
+            "Before — a PDF, sent on request",
+            "After — the site does that part first",
+            "The call starts further along",
+            "Nobody waits on an email attachment"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "FreshKart · B2B ordering",
+          "head": "Nobody picks up the phone any more.",
+          "body": "Wholesale orders used to come in one at a time, by phone. Now buyers place their own, priced correctly, without anyone answering."
+        },
+        {
+          "kind": "cta",
+          "kicker": "brandmintstudios.in",
+          "head": "All four are live. Go and look.",
+          "em": "What would 'after' look like for you?",
+          "body": "Comment what you sell and what takes the most time right now. We'll tell you, honestly, whether a site would actually fix it."
+        }
+      ]
+    },
+    {
+      "id": "after-you-say-yes",
+      "title": "After you say yes",
+      "batch": "proof",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "No pitch deck",
+          "huge": "AFTER|YOU SAY|YES",
+          "accent": true,
+          "sub": "What actually happens between the first message and a live site. Three steps, and you can stop at any of them.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Nothing due until you sign",
+          "huge": "NO|DISCOVERY|FEE",
+          "accent": true,
+          "sub": "Thirty minutes on WhatsApp or a call. You leave that call with a scope and a price whether or not you go ahead."
+        },
+        {
+          "kind": "list",
+          "kicker": "Step by step",
+          "head": "Three steps, that's all.",
+          "items": [
+            "Book a call — 30 minutes, no pitch deck, no fee",
+            "A fixed price in writing, before you pay",
+            "Sign, pay 50%, and your portal goes live"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "What the portal is",
+          "head": "You watch it happen.",
+          "body": "Timeline, files to approve, invoices and a direct line to us — in one place, from the day the deposit lands. You are never wondering what week it is."
+        },
+        {
+          "kind": "list",
+          "kicker": "Real timings",
+          "head": "How long it actually takes.",
+          "items": [
+            "Static website — two weeks",
+            "WhatsApp Store — four weeks",
+            "Site + CRM — six weeks to live",
+            "Larger stores — eight to twelve+ weeks"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "And the rest of it",
+          "head": "50% to start, 50% before launch.",
+          "body": "A GST invoice for every payment. No hourly billing, no extras inside a tier. Ask us to walk you through it on WhatsApp before you commit to anything."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Book the 30 minutes.",
+          "em": "What's stopping you starting?",
+          "body": "Comment it — budget, timing, not sure what you need, been burned before. We answer every one, including the ones that end in 'don't hire us yet'."
+        }
+      ]
+    },
+    {
+      "id": "what-we-need",
+      "title": "What we need from you",
+      "batch": "proof",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Before we start",
+          "huge": "WHAT|WE NEED|FROM YOU",
+          "accent": true,
+          "sub": "Four things. If you have none of them, say so — that is a normal answer and it changes nothing.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "This is why builds slip",
+          "huge": "FOUR|THINGS|THAT'S ALL",
+          "accent": true,
+          "sub": "A build almost never runs late because of code. It runs late waiting for product photos. Here is the whole list, up front."
+        },
+        {
+          "kind": "list",
+          "kicker": "The list · 1 of 2",
+          "head": "Your side of it.",
+          "items": [
+            "Product list and photos, with prices and stock",
+            "Business and GST details — name, address, GSTIN"
+          ]
+        },
+        {
+          "kind": "list",
+          "kicker": "The list · 2 of 2",
+          "head": "Accounts and assets.",
+          "items": [
+            "Logo and brand assets — whatever you have",
+            "Your domain, and a Razorpay account in your name"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "If you have none of it",
+          "head": "That is a normal answer.",
+          "body": "No logo, no domain, no catalogue, no GST yet. We work with that and we walk you through the accounts. Nobody is expected to arrive prepared."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The one that matters most",
+          "head": "Fill in the catalogue template early.",
+          "body": "We send it on the call. Filling it in early is the single biggest thing that keeps a build on schedule — more than any decision we make."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask for the template now.",
+          "em": "Which of the four don't you have?",
+          "body": "Comment it. We'll tell you whether it blocks anything, and in most cases it does not — people are usually worrying about the wrong one."
+        }
+      ]
+    },
+    {
+      "id": "search-your-shop",
+      "title": "Search your own shop",
+      "batch": "pre-adoption",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Do this now",
+          "huge": "SEARCH|YOUR OWN|SHOP",
+          "accent": true,
+          "sub": "Open Google. Type your shop name and your area. Look at what a customer sees.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Thirty seconds",
+          "huge": "TRY IT|BEFORE YOU|SWIPE ON",
+          "accent": true,
+          "sub": "You will get one of four results, and three of them are costing you customers you will never hear about."
+        },
+        {
+          "kind": "list",
+          "kicker": "Type this in",
+          "head": "Exactly what a customer types.",
+          "items": [
+            "Your shop name plus your area",
+            "What you sell plus 'near me'",
+            "What you sell plus your suburb",
+            "Your shop name plus 'price'"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "What most people find",
+          "head": "A map pin and nothing else.",
+          "body": "Maybe an Instagram page. No prices, no timings, no way to know if you deliver. So they go back and tap the next result."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The part you never hear about",
+          "head": "There is no missed call for this.",
+          "body": "Nobody messages to say they couldn't find your price. You only see the customers who got through — never the ones who didn't."
+        },
+        {
+          "kind": "statement",
+          "kicker": "What fixes it",
+          "head": "A page with the answers on it.",
+          "body": "Prices, timings, delivery, a WhatsApp button. Five pages, your own domain, ₹14,999 one time and GST extra. Ask us what yours would look like."
+        },
+        {
+          "kind": "cta",
+          "kicker": "brandmintstudios.in",
+          "head": "We'll search it with you.",
+          "em": "What came up when you searched?",
+          "body": "Comment what you found — a map pin, an old Justdial listing, nothing at all. We'll tell you the one thing to fix first, free."
+        }
+      ]
+    },
+    {
+      "id": "whatsapp-catalogue",
+      "title": "The catalogue isn't a shop",
+      "batch": "pre-adoption",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "If you sell on WhatsApp",
+          "huge": "YOUR|CATALOGUE|ISN'T A SHOP",
+          "accent": true,
+          "sub": "It works, right up until the day it doesn't. Here is where the line is.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Keep WhatsApp. Add the page.",
+          "huge": "IT WORKS|UNTIL|IT DOESN'T",
+          "accent": true,
+          "sub": "Nobody is telling you to stop selling on WhatsApp. The question is what happens on the days you cannot answer it."
+        },
+        {
+          "kind": "list",
+          "kicker": "What a catalogue can't do",
+          "head": "Four things it will never do.",
+          "items": [
+            "Take the money while you're asleep",
+            "Stop selling something you've run out of",
+            "Send a GST invoice on its own",
+            "Tell you what people looked at and didn't buy"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "The real cost",
+          "head": "You are the checkout.",
+          "body": "Every sale waits for you to reply. That is fine at ten orders a week and it is the whole problem at fifty."
+        },
+        {
+          "kind": "statement",
+          "kicker": "What doesn't change",
+          "head": "WhatsApp stays.",
+          "body": "Orders still land on your phone. The WhatsApp Store tier is built so you run the entire thing from WhatsApp — returns and refunds included."
+        },
+        {
+          "kind": "price",
+          "kicker": "Four tiers, GST extra",
+          "head": "WhatsApp Store",
+          "price": "₹49,999",
+          "sub": "four weeks · GST extra",
+          "body": "Run it all from your phone: orders, returns and customers on WhatsApp, with a real checkout behind it. Ask if this is the tier you need."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask before you spend anything.",
+          "em": "How many orders a week are you at?",
+          "body": "Comment a rough number. Under ten and we will probably tell you to wait — that answer is free and we give it often."
+        }
+      ]
+    },
+    {
+      "id": "diwali-deadline",
+      "title": "Diwali is 8 November",
+      "batch": "festive",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Diwali · 8 November 2026",
+          "huge": "DIWALI|8 NOV",
+          "accent": true,
+          "sub": "If you want to be selling online for it, the maths says you sign in October.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Work backwards",
+          "huge": "START BY|11|OCTOBER",
+          "accent": true,
+          "sub": "A WhatsApp Store takes four weeks. Count back from 8 November and 11 October is the last comfortable Monday to sign."
+        },
+        {
+          "kind": "list",
+          "kicker": "Counting back from 8 November",
+          "head": "The real dates.",
+          "items": [
+            "Static site · 2 weeks · by 25 Oct",
+            "WhatsApp Store · 4 weeks · by 11 Oct",
+            "Larger store · 8 weeks · by 13 Sept",
+            "Site + CRM · 6 weeks · by 27 Sept"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "Why the deadline is real",
+          "head": "It is not urgency, it is arithmetic.",
+          "body": "The build takes as long as it takes. We would rather tell you in September that eight weeks no longer fits than take the deposit and rush it."
+        },
+        {
+          "kind": "statement",
+          "kicker": "If you have left it late",
+          "head": "Two weeks still fits.",
+          "body": "A static website with your prices, timings and a WhatsApp button will do more for a festive season than no page at all. ₹14,999, GST extra."
+        },
+        {
+          "kind": "price",
+          "kicker": "Four weeks, GST extra",
+          "head": "WhatsApp Store",
+          "price": "₹49,999",
+          "sub": "sign by 11 October",
+          "body": "Orders, returns and customers on WhatsApp, with a real checkout behind it. Message us this week and we'll tell you honestly if it still fits."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask if your date still works.",
+          "em": "What are you hoping to sell this Diwali?",
+          "body": "Comment it and we'll tell you which of the four dates above is yours — or that you should aim at Sankranti instead and do it properly."
+        }
+      ]
+    },
+    {
+      "id": "free-checklist",
+      "title": "The launch checklist",
+      "batch": "giveaway",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Free, no email required",
+          "huge": "THE 20|POINT|CHECK",
+          "accent": true,
+          "sub": "The pass every Brand Mint store clears before it goes live. Run it against a site you already have.",
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Ask and we send it",
+          "huge": "NO FORM|NO EMAIL|NO CATCH",
+          "accent": true,
+          "sub": "It is a PDF. Message us the word CHECKLIST on WhatsApp and it comes back. We do not add you to anything."
+        },
+        {
+          "kind": "list",
+          "kicker": "What it checks · 1 of 2",
+          "head": "Before anything goes live.",
+          "items": [
+            "Lighthouse across all four axes",
+            "Real-device mobile QA, not a browser resize",
+            "Cross-browser check",
+            "WCAG AA accessibility"
+          ]
+        },
+        {
+          "kind": "list",
+          "kicker": "What it checks · 2 of 2",
+          "head": "The things that break quietly.",
+          "items": [
+            "End-to-end form and checkout tests",
+            "Link-preview validation",
+            "DNS and SSL verification",
+            "Analytics firing before launch, not after"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "Use it against us",
+          "head": "Including on our own work.",
+          "body": "It is the same list we run. If you are talking to another studio, hand it to them — a studio that objects to a QA checklist has told you something useful."
+        },
+        {
+          "kind": "statement",
+          "kicker": "Two more, same terms",
+          "head": "The other free ones.",
+          "body": "A product catalogue template — the exact fields we ask every client for. And a scope worksheet, so you can compare quotes on the same basis, including ours."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Message the word CHECKLIST.",
+          "em": "Which of the three do you want?",
+          "body": "Comment CHECKLIST, CATALOGUE or SCOPE and we'll send it. Free, no sign-up, and we will not follow up unless you ask us to."
         }
       ]
     }
