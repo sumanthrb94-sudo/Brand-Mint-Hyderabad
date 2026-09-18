@@ -66,7 +66,15 @@ label, a beverage brand and two B2B platforms; not one of them is a kirana
 shop, and a prospect should find something that looks like their own business
 somewhere in the set.
 
-Always review a fresh batch as a contact sheet before wiring it in — sixteen
+Run `node scripts/seamcheck.cjs images/*.png` after every generation and
+reshoot anything it names. Asking the model to keep "the bottom 40 percent
+calm and uncluttered" so a headline could sit there got taken literally: it
+rendered a second, out-of-focus plane and spliced it in at exactly 50%, which
+is invisible in a thumbnail and looks like the photograph has been cut in half
+at full size. The prompt now asks for one continuous photograph with the floor
+receding naturally, and the check catches the ones that still come back wrong.
+It is a heuristic and it misses some, so also review a fresh batch as a
+contact sheet before wiring it in — sixteen
 images side by side is the only way the failures show up. Three of the first
 sixteen had to be reshot, and the worst of them put a fabricated brand name in
 legible type across a shopfront.

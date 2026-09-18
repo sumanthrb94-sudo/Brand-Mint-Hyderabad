@@ -84,10 +84,16 @@
      once it is posted. Cheaper to crop than to keep re-rolling. */
   .photo .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
   .photo .body{max-width:26ch}
+  /* Many stops, not few. The photography is bright now, so a gradient that
+     goes .10 -> .50 -> .86 in two jumps shows as a hard horizontal band across
+     the middle of the slide — the picture looks like it has been cut in half.
+     Stepping it finely is the whole fix. */
   .photo .scrim{position:absolute;inset:0;
-    background:linear-gradient(180deg, rgba(6,20,15,.40) 0%, rgba(6,20,15,.10) 24%,
-               rgba(6,20,15,.50) 44%, rgba(6,20,15,.86) 64%,
-               rgba(6,20,15,.95) 82%, rgba(6,20,15,.97) 100%)}
+    background:linear-gradient(180deg,
+      rgba(6,20,15,.34) 0%,  rgba(6,20,15,.12) 18%, rgba(6,20,15,.14) 30%,
+      rgba(6,20,15,.24) 40%, rgba(6,20,15,.38) 48%, rgba(6,20,15,.54) 55%,
+      rgba(6,20,15,.68) 62%, rgba(6,20,15,.80) 69%, rgba(6,20,15,.88) 76%,
+      rgba(6,20,15,.93) 84%, rgba(6,20,15,.96) 100%)}
   .photo .inner{position:absolute;inset:0;padding:86px 78px;display:flex;flex-direction:column}
   .photo .kicker{color:var(--emerald)}
   .photo h1{color:var(--cream);font-size:104px;text-shadow:0 4px 40px rgba(0,0,0,.45)}
@@ -125,9 +131,11 @@
      generated plates, which were already almost black — it is far too weak to
      carry cream type over a real photograph. */
   .loud .veil{position:absolute;inset:0;background:
-      linear-gradient(180deg, rgba(6,20,15,.42) 0%, rgba(6,20,15,.12) 26%,
-                      rgba(6,20,15,.55) 50%, rgba(6,20,15,.88) 74%,
-                      rgba(6,20,15,.96) 100%)}
+      linear-gradient(180deg,
+        rgba(6,20,15,.38) 0%,  rgba(6,20,15,.12) 20%, rgba(6,20,15,.15) 32%,
+        rgba(6,20,15,.26) 42%, rgba(6,20,15,.42) 50%, rgba(6,20,15,.60) 57%,
+        rgba(6,20,15,.74) 64%, rgba(6,20,15,.85) 71%, rgba(6,20,15,.92) 79%,
+        rgba(6,20,15,.96) 100%)}
   /* Type anchored to the bottom, so it never rides up over the face. */
   .loud.has-img .mid{justify-content:flex-end}
   .loud.has-img .huge{font-size:206px}

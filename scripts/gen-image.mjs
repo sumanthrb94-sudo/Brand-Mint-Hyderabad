@@ -333,10 +333,16 @@ const PEOPLE_BASE =
   "LIGHT: generous soft daylight through large windows, airy and clean, warm " +
   "neutrals, pale wood, off-white walls, a little greenery. The subject is " +
   "brightly and flatteringly lit. " +
-  "COMPOSITION IS STRICT: the person's head sits in the TOP THIRD, well above " +
-  "centre, looking toward or just past the camera. The bottom 40 percent is " +
-  "calm and uncluttered — a plain surface, a floor, or soft blurred depth — " +
-  "because a headline is laid over it. " +
+  "COMPOSITION: the person's head sits in the TOP THIRD, well above centre, " +
+  "looking toward or just past the camera. The camera is slightly above eye " +
+  "level and tilted a little downward, so the floor or the work surface " +
+  "recedes naturally through the lower part of the frame and is comparatively " +
+  "empty there. " +
+  "ONE SINGLE CONTINUOUS PHOTOGRAPH. No seam, no horizontal split, no band, " +
+  "no second image spliced in below, no separate panel, no collage, no sudden " +
+  "change of focus or brightness partway down. The lower part of the frame is " +
+  "the same room, the same light and the same perspective as the top — simply " +
+  "emptier. Describing it as a zone for text is forbidden; it is just floor. " +
   "A single small emerald-green accent somewhere in frame. " +
   "The photograph fills the frame edge to edge, full bleed. No border, no " +
   "matte, no white bars, no letterboxing, no frame. " +
