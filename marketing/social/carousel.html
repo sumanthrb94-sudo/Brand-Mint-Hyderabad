@@ -1,0 +1,132 @@
+<!doctype html>
+<!--
+  Slide template for the Instagram carousels. One slide per render; the
+  renderer sets window.__SLIDE before paint.
+
+  1080x1350 — 4:5, the tallest ratio the feed allows, so each slide takes the
+  most screen it can on a phone.
+
+  Type is set in the site's own faces, loaded from /fonts, so a carousel and
+  the landing page it sends people to look like one studio. That is also why
+  this is HTML rendered in Chromium rather than a generated image: a model
+  cannot spell ₹14,999 reliably, and a wrong price in a post is a takedown
+  rather than an edit.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Carousel slide</title>
+<style>
+  @font-face { font-family:"Plus Jakarta Sans"; src:url("/fonts/plus-jakarta-sans.woff2") format("woff2"); font-weight:200 800; font-display:block; }
+  @font-face { font-family:"Inter"; src:url("/fonts/inter.woff2") format("woff2"); font-weight:100 900; font-display:block; }
+  @font-face { font-family:"JetBrains Mono"; src:url("/fonts/jetbrains-mono.woff2") format("woff2"); font-weight:100 800; font-display:block; }
+  /* JetBrains Mono ships no rupee; borrow Inter's for that one codepoint, or
+     every price renders with a hole in the middle. */
+  @font-face { font-family:"JetBrains Mono"; src:url("/fonts/inter.woff2") format("woff2"); unicode-range:U+20B9; font-weight:100 900; font-display:block; }
+
+  :root{
+    --paper:#f5f1ea; --ink:#0a0e0c; --muted:#5b625e;
+    --mint:#10b981; --mint-deep:#047857; --mint-wash:#d6f5e6;
+    --bm-ink:#0b1f1a; --bm-deep:#06140f; --cream:#f5f1ea; --emerald:#00c897; --gold:#c9a14a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;overflow:hidden;font-family:"Inter",sans-serif;
+       color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased}
+
+  .slide{position:relative;width:1080px;height:1350px;padding:86px 78px;
+         display:flex;flex-direction:column;
+         background:radial-gradient(760px 520px at 88% -10%, rgba(16,185,129,.14), transparent 62%), var(--paper)}
+  .slide.dark{background:radial-gradient(760px 560px at 50% 22%, #14352d, var(--bm-ink) 58%, var(--bm-deep));color:var(--cream)}
+
+  .kicker{font:600 20px/1.4 "Inter";letter-spacing:.2em;text-transform:uppercase;color:var(--mint-deep)}
+  .dark .kicker{color:var(--emerald)}
+
+  h1{font-family:"Plus Jakarta Sans";font-weight:600;letter-spacing:-.035em;line-height:1.03;
+     font-size:96px;margin-top:26px;text-wrap:balance}
+  h1.sm{font-size:76px}
+  h1 em{display:block;font-style:italic;font-weight:400;color:var(--mint-deep)}
+  .dark h1 em{color:var(--emerald)}
+
+  .body{margin-top:32px;font-size:30px;line-height:1.5;color:var(--muted);max-width:22ch}
+  .dark .body{color:rgba(245,241,234,.72)}
+
+  ul{list-style:none;margin-top:44px;display:flex;flex-direction:column;gap:22px}
+  li{display:flex;gap:20px;align-items:flex-start;font-size:33px;line-height:1.35}
+  li b{flex:none;width:44px;height:44px;border-radius:12px;background:var(--mint-wash);
+       color:var(--mint-deep);font:700 21px/44px "JetBrains Mono";text-align:center}
+  .dark li b{background:rgba(0,200,151,.18);color:var(--emerald)}
+
+  .price{font-family:"JetBrains Mono";font-weight:500;font-variant-numeric:tabular-nums;
+         font-size:132px;letter-spacing:-.04em;line-height:1;margin-top:30px;color:var(--mint-deep)}
+  .dark .price{color:var(--emerald)}
+  .price-sub{margin-top:14px;font:400 26px/1.4 "Inter";color:var(--muted)}
+  .dark .price-sub{color:rgba(245,241,234,.6)}
+
+  /* The content block is centred between the top padding and the footer
+     rather than top-aligned. Top-aligned left a third of every slide empty
+     under the headline, which reads as unfinished rather than spacious. */
+  .main{flex:1;display:flex;flex-direction:column;justify-content:center}
+
+  .foot{display:flex;align-items:center;justify-content:space-between;
+        padding-top:30px;border-top:1px solid rgba(10,14,12,.14);font-size:24px}
+  .dark .foot{border-top-color:rgba(245,241,234,.18)}
+  .brand{display:flex;align-items:center;gap:14px;font-family:"Plus Jakarta Sans";
+         font-weight:600;font-size:28px;letter-spacing:-.02em;word-spacing:.12em}
+  .mark{width:46px;height:46px;border-radius:12px;display:block}
+  .swipe{font:500 24px/1 "JetBrains Mono";letter-spacing:.08em;color:var(--mint-deep)}
+  .dark .swipe{color:var(--emerald)}
+  .dot{font:500 22px/1 "JetBrains Mono";color:var(--muted)}
+  .dark .dot{color:rgba(245,241,234,.55)}
+</style>
+</head>
+<body>
+<div class="slide" id="slide"></div>
+<script>
+  const S = window.__SLIDE || { kind: "cover", head: "No slide data" };
+  const esc = (t) => String(t == null ? "" : t)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  const MARK = `<svg class="mark" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7CF6C8"/><stop offset="100%" stop-color="#10B981"/>
+    </linearGradient></defs>
+    <rect width="32" height="32" rx="8" fill="url(#g)"/>
+    <path d="M9 22V10l7 6 7-6v12" stroke="#0b1f1a" stroke-width="2.6"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
+
+  // Cover and CTA carry the dark ground, so a carousel opens and closes on the
+  // brand colour and the middle stays light and readable.
+  const dark = S.kind === "cover" || S.kind === "cta";
+  const el = document.getElementById("slide");
+  if (dark) el.classList.add("dark");
+
+  let mid = "";
+  if (S.kind === "list") {
+    mid = "<ul>" + (S.items || []).map((t, i) =>
+      `<li><b>${String(i + 1).padStart(2, "0")}</b><span>${esc(t)}</span></li>`).join("") + "</ul>";
+  } else if (S.kind === "price") {
+    mid = `<div class="price">${esc(S.price)}</div>
+           <div class="price-sub">${esc(S.sub)}</div>
+           ${S.body ? `<p class="body">${esc(S.body)}</p>` : ""}`;
+  } else if (S.body) {
+    mid = `<p class="body">${esc(S.body)}</p>`;
+  }
+
+  // The headline runs smaller when it is long enough to wrap past three lines
+  // at full size — measured on the rendered slide, not guessed from a count.
+  const headClass = (S.head || "").length > 34 ? "sm" : "";
+
+  el.innerHTML = `
+    <div class="main">
+      ${S.kicker ? `<p class="kicker">${esc(S.kicker)}</p>` : ""}
+      <h1 class="${headClass}">${esc(S.head)}${S.em ? `<em>${esc(S.em)}</em>` : ""}</h1>
+      ${mid}
+    </div>
+    <div class="foot">
+      <span class="brand">${MARK} Brand Mint</span>
+      ${S.foot ? `<span class="swipe">${esc(S.foot)}</span>`
+               : `<span class="dot">${esc(S.n || "")} / ${esc(S.of || "")}</span>`}
+    </div>`;
+</script>
+</body>
+</html>

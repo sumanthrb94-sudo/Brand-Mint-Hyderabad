@@ -1,0 +1,101 @@
+{
+  "_": [
+    "Instagram carousels, 1080x1350 (4:5 — the tallest the feed allows, so it",
+    "takes the most screen on a phone).",
+    "",
+    "EVERY NUMBER HERE IS ON THE LIVE SITE. 14,999 static, from 49,999 store,",
+    "79,999 Site + CRM, 25+ projects, 8+ years, Hyderabad and the UK. No revenue",
+    "figures, no ROI percentages, no client count beyond what shared/work.js",
+    "carries. If a price changes on the site, change it here and re-render —",
+    "these are the same claims in a different medium, not marketing licence.",
+    "",
+    "kind: cover | statement | list | price | cta",
+    "Render: NODE_PATH=$(npm root -g) node marketing/social/render-carousels.cjs"
+  ],
+
+  "carousels": [
+    {
+      "id": "reply-machine",
+      "title": "The reply machine",
+      "slides": [
+        { "kind": "cover", "kicker": "For shops running on WhatsApp",
+          "head": "You're not running a business.",
+          "em": "You're running a reply machine.",
+          "foot": "Swipe →" },
+        { "kind": "statement", "kicker": "Every single day",
+          "head": "Price?",
+          "body": "Timing? Do you deliver? Where are you? The same four questions, from a different person, every hour." },
+        { "kind": "statement", "kicker": "The part you never see",
+          "head": "Someone searched. Found nothing. Called the next shop.",
+          "body": "No missed call. No message. No way to know it happened." },
+        { "kind": "list", "kicker": "What a store answers for you",
+          "head": "Four questions, answered once.",
+          "items": ["Prices, on the page", "Delivery and timing, stated", "UPI, cards, cash on delivery", "Orders straight to WhatsApp"] },
+        { "kind": "price", "kicker": "Fixed price, in writing",
+          "head": "Static website",
+          "price": "₹14,999",
+          "sub": "one time · GST extra",
+          "body": "An online store starts at ₹49,999. Price and scope agreed before anyone starts work." },
+        { "kind": "cta", "kicker": "Hyderabad · HITEC City",
+          "head": "Book a 30-minute call.",
+          "body": "We'll tell you which tier you need — or that you don't need us yet." }
+      ]
+    },
+
+    {
+      "id": "own-it",
+      "title": "Own it or rent it",
+      "slides": [
+        { "kind": "cover", "kicker": "If your shop lives on Instagram",
+          "head": "That page",
+          "em": "isn't yours.",
+          "foot": "Swipe →" },
+        { "kind": "statement", "kicker": "It happens quietly",
+          "head": "The account goes. The business goes with it.",
+          "body": "Your photos, your prices, every customer conversation — on a platform you don't control, with nobody to appeal to." },
+        { "kind": "list", "kicker": "What you actually own with us",
+          "head": "In your name, from day one.",
+          "items": ["The domain", "The hosting", "The payment account", "Every order and customer record"] },
+        { "kind": "statement", "kicker": "And you lose nothing",
+          "head": "Keep posting exactly as you do.",
+          "body": "Instagram stays your shopfront. The site is the thing underneath it that you own." },
+        { "kind": "price", "kicker": "Fixed price, in writing",
+          "head": "Online store",
+          "price": "from ₹49,999",
+          "sub": "GST extra · four to twelve weeks",
+          "body": "Four tiers. Each includes everything in the one before it, so moving up later is an add-on, never a rebuild." },
+        { "kind": "cta", "kicker": "brandmintstudios.in",
+          "head": "See the four tiers.",
+          "body": "Every price in full on the site. No form, no discovery call to find out what it costs." }
+      ]
+    },
+
+    {
+      "id": "fixed-price",
+      "title": "Why the price is fixed",
+      "slides": [
+        { "kind": "cover", "kicker": "You've been burned before",
+          "head": "Your price.",
+          "em": "In writing.",
+          "foot": "Swipe →" },
+        { "kind": "statement", "kicker": "The usual story",
+          "head": "It started at one number and ended at three.",
+          "body": "Hourly billing, scope that grew, extras nobody mentioned until the invoice." },
+        { "kind": "list", "kicker": "How this works instead",
+          "head": "Agreed before anyone starts.",
+          "items": ["Scope and price in a signed agreement", "50% to start, 50% before launch", "GST invoice for every payment", "No hourly billing, no extras inside a tier"] },
+        { "kind": "statement", "kicker": "Who does the work",
+          "head": "The person on the call is the person building it.",
+          "body": "8+ years on every build. No account manager in between, and nobody hands it to an intern." },
+        { "kind": "price", "kicker": "Website and CRM together",
+          "head": "Site + CRM",
+          "price": "₹79,999",
+          "sub": "setup · then ₹9,999/mo · GST extra",
+          "body": "Your site, a lead CRM, WhatsApp both ways and the analytics behind both. One login." },
+        { "kind": "cta", "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask what yours would cost.",
+          "body": "Straight answer on the first message. If a cheaper option is the honest one, we'll say so." }
+      ]
+    }
+  ]
+}
