@@ -51,24 +51,32 @@ non-followers land in the requests folder and are never seen. We answer the
 comments ourselves, in the thread, within the hour. Fifteen local buyers, not
 eight hundred commenters.
 
-**3 · No AI imagery on any slide.** The generated cover plates
-(`images/bg-*.png`) and the scale-hook images (`images/hook-*.png`) have been
-pulled. The covers are typographic on a CSS ground, which at thumbnail size
-reads louder than a dark photograph under a scrim did, and never arrives with
-a grey hairline baked into the edge.
+**3 · Generated photography on the cover, never as evidence.** Slide 1 of
+every set carries a generated photograph of a person — a shopkeeper on the
+phone, a boutique owner in her doorway, two men shaking hands over a counter.
+Regenerate with `node scripts/gen-image.mjs --people --key <key>` then
+`node scripts/autocrop.cjs images/ppl-*.png`.
 
-The reason is not the US survey data on AI backlash — that is real but it is
-US data and nobody has measured what a Hyderabad shop owner thinks. The reason
-is inferential and it transfers regardless: we sell "a real working site for a
-real fixed price" to a cautious first-time buyer, and a grid of generated
-storefronts invites exactly one inference — that the portfolio might be
-generated too. The screenshots of shipped work are the hardest-to-fake asset
-in a category full of stock mockups, and generated imagery sitting next to
-them is what makes them look cheap.
+This is stock photography and it is fine. Nobody has ever believed the woman
+in a bank's billboard banks there. The line — and it is the only line — is
+that a generated person must never do **evidentiary** work:
 
-An `img` on a slide is now reserved for a **real screenshot of shipped work**.
-`scripts/gen-image.mjs` still generates the old plates; nothing stops anyone
-re-adding them, which is why the reason is written down here.
+| Fine | Never |
+|---|---|
+| A generic shopkeeper on a cover, uncaptioned | A generated person captioned as a client |
+| A market scene setting the mood | A generated quote or testimonial |
+| A person photographing a product | A generated face presented as studio staff |
+| A shop interior as a backdrop | A generated screenshot of "client work" |
+
+The site imagery in `SHOTS` still bans faces, and that is not inconsistent:
+those images sit on a page that says "a senior operator with 8+ years", where
+a stranger's face *is* a claim about who you are. A carousel cover makes no
+such claim.
+
+Screenshots of client work are the one thing that must be a real capture —
+`scripts/shoot-work.cjs`, run on a machine that can reach the sites. A
+generated storefront standing in for a real one is the fabrication this whole
+rule exists to prevent.
 
 ---
 

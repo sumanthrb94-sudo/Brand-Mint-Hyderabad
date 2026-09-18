@@ -249,10 +249,15 @@ function usage() {
 }
 
 async function generate(id) {
-  const shot = SHOTS[id] || AVATARS[id] || HOOKS[id] || COVERS[id];
+  // PEOPLE entries are bare prompt strings — the file name is the id and the
+  // ratio is always 4:5, so there is nothing else worth repeating sixteen
+  // times. Everything else carries its own {file, aspect, prompt}.
+  const shot = SHOTS[id] || AVATARS[id] || HOOKS[id] || COVERS[id]
+    || (PEOPLE[id] ? { file: id, aspect: "4:5", prompt: PEOPLE[id] } : null);
   if (!shot) throw new Error(`Unknown shot "${id}". Try --list.`);
 
-  const house = AVATARS[id] ? PRESENTER : HOOKS[id] ? SCALE : COVERS[id] ? COVER : PALETTE;
+  const house = AVATARS[id] ? PRESENTER : HOOKS[id] ? SCALE
+    : COVERS[id] ? COVER : PEOPLE[id] ? PEOPLE_BASE : PALETTE;
   const body = {
     contents: [{ parts: [{ text: `${shot.prompt}\n\n${house}` }] }],
     generationConfig: {
@@ -291,11 +296,75 @@ async function generate(id) {
   return out;
 }
 
+/* ------------------------- CAROUSEL PEOPLE COVERS -------------------------
+   People, on purpose, and the distinction that makes it fine.
+
+   A generated person here is doing the job stock photography has always done:
+   mood, attention, a human face at the top of a poster. Nobody has ever
+   believed the woman in a bank's billboard banks there. What is NOT allowed,
+   ever, is a generated person doing EVIDENTIARY work — captioned as a client,
+   quoted as a testimonial, presented as studio staff, or standing in a shop
+   described as a client's shop. That is the whole line, and it is the reason
+   the SHOTS set above still bans faces: those sit on a page that says "an
+   operator with eight years", where a stranger's face IS a claim about who
+   you are. A carousel cover makes no such claim.
+
+   Composition is fixed by the template. carousel.html anchors the headline to
+   the bottom half under a heavy scrim, so:
+     - THE FACE BELONGS IN THE TOP THIRD, and must not be centred low.
+     - The bottom 45% is going under near-black. Put nothing there that
+       matters.
+     - Vertical 4:5.
+   Hyderabad and its trades, because a generic Western storefront says nothing
+   to a boutique in Kukatpally. */
+const PEOPLE_BASE =
+  "Ultra-realistic editorial photograph, vertical 4:5, shot on a 50mm lens at " +
+  "f/2, natural light. Real Indian people with real skin texture and real " +
+  "fabric — documentary photography in the style of an Indian magazine " +
+  "portrait, not a stock library, not CGI, no plastic or rendered look, no " +
+  "beauty retouching. " +
+  "SETTING IS ALWAYS INDIA: Hyderabad and Telangana — the shops, streets, " +
+  "clothing, signage shapes and light of a South Indian city. Never a " +
+  "European or American storefront. " +
+  "COMPOSITION IS STRICT: the person's head sits in the TOP THIRD of the " +
+  "frame, well above centre, looking toward or just past the camera. The " +
+  "bottom 45 percent is quiet and dark — floor, shadow, counter surface or " +
+  "blurred depth — because a headline is laid over it. " +
+  "EXPOSURE: the face is clearly lit and clearly readable. Shadows are deep " +
+  "but the subject is not underexposed. " +
+  "Colour grade: deep forest green and near-black shadows, warm amber " +
+  "practical lights, one small emerald accent. Cinematic and muted. " +
+  "The photograph fills the entire frame edge to edge, full bleed. No border, " +
+  "no matte, no white bars, no letterboxing, no vignette ring, no frame. " +
+  "No text, letters, numbers, words, signage, logos, price tags, watermarks " +
+  "or legible phone or laptop screens anywhere in frame. No distorted hands, " +
+  "no extra fingers, no duplicated people.";
+
+const PEOPLE = {
+  "ppl-reply":     "An Indian man in his thirties behind the counter of his small shop in the evening, phone held up near his face mid-reply, faintly tired. A warm bulb above him, the shop dark behind.",
+  "ppl-own":       "An Indian woman in her late twenties standing in the doorway of her own small clothing boutique at dusk, arms loosely folded, looking straight at the camera, calm and proprietorial.",
+  "ppl-fixed":     "Two Indian men either side of a shop counter, mid-conversation, one leaning in slightly. A single sheet of paper on the counter between them, angled so nothing on it is readable.",
+  "ppl-before":    "An Indian man in his forties looking down at his phone with a sceptical, weighing expression, one eyebrow slightly raised, as if reading a quote he does not quite believe.",
+  "ppl-inside":    "A young Indian shopkeeper reaching up to straighten stock on a high shelf, caught mid-movement, half-turned toward the camera, a small tidy shop around him.",
+  "ppl-store":     "An Indian boutique owner folding a garment into a parcel on a wooden table, hands in frame and in focus, looking up at the camera as she works.",
+  "ppl-quote":     "An Indian man at a cluttered back-office desk holding a printed bill at arm's length, frowning at it, a desk lamp raking across from one side.",
+  "ppl-crm":       "An Indian woman in a small back office at a laptop, leaning back from the screen with one hand on the desk, thinking. The laptop screen is dark and shows nothing.",
+  "ppl-work":      "A young Indian man on a Hyderabad street holding his phone up toward the camera to show someone something on it, pleased. The phone screen is blank and dark.",
+  "ppl-change":    "An older Indian shopkeeper looking up and slightly off-camera with a faint, unforced smile, his shop soft and out of focus behind him.",
+  "ppl-yes":       "Two Indian men shaking hands across a shop counter, both partly in frame, warm and unstaged, shot slightly from the side. Not a corporate handshake.",
+  "ppl-need":      "An Indian woman photographing a product on a plain table with her phone, bent slightly over it, concentrating. The phone screen is not visible.",
+  "ppl-search":    "An Indian woman standing on a busy Hyderabad street at dusk looking down at her phone, other pedestrians blurred around her, city lights behind. Phone screen dark.",
+  "ppl-catalogue": "An Indian man sitting on a stool in his shop thumbing through photos on his phone, a stack of unsent parcels beside him, evening light.",
+  "ppl-diwali":    "An Indian shopkeeper standing in the doorway of a small shop strung with warm Diwali lights and clay oil lamps at night, looking at the camera, proud and a little tired.",
+  "ppl-check":     "An Indian woman holding a printed sheet of paper, reading down it with a pen in her other hand, half-lit by a window. Nothing on the page is readable.",
+};
+
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KEY);
 const ids = process.argv.includes("--all") ? Object.keys(SHOTS)
   : process.argv.includes("--avatars") ? Object.keys(AVATARS)
   : process.argv.includes("--hooks") ? Object.keys(HOOKS)
   : process.argv.includes("--covers") ? Object.keys(COVERS)
+  : process.argv.includes("--people") ? Object.keys(PEOPLE)
   : args;
 
 if (process.argv.includes("--list") || !ids.length) {

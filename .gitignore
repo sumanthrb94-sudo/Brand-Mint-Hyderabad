@@ -32,3 +32,7 @@ images/bg-*.png
 # Deep-research working files. The finished playbook lives in marketing/social/.
 research_notes/
 reports/
+
+# Generated carousel cover photography. 16 x ~650 KB, regenerable with
+# scripts/gen-image.mjs --people followed by scripts/autocrop.cjs.
+images/ppl-*.png

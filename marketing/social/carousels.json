@@ -15,8 +15,12 @@
     "people meet cold. It carries its own hook and states the offer, rather",
     "than continuing a sentence from slide 1. See marketing/social/PLAYBOOK.md.",
     "",
-    "NO AI IMAGERY ON ANY SLIDE. The covers are typographic on a CSS ground.",
-    "An `img` here is for a REAL screenshot of shipped work and nothing else.",
+    "",
+    "COVER IMAGERY: slide 1 of every set carries a generated photograph of a",
+    "person (images/ppl-*.png, scripts/gen-image.mjs --people). That is stock",
+    "photography and it is fine. What is never fine is a generated person doing",
+    "evidentiary work — captioned as a client, quoted as a testimonial, or shown",
+    "as studio staff. A screenshot of client work must be a REAL capture.",
     "",
     "kind: cover | statement | list | price | cta | photo | loud",
     "Render: NODE_PATH=$(npm root -g) node marketing/social/render-carousels.cjs"
@@ -32,7 +36,8 @@
           "huge": "REPLY|MACHINE",
           "accent": true,
           "sub": "You answer the same four questions all day. A website answers them once.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-reply.png"
         },
         {
           "kind": "loud",
@@ -87,7 +92,8 @@
           "huge": "THAT PAGE|ISN'T|YOURS",
           "accent": true,
           "sub": "If the Instagram account goes tomorrow, the business goes with it.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-own.png"
         },
         {
           "kind": "loud",
@@ -149,7 +155,8 @@
           "accent": true,
           "num": false,
           "sub": "One time. GST extra. Price and scope in writing before anyone starts.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-fixed.png"
         },
         {
           "kind": "loud",
@@ -210,7 +217,8 @@
           "huge": "10|QUESTIONS",
           "accent": true,
           "sub": "Ask these before you pay anyone to build your website.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-before.png"
         },
         {
           "kind": "loud",
@@ -283,7 +291,8 @@
           "huge": "WHAT|₹14,999|BUYS",
           "accent": true,
           "sub": "Not a range. Not 'starting from'. The whole list, and what is not on it.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-inside.png"
         },
         {
           "kind": "loud",
@@ -339,7 +348,8 @@
           "huge": "₹14,999|OR|₹49,999",
           "accent": true,
           "sub": "Same studio, same care. So why does one cost three times the other?",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-store.png"
         },
         {
           "kind": "loud",
@@ -394,7 +404,8 @@
           "huge": "NOT IN|THE|QUOTE",
           "accent": true,
           "sub": "Eight charges that turn up after you have signed. Every one of them is normal, and every one should have been stated.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-quote.png"
         },
         {
           "kind": "loud",
@@ -460,7 +471,8 @@
           "huge": "₹9,999|A MONTH",
           "accent": true,
           "sub": "There is a monthly because the thing keeps running. Here is exactly what that pays for.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-crm.png"
         },
         {
           "kind": "loud",
@@ -515,7 +527,8 @@
           "huge": "OPEN|THE|WORK",
           "accent": true,
           "sub": "Four live sites you can open right now, on your own phone, without asking us for anything.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-work.png"
         },
         {
           "kind": "loud",
@@ -569,7 +582,8 @@
           "huge": "BEFORE|AFTER",
           "accent": true,
           "sub": "Not what we promise. What actually changed for four businesses after the site went live.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-change.png"
         },
         {
           "kind": "loud",
@@ -638,7 +652,8 @@
           "huge": "AFTER|YOU SAY|YES",
           "accent": true,
           "sub": "What actually happens between the first message and a live site. Three steps, and you can stop at any of them.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-yes.png"
         },
         {
           "kind": "loud",
@@ -701,7 +716,8 @@
           "huge": "WHAT|WE NEED|FROM YOU",
           "accent": true,
           "sub": "Four things. If you have none of them, say so — that is a normal answer and it changes nothing.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-need.png"
         },
         {
           "kind": "loud",
@@ -761,7 +777,8 @@
           "huge": "SEARCH|YOUR OWN|SHOP",
           "accent": true,
           "sub": "Open Google. Type your shop name and your area. Look at what a customer sees.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-search.png"
         },
         {
           "kind": "loud",
@@ -820,7 +837,8 @@
           "huge": "YOUR|CATALOGUE|ISN'T A SHOP",
           "accent": true,
           "sub": "It works, right up until the day it doesn't. Here is where the line is.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-catalogue.png"
         },
         {
           "kind": "loud",
@@ -881,7 +899,8 @@
           "huge": "DIWALI|8 NOV",
           "accent": true,
           "sub": "If you want to be selling online for it, the maths says you sign in October.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-diwali.png"
         },
         {
           "kind": "loud",
@@ -942,7 +961,8 @@
           "huge": "THE 20|POINT|CHECK",
           "accent": true,
           "sub": "The pass every Brand Mint store clears before it goes live. Run it against a site you already have.",
-          "foot": "Swipe →"
+          "foot": "Swipe →",
+          "img": "/images/ppl-check.png"
         },
         {
           "kind": "loud",
