@@ -138,19 +138,75 @@ const AVATARS = {
       "than a presenter. Muted sage green sweatshirt." },
 };
 
+
+/* --------------------------- SCALE HOOK COVERS ----------------------------
+   The format in the viral prompt-pack carousels: one person rendered at
+   impossible scale against real architecture. It works because the eye cannot
+   resolve it at thumbnail size, so the thumb stops.
+
+   Borrowed as a MECHANIC, not as content. Those posts give away an AI prompt
+   because their audience is designers. This audience is shop owners in
+   Hyderabad, and the giveaway has to be the thing they actually want — the
+   prices, the checklist, the straight answer. The surreal image only buys the
+   first second.
+
+   Hyderabad landmarks on purpose. A giant man on the Arc de Triomphe says
+   nothing to a boutique in Kukatpally; Charminar and the HITEC City towers
+   say "this is for you" before a word is read.
+
+   The person is deliberately generic and never presented as a client, a
+   customer or the studio's staff — the rule that governs AVATARS above
+   applies here too. */
+const SCALE =
+  "Ultra-realistic surreal lifestyle photograph, vertical 4:5 composition. " +
+  "Extreme low-angle wide-angle perspective from street level, 20-24mm, so the " +
+  "architecture converges dramatically toward the sky and the giant figure " +
+  "dominates the upper half of the frame. Photorealistic skin and fabric, " +
+  "realistic atmospheric depth, subtle film grain, overcast cinematic daylight, " +
+  "high-fashion street photography treatment. Real vehicles and pedestrians far " +
+  "below for scale. " +
+  "No text, letters, numbers, words, signage, logos, watermarks, hats, caps or " +
+  "sunglasses anywhere in frame. No distorted anatomy, no duplicated people, no " +
+  "CGI plastic look — the surreal effect must come only from the difference in " +
+  "scale.";
+
+const HOOKS = {
+  "hook-charminar": { file: "hook-charminar", aspect: "4:5", where: "carousel cover — scale hook, Charminar",
+    prompt: "A young Indian man at impossible giant scale, sitting casually on the " +
+      "upper gallery of Charminar in Hyderabad as if the monument were a bench, both " +
+      "legs hanging over the edge toward the camera. He wears a plain dark forest-green " +
+      "t-shirt and light-wash relaxed jeans, relaxed and nonchalant, looking slightly " +
+      "down toward the lens. The old city market streets, traffic and crowds are far " +
+      "below at normal size. Warm late-afternoon haze." },
+  "hook-hitec": { file: "hook-hitec", aspect: "4:5", where: "carousel cover — scale hook, HITEC City",
+    prompt: "A young Indian woman at impossible giant scale, sitting on the edge of a " +
+      "glass-and-steel office tower in HITEC City Hyderabad as if the building were a " +
+      "seat, legs hanging over the edge. She wears a plain cream linen shirt and light " +
+      "jeans, calm and confident. Far below at street level, at normal human size, the " +
+      "same woman stands on the pavement looking up at her gigantic self. Both must " +
+      "clearly be the same person. Wide modern boulevard, glass reflections." },
+  "hook-shop": { file: "hook-shop", aspect: "4:5", where: "carousel cover — scale hook, the shop",
+    prompt: "A young Indian man at impossible giant scale, kneeling on one knee in a " +
+      "Hyderabad street and reaching down with one hand toward a single small " +
+      "ordinary shopfront that comes up only to his knee — a modest neighbourhood " +
+      "boutique with a plain awning and no signage. He wears a dark green t-shirt and " +
+      "light jeans, his expression careful and protective rather than threatening. " +
+      "Other buildings on the street are normal size around him." },
+};
+
 function usage() {
   console.log("Shots:\n");
-  for (const [id, s] of Object.entries({ ...SHOTS, ...AVATARS })) {
+  for (const [id, s] of Object.entries({ ...SHOTS, ...AVATARS, ...HOOKS })) {
     console.log(`  ${id.padEnd(6)} images/${s.file}.png  (${s.aspect})  ${s.where}`);
   }
   console.log("\n  node scripts/gen-image.mjs <id> [<id>...]   |   --all");
 }
 
 async function generate(id) {
-  const shot = SHOTS[id] || AVATARS[id];
+  const shot = SHOTS[id] || AVATARS[id] || HOOKS[id];
   if (!shot) throw new Error(`Unknown shot "${id}". Try --list.`);
 
-  const house = AVATARS[id] ? PRESENTER : PALETTE;
+  const house = AVATARS[id] ? PRESENTER : HOOKS[id] ? SCALE : PALETTE;
   const body = {
     contents: [{ parts: [{ text: `${shot.prompt}\n\n${house}` }] }],
     generationConfig: {
@@ -192,6 +248,7 @@ async function generate(id) {
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KEY);
 const ids = process.argv.includes("--all") ? Object.keys(SHOTS)
   : process.argv.includes("--avatars") ? Object.keys(AVATARS)
+  : process.argv.includes("--hooks") ? Object.keys(HOOKS)
   : args;
 
 if (process.argv.includes("--list") || !ids.length) {

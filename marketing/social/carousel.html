@@ -67,6 +67,24 @@
      under the headline, which reads as unfinished rather than spacious. */
   .main{flex:1;display:flex;flex-direction:column;justify-content:center}
 
+
+  /* Full-bleed photograph with type over it — the scale-hook covers. A scrim
+     top and bottom, because a headline sitting directly on a photograph is
+     unreadable the moment the photograph changes. */
+  .slide.photo{padding:0;background:#06140f}
+  .photo .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .photo .scrim{position:absolute;inset:0;
+    background:linear-gradient(180deg, rgba(6,20,15,.78) 0%, rgba(6,20,15,.30) 34%,
+               rgba(6,20,15,.10) 52%, rgba(6,20,15,.72) 88%, rgba(6,20,15,.90) 100%)}
+  .photo .inner{position:absolute;inset:0;padding:86px 78px;display:flex;flex-direction:column}
+  .photo .kicker{color:var(--emerald)}
+  .photo h1{color:var(--cream);font-size:104px;text-shadow:0 4px 40px rgba(0,0,0,.45)}
+  .photo h1.sm{font-size:82px}
+  .photo h1 em{color:var(--emerald)}
+  .photo .body{color:rgba(245,241,234,.86);text-shadow:0 2px 20px rgba(0,0,0,.5)}
+  .photo .foot{border-top-color:rgba(245,241,234,.26);color:var(--cream)}
+  .photo .swipe,.photo .dot{color:var(--emerald)}
+
   .foot{display:flex;align-items:center;justify-content:space-between;
         padding-top:30px;border-top:1px solid rgba(10,14,12,.14);font-size:24px}
   .dark .foot{border-top-color:rgba(245,241,234,.18)}
@@ -99,6 +117,7 @@
   const dark = S.kind === "cover" || S.kind === "cta";
   const el = document.getElementById("slide");
   if (dark) el.classList.add("dark");
+  if (S.kind === "photo") el.classList.add("photo");
 
   let mid = "";
   if (S.kind === "list") {
@@ -116,7 +135,11 @@
   // at full size — measured on the rendered slide, not guessed from a count.
   const headClass = (S.head || "").length > 34 ? "sm" : "";
 
-  el.innerHTML = `
+  const shell = (inner) => S.kind === "photo"
+    ? `<img class="shot" src="${S.img}" alt=""><div class="scrim"></div><div class="inner">${inner}</div>`
+    : inner;
+
+  el.innerHTML = shell(`
     <div class="main">
       ${S.kicker ? `<p class="kicker">${esc(S.kicker)}</p>` : ""}
       <h1 class="${headClass}">${esc(S.head)}${S.em ? `<em>${esc(S.em)}</em>` : ""}</h1>
@@ -126,7 +149,7 @@
       <span class="brand">${MARK} Brand Mint</span>
       ${S.foot ? `<span class="swipe">${esc(S.foot)}</span>`
                : `<span class="dot">${esc(S.n || "")} / ${esc(S.of || "")}</span>`}
-    </div>`;
+    </div>`);
 </script>
 </body>
 </html>

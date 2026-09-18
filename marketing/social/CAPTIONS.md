@@ -194,3 +194,85 @@ clearest signal to the ranker that a post is not worth showing to anyone local.
   on the problem, not on the studio's name, for exactly that reason.
 - **Point the link in bio at `/pricing`**, not the home page. These posts all
   promise a number; send people to where the numbers are.
+
+---
+
+## 4 · Before you pay anyone
+`marketing/social/out/before-you-pay/` — 7 slides
+
+The scale-hook format, borrowed from the prompt-pack carousels that run on
+Explore. **The mechanic is what transfers, not the content.** Those posts get
+shares roughly equal to likes because slide five hands over the exact AI
+prompt — the image only buys the first second, the giveaway does the rest.
+Their audience is designers, so the giveaway is a prompt. This audience is
+shop owners, so the giveaway is the ten questions that protect them from a bad
+build. A prompt pack here would buy followers who will never purchase.
+
+The checklist is deliberately answerable by any studio, including competitors.
+A giveaway that only we pass is an advert wearing a checklist's clothes, and
+people can tell.
+
+**Caption**
+
+> Ten questions to ask before you pay anyone to build your website. Screenshot
+> this.
+>
+> WHO OWNS WHAT
+> 1. Is the domain registered in my business name?
+> 2. Is the hosting account mine, or theirs?
+> 3. Is the payment account in my name?
+> 4. Can I export my orders and customers whenever I want?
+>
+> WHAT IT COSTS
+> 5. Is the price fixed, or hourly?
+> 6. Is it in a signed agreement before work starts?
+> 7. Is GST included or extra?
+> 8. What happens if I want a change midway?
+> 9. What is not included that I will be asked to pay for later?
+> 10. Who do I call when it breaks at 9pm?
+>
+> Number ten is the one that catches people. If the answer is an account
+> manager, a ticket form, or silence — you already know.
+>
+> Ask any studio in Hyderabad these ten. Ask us. We answer all of them in
+> writing before a rupee moves: static site ₹14,999, stores from ₹49,999, GST
+> extra, price and scope fixed before anyone starts.
+>
+> brandmintstudios.in · WhatsApp +91 77999 34943
+>
+> #hyderabadbusiness #hitechcity #smallbusinessindia #hyderabadsmallbusiness
+> #websitedesignhyderabad #shoplocalhyderabad #brandmint #businessowner
+> #smallbusinesstips #startupindia
+
+**Meta description**
+
+> Ten questions to ask before paying for a website: who owns the domain, is the
+> price fixed, who answers at 9pm. A Hyderabad studio's checklist.
+
+**Alt text, per slide**
+
+1. A giant man kneeling in an old Hyderabad street beside a small shopfront. "Before you pay anyone for a website."
+2. Cream slide: the problem is never the code, it is what was never agreed in writing.
+3. Cream slide, four ownership questions: domain, hosting, payment account, data export.
+4. Cream slide, four cost questions: fixed or hourly, signed agreement, GST, mid-project changes.
+5. Cream slide: "Who do I call when it breaks at 9pm?"
+6. A giant man sitting on Charminar. Ten questions, no wrong answers, only honest ones.
+7. Dark green slide: Brand Mint answers all ten in writing. Prices and WhatsApp number.
+
+**Why this one is the lead post.** It is the only carousel in the set that is
+useful to someone who never hires us, which is exactly why it gets saved and
+sent to a friend opening a shop. Post it first.
+
+### On the scale-hook images
+
+`images/hook-shop.png`, `hook-charminar.png`, `hook-hitec.png` — generated,
+4:5, regenerate with `node scripts/gen-image.mjs --hooks`.
+
+Hyderabad landmarks on purpose: a giant man on the Arc de Triomphe says nothing
+to a boutique in Kukatpally, and Charminar and the autos say "this is for you"
+before a word is read. The figure is generic and is never presented as a
+client, a customer or studio staff.
+
+These are obviously impossible images, so nobody reads them as documentary —
+but if one is ever used where it could be mistaken for a photograph of real
+work, label it. The same rule as the presenter avatars.
