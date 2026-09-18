@@ -25,7 +25,7 @@ const KEY =
   process.env.GEMINI_API_KEY ||
   (process.argv.includes("--key") ? process.argv[process.argv.indexOf("--key") + 1] : "");
 
-const MODEL = process.env.GEMINI_TTS_MODEL || "gemini-2.5-pro-preview-tts";
+const MODEL = process.env.GEMINI_TTS_MODEL || "gemini-3.1-flash-tts-preview";
 const API = "https://generativelanguage.googleapis.com/v1beta";
 
 /** Direction and script in one string — Gemini TTS takes its performance notes
@@ -59,9 +59,15 @@ Fixed price, in writing, before anyone starts.
 
 Brand Mint. Hyderabad.`;
 
-SCRIPTS.brand = `Read this as a calm, warm Indian English voiceover for a premium advertisement. \
-Unhurried and confident, never salesy. Take a real pause at every full stop and a longer one at \
-each paragraph break.
+SCRIPTS.brand = `Speak as a male Indian English voiceover artist in his early forties from \
+Hyderabad. Telugu is his mother tongue and he was schooled in English medium, so his English \
+is fluent, neutral and precise — the register of a university lecturer or a national news \
+anchor. This is NOT a performed, thick or comic accent, and never a caricature: the accent is \
+simply his, and nothing about the read draws attention to it. Consonants are crisp but not \
+exaggerated. Intonation is level — every sentence lands flat and finished, never rising at the \
+end, never sing-song. Mid-to-low resonant register. Unhurried: take a real pause at every full \
+stop and a longer one at each paragraph break. Warm, but the warmth comes from the pace, not \
+from smiling into the microphone. He is stating facts, not selling.
 
 Your customers are already looking for you. They find a phone number, a WhatsApp, and nothing else.
 
@@ -80,14 +86,25 @@ const WHICH = process.argv.includes("--script")
 const SCRIPT = SCRIPTS[WHICH];
 if (!SCRIPT) { console.error(`Unknown --script "${WHICH}". Try: ${Object.keys(SCRIPTS).join(", ")}`); process.exit(1); }
 
-/** Two candidates rather than one pick. A voice is the most subjective thing
- *  in the reel and costs almost nothing to try twice. */
+/** Candidates for the permanent brand voice, per marketing/video/BRAND-VOICE.md.
+ *  The brief is an EDUCATED Indian English, not a performed one — "a
+ *  professional Indian, English professor kind of", from a Telugu state — so
+ *  these are the mature, even, low-register voices rather than the warm or
+ *  lively ones. Sulafat and Charon were auditioned and rejected as generic;
+ *  they stay listed so the same two are not tried again by accident. */
 const VOICES = {
-  sulafat: "Sulafat",             // warm       — brand film
-  charon: "Charon",               // measured   — brand film
-  puck: "Puck",                   // upbeat     — UGC
-  zubenelgenubi: "Zubenelgenubi", // casual     — UGC
-  sadachbia: "Sadachbia",         // lively     — UGC
+  gacrux: "Gacrux",               // mature       — brand film candidate
+  rasalgethi: "Rasalgethi",       // informative  — brand film candidate
+  iapetus: "Iapetus",             // clear        — brand film candidate
+  alnilam: "Alnilam",             // firm         — brand film candidate
+  sadaltager: "Sadaltager",       // knowledgeable— brand film candidate
+  schedar: "Schedar",             // even         — brand film candidate
+  orus: "Orus",                   // firm         — brand film candidate
+  sulafat: "Sulafat",             // warm         — REJECTED, generic
+  charon: "Charon",               // measured     — REJECTED, generic
+  puck: "Puck",                   // upbeat       — UGC
+  zubenelgenubi: "Zubenelgenubi", // casual       — UGC
+  sadachbia: "Sadachbia",         // lively       — UGC
 };
 
 /** Gemini TTS returns headerless signed 16-bit little-endian PCM. Written
