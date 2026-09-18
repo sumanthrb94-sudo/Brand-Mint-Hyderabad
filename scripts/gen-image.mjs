@@ -319,76 +319,78 @@ async function generate(id) {
    Hyderabad and its trades, because a generic Western storefront says nothing
    to a boutique in Kukatpally. */
 const PEOPLE_BASE =
-  "Ultra-realistic editorial photograph, vertical 4:5, shot on a 50mm lens at " +
-  "f/2, natural light. Real Indian people with real skin texture and real " +
-  "fabric — documentary photography in the style of an Indian magazine " +
-  "portrait, not a stock library, not CGI, no plastic or rendered look, no " +
-  "beauty retouching. " +
-  "SETTING IS ALWAYS INDIA: Hyderabad and Telangana — the shops, streets, " +
-  "clothing, signage shapes and light of a South Indian city. Never a " +
-  "European or American storefront. " +
-  "COMPOSITION IS STRICT: the person's head sits in the TOP THIRD of the " +
-  "frame, well above centre, looking toward or just past the camera. The " +
-  "bottom 45 percent is quiet and dark — floor, shadow, counter surface or " +
-  "blurred depth — because a headline is laid over it. " +
-  "EXPOSURE: the face is clearly lit and clearly readable. Shadows are deep " +
-  "but the subject is not underexposed. " +
-  "Colour grade: deep forest green and near-black shadows, warm amber " +
-  "practical lights, one small emerald accent. Cinematic and muted. " +
-  "The photograph fills the entire frame edge to edge, full bleed. No border, " +
-  "no matte, no white bars, no letterboxing, no vignette ring, no frame. " +
+  "Premium commercial brand photography, vertical 4:5, 50mm at f/2, styled and " +
+  "art-directed like a D2C brand campaign or a fashion lookbook. Bright, clean, " +
+  "aspirational and expensive-looking. Real Indian people with real skin " +
+  "texture — editorial, never CGI, never a rendered or plastic look, never a " +
+  "cheap stock photo. " +
+  "MODERN INDIAN BUSINESS, NOT A STREET STALL: contemporary Indian retail and " +
+  "studios — a designer boutique, a jewellery showroom, a specialty café, a " +
+  "skincare or beverage brand's studio, a clean fulfilment room, a bright " +
+  "co-working office. Hyderabad and Indian in styling, people and dress, but " +
+  "well-designed and well-lit throughout. Never a crowded bazaar, never a " +
+  "cluttered kirana shop, never anything that reads as run-down. " +
+  "LIGHT: generous soft daylight through large windows, airy and clean, warm " +
+  "neutrals, pale wood, off-white walls, a little greenery. The subject is " +
+  "brightly and flatteringly lit. " +
+  "COMPOSITION IS STRICT: the person's head sits in the TOP THIRD, well above " +
+  "centre, looking toward or just past the camera. The bottom 40 percent is " +
+  "calm and uncluttered — a plain surface, a floor, or soft blurred depth — " +
+  "because a headline is laid over it. " +
+  "A single small emerald-green accent somewhere in frame. " +
+  "The photograph fills the frame edge to edge, full bleed. No border, no " +
+  "matte, no white bars, no letterboxing, no frame. " +
   "No text, letters, numbers, words, signage, logos, price tags, watermarks " +
-  "or legible phone or laptop screens anywhere in frame. No distorted hands, " +
-  "no extra fingers, no duplicated people.";
+  "or legible phone or laptop screens anywhere. No distorted hands, no extra " +
+  "fingers, no duplicated people, no double exposure, no composite.";
 
+/* Sixteen covers across sixteen kinds of business, because the four real
+   clients are a couture label, a beverage brand and two B2B platforms — not
+   one kirana shop between them. A prospect should be able to find something
+   that looks like their own business somewhere in the set. */
 const PEOPLE = {
-  "ppl-reply":     "An Indian man in his thirties behind the counter of his small shop in the evening, phone held up near his face mid-reply, faintly tired. A warm bulb above him, the shop dark behind.",
-  "ppl-own":       "An Indian woman in her late twenties standing in the doorway of her own small clothing boutique at dusk, arms loosely folded, looking straight at the camera, calm and proprietorial.",
-  "ppl-fixed":     "Two Indian men either side of a shop counter, mid-conversation, one leaning in slightly. A single sheet of paper on the counter between them, angled so nothing on it is readable.",
-  "ppl-before":    "An Indian man in his forties looking down at his phone with a sceptical, weighing expression, one eyebrow slightly raised, as if reading a quote he does not quite believe.",
-  "ppl-inside":    "A young Indian shopkeeper reaching up to straighten stock on a high shelf, caught mid-movement, half-turned toward the camera, a small tidy shop around him.",
-  "ppl-store":     "An Indian boutique owner folding a garment into a parcel on a wooden table, hands in frame and in focus, looking up at the camera as she works.",
-  "ppl-quote":     "An Indian man at a cluttered back-office desk holding a printed bill at arm's length, frowning at it, a desk lamp raking across from one side.",
-  "ppl-crm":       "An Indian woman in a small back office at a laptop, leaning back from the screen with one hand on the desk, thinking. The laptop screen is dark and shows nothing.",
-  "ppl-work":      "A young Indian man on a Hyderabad street holding his phone up toward the camera to show someone something on it, pleased. The phone screen is blank and dark.",
-  "ppl-change":    "An older Indian shopkeeper looking up and slightly off-camera with a faint, unforced smile, his shop soft and out of focus behind him.",
-  "ppl-yes":       "Two Indian men shaking hands across a shop counter, both partly in frame, warm and unstaged, shot slightly from the side. Not a corporate handshake.",
-  "ppl-need":      "An Indian woman photographing a product on a plain table with her phone, bent slightly over it, concentrating. The phone screen is not visible.",
-  "ppl-search":    "An Indian woman standing on a busy Hyderabad street at dusk looking down at her phone, other pedestrians blurred around her, city lights behind. Phone screen dark.",
-  "ppl-catalogue": "An Indian man sitting on a stool in his shop thumbing through photos on his phone, a stack of unsent parcels beside him, evening light.",
-  "ppl-diwali":    "An Indian shopkeeper standing in the doorway of a small shop strung with warm Diwali lights and clay oil lamps at night, looking at the camera, proud and a little tired.",
-  "ppl-check":     "An Indian woman holding a printed sheet of paper, reading down it with a pen in her other hand, half-lit by a window. Nothing on the page is readable.",
+  "ppl-reply":     "A woman in her thirties in her bright modern clothing boutique, phone to her ear mid-conversation, one hand resting on a rail of hanging garments. Racks and pale wood behind her, large window light.",
+  "ppl-own":       "The founder of a skincare brand standing in her clean studio behind a table of unbranded bottles and jars, arms loosely folded, looking straight at the camera, calm and proprietorial.",
+  "ppl-fixed":     "Two people at a pale wood table in a bright studio office, mid-conversation, one leaning in. A single sheet of paper between them, angled so nothing on it is readable.",
+  "ppl-before":    "A man in his forties in a specialty café reading something on a tablet with a sceptical, weighing expression, one eyebrow slightly raised. Tablet screen dark.",
+  "ppl-inside":    "A young man arranging stock on open shelves in a small, beautifully merchandised lifestyle store, half-turned toward the camera, warm daylight.",
+  "ppl-store":     "The owner of a fashion label folding a garment into premium unbranded packaging on a clean table, hands in frame and in focus, looking up at the camera.",
+  "ppl-quote":     "A woman at a tidy modern desk holding a printed invoice down low on the desk in front of her, frowning at it. Her whole face is clearly visible and completely unobscured — the paper is well below her chin and never crosses her face. Soft window light from one side.",
+  "ppl-crm":       "A founder in a bright co-working office leaning back from a laptop with one hand on the desk, thinking. The laptop screen is dark and shows nothing.",
+  "ppl-work":      "A young man in a modern retail store holding his phone up toward the camera to show someone something on it, pleased. Phone screen blank and dark.",
+  "ppl-change":    "The owner of a jewellery showroom standing behind a lit glass display case, looking up at the camera with a faint, unforced smile. Clean, expensive, softly lit.",
+  "ppl-yes":       "Two people shaking hands across a pale wood counter in a modern showroom, both partly in frame, warm and unstaged, shot slightly from the side.",
+  "ppl-need":      "A woman shooting a styled product flat-lay on a white table with her phone on a small tripod, bent slightly over it, concentrating. No screen visible.",
+  "ppl-search":    "A woman on a clean modern Indian high street at golden hour looking down at her phone, well-designed shopfronts blurred behind her. Phone screen dark.",
+  "ppl-catalogue": "The owner of a specialty bakery behind a counter of unlabelled pastries, scrolling photos on her phone, a stack of packed boxes beside her.",
+  "ppl-diwali":    "The owner of a premium clothing store during the festive season, standing in a bright store dressed with warm string lights and marigold, customers softly blurred behind, looking at the camera.",
+  "ppl-check":     "A woman in a bright studio holding a printed sheet, reading down it with a pen in her other hand. Nothing on the page is readable.",
 };
 
 /* --------------------------- CAROUSEL INTERIOR SCENES ---------------------
-   The covers were only ever 16 of 109 slides. These fill the statement and
-   CTA slides behind the same scrim, under the same rule as PEOPLE above:
-   stock photography, never evidence.
-
-   Reused across carousels on purpose. A set posted over six weeks reads as
-   one studio when scenes recur; forty-five unrelated photographs read as a
-   stock subscription. List and price slides stay clean — a four-row list at
-   41px, or a price, over a photograph is a legibility gamble worth nothing.
-
-   Same composition contract as PEOPLE: subject in the top half, bottom 45%
-   quiet and dark, because the headline sits on it. */
+   Statement and CTA slides, behind the same scrim, under the same rule:
+   stock photography, never evidence. Reused across carousels on purpose — a
+   set posted over six weeks reads as one studio when scenes recur, and as a
+   stock subscription when forty-five unrelated photographs do not. List and
+   price slides stay clean, because a price over a photograph is a legibility
+   gamble worth nothing. */
 const SCENES = {
-  "sc-walkaway":  "A customer seen from behind walking away from a small Indian shopfront at dusk, already looking down at their phone. The shop behind them is lit but unattended.",
-  "sc-shutter":   "The closed metal shutter of a small Indian shop at night, one street light raking across it, a narrow empty street in front. Nobody in frame.",
-  "sc-queue":     "Four or five people waiting at a small Indian shop counter in the evening, shot from behind the queue, the shopkeeper busy and out of reach at the far end.",
-  "sc-phonepile": "An Indian man's hands holding a phone on a shop counter late at night, the screen dark, a ledger and a cold cup of chai beside it. Shot from above his shoulder.",
-  "sc-emptyshop": "The inside of a small Indian shop in the early morning before opening, stock neat on the shelves, nobody there yet, light coming in from one side.",
-  "sc-paperwork": "A cluttered Indian back-office desk seen at a low angle — a stack of printed papers, a calculator, a pen, one warm desk lamp. No text readable, no person.",
-  "sc-handoff":   "An Indian shopkeeper handing a wrapped parcel across a counter to a customer, both hands in frame, warm evening light, faces partly visible.",
-  "sc-market":    "A busy Hyderabad market lane at dusk shot straight down its length from standing height, shopfronts on both sides, people moving away from camera, warm lights strung overhead. ONE straightforward photograph — no portrait, no face anywhere, no foreground subject, no double exposure, no composite, no overlaid second image.",
-  "sc-packing":   "An Indian woman packing orders into parcels at a table stacked with brown paper and tape, working steadily, looking down at her hands.",
-  "sc-scooter":   "A delivery rider on a scooter pulling away down a street at night with parcels bungeed on the back, shot from behind at low angle. Absolutely no signboards, no shop signs, no lettering of any kind anywhere in the frame — plain walls and shutters only.",
-  "sc-thinking":  "An Indian shop owner sitting alone on a stool in his own closed shop after hours, elbows on knees, looking at nothing in particular. Quiet, not sad.",
-  "sc-twohands":  "Two pairs of Indian hands over a counter, one pointing at a sheet of paper the other is holding. Faces out of frame above. Nothing on the paper is readable.",
-  "sc-streetphone":"A young Indian woman on a Hyderabad pavement at night looking at her phone, the lit shopfronts of the street reflected around her. Phone screen dark.",
-  "sc-shelves":   "Densely stocked shelves in a small Indian kirana shop, shot straight on, a single bulb above, no person in frame.",
-  "sc-openingup": "An Indian shopkeeper in a clean pressed shirt and trousers rolling up the metal shutter of his own shop in the early morning, seen from the street, back half-turned to the camera. A tidy commercial street. He is fully and neatly dressed.",
-  "sc-counter":   "An empty Indian shop counter at night lit by one overhead bulb, a phone face down on the wood, the shop dark behind it. Nobody in frame.",
+  "sc-walkaway":  "A customer seen from behind walking out of a bright modern boutique, already looking down at their phone. The store behind them is beautifully lit and unattended.",
+  "sc-shutter":   "The closed glass frontage of a smart modern Indian store at night, lights off inside, clean pavement in front. Nobody in frame. Quiet, not derelict. The fascia above the window is completely blank — absolutely no shop name, no brand name, no lettering, no logo, no signage of any kind anywhere in the frame.",
+  "sc-queue":     "Four or five well-dressed people waiting at the counter of a busy modern store, shot from behind the queue, the one staff member out of reach at the far end.",
+  "sc-phonepile": "A phone face up on a clean pale desk beside a notebook and a cup of coffee, late evening, one warm lamp. Screen dark. No person in frame.",
+  "sc-emptyshop": "The inside of a beautifully merchandised small store early in the morning before opening, stock neat, nobody there yet, daylight through a large window.",
+  "sc-paperwork": "A tidy modern desk shot at a low angle — a small stack of printed papers, a pen, a laptop closed, soft daylight. Nothing readable, no person.",
+  "sc-handoff":   "A clearly recognisable brown cardboard shipping box, cubic and obviously a parcel, being handed across a pale wood counter — both pairs of hands in frame, bright warm light, faces partly visible above. It must read unmistakably as a parcel, not a tablet or a flat slab.",
+  "sc-market":    "A clean, modern Indian shopping street at golden hour shot straight down its length, well-designed shopfronts both sides, people walking away from camera. One photograph — no portrait, no face, no foreground subject, no double exposure, no composite.",
+  "sc-packing":   "A styled packing station — a woman placing folded goods into premium unbranded boxes with tissue paper, clean white table, daylight.",
+  "sc-scooter":   "A delivery rider loading parcels onto a scooter outside a smart modern storefront in daylight, shot from the doorway. No signboards, no lettering anywhere in frame.",
+  "sc-thinking":  "A founder sitting alone on a stool in her own studio after hours, elbows on knees, looking at nothing in particular. Calm, considered, softly lit.",
+  "sc-twohands":  "Two pairs of hands over a pale wood table, one pointing at a sheet of paper the other is holding. Faces out of frame above. Nothing readable.",
+  "sc-streetphone":"A young woman on a clean modern Indian street at golden hour looking at her phone, well-designed shopfronts softly blurred around her. Phone screen dark.",
+  "sc-shelves":   "Beautifully merchandised open shelving in a modern lifestyle store, shot straight on, warm daylight, generous spacing. No person in frame.",
+  "sc-openingup": "A well-dressed shop owner unlocking and opening the glass door of her modern boutique in the early morning, seen from the street, half-turned to the camera.",
+  "sc-counter":   "A clean modern checkout counter, empty, one card reader and a small plant on it, soft daylight, the store softly out of focus behind.",
 };
 
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KEY);

@@ -54,8 +54,22 @@ eight hundred commenters.
 **3 · Generated photography on the cover, never as evidence.** Slide 1 of
 every set carries a generated photograph of a person — a shopkeeper on the
 phone, a boutique owner in her doorway, two men shaking hands over a counter.
-Regenerate with `node scripts/gen-image.mjs --people --key <key>` then
-`node scripts/autocrop.cjs images/ppl-*.png`.
+Regenerate with `node scripts/gen-image.mjs --people --key <key>`, the
+interior scenes with `--scenes`, then `node scripts/autocrop.cjs images/*.png`.
+
+**The look is premium commercial, not documentary.** Bright daylight, clean
+modern interiors, pale wood, one emerald accent — a D2C brand campaign rather
+than street photography. And the businesses vary on purpose: a designer
+boutique, a skincare studio, a jewellery showroom, a specialty bakery, a
+co-working office, a fulfilment room. The four real clients are a couture
+label, a beverage brand and two B2B platforms; not one of them is a kirana
+shop, and a prospect should find something that looks like their own business
+somewhere in the set.
+
+Always review a fresh batch as a contact sheet before wiring it in — sixteen
+images side by side is the only way the failures show up. Three of the first
+sixteen had to be reshot, and the worst of them put a fabricated brand name in
+legible type across a shopfront.
 
 This is stock photography and it is fine. Nobody has ever believed the woman
 in a bank's billboard banks there. The line — and it is the only line — is
