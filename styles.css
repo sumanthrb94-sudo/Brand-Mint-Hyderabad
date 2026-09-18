@@ -49,8 +49,11 @@
   --surface:   #ffffff;
   --ink:       #0a0e0c;
   --ink-2:     #3a423e;
-  --muted:     #5b625e;   /* 6.5:1 on paper */
-  --faint:     #6f7672;   /* 4.9:1 on paper — smallest labels */
+  --muted:     #5b625e;   /* 5.56:1 on paper, 6.26:1 on white — AA */
+  /* Was #6f7672, commented "4.9:1" and actually 4.14:1 — under AA, and
+     used ONLY on the 10.5-11px labels where 4.5:1 is mandatory
+     (.tier-kicker, .service-n, .work-kind). Darkened to clear it. */
+  --faint:     #666d69;   /* 4.63:1 on paper — smallest labels */
   --line:      rgba(10, 14, 12, 0.12);
   --line-soft: rgba(10, 14, 12, 0.07);
   --mint:      #10b981;
@@ -83,11 +86,45 @@
   --shadow-lg: 0 24px 64px rgba(6, 20, 15, 0.22);
   --maxw:      1120px;
   --pad:       clamp(18px, 4vw, 40px);
-  --ease:      cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* MOTION. The three curves are the canonical set from Emil Kowalski's
+     design-engineering skill (github.com/emilkowalski/skills), verified
+     against the repo rather than copied from a blog. Its rule: the built-in
+     CSS easings are too weak for deliberate motion, and ease-in is never
+     correct for UI because it delays the first frame — the exact moment the
+     eye is on the element.
+
+     --ease-out    everything entering, exiting, or responding to a press
+     --ease-in-out something moving or morphing while already on screen
+     --ease        kept as an alias so the 30 existing call sites adopt the
+                   stronger curve in one line, and can be reverted in one.
+
+     Do not hand-roll a fourth curve. Take one from easing.dev if you need it. */
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease:        var(--ease-out);
+
+  /* Durations, from the same source's per-element table. Press feedback
+     100-160ms, tooltips 125-200, dropdowns 150-250, modals/drawers 200-500.
+     UI chrome stays under 300ms; marketing motion (the hero, the scroll
+     reveal) is explicitly allowed to run longer and does. */
+  --t-press: 160ms;
+  --t-ui:    200ms;
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+/* scroll-padding-top clears the sticky nav (71px) for every in-page anchor.
+   Without it #book landed with its heading 54px UNDER the nav on a phone —
+   and #book is where the hero's secondary CTA sends people. */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 88px;
+  /* Declared so OS dark mode does not render native selects, autofill and
+     scrollbars dark inside a page that is light by design. */
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   margin: 0;
@@ -121,12 +158,15 @@ a { color: inherit; }
 
 :focus-visible { outline: 2px solid var(--mint-deep); outline-offset: 3px; border-radius: 4px; }
 .skip {
-  position: absolute; left: var(--pad); top: -60px; z-index: 100;
+  position: absolute; left: var(--pad); top: 12px; z-index: 100;
   padding: 10px 14px; border-radius: var(--radius-sm);
   background: var(--ink); color: var(--cream); font-weight: 600; text-decoration: none;
-  transition: top 0.15s var(--ease);
+  /* transform, not `top` — `top` on a positioned element runs layout on every
+     frame; transform is composited. Same 72px of travel either way. */
+  transform: translateY(-72px);
+  transition: transform 0.15s var(--ease-out);
 }
-.skip:focus { top: 12px; }
+.skip:focus { transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -140,7 +180,9 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 11px 18px;
+  /* 12px, not 11px: at 11px the button renders 42px tall, under the 44px iOS
+     and 48px Android minimum tap target. One pixel each side clears iOS. */
+  padding: 12px 18px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   background: var(--surface);
@@ -149,10 +191,26 @@ a { color: inherit; }
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease), background-color 0.15s var(--ease), transform 0.06s ease;
+  /* touch-action: manipulation kills the 300ms click delay and the
+     double-tap-to-zoom gesture on the one element nobody wants to zoom. */
+  touch-action: manipulation;
+  /* Press feedback was `transform 0.06s ease` — 60ms is below the perceptual
+     floor, so it read as instant and bought nothing but a bare `ease`. The
+     recipe is 160ms ease-out with scale(0.97): subtle, and it reads as the
+     button taking the press rather than jumping. */
+  transition: border-color 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out),
+              background-color 0.15s var(--ease-out), transform var(--t-press) var(--ease-out);
 }
 .btn:hover { border-color: rgba(10, 14, 12, 0.28); box-shadow: 0 6px 20px rgba(10, 14, 12, 0.08); }
-.btn:active { transform: translateY(1px); }
+.btn:active { transform: scale(0.97); }
+/* The one form that disables its button (index.html booking POST) had no
+   disabled state at all: it stayed full-opacity mint with a pointer cursor,
+   inviting a second submit. login.html and the portal both got this right. */
+.btn:disabled, .btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .btn:focus-visible { outline: 2px solid var(--mint-deep); outline-offset: 3px; }
 .btn-primary {
   background: var(--mint);
@@ -203,6 +261,11 @@ html.js .bm-mark-m { stroke-dasharray: 100; stroke-dashoffset: 100; animation: b
   font-size: 13.5px; font-weight: 500; color: var(--muted); text-decoration: none;
   transition: background-color 0.15s var(--ease), color 0.15s var(--ease);
 }
+/* pricing.html and platform.html both set aria-current="page" on their nav
+   link and nothing styled it — all four links computed to the identical
+   colour and weight, so you could not see which page you were on. The
+   semantics were already right; only the paint was missing. */
+.nav-links a[aria-current="page"] { color: var(--ink); background: rgba(10, 14, 12, 0.06); }
 .nav-links a:hover { background: rgba(10, 14, 12, 0.06); color: var(--ink); }
 .nav-actions { display: flex; gap: var(--s-2); }
 
@@ -276,7 +339,13 @@ html.js .bm-mark-m { stroke-dasharray: 100; stroke-dashoffset: 100; animation: b
   box-shadow: var(--shadow);
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
-.tier:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(10, 14, 12, 0.04), 0 18px 40px rgba(10, 14, 12, 0.1); }
+/* Hover gated on a real pointer. Without this a TAP on a phone latches
+   the lift — the card stays raised and shadowed until you tap elsewhere,
+   which on pricing.html leaves one of four tier cards standing proud for
+   no reason. Every :hover that MOVES something belongs behind this. */
+@media (hover: hover) and (pointer: fine) {
+  .tier:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(10, 14, 12, 0.04), 0 18px 40px rgba(10, 14, 12, 0.1); }
+}
 .tier--featured {
   background: var(--bm-ink);
   border-color: var(--bm-ink);
@@ -534,27 +603,57 @@ html.js .faq-item[open] p { animation: fadeUp 0.35s var(--ease) both; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
 /* Hero entrance: staggered, once, only with JS so nothing is ever hidden. */
-html.js .hero [data-enter] { animation: fadeUp 0.7s var(--ease) both; }
-html.js .hero [data-enter]:nth-child(1) { animation-delay: 0.05s; }
-html.js .hero [data-enter]:nth-child(2) { animation-delay: 0.15s; }
-html.js .hero [data-enter]:nth-child(3) { animation-delay: 0.25s; }
-html.js .hero [data-enter]:nth-child(4) { animation-delay: 0.35s; }
-html.js .hero [data-enter]:nth-child(5) { animation-delay: 0.45s; }
-html.js .hero [data-enter]:nth-child(6) { animation-delay: 0.55s; }
+/* The delay comes from --i on the element, NOT :nth-child. [data-enter] is
+   matched as a DESCENDANT of .hero, so :nth-child counted position within
+   whatever parent each element happened to sit in: the copy lives in
+   .hero-copy while .hero-proof-panel is a direct child of .hero, and both
+   resolved to :nth-child(2). Measured: the proof panel entered at 0.15s, in
+   lockstep with the headline, instead of last. Same fault on platform.html.
+   --i is set in the markup, which is where the running order actually is. */
+html.js .hero [data-enter] {
+  animation: fadeUp 0.7s var(--ease-out) both;
+  animation-delay: calc(0.05s + var(--i, 0) * 100ms);
+}
 
 /* Scroll reveal: the observer adds .is-in; children of a group stagger by --i. */
-html.js [data-reveal] {
+html.js [data-reveal]:not(.is-in) {
   opacity: 0; transform: translateY(16px);
-  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
-  transition-delay: calc(var(--i, 0) * 70ms);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+  /* 70ms per item is inside the 30-80ms stagger band, but it was uncapped:
+     the 9th card in a group waited 630ms before it began. Capped at 5 steps
+     (350ms) so a long group still finishes promptly. */
+  transition-delay: calc(min(var(--i, 0), 5) * 70ms);
 }
+
+/* THE SETTLED STATE OWNS NOTHING.
+   This block used to read `[data-reveal].is-in { opacity: 1; transform: none }`
+   with the 0.6s transition and the per-item delay still applying, and a second
+   rule adding box-shadow to the property list. Nothing ever reset them, so
+   every revealed card kept a 600ms transition and its stagger delay FOREVER.
+   Measured on pricing.html: hovering the fourth tier waited 210ms and then
+   took 600ms to lift; the fifth service card waited 280ms. On a pricing page
+   the tier cards are the product, and they felt broken to the touch.
+   Scoping the reveal to :not(.is-in) hands each card back its own 0.2s hover
+   transition the moment it lands. */
 html.js [data-reveal].is-in { opacity: 1; transform: none; }
-html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-shadow; }
 
 @media (prefers-reduced-motion: reduce) {
   html.js [data-reveal], html.js .hero [data-enter] { opacity: 1; transform: none; animation: none; }
   html.js .bm-mark-m { stroke-dashoffset: 0; animation: none; }
   .sticky-cta { transition: none; }
+}
+
+/* The nav is a sticky, translucent, backdrop-filtered bar. Two OS settings
+   ask for exactly that to stop, and neither is covered by reduced-motion:
+   raise the opacity and drop the blur for reduced transparency, and go
+   near-solid with a defined border for increased contrast. */
+@media (prefers-reduced-transparency: reduce) {
+  .nav { background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  .nav { background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none;
+         border-bottom-color: var(--ink); }
+  :focus-visible { outline-width: 3px; }
 }
 
 @media (max-width: 719px) {
@@ -616,7 +715,13 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
   border-radius: var(--radius); box-shadow: var(--shadow);
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
-.service:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(10,14,12,.04), 0 18px 40px rgba(10,14,12,.1); }
+/* Hover gated on a real pointer. Without this a TAP on a phone latches
+   the lift — the card stays raised and shadowed until you tap elsewhere,
+   which on pricing.html leaves one of four tier cards standing proud for
+   no reason. Every :hover that MOVES something belongs behind this. */
+@media (hover: hover) and (pointer: fine) {
+  .service:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(10,14,12,.04), 0 18px 40px rgba(10,14,12,.1); }
+}
 .service--featured { background: var(--bm-ink); border-color: var(--bm-ink); color: var(--cream); box-shadow: var(--shadow-lg); }
 .service--featured:hover { box-shadow: 0 28px 70px rgba(6,20,15,.28); }
 
@@ -705,7 +810,13 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
   border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
   transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
-.work:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(10,14,12,.04), 0 22px 48px rgba(10,14,12,.12); }
+/* Hover gated on a real pointer. Without this a TAP on a phone latches
+   the lift — the card stays raised and shadowed until you tap elsewhere,
+   which on pricing.html leaves one of four tier cards standing proud for
+   no reason. Every :hover that MOVES something belongs behind this. */
+@media (hover: hover) and (pointer: fine) {
+  .work:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(10,14,12,.04), 0 22px 48px rgba(10,14,12,.12); }
+}
 .work-shot {
   position: relative; aspect-ratio: 16 / 10; overflow: hidden;
   background: linear-gradient(155deg, var(--bm-ink), var(--bm-ink-2) 70%, var(--bm-ink-deep));
@@ -786,13 +897,20 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
 .bf > span { font: 600 11.5px/1.4 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cream-mute); }
 .bf > span i { font-style: normal; text-transform: none; letter-spacing: 0; font-weight: 400; }
 .bf input, .bf select, .bf textarea {
-  font: 400 15px/1.4 var(--sans); color: var(--cream);
+  /* 16px is a hard floor, not a type choice: iOS Safari zooms the whole page
+     when a focused control is under 16px, and the visitor is then left
+     zoomed-in on a dark form. */
+  font: 400 16px/1.4 var(--sans); color: var(--cream);
   background: rgba(255, 255, 255, 0.06); border: 1px solid var(--cream-line);
   border-radius: var(--radius-sm); padding: 11px 13px; width: 100%;
 }
 .bf textarea { resize: vertical; min-height: 62px; }
 .bf select option { color: var(--ink); }
 .bf input:focus, .bf select:focus, .bf textarea:focus { outline: 2px solid var(--emerald); outline-offset: 2px; border-color: transparent; }
+/* :user-invalid, not :invalid — :invalid matches an empty required field on
+   first paint, so the form would load already marked red. :user-invalid
+   waits until the visitor has actually entered something and left. */
+.bf input:user-invalid, .bf textarea:user-invalid { border-color: #ffb4b4; }
 .book-form .btn { margin-top: var(--s-2); }
 .book-status { font-size: 14px; padding: 10px 12px; border-radius: var(--radius-sm); }
 .book-status.is-ok { background: rgba(0, 200, 151, 0.16); color: var(--emerald); }
@@ -1135,9 +1253,6 @@ html.js .tier[data-reveal].is-in { transition-property: opacity, transform, box-
   .showcase-inner { grid-template-columns: 1fr; }
   .showcase-stage { order: -1; }
   .showcase-glow { right: 50%; transform: translateX(50%); bottom: auto; top: -12%; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .showcase * { animation: none !important; }
 }
 
 /* ======================================================================
