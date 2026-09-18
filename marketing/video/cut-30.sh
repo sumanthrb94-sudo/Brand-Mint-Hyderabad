@@ -11,20 +11,21 @@
 #   before   8.0   0.0  ->  8.0
 #   build    8.0   8.0  -> 16.0
 #   after    8.0  16.0  -> 24.0
-#   endcard  6.6  23.4  -> 30.0     crossfaded in over 0.6s
+#   endcard  6.0  24.0  -> 30.0
 #                        ---------
 #                        30.00 exactly
 #
-# The crossfade overlaps, so the end card is 6.6s of source to land 6.0s of
-# screen time. Hard cuts between the three clips on purpose: they are three
-# different scenes, and a dissolve between them would read as a slideshow.
+# A plain four-way concat, with the end card fading up on its own rather than
+# crossfading from the footage. xfade was the first attempt and it is not worth
+# the trouble here: it demands that both inputs share a timebase AND be
+# constant frame rate, concat emits 1/1000000 while a looped still arrives at
+# 1/24, and settb=AVTB reconciles the timebase only to strip the frame rate, at
+# which point xfade rejects the input as variable ("current rate of 1/0 is
+# invalid"). Every one of those surfaces as the same unhelpful line, "Error
+# reinitializing filters!". Concat needs none of it and makes the total exact.
 #
-# settb=1/24 on both xfade inputs is not decoration. concat hands on a
-# 1/1000000 timebase and a looped still arrives at 1/24; xfade refuses to
-# configure when they disagree, and reports it only as "Error reinitializing
-# filters!". settb=AVTB fixes the mismatch but strips the frame rate, and
-# xfade then rejects the input as variable rate ("current rate of 1/0 is
-# invalid"), so the timebase has to be pinned to the frame rate, not reset.
+# Hard cuts between the three clips on purpose: they are three different
+# scenes, and dissolving between them would read as a slideshow.
 #
 # Veo returns 720x1280 (checked, every time so far). Everything is composited
 # on a 1080x1920 timeline and the footage upscaled, per OMNI-30-VIDEO-PLAN.md:
@@ -55,15 +56,41 @@ done
 
 V="scale=1080:1920:flags=lanczos,fps=24,format=yuv420p,setpts=PTS-STARTPTS"
 
+# The voiceover is optional. Without one the reel keeps the clips' own room
+# tone at full level; with one, that tone drops to a bed under the voice.
+# BED_VOL is deliberately low — Veo's ambience is atmosphere, not sound design,
+# and anything above about 0.2 fights the read on a phone speaker.
+VO="${2:-marketing/video/out/vo-charon.wav}"
+BED_VOL="${BED_VOL:-0.16}"
+
+VIDEO_FC="\
+[0:v]$V[v0];[1:v]$V[v1];[2:v]$V[v2];\
+[3:v]scale=1080:1920,fps=24,format=yuv420p,fade=t=in:st=0:d=0.5,setpts=PTS-STARTPTS[v3];\
+[v0][v1][v2][v3]concat=n=4:v=1:a=0[vout];"
+
+if [ -f "$VO" ]; then
+  VO_IN=(-i "$VO")
+  # normalize=0 on amix, or it halves both inputs to avoid clipping and the
+  # voice ends up quieter than the bed it is supposed to sit over.
+  AUDIO_FC="\
+[0:a][1:a][2:a]concat=n=3:v=0:a=1,aresample=48000,aformat=channel_layouts=stereo,\
+apad=whole_dur=30,volume=$BED_VOL[bed];\
+[4:a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=30[vo];\
+[bed][vo]amix=inputs=2:duration=first:normalize=0,afade=t=out:st=28.6:d=1.4,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+  echo "  voiceover: $VO  (bed at $BED_VOL)"
+else
+  VO_IN=()
+  AUDIO_FC="\
+[0:a][1:a][2:a]concat=n=3:v=0:a=1[ac];\
+[ac]apad=whole_dur=30,afade=t=out:st=28.2:d=1.8,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000[aout]"
+  echo "  no voiceover at $VO — using the clips' own audio"
+fi
+
 "$FF" -y -hide_banner -loglevel error \
   -i "$IN/before.mp4" -i "$IN/build.mp4" -i "$IN/after.mp4" \
   -framerate 24 -loop 1 -t 6 -i "$EC" \
-  -filter_complex "\
-[0:v]$V[v0];[1:v]$V[v1];[2:v]$V[v2];\
-[3:v]scale=1080:1920,fps=24,format=yuv420p,fade=t=in:st=0:d=0.5,setpts=PTS-STARTPTS[v3];\
-[v0][v1][v2][v3]concat=n=4:v=1:a=0[vout];\
-[0:a][1:a][2:a]concat=n=3:v=0:a=1[ac];\
-[ac]apad=whole_dur=30,afade=t=out:st=28.2:d=1.8,aresample=48000[aout]" \
+  "${VO_IN[@]}" \
+  -filter_complex "${VIDEO_FC}${AUDIO_FC}" \
   -map "[vout]" -map "[aout]" \
   -c:v libx264 -profile:v high -level 4.1 -preset slow -crf 20 \
   -pix_fmt yuv420p -r 24 -g 48 \
@@ -71,7 +98,10 @@ V="scale=1080:1920:flags=lanczos,fps=24,format=yuv420p,setpts=PTS-STARTPTS"
   -movflags +faststart -t 30 \
   "$OUT"
 
-DUR=$("$FF" -hide_banner -i "$OUT" 2>&1 | sed -n 's/.*Duration: \([0-9:.]*\).*/\1/p')
+# `ffmpeg -i` with no output file always exits 1 — it is a probe, not a
+# failure. Under `set -e -o pipefail` that killed the script here, after the
+# reel had already been written, so a good render looked like a silent failure.
+DUR=$("$FF" -hide_banner -i "$OUT" 2>&1 | sed -n 's/.*Duration: \([0-9:.]*\).*/\1/p' || true)
 SZ=$(( $(stat -c%s "$OUT") / 1024 ))
 echo "  ok  $OUT  ${SZ} KB  duration $DUR"
 echo "      1080x1920 · 24fps · H.264 high · AAC 128k — Instagram Reels ready"
