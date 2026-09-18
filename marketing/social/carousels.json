@@ -131,7 +131,7 @@
           "kicker": "Fixed price, in writing",
           "head": "Online store",
           "price": "from ₹49,999",
-          "sub": "GST extra · four to twelve+ weeks",
+          "sub": "GST extra · four tiers",
           "body": "Four tiers. Each includes everything in the one before it, so moving up later is an add-on, never a rebuild. Ask which one fits on WhatsApp."
         },
         {
@@ -230,7 +230,7 @@
         },
         {
           "kind": "statement",
-          "kicker": "Nine out of ten bad builds",
+          "kicker": "Where builds actually go wrong",
           "head": "The problem is never the code.",
           "body": "It is what was never agreed in writing. Every one of these is a question you can ask before any money moves."
         },
@@ -297,10 +297,10 @@
         {
           "kind": "loud",
           "light": true,
-          "tag": "Two weeks, one price",
-          "huge": "FIVE PAGES|TWO WEEKS|ONE PRICE",
+          "tag": "One number",
+          "huge": "FIVE PAGES|ONE PRICE",
           "accent": true,
-          "sub": "A static website, live in two weeks, ₹14,999 one time and GST extra. Everything below is included in that number."
+          "sub": "A static website for ₹14,999, one time and GST extra. Everything below is included in that number."
         },
         {
           "kind": "list",
@@ -325,7 +325,7 @@
           "kicker": "One time, GST extra",
           "head": "Static website",
           "price": "₹14,999",
-          "sub": "live in two weeks",
+          "sub": "one time · GST extra",
           "body": "Scope and price signed before anyone starts. Not sure this is the one you need? Ask on WhatsApp first."
         },
         {
@@ -381,7 +381,7 @@
           "kicker": "Four tiers, GST extra",
           "head": "Online store",
           "price": "from ₹49,999",
-          "sub": "four to twelve+ weeks",
+          "sub": "GST extra · four tiers",
           "body": "Each tier includes everything in the one before it, so moving up later is an add-on and never a rebuild. Ask which one fits on WhatsApp."
         },
         {
@@ -505,7 +505,7 @@
           "head": "Site + CRM",
           "price": "₹79,999",
           "sub": "setup · then ₹9,999/mo · GST extra",
-          "body": "Six weeks to live. 12-month minimum on the monthly. Ask for the full breakdown on WhatsApp before you decide."
+          "body": "Your site, your admin dashboard, the lead CRM and the WhatsApp and Meta connections behind them. Ask for the full breakdown on WhatsApp before you decide."
         },
         {
           "kind": "cta",
@@ -651,7 +651,7 @@
           "tag": "No pitch deck",
           "huge": "AFTER|YOU SAY|YES",
           "accent": true,
-          "sub": "What actually happens between the first message and a live site. Three steps, and you can stop at any of them.",
+          "sub": "What actually happens between the first message and a live site.",
           "foot": "Swipe →",
           "img": "/images/ppl-yes.png"
         },
@@ -677,17 +677,17 @@
           "kind": "statement",
           "kicker": "What the portal is",
           "head": "You watch it happen.",
-          "body": "Timeline, files to approve, invoices and a direct line to us — in one place, from the day the deposit lands. You are never wondering what week it is."
+          "body": "Timeline, files to approve, invoices and a direct line to us — in one place, from the moment the deposit lands. You are never wondering where it has got to."
         },
         {
           "kind": "list",
-          "kicker": "Real timings",
-          "head": "How long it actually takes.",
+          "kicker": "What is in the agreement",
+          "head": "All of it, before you pay.",
           "items": [
-            "Static website — two weeks",
-            "WhatsApp Store — four weeks",
-            "Site + CRM — six weeks to live",
-            "Larger stores — eight to twelve+ weeks"
+            "Exactly what is being built, page by page",
+            "The price, and that it does not move",
+            "What is not included, written down",
+            "Whose name the domain and accounts go in"
           ]
         },
         {
@@ -786,7 +786,7 @@
           "tag": "Thirty seconds",
           "huge": "TRY IT|BEFORE YOU|SWIPE ON",
           "accent": true,
-          "sub": "You will get one of four results, and three of them are costing you customers you will never hear about."
+          "sub": "Whatever comes up is what a customer decides on. It is rarely what you would have chosen for them."
         },
         {
           "kind": "list",
@@ -801,7 +801,7 @@
         },
         {
           "kind": "statement",
-          "kicker": "What most people find",
+          "kicker": "What a lot of people find",
           "head": "A map pin and nothing else.",
           "body": "Maybe an Instagram page. No prices, no timings, no way to know if you deliver. So they go back and tap the next result."
         },
@@ -876,7 +876,7 @@
           "kicker": "Four tiers, GST extra",
           "head": "WhatsApp Store",
           "price": "₹49,999",
-          "sub": "four weeks · GST extra",
+          "sub": "GST extra · run from your phone",
           "body": "Run it all from your phone: orders, returns and customers on WhatsApp, with a real checkout behind it. Ask if this is the tier you need."
         },
         {
@@ -889,64 +889,64 @@
       ]
     },
     {
-      "id": "diwali-deadline",
-      "title": "Diwali is 8 November",
+      "id": "festive-rush",
+      "title": "The rush you can't serve",
       "batch": "festive",
       "slides": [
         {
           "kind": "loud",
-          "tag": "Diwali · 8 November 2026",
-          "huge": "DIWALI|8 NOV",
+          "tag": "Festive season",
+          "huge": "THE RUSH|YOU CAN'T|SERVE",
           "accent": true,
-          "sub": "If you want to be selling online for it, the maths says you sign in October.",
+          "sub": "Your busiest season is the one where you lose the most customers.",
           "foot": "Swipe →",
           "img": "/images/ppl-diwali.png"
         },
         {
           "kind": "loud",
           "light": true,
-          "tag": "Work backwards",
-          "huge": "START BY|11|OCTOBER",
+          "tag": "One at a time",
+          "huge": "YOU CAN|SERVE ONE|AT A TIME",
           "accent": true,
-          "sub": "A WhatsApp Store takes four weeks. Count back from 8 November and 11 October is the last safe date to sign."
+          "sub": "Everyone else is waiting, scrolling, or already messaging the shop down the road. A page serves all of them at once."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The queue you never see",
+          "head": "The ones who gave up never told you.",
+          "body": "They didn't complain and they didn't call back. They stopped waiting for a reply and bought somewhere else, and you never heard about any of it."
+        },
+        {
+          "kind": "statement",
+          "kicker": "And it is not more staff",
+          "head": "You can't hire your way out of a rush.",
+          "body": "An extra pair of hands answers faster. It still answers one person at a time, and only while the shutter is up."
         },
         {
           "kind": "list",
-          "kicker": "Counting back from 8 November",
-          "head": "The real dates.",
+          "kicker": "What a store does in a rush",
+          "head": "It doesn't queue.",
           "items": [
-            "Static site · 2 weeks · by 25 Oct",
-            "WhatsApp Store · 4 weeks · by 11 Oct",
-            "Larger store · 8 weeks · by 13 Sept",
-            "Site + CRM · 6 weeks · by 27 Sept"
+            "Takes the order while you're serving someone else",
+            "Stops selling what you've run out of",
+            "Sends the GST invoice on its own",
+            "Keeps taking orders after you've closed"
           ]
         },
         {
-          "kind": "statement",
-          "kicker": "Why the deadline is real",
-          "head": "It is not urgency, it is arithmetic.",
-          "body": "The build takes as long as it takes. We would rather tell you in September that eight weeks no longer fits than take the deposit and rush it."
-        },
-        {
-          "kind": "statement",
-          "kicker": "If you have left it late",
-          "head": "Two weeks still fits.",
-          "body": "A static website with your prices, timings and a WhatsApp button will do more for a festive season than no page at all. ₹14,999, GST extra."
-        },
-        {
           "kind": "price",
-          "kicker": "Four weeks, GST extra",
+          "kicker": "Fixed price, in writing",
           "head": "WhatsApp Store",
           "price": "₹49,999",
-          "sub": "sign by 11 October",
-          "body": "Orders, returns and customers on WhatsApp, with a real checkout behind it. Message us this week and we'll tell you honestly if it still fits."
+          "sub": "GST extra · four tiers",
+          "body": "Orders, returns and customers on WhatsApp, with a real checkout behind it. Ask us what the rush is actually costing you."
         },
         {
           "kind": "cta",
           "kicker": "WhatsApp +91 77999 34943",
-          "head": "Ask if your date still works.",
-          "em": "What are you hoping to sell this Diwali?",
-          "body": "Comment it and we'll tell you which of the four dates above is yours — or that you should aim at Sankranti instead and do it properly."
+          "head": "Ask before your busy season.",
+          "em": "What do you sell most of?",
+          "body": "Comment it and we'll tell you whether a page would take the pressure off, or whether you're fine as you are. We say the second one often."
         }
       ]
     },

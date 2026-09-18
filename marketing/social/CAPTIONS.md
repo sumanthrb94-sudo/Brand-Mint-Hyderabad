@@ -247,7 +247,7 @@ Instagram ranking has no primary source behind it.
 3. Dark slide: the account goes and the business goes with it — no warning, no appeal.
 4. Dark slide listing what you own with Brand Mint: domain, hosting, payment account, customer records.
 5. Dark slide: keep posting on Instagram exactly as you do now.
-6. Dark slide: online stores from ₹49,999, GST extra, four to twelve-plus weeks.
+6. Dark slide: online stores from ₹49,999, GST extra, four tiers.
 7. Dark slide: see the four store tiers at brandmintstudios.in, or comment your trade.
 
 ---
@@ -387,21 +387,24 @@ cheapest in the set, because the answer is a single digit.
 
 # Batch 2 — twelve carousels, six weeks
 
-Two a week, Tuesday to Thursday, 6–9pm IST. The order below is the posting
-order: it alternates price, proof and pre-adoption rather than running four
-price posts in a row, because the same shape twice in a week reads as a
-campaign and a campaign gets scrolled past.
+Two a week, Tuesday to Thursday, 6–9pm IST. The order alternates price, proof
+and pre-adoption rather than running four price posts in a row, because the
+same shape twice in a week reads as a campaign and a campaign gets scrolled
+past.
 
-**Post `diwali-deadline` in the week of 21 September**, out of order. It is
-the only post here with an expiry date on it — Diwali is **Sunday 8 November
-2026** and the sign-by dates on slide 3 are counted back from it. After the
-festive season it comes down, and the same slides get rebuilt for Sankranti.
+**Every post in this batch is problem → solution.** Hook on the problem,
+restate it harder on slide 2, show what it costs, turn to what actually fixes
+it, state the price, ask for a comment. No deadlines, no countdowns, no build
+durations on any slide — a buyer who wants to know how long it takes reads it
+on the pricing page, where it sits in context instead of competing with the
+hook. If that turns out to be the wrong call it is one line per price slide to
+put back.
 
 The four fixed hashtags are unchanged. The fifth is listed with each post.
 
 | Week | Tue/Wed | Thu |
 |---|---|---|
-| 1 | `diwali-deadline` | `inside-14999` |
+| 1 | `festive-rush` | `inside-14999` |
 | 2 | `search-your-shop` | `why-49999` |
 | 3 | `open-the-work` | `not-in-the-quote` |
 | 4 | `whatsapp-catalogue` | `after-you-say-yes` |
@@ -431,7 +434,7 @@ Fifth tag: `#webdesign`
 > — Google Search Console verified and submitted
 > — Visitor analytics from day one
 >
-> Live in two weeks. ₹14,999 one time, GST extra, and that is the whole number.
+> ₹14,999 one time, GST extra, and that is the whole number.
 >
 > What it is not: it does not take payments and it does not hold stock. If you
 > need to sell online you need a store, that starts at ₹49,999, and we will
@@ -446,9 +449,9 @@ Fifth tag: `#webdesign`
 > #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
 > #smallbusinessindia #webdesign
 
-**Meta description** · What ₹14,999 buys, line by line: five pages, your domain, SSL, analytics, live in two weeks. Hyderabad, GST extra.
+**Meta description** · What ₹14,999 buys, line by line: five pages, your domain, SSL, email and analytics. Hyderabad, GST extra.
 
-**Alt text** · 1 Dark slide "WHAT ₹14,999 BUYS". 2 Cream slide "FIVE PAGES TWO WEEKS ONE PRICE". 3 List of five inclusions. 4 What it is not — no payments, no stock. 5 ₹14,999 one time, live in two weeks. 6 WhatsApp to ask what yours would cost.
+**Alt text** · 1 Dark slide "WHAT ₹14,999 BUYS". 2 Cream slide "FIVE PAGES ONE PRICE". 3 List of five inclusions. 4 What it is not — no payments, no stock. 5 ₹14,999 one time, GST extra. 6 WhatsApp to ask what yours would cost.
 
 ---
 
@@ -548,7 +551,7 @@ Fifth tag: `#whatsappbusiness`
 > you like. Meta bills its own message fees to your card, not ours — so you
 > keep the account if you ever leave us.
 >
-> Six weeks to live. 12-month minimum on the monthly. GST extra on both.
+> GST extra on both.
 >
 > Honest question: would you rather pay once and risk it quietly dying?
 > **Comment your answer.** Plenty of people say yes and for some businesses
@@ -653,9 +656,6 @@ Fifth tag: `#businessowner`
 > approve, invoices and a direct line to us, all in one place. You are never
 > wondering what week it is.
 >
-> How long it actually takes: static website two weeks, WhatsApp Store four
-> weeks, Site + CRM six weeks to live, larger stores eight to twelve-plus.
->
 > 50% to start, 50% before launch. A GST invoice for every payment. No hourly
 > billing and no extras inside a tier.
 >
@@ -668,9 +668,9 @@ Fifth tag: `#businessowner`
 > #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
 > #smallbusinessindia #businessowner
 
-**Meta description** · How a Brand Mint build runs: a 30-minute call, a fixed price in writing, 50% to start. Two to twelve-plus weeks. Hyderabad.
+**Meta description** · How a Brand Mint build runs: a 30-minute call, a fixed price in writing, nothing due until you sign. Hyderabad.
 
-**Alt text** · 1 Dark slide "AFTER YOU SAY YES". 2 Cream slide "NO DISCOVERY FEE". 3 The three steps. 4 What the client portal is. 5 Real timings for each build. 6 50/50 payment and GST invoices. 7 Book the 30 minutes.
+**Alt text** · 1 Dark slide "AFTER YOU SAY YES". 2 Cream slide "NO DISCOVERY FEE". 3 The three steps. 4 What the client portal is. 5 What is in the agreement before you pay. 6 50/50 payment and GST invoices. 7 Book the 30 minutes.
 
 ---
 
@@ -722,7 +722,7 @@ Fifth tag: `#localbusiness`
 > — what you sell plus your suburb
 > — your shop name plus "price"
 >
-> Most people find a map pin and nothing else. Maybe an Instagram page. No
+> A lot of people find a map pin and nothing else. Maybe an Instagram page. No
 > prices, no timings, no way to know whether you deliver. So they go back and
 > tap the next result.
 >
@@ -745,7 +745,7 @@ Fifth tag: `#localbusiness`
 
 **Meta description** · Search your own shop on Google. A map pin and no prices is costing you customers you never hear about. Hyderabad, from ₹14,999.
 
-**Alt text** · 1 Dark slide "SEARCH YOUR OWN SHOP". 2 Cream slide "TRY IT BEFORE YOU SWIPE ON". 3 Four searches to type. 4 Most people find a map pin and nothing else. 5 There is no missed call for this. 6 What fixes it — a page with the answers. 7 Comment what came up.
+**Alt text** · 1 Dark slide "SEARCH YOUR OWN SHOP". 2 Cream slide "TRY IT BEFORE YOU SWIPE ON". 3 Four searches to type. 4 A lot of people find a map pin and nothing else. 5 There is no missed call for this. 6 What fixes it — a page with the answers. 7 Comment what came up.
 
 ---
 
@@ -768,7 +768,7 @@ Fifth tag: `#whatsappbusiness`
 >
 > And nothing has to change. The WhatsApp Store tier is built so you run the
 > entire thing from WhatsApp — orders, returns and refunds included — with a
-> real checkout sitting behind it. ₹49,999, four weeks, GST extra.
+> real checkout sitting behind it. ₹49,999, GST extra.
 >
 > How many orders a week are you at right now? **Comment a rough number.**
 > Under ten and we will probably tell you to wait. That answer is free and we
@@ -779,47 +779,46 @@ Fifth tag: `#whatsappbusiness`
 > #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
 > #smallbusinessindia #whatsappbusiness
 
-**Meta description** · A WhatsApp catalogue can't take money, track stock or invoice. WhatsApp Store ₹49,999, four weeks, run from your phone. Hyderabad.
+**Meta description** · A WhatsApp catalogue can't take money, track stock or invoice. WhatsApp Store ₹49,999, run from your phone. Hyderabad.
 
-**Alt text** · 1 Dark slide "YOUR CATALOGUE ISN'T A SHOP". 2 Cream slide "IT WORKS UNTIL IT DOESN'T". 3 Four things a catalogue can't do. 4 You are the checkout. 5 WhatsApp stays. 6 WhatsApp Store ₹49,999, four weeks. 7 Comment how many orders a week.
+**Alt text** · 1 Dark slide "YOUR CATALOGUE ISN'T A SHOP". 2 Cream slide "IT WORKS UNTIL IT DOESN'T". 3 Four things a catalogue can't do. 4 You are the checkout. 5 WhatsApp stays. 6 WhatsApp Store ₹49,999, GST extra. 7 Comment how many orders a week.
 
 ---
 
-## 15 · Diwali is 8 November · `diwali-deadline` — 7 slides
-Fifth tag: `#diwali2026`
+## 15 · The rush you can't serve · `festive-rush` — 7 slides
+Fifth tag: `#festiveseason`
 
-**Post this first, in the week of 21 September. It expires.**
-
-> Want to be selling online by Diwali in Hyderabad? Here are the real sign-by dates.
+> Festive rush in Hyderabad: why your busiest season is the one you lose the most customers in.
 >
-> Diwali is Sunday 8 November 2026. Counting back from it:
+> The ones who gave up never told you. They didn't complain and they didn't
+> call back — they stopped waiting for a reply and bought somewhere else, and
+> you never heard about any of it.
 >
-> — Static website, two weeks — sign by 25 October
-> — WhatsApp Store, four weeks — sign by 11 October
-> — Site + CRM, six weeks — sign by 27 September
-> — Larger store, eight weeks — sign by 13 September
+> And you can't hire your way out of it. An extra pair of hands answers faster.
+> It still answers one person at a time, and only while the shutter is up.
 >
-> That last one has already gone, and we would rather say so now than take a
-> deposit in October and rush it. The build takes as long as it takes. This
-> isn't urgency, it's arithmetic.
+> What a store does in a rush:
+> — Takes the order while you're serving someone else
+> — Stops selling what you've run out of
+> — Sends the GST invoice on its own
+> — Keeps taking orders after you've closed
 >
-> If you have left it late, two weeks still fits. A static website with your
-> prices, your timings and a WhatsApp button will do more for a festive season
-> than no page at all — ₹14,999, GST extra.
+> WhatsApp Store ₹49,999, GST extra. Orders, returns and customers still on
+> WhatsApp, with a real checkout behind it. Four tiers, each including
+> everything in the one before it.
 >
-> What are you hoping to sell this Diwali? **Comment it and we'll tell you
-> which of those four dates is yours** — or that you should aim at Sankranti
-> instead and do it properly.
+> What do you sell most of? **Comment it and we'll tell you whether a page
+> would take the pressure off, or whether you're fine as you are.** We give the
+> second answer more often than you'd expect.
 >
-> WhatsApp +91 77999 34943 this week and we'll tell you honestly if it still
-> fits.
+> WhatsApp +91 77999 34943.
 >
 > #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
-> #smallbusinessindia #diwali2026
+> #smallbusinessindia #festiveseason
 
-**Meta description** · Diwali is 8 November 2026. Sign by 11 October for a WhatsApp Store, 25 October for a website. Fixed prices, Hyderabad.
+**Meta description** · Your busiest season is the one you lose most customers in. A store takes orders while you serve someone else. ₹49,999, Hyderabad.
 
-**Alt text** · 1 Dark slide "DIWALI 8 NOV". 2 Cream slide "START BY 11 OCTOBER". 3 The four sign-by dates. 4 It is not urgency, it is arithmetic. 5 Two weeks still fits. 6 WhatsApp Store ₹49,999, sign by 11 October. 7 Ask if your date still works.
+**Alt text** · 1 Shopkeeper in a lit doorway at night, "THE RUSH YOU CAN'T SERVE". 2 Cream slide "YOU CAN SERVE ONE AT A TIME". 3 The ones who gave up never told you. 4 You can't hire your way out of a rush. 5 Four things a store does in a rush. 6 WhatsApp Store ₹49,999, GST extra. 7 Comment what you sell most of.
 
 ---
 
