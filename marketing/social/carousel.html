@@ -71,15 +71,23 @@
   /* Full-bleed photograph with type over it — the scale-hook covers. A scrim
      top and bottom, because a headline sitting directly on a photograph is
      unreadable the moment the photograph changes. */
+  /* Any slide carrying an img renders as a poster: subject in the top half,
+     text on the bottom half under a scrim heavy enough to carry cream type
+     over a real photograph. Lists and price slides never take one — four rows
+     at 41px, or a price, over a photograph is a legibility gamble that is not
+     worth taking for a picture. */
   .slide.photo{padding:0;background:#06140f}
+  .photo .main{flex:none;margin-top:auto}
   /* scale(1.05) crops ~2.5% off every edge. Gemini keeps drawing a thin grey
      frame or matte into these plates whatever the prompt says, and one dark
      hairline along a slide edge is the kind of thing that only becomes obvious
      once it is posted. Cheaper to crop than to keep re-rolling. */
   .photo .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+  .photo .body{max-width:26ch}
   .photo .scrim{position:absolute;inset:0;
-    background:linear-gradient(180deg, rgba(6,20,15,.78) 0%, rgba(6,20,15,.30) 34%,
-               rgba(6,20,15,.10) 52%, rgba(6,20,15,.72) 88%, rgba(6,20,15,.90) 100%)}
+    background:linear-gradient(180deg, rgba(6,20,15,.40) 0%, rgba(6,20,15,.10) 24%,
+               rgba(6,20,15,.50) 44%, rgba(6,20,15,.86) 64%,
+               rgba(6,20,15,.95) 82%, rgba(6,20,15,.97) 100%)}
   .photo .inner{position:absolute;inset:0;padding:86px 78px;display:flex;flex-direction:column}
   .photo .kicker{color:var(--emerald)}
   .photo h1{color:var(--cream);font-size:104px;text-shadow:0 4px 40px rgba(0,0,0,.45)}
@@ -200,7 +208,11 @@
   const dark = S.kind === "cover" || S.kind === "cta";
   const el = document.getElementById("slide");
   if (dark) el.classList.add("dark");
-  if (S.kind === "photo") el.classList.add("photo");
+  // "photo" survives as a kind for the sets that already use it, but an img on
+  // a statement or a cta now turns that slide into a poster too — which is the
+  // only reason 93 of 109 slides were type-only.
+  const poster = S.kind === "photo" || (S.img && S.kind !== "loud");
+  if (poster) el.classList.add("photo");
   if (S.kind === "loud") {
     el.classList.add("loud");
     if (S.light) el.classList.add("light");
@@ -223,7 +235,7 @@
   // at full size — measured on the rendered slide, not guessed from a count.
   const headClass = (S.head || "").length > 26 ? "sm" : "";
 
-  const shell = (inner) => S.kind === "photo"
+  const shell = (inner) => poster && S.img
     ? `<img class="shot" src="${S.img}" alt=""><div class="scrim"></div><div class="inner">${inner}</div>`
     : inner;
 

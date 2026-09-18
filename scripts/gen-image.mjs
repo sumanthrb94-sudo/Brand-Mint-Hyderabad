@@ -253,11 +253,12 @@ async function generate(id) {
   // ratio is always 4:5, so there is nothing else worth repeating sixteen
   // times. Everything else carries its own {file, aspect, prompt}.
   const shot = SHOTS[id] || AVATARS[id] || HOOKS[id] || COVERS[id]
-    || (PEOPLE[id] ? { file: id, aspect: "4:5", prompt: PEOPLE[id] } : null);
+    || (PEOPLE[id] ? { file: id, aspect: "4:5", prompt: PEOPLE[id] } : null)
+    || (SCENES[id] ? { file: id, aspect: "4:5", prompt: SCENES[id] } : null);
   if (!shot) throw new Error(`Unknown shot "${id}". Try --list.`);
 
   const house = AVATARS[id] ? PRESENTER : HOOKS[id] ? SCALE
-    : COVERS[id] ? COVER : PEOPLE[id] ? PEOPLE_BASE : PALETTE;
+    : COVERS[id] ? COVER : (PEOPLE[id] || SCENES[id]) ? PEOPLE_BASE : PALETTE;
   const body = {
     contents: [{ parts: [{ text: `${shot.prompt}\n\n${house}` }] }],
     generationConfig: {
@@ -359,12 +360,44 @@ const PEOPLE = {
   "ppl-check":     "An Indian woman holding a printed sheet of paper, reading down it with a pen in her other hand, half-lit by a window. Nothing on the page is readable.",
 };
 
+/* --------------------------- CAROUSEL INTERIOR SCENES ---------------------
+   The covers were only ever 16 of 109 slides. These fill the statement and
+   CTA slides behind the same scrim, under the same rule as PEOPLE above:
+   stock photography, never evidence.
+
+   Reused across carousels on purpose. A set posted over six weeks reads as
+   one studio when scenes recur; forty-five unrelated photographs read as a
+   stock subscription. List and price slides stay clean — a four-row list at
+   41px, or a price, over a photograph is a legibility gamble worth nothing.
+
+   Same composition contract as PEOPLE: subject in the top half, bottom 45%
+   quiet and dark, because the headline sits on it. */
+const SCENES = {
+  "sc-walkaway":  "A customer seen from behind walking away from a small Indian shopfront at dusk, already looking down at their phone. The shop behind them is lit but unattended.",
+  "sc-shutter":   "The closed metal shutter of a small Indian shop at night, one street light raking across it, a narrow empty street in front. Nobody in frame.",
+  "sc-queue":     "Four or five people waiting at a small Indian shop counter in the evening, shot from behind the queue, the shopkeeper busy and out of reach at the far end.",
+  "sc-phonepile": "An Indian man's hands holding a phone on a shop counter late at night, the screen dark, a ledger and a cold cup of chai beside it. Shot from above his shoulder.",
+  "sc-emptyshop": "The inside of a small Indian shop in the early morning before opening, stock neat on the shelves, nobody there yet, light coming in from one side.",
+  "sc-paperwork": "A cluttered Indian back-office desk seen at a low angle — a stack of printed papers, a calculator, a pen, one warm desk lamp. No text readable, no person.",
+  "sc-handoff":   "An Indian shopkeeper handing a wrapped parcel across a counter to a customer, both hands in frame, warm evening light, faces partly visible.",
+  "sc-market":    "A busy Hyderabad market lane at dusk shot straight down its length from standing height, shopfronts on both sides, people moving away from camera, warm lights strung overhead. ONE straightforward photograph — no portrait, no face anywhere, no foreground subject, no double exposure, no composite, no overlaid second image.",
+  "sc-packing":   "An Indian woman packing orders into parcels at a table stacked with brown paper and tape, working steadily, looking down at her hands.",
+  "sc-scooter":   "A delivery rider on a scooter pulling away down a street at night with parcels bungeed on the back, shot from behind at low angle. Absolutely no signboards, no shop signs, no lettering of any kind anywhere in the frame — plain walls and shutters only.",
+  "sc-thinking":  "An Indian shop owner sitting alone on a stool in his own closed shop after hours, elbows on knees, looking at nothing in particular. Quiet, not sad.",
+  "sc-twohands":  "Two pairs of Indian hands over a counter, one pointing at a sheet of paper the other is holding. Faces out of frame above. Nothing on the paper is readable.",
+  "sc-streetphone":"A young Indian woman on a Hyderabad pavement at night looking at her phone, the lit shopfronts of the street reflected around her. Phone screen dark.",
+  "sc-shelves":   "Densely stocked shelves in a small Indian kirana shop, shot straight on, a single bulb above, no person in frame.",
+  "sc-openingup": "An Indian shopkeeper in a clean pressed shirt and trousers rolling up the metal shutter of his own shop in the early morning, seen from the street, back half-turned to the camera. A tidy commercial street. He is fully and neatly dressed.",
+  "sc-counter":   "An empty Indian shop counter at night lit by one overhead bulb, a phone face down on the wood, the shop dark behind it. Nobody in frame.",
+};
+
 const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KEY);
 const ids = process.argv.includes("--all") ? Object.keys(SHOTS)
   : process.argv.includes("--avatars") ? Object.keys(AVATARS)
   : process.argv.includes("--hooks") ? Object.keys(HOOKS)
   : process.argv.includes("--covers") ? Object.keys(COVERS)
   : process.argv.includes("--people") ? Object.keys(PEOPLE)
+  : process.argv.includes("--scenes") ? Object.keys(SCENES)
   : args;
 
 if (process.argv.includes("--list") || !ids.length) {

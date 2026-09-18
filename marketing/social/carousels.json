@@ -51,7 +51,8 @@
           "kind": "statement",
           "kicker": "The part you never see",
           "head": "Someone searched. Found nothing. Called the next shop.",
-          "body": "No missed call. No message. No way to know it happened."
+          "body": "No missed call. No message. No way to know it happened.",
+          "img": "/images/sc-walkaway.png"
         },
         {
           "kind": "list",
@@ -77,7 +78,8 @@
           "kicker": "Hyderabad · HITEC City",
           "head": "Book a 30-minute call.",
           "em": "Or just comment your question.",
-          "body": "Tell us the one question you answer most and we'll show you where it lives on a page. We'll also tell you if you don't need us yet."
+          "body": "Tell us the one question you answer most and we'll show you where it lives on a page. We'll also tell you if you don't need us yet.",
+          "img": "/images/sc-handoff.png"
         }
       ],
       "batch": "shipped"
@@ -107,7 +109,8 @@
           "kind": "statement",
           "kicker": "It happens quietly",
           "head": "The account goes. The business goes with it.",
-          "body": "No warning, no appeal, nobody to call. It is not rare and it is not your fault when it happens."
+          "body": "No warning, no appeal, nobody to call. It is not rare and it is not your fault when it happens.",
+          "img": "/images/sc-shutter.png"
         },
         {
           "kind": "list",
@@ -124,7 +127,8 @@
           "kind": "statement",
           "kicker": "And you lose nothing",
           "head": "Keep posting exactly as you do.",
-          "body": "Instagram stays your shopfront. The site is the thing underneath it that you own."
+          "body": "Instagram stays your shopfront. The site is the thing underneath it that you own.",
+          "img": "/images/sc-market.png"
         },
         {
           "kind": "price",
@@ -139,7 +143,8 @@
           "kicker": "brandmintstudios.in",
           "head": "See the four tiers.",
           "em": "Comment your trade and we'll say which.",
-          "body": "Boutique, bakery, gym, wholesale — comment what you sell and we'll tell you which tier is the honest answer, here in the replies."
+          "body": "Boutique, bakery, gym, wholesale — comment what you sell and we'll tell you which tier is the honest answer, here in the replies.",
+          "img": "/images/sc-openingup.png"
         }
       ],
       "batch": "shipped"
@@ -170,7 +175,8 @@
           "kind": "statement",
           "kicker": "The usual story",
           "head": "It started at one number and ended at three.",
-          "body": "Hourly billing, scope that grew, extras nobody mentioned until the invoice."
+          "body": "Hourly billing, scope that grew, extras nobody mentioned until the invoice.",
+          "img": "/images/sc-paperwork.png"
         },
         {
           "kind": "list",
@@ -187,7 +193,8 @@
           "kind": "statement",
           "kicker": "Who does the work",
           "head": "The person on the call is the person building it.",
-          "body": "8+ years on every build. No account manager in between, and nobody hands it to an intern."
+          "body": "8+ years on every build. No account manager in between, and nobody hands it to an intern.",
+          "img": "/images/sc-twohands.png"
         },
         {
           "kind": "price",
@@ -202,7 +209,8 @@
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Ask what yours would cost.",
           "em": "Or post the last quote you got.",
-          "body": "No names, just the number and what it covered — comment it and we'll tell you what's missing from it. If a cheaper option is the honest one, we'll say so."
+          "body": "No names, just the number and what it covered — comment it and we'll tell you what's missing from it. If a cheaper option is the honest one, we'll say so.",
+          "img": "/images/sc-handoff.png"
         }
       ],
       "batch": "shipped"
@@ -232,7 +240,8 @@
           "kind": "statement",
           "kicker": "Where builds actually go wrong",
           "head": "The problem is never the code.",
-          "body": "It is what was never agreed in writing. Every one of these is a question you can ask before any money moves."
+          "body": "It is what was never agreed in writing. Every one of these is a question you can ask before any money moves.",
+          "img": "/images/sc-paperwork.png"
         },
         {
           "kind": "list",
@@ -260,7 +269,8 @@
           "kind": "statement",
           "kicker": "The one that catches people",
           "head": "\"Who do I call when it breaks at 9pm?\"",
-          "body": "If the answer is an account manager, a ticket form or silence, you already know. Ask it on the first call."
+          "body": "If the answer is an account manager, a ticket form or silence, you already know. Ask it on the first call.",
+          "img": "/images/sc-thinking.png"
         },
         {
           "kind": "loud",
@@ -275,7 +285,8 @@
           "kicker": "brandmintstudios.in · WhatsApp +91 77999 34943",
           "head": "We answer all ten, in writing.",
           "em": "Which one would yours fail?",
-          "body": "Comment the number — 1 to 10 — and we'll tell you what to ask next. Static site ₹14,999. Stores from ₹49,999. GST extra."
+          "body": "Comment the number — 1 to 10 — and we'll tell you what to ask next. Static site ₹14,999. Stores from ₹49,999. GST extra.",
+          "img": "/images/sc-twohands.png"
         }
       ],
       "batch": "shipped"
@@ -318,7 +329,8 @@
           "kind": "statement",
           "kicker": "Said plainly",
           "head": "What it is not.",
-          "body": "It does not take payments and it does not hold stock. If you need to sell online, you need a store — that starts at ₹49,999, and we will say so on the call rather than after it."
+          "body": "It does not take payments and it does not hold stock. If you need to sell online, you need a store — that starts at ₹49,999, and we will say so on the call rather than after it.",
+          "img": "/images/sc-emptyshop.png"
         },
         {
           "kind": "price",
@@ -333,7 +345,8 @@
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Ask what yours would cost.",
           "em": "How many pages do you actually need?",
-          "body": "Comment the number — 3, 5, 10 — and we'll tell you whether ₹14,999 covers it or whether you are being sold too much."
+          "body": "Comment the number — 3, 5, 10 — and we'll tell you whether ₹14,999 covers it or whether you are being sold too much.",
+          "img": "/images/sc-handoff.png"
         }
       ]
     },
@@ -374,7 +387,8 @@
           "kind": "statement",
           "kicker": "The honest version",
           "head": "If nobody pays you on the page, don't buy a store.",
-          "body": "Plenty of businesses need five good pages and a WhatsApp button. We would rather sell you that than a store you don't use."
+          "body": "Plenty of businesses need five good pages and a WhatsApp button. We would rather sell you that than a store you don't use.",
+          "img": "/images/sc-shelves.png"
         },
         {
           "kind": "price",
@@ -389,7 +403,8 @@
           "kicker": "brandmintstudios.in",
           "head": "Both prices are on the site.",
           "em": "Do people pay you before they arrive?",
-          "body": "Comment yes or no — that single answer decides which of the two you need, and we'll tell you which in the replies."
+          "body": "Comment yes or no — that single answer decides which of the two you need, and we'll tell you which in the replies.",
+          "img": "/images/sc-packing.png"
         }
       ]
     },
@@ -441,7 +456,8 @@
           "kind": "statement",
           "kicker": "What we do instead",
           "head": "The number is the number.",
-          "body": "Scope and price in a signed agreement before anyone starts. No hourly billing, no extras inside a tier, and a GST invoice for every payment."
+          "body": "Scope and price in a signed agreement before anyone starts. No hourly billing, no extras inside a tier, and a GST invoice for every payment.",
+          "img": "/images/sc-paperwork.png"
         },
         {
           "kind": "price",
@@ -456,7 +472,8 @@
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Send us a quote to read.",
           "em": "Which of the eight caught you?",
-          "body": "Comment the one that turned up on your last invoice. If you have a live quote, send it over — no names, and we'll mark what is missing."
+          "body": "Comment the one that turned up on your last invoice. If you have a live quote, send it over — no names, and we'll mark what is missing.",
+          "img": "/images/sc-twohands.png"
         }
       ]
     },
@@ -497,7 +514,8 @@
           "kind": "statement",
           "kicker": "What is yours regardless",
           "head": "The accounts are in your name.",
-          "body": "Domain, website, data, WhatsApp and ad accounts all sit in your business's name. Export your leads whenever you like. Meta bills its own message fees to your card, not ours."
+          "body": "Domain, website, data, WhatsApp and ad accounts all sit in your business's name. Export your leads whenever you like. Meta bills its own message fees to your card, not ours.",
+          "img": "/images/sc-counter.png"
         },
         {
           "kind": "price",
@@ -512,7 +530,8 @@
           "kicker": "brandmintstudios.in/platform",
           "head": "The whole page is public.",
           "em": "Would you rather pay once and risk it dying?",
-          "body": "Genuine question — comment your answer. Plenty of people say yes, and for some businesses that is the right call. We'll tell you which you are."
+          "body": "Genuine question — comment your answer. Plenty of people say yes, and for some businesses that is the right call. We'll tell you which you are.",
+          "img": "/images/sc-handoff.png"
         }
       ]
     },
@@ -542,32 +561,37 @@
           "kind": "statement",
           "kicker": "Online store",
           "head": "SimplySip",
-          "body": "simplysip.in — sold through WhatsApp DMs. Now customers check out themselves: UPI, cards or cash on delivery, and every order arrives priced and recorded."
+          "body": "simplysip.in — sold through WhatsApp DMs. Now customers check out themselves: UPI, cards or cash on delivery, and every order arrives priced and recorded.",
+          "img": "/images/sc-packing.png"
         },
         {
           "kind": "statement",
           "kicker": "Online store",
           "head": "Trésor Couture",
-          "body": "tresorcouture.in — sold to whoever walked in. Now the label reaches past the shop floor, with its own checkout and a GST invoice on every order."
+          "body": "tresorcouture.in — sold to whoever walked in. Now the label reaches past the shop floor, with its own checkout and a GST invoice on every order.",
+          "img": "/images/sc-shelves.png"
         },
         {
           "kind": "statement",
           "kicker": "Website",
           "head": "GreenTeam",
-          "body": "thegreenteam.in — the pitch used to be a PDF catalogue, sent on request. Now the site does that part before the call, not after it."
+          "body": "thegreenteam.in — the pitch used to be a PDF catalogue, sent on request. Now the site does that part before the call, not after it.",
+          "img": "/images/sc-paperwork.png"
         },
         {
           "kind": "statement",
           "kicker": "B2B ordering platform",
           "head": "FreshKart",
-          "body": "Wholesale orders came in by phone, one at a time. Now buyers place their own, priced correctly, without anyone picking up."
+          "body": "Wholesale orders came in by phone, one at a time. Now buyers place their own, priced correctly, without anyone picking up.",
+          "img": "/images/sc-scooter.png"
         },
         {
           "kind": "cta",
           "kicker": "25+ projects · Hyderabad and the UK",
           "head": "Open them. Then talk to us.",
           "em": "Which one is closest to your business?",
-          "body": "Comment the name and we'll tell you what that build cost, how long it took and what we'd do differently for you."
+          "body": "Comment the name and we'll tell you what that build cost, how long it took and what we'd do differently for you.",
+          "img": "/images/sc-market.png"
         }
       ]
     },
@@ -630,14 +654,16 @@
           "kind": "statement",
           "kicker": "FreshKart · B2B ordering",
           "head": "Nobody picks up the phone any more.",
-          "body": "Wholesale orders used to come in one at a time, by phone. Now buyers place their own, priced correctly, without anyone answering."
+          "body": "Wholesale orders used to come in one at a time, by phone. Now buyers place their own, priced correctly, without anyone answering.",
+          "img": "/images/sc-scooter.png"
         },
         {
           "kind": "cta",
           "kicker": "brandmintstudios.in",
           "head": "All four are live. Go and look.",
           "em": "What would 'after' look like for you?",
-          "body": "Comment what you sell and what takes the most time right now. We'll tell you, honestly, whether a site would actually fix it."
+          "body": "Comment what you sell and what takes the most time right now. We'll tell you, honestly, whether a site would actually fix it.",
+          "img": "/images/sc-handoff.png"
         }
       ]
     },
@@ -677,7 +703,8 @@
           "kind": "statement",
           "kicker": "What the portal is",
           "head": "You watch it happen.",
-          "body": "Timeline, files to approve, invoices and a direct line to us — in one place, from the moment the deposit lands. You are never wondering where it has got to."
+          "body": "Timeline, files to approve, invoices and a direct line to us — in one place, from the moment the deposit lands. You are never wondering where it has got to.",
+          "img": "/images/sc-twohands.png"
         },
         {
           "kind": "list",
@@ -694,14 +721,16 @@
           "kind": "statement",
           "kicker": "And the rest of it",
           "head": "50% to start, 50% before launch.",
-          "body": "A GST invoice for every payment. No hourly billing, no extras inside a tier. Ask us to walk you through it on WhatsApp before you commit to anything."
+          "body": "A GST invoice for every payment. No hourly billing, no extras inside a tier. Ask us to walk you through it on WhatsApp before you commit to anything.",
+          "img": "/images/sc-paperwork.png"
         },
         {
           "kind": "cta",
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Book the 30 minutes.",
           "em": "What's stopping you starting?",
-          "body": "Comment it — budget, timing, not sure what you need, been burned before. We answer every one, including the ones that end in 'don't hire us yet'."
+          "body": "Comment it — budget, timing, not sure what you need, been burned before. We answer every one, including the ones that end in 'don't hire us yet'.",
+          "img": "/images/sc-handoff.png"
         }
       ]
     },
@@ -749,20 +778,23 @@
           "kind": "statement",
           "kicker": "If you have none of it",
           "head": "That is a normal answer.",
-          "body": "No logo, no domain, no catalogue, no GST yet. We work with that and we walk you through the accounts. Nobody is expected to arrive prepared."
+          "body": "No logo, no domain, no catalogue, no GST yet. We work with that and we walk you through the accounts. Nobody is expected to arrive prepared.",
+          "img": "/images/sc-emptyshop.png"
         },
         {
           "kind": "statement",
           "kicker": "The one that matters most",
           "head": "Fill in the catalogue template early.",
-          "body": "We send it on the call. Filling it in early is the single biggest thing that keeps a build on schedule — more than any decision we make."
+          "body": "We send it on the call. Filling it in early is the single biggest thing that keeps a build on schedule — more than any decision we make.",
+          "img": "/images/sc-packing.png"
         },
         {
           "kind": "cta",
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Ask for the template now.",
           "em": "Which of the four don't you have?",
-          "body": "Comment it. We'll tell you whether it blocks anything, and in most cases it does not — people are usually worrying about the wrong one."
+          "body": "Comment it. We'll tell you whether it blocks anything, and in most cases it does not — people are usually worrying about the wrong one.",
+          "img": "/images/sc-handoff.png"
         }
       ]
     },
@@ -803,26 +835,30 @@
           "kind": "statement",
           "kicker": "What a lot of people find",
           "head": "A map pin and nothing else.",
-          "body": "Maybe an Instagram page. No prices, no timings, no way to know if you deliver. So they go back and tap the next result."
+          "body": "Maybe an Instagram page. No prices, no timings, no way to know if you deliver. So they go back and tap the next result.",
+          "img": "/images/sc-streetphone.png"
         },
         {
           "kind": "statement",
           "kicker": "The part you never hear about",
           "head": "There is no missed call for this.",
-          "body": "Nobody messages to say they couldn't find your price. You only see the customers who got through — never the ones who didn't."
+          "body": "Nobody messages to say they couldn't find your price. You only see the customers who got through — never the ones who didn't.",
+          "img": "/images/sc-walkaway.png"
         },
         {
           "kind": "statement",
           "kicker": "What fixes it",
           "head": "A page with the answers on it.",
-          "body": "Prices, timings, delivery, a WhatsApp button. Five pages, your own domain, ₹14,999 one time and GST extra. Ask us what yours would look like."
+          "body": "Prices, timings, delivery, a WhatsApp button. Five pages, your own domain, ₹14,999 one time and GST extra. Ask us what yours would look like.",
+          "img": "/images/sc-shelves.png"
         },
         {
           "kind": "cta",
           "kicker": "brandmintstudios.in",
           "head": "We'll search it with you.",
           "em": "What came up when you searched?",
-          "body": "Comment what you found — a map pin, an old Justdial listing, nothing at all. We'll tell you the one thing to fix first, free."
+          "body": "Comment what you found — a map pin, an old Justdial listing, nothing at all. We'll tell you the one thing to fix first, free.",
+          "img": "/images/sc-market.png"
         }
       ]
     },
@@ -863,13 +899,15 @@
           "kind": "statement",
           "kicker": "The real cost",
           "head": "You are the checkout.",
-          "body": "Every sale waits for you to reply. That is fine at ten orders a week and it is the whole problem at fifty."
+          "body": "Every sale waits for you to reply. That is fine at ten orders a week and it is the whole problem at fifty.",
+          "img": "/images/sc-phonepile.png"
         },
         {
           "kind": "statement",
           "kicker": "What doesn't change",
           "head": "WhatsApp stays.",
-          "body": "Orders still land on your phone. The WhatsApp Store tier is built so you run the entire thing from WhatsApp — returns and refunds included."
+          "body": "Orders still land on your phone. The WhatsApp Store tier is built so you run the entire thing from WhatsApp — returns and refunds included.",
+          "img": "/images/sc-queue.png"
         },
         {
           "kind": "price",
@@ -884,7 +922,8 @@
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Ask before you spend anything.",
           "em": "How many orders a week are you at?",
-          "body": "Comment a rough number. Under ten and we will probably tell you to wait — that answer is free and we give it often."
+          "body": "Comment a rough number. Under ten and we will probably tell you to wait — that answer is free and we give it often.",
+          "img": "/images/sc-handoff.png"
         }
       ]
     },
@@ -914,13 +953,15 @@
           "kind": "statement",
           "kicker": "The queue you never see",
           "head": "The ones who gave up never told you.",
-          "body": "They didn't complain and they didn't call back. They stopped waiting for a reply and bought somewhere else, and you never heard about any of it."
+          "body": "They didn't complain and they didn't call back. They stopped waiting for a reply and bought somewhere else, and you never heard about any of it.",
+          "img": "/images/sc-walkaway.png"
         },
         {
           "kind": "statement",
           "kicker": "And it is not more staff",
           "head": "You can't hire your way out of a rush.",
-          "body": "An extra pair of hands answers faster. It still answers one person at a time, and only while the shutter is up."
+          "body": "An extra pair of hands answers faster. It still answers one person at a time, and only while the shutter is up.",
+          "img": "/images/sc-queue.png"
         },
         {
           "kind": "list",
@@ -946,7 +987,8 @@
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Ask before your busy season.",
           "em": "What do you sell most of?",
-          "body": "Comment it and we'll tell you whether a page would take the pressure off, or whether you're fine as you are. We say the second one often."
+          "body": "Comment it and we'll tell you whether a page would take the pressure off, or whether you're fine as you are. We say the second one often.",
+          "img": "/images/sc-market.png"
         }
       ]
     },
@@ -998,20 +1040,23 @@
           "kind": "statement",
           "kicker": "Use it against us",
           "head": "Including on our own work.",
-          "body": "It is the same list we run. If you are talking to another studio, hand it to them — a studio that objects to a QA checklist has told you something useful."
+          "body": "It is the same list we run. If you are talking to another studio, hand it to them — a studio that objects to a QA checklist has told you something useful.",
+          "img": "/images/sc-twohands.png"
         },
         {
           "kind": "statement",
           "kicker": "Two more, same terms",
           "head": "The other free ones.",
-          "body": "A product catalogue template — the exact fields we ask every client for. And a scope worksheet, so you can compare quotes on the same basis, including ours."
+          "body": "A product catalogue template — the exact fields we ask every client for. And a scope worksheet, so you can compare quotes on the same basis, including ours.",
+          "img": "/images/sc-paperwork.png"
         },
         {
           "kind": "cta",
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Message the word CHECKLIST.",
           "em": "Which of the three do you want?",
-          "body": "Comment CHECKLIST, CATALOGUE or SCOPE and we'll send it. Free, no sign-up, and we will not follow up unless you ask us to."
+          "body": "Comment CHECKLIST, CATALOGUE or SCOPE and we'll send it. Free, no sign-up, and we will not follow up unless you ask us to.",
+          "img": "/images/sc-handoff.png"
         }
       ]
     }

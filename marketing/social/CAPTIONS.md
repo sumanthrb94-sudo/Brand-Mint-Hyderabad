@@ -191,14 +191,14 @@ Instagram ranking has no primary source behind it.
 > Answering the same four questions on WhatsApp all day? A website answers them
 > for you. From ₹14,999, fixed price in writing. Hyderabad.
 
-**Alt text, per slide** — Instagram reads this for accessibility and search.
+**Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Dark green slide, huge type: "REPLY MACHINE". You answer the same four questions all day; a website answers them once.
-2. Cream slide, huge type: "SAME FOUR QUESTIONS EVERY DAY". Price, timing, delivery, location — answered once for ₹14,999.
-3. Dark slide: a customer searched, found nothing, and called a competitor.
-4. Dark slide listing four things a website answers: prices, delivery, payment methods, WhatsApp orders.
-5. Dark slide: static website ₹14,999 one time, GST extra; online stores from ₹49,999.
-6. Dark slide: book a 30-minute call with Brand Mint, or comment the question you answer most.
+1. Shopkeeper on the phone behind his counter. "REPLY MACHINE". You answer the same four questions all day. A website answers them once.
+2. Cream slide. "SAME FOUR QUESTIONS EVERY DAY". Price. Timing. Do you deliver. Where are you. A page answers all four once — ₹14,999, one time, GST extra.
+3. Customer walking away from a lit shop. Someone searched. Found nothing. Called the next shop.
+4. Dark slide. Four questions, answered once. Prices, on the page; Delivery and timing, stated; UPI, cards, cash on delivery; Orders straight to WhatsApp
+5. Dark slide. Static website ₹14,999, one time · GST extra
+6. A parcel handed across a counter. Book a 30-minute call. Or just comment your question.
 
 ---
 
@@ -240,15 +240,15 @@ Instagram ranking has no primary source behind it.
 > Running your shop off Instagram? That page isn't yours. Own your domain,
 > hosting and orders. Online stores from ₹49,999. Hyderabad.
 
-**Alt text, per slide**
+**Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Dark green slide, huge type: "THAT PAGE ISN'T YOURS."
-2. Cream slide, huge type: "GONE IN ONE MORNING". A domain in your own name cannot be taken away.
-3. Dark slide: the account goes and the business goes with it — no warning, no appeal.
-4. Dark slide listing what you own with Brand Mint: domain, hosting, payment account, customer records.
-5. Dark slide: keep posting on Instagram exactly as you do now.
-6. Dark slide: online stores from ₹49,999, GST extra, four tiers.
-7. Dark slide: see the four store tiers at brandmintstudios.in, or comment your trade.
+1. Boutique owner in her doorway at dusk. "THAT PAGE ISN'T YOURS". If the Instagram account goes tomorrow, the business goes with it.
+2. Cream slide. "GONE IN ONE MORNING". Your photos, your prices, every customer conversation — on a platform you don't control. A domain in your own name cannot be taken away.
+3. A closed shutter on an empty night street. The account goes. The business goes with it.
+4. Dark slide. In your name, from day one. The domain; The hosting; The payment account; Every order and customer record
+5. A Hyderabad market lane at dusk. Keep posting exactly as you do.
+6. Dark slide. Online store from ₹49,999, GST extra · four tiers
+7. Shopkeeper rolling up his shutter. See the four tiers. Comment your trade and we'll say which.
 
 ---
 
@@ -289,15 +289,15 @@ Instagram ranking has no primary source behind it.
 > Fixed price, in writing, before anyone starts. Websites from ₹14,999, stores
 > from ₹49,999, GST extra. A senior operator on every build. Hyderabad.
 
-**Alt text, per slide**
+**Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Dark green slide, huge type: "A WEBSITE ₹14,999". One time, GST extra, in writing before anyone starts.
-2. Cream slide, huge type: "ONE NUMBER THEN THREE". Scope and price signed before a rupee moves.
-3. Dark slide: the usual story — started at one number, ended at three.
-4. Dark slide listing four terms: signed scope and price, 50/50 payment, GST invoices, no hourly billing.
-5. Dark slide: the person on the call is the person building it, 8+ years on every build.
-6. Dark slide: Site + CRM ₹79,999 setup then ₹9,999 a month, GST extra.
-7. Dark slide: WhatsApp +91 77999 34943, or post your last quote in the comments.
+1. Two men talking across a shop counter. "A WEBSITE ₹14,999". One time. GST extra. Price and scope in writing before anyone starts.
+2. Cream slide. "ONE NUMBER THEN THREE". Every website story ends the same way. This one doesn't — the scope and the price are signed before a rupee moves.
+3. Papers and a calculator under a desk lamp. It started at one number and ended at three.
+4. Dark slide. Agreed before anyone starts. Scope and price in a signed agreement; 50% to start, 50% before launch; GST invoice for every payment; No hourly billing, no extras inside a tier
+5. Two pairs of hands over a sheet of paper. The person on the call is the person building it.
+6. Dark slide. Site + CRM ₹79,999, setup · then ₹9,999/mo · GST extra
+7. A parcel handed across a counter. Ask what yours would cost. Or post the last quote you got.
 
 ---
 
@@ -344,21 +344,16 @@ Instagram ranking has no primary source behind it.
 > Ten questions to ask before paying for a website: who owns the domain, is the
 > price fixed, who answers at 9pm. A Hyderabad studio's checklist.
 
-**Alt text, per slide**
+**Alt text** — Instagram reads this for accessibility and for Google.
 
-1. Dark green slide, huge type: "10 QUESTIONS". Ask these before you pay anyone to build your website.
-2. Cream slide, huge type: "WOULD YOURS PASS ALL TEN?" Any honest Hyderabad studio answers all ten.
-3. Dark slide: the problem is never the code, it is what was never agreed in writing.
-4. Dark slide, four ownership questions: domain, hosting, payment account, data export.
-5. Dark slide, four cost questions: fixed or hourly, signed agreement, GST, mid-project changes.
-6. Dark slide: "Who do I call when it breaks at 9pm?"
-7. Cream slide, huge type: "NO WRONG ANSWERS. ONLY HONEST". Screenshot it and ask any studio.
-8. Dark slide: Brand Mint answers all ten in writing. Comment which number yours would fail.
-
-**Why this one is the lead post.** It is the only carousel in the set that is
-useful to someone who never hires us, which is exactly why it gets saved and
-sent to a friend opening a shop. Post it first — and its comment CTA is the
-cheapest in the set, because the answer is a single digit.
+1. Man reading his phone sceptically. "10 QUESTIONS". Ask these before you pay anyone to build your website.
+2. Cream slide. "WOULD YOURS PASS ALL TEN?". Ten questions that decide whether a website build goes well. Any honest studio in Hyderabad answers all ten — including us.
+3. Papers and a calculator under a desk lamp. The problem is never the code.
+4. Dark slide. Who owns what? Is the domain registered in MY business name?; Is the hosting account mine, or theirs?; Is the payment account in my name?; Can I export my orders and customers?
+5. Dark slide. What does it actually cost? Is the price fixed, or hourly?; Is it in a signed agreement before work starts?; Is GST included or extra?; What happens if I want a change midway?
+6. Shop owner sitting alone after hours. "Who do I call when it breaks at 9pm?"
+7. Cream slide. "NO WRONG ANSWERS. ONLY HONEST". Screenshot it and ask any studio you are talking to. We answer all ten in writing before a rupee moves.
+8. Two pairs of hands over a sheet of paper. We answer all ten, in writing. Which one would yours fail?
 
 ---
 
@@ -451,7 +446,14 @@ Fifth tag: `#webdesign`
 
 **Meta description** · What ₹14,999 buys, line by line: five pages, your domain, SSL, email and analytics. Hyderabad, GST extra.
 
-**Alt text** · 1 Dark slide "WHAT ₹14,999 BUYS". 2 Cream slide "FIVE PAGES ONE PRICE". 3 List of five inclusions. 4 What it is not — no payments, no stock. 5 ₹14,999 one time, GST extra. 6 WhatsApp to ask what yours would cost.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Shopkeeper straightening stock on a high shelf. "WHAT ₹14,999 BUYS". Not a range. Not 'starting from'. The whole list, and what is not on it.
+2. Cream slide. "FIVE PAGES ONE PRICE". A static website for ₹14,999, one time and GST extra. Everything below is included in that number.
+3. Dark slide. What you get. Up to 5 pages, written and built with you; Your domain, SSL and email set up; WhatsApp and call buttons that work on a phone; Google Search Console verified and submitted; Visitor analytics from day one
+4. A small shop before opening. What it is not.
+5. Dark slide. Static website ₹14,999, one time · GST extra
+6. A parcel handed across a counter. Ask what yours would cost. How many pages do you actually need?
 
 ---
 
@@ -487,7 +489,14 @@ Fifth tag: `#onlinestore`
 
 **Meta description** · Why a store is ₹49,999 and a website ₹14,999: payments, stock, orders and GST invoices. Four fixed tiers. Hyderabad.
 
-**Alt text** · 1 Dark slide "₹14,999 OR ₹49,999". 2 Cream slide "IT IS NOT MORE PAGES". 3 List of the four things a store adds. 4 If nobody pays you on the page, don't buy a store. 5 Stores from ₹49,999, four tiers. 6 Both prices are on the site.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Boutique owner parcelling a garment. "₹14,999 OR ₹49,999". Same studio, same care. So why does one cost three times the other?
+2. Cream slide. "IT IS NOT MORE PAGES". A store costs more because four things start existing: money changing hands, stock, orders and invoices. Each one has to be right every single time.
+3. Dark slide. Four things that change. It takes money — UPI, cards, cash on delivery; It knows stock, and stops selling what's gone; Every order becomes a record you can act on; A GST invoice goes out, correctly, on its own
+4. Stocked shelves in a kirana shop. If nobody pays you on the page, don't buy a store.
+5. Dark slide. Online store from ₹49,999, GST extra · four tiers
+6. Woman packing orders into parcels. Both prices are on the site. Do people pay you before they arrive?
 
 ---
 
@@ -527,7 +536,15 @@ Fifth tag: `#businessowner`
 
 **Meta description** · Eight website charges that turn up after you sign: domain renewal, hosting, SSL, per-page fees, handover. Hyderabad.
 
-**Alt text** · 1 Dark slide "NOT IN THE QUOTE". 2 Cream slide "THE BILL COMES LATER". 3 Four recurring charges. 4 Four per-unit charges. 5 What we do instead — the number is the number. 6 ₹14,999, renewals in your name. 7 Send us a quote to read.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Man frowning at a printed bill. "NOT IN THE QUOTE". Eight charges that turn up after you have signed. Every one of them is normal, and every one should have been stated.
+2. Cream slide. "THE BILL COMES LATER". None of these are scams. They are real costs that a quote can quietly leave out — so the number you compared was never the number you pay.
+3. Dark slide. Things that run out. Domain renewal, every year, forever; Hosting — whose account is it, really?; SSL certificate renewal; Email hosting, per mailbox, per month
+4. Dark slide. Things billed per unit. Per extra page, after the first few; Per product uploaded to the catalogue; Content and photography, if you don't supply it; Handover — being given your own accounts
+5. Papers and a calculator under a desk lamp. The number is the number.
+6. Dark slide. Static website ₹14,999, stores from ₹49,999
+7. Two pairs of hands over a sheet of paper. Send us a quote to read. Which of the eight caught you?
 
 ---
 
@@ -564,7 +581,14 @@ Fifth tag: `#whatsappbusiness`
 
 **Meta description** · Site + CRM ₹79,999 setup then ₹9,999/month: hosting, security, support and the WhatsApp and Meta connections. Hyderabad.
 
-**Alt text** · 1 Dark slide "₹9,999 A MONTH". 2 Cream slide "TOKENS EXPIRE". 3 Four things the monthly covers. 4 The accounts are in your name. 5 ₹79,999 setup then ₹9,999/mo. 6 The whole page is public.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman thinking at a laptop in a back office. "₹9,999 A MONTH". There is a monthly because the thing keeps running. Here is exactly what that pays for.
+2. Cream slide. "TOKENS EXPIRE". WhatsApp and Meta connections break when tokens expire, and someone has to fix them. A one-time fee for a living system is how you end up with a dead one.
+3. Dark slide. What keeps running. Hosting, and the site staying up; Security updates and patches; Support — a person, not a ticket form; WhatsApp and Meta connections kept alive
+4. An empty counter lit by one bulb. The accounts are in your name.
+5. Dark slide. Site + CRM ₹79,999, setup · then ₹9,999/mo · GST extra
+6. A parcel handed across a counter. The whole page is public. Would you rather pay once and risk it dying?
 
 ---
 
@@ -598,7 +622,15 @@ Fifth tag: `#webdesign`
 
 **Meta description** · Four live sites built by Brand Mint — open them yourself. Online stores, a website and a B2B ordering platform. Hyderabad.
 
-**Alt text** · 1 Dark slide "OPEN THE WORK". 2 Cream slide "LIVE SITES NOT SCREENSHOTS". 3 SimplySip. 4 Trésor Couture. 5 GreenTeam. 6 FreshKart. 7 Open them, then talk to us.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Young man holding out his phone. "OPEN THE WORK". Four live sites you can open right now, on your own phone, without asking us for anything.
+2. Cream slide. "LIVE SITES NOT SCREENSHOTS". Anyone can show you a mockup. These are addresses — put them in your browser and see what actually loads.
+3. Woman packing orders into parcels. SimplySip
+4. Stocked shelves in a kirana shop. Trésor Couture
+5. Papers and a calculator under a desk lamp. GreenTeam
+6. Delivery rider pulling away at night. FreshKart
+7. A Hyderabad market lane at dusk. Open them. Then talk to us. Which one is closest to your business?
 
 ---
 
@@ -635,7 +667,15 @@ Fifth tag: `#onlinestore`
 
 **Meta description** · What changed for four businesses after launch — from WhatsApp DMs to self-checkout, from PDF catalogues to a live site.
 
-**Alt text** · 1 Dark slide "BEFORE AFTER". 2 Cream slide "NO FAKE METRICS HERE". 3 SimplySip before and after. 4 Trésor Couture before and after. 5 GreenTeam before and after. 6 FreshKart before and after. 7 All four are live.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Older shopkeeper looking up, half-smiling. "BEFORE AFTER". Not what we promise. What actually changed for four businesses after the site went live.
+2. Cream slide. "NO FAKE METRICS HERE". You will not find a revenue figure or a percentage on this post. What you will find is what the owner used to do, and what they do now.
+3. Dark slide. From DMs to checkout. Before — every sale negotiated in a WhatsApp DM; After — customers check out themselves; UPI, cards or cash on delivery; Every order arrives priced and recorded
+4. Dark slide. Past the shop floor. Before — sold to whoever walked in; After — the label reaches beyond the shop; Its own checkout, not a DM thread; A GST invoice on every single order
+5. Dark slide. The catalogue, before the call. Before — a PDF, sent on request; After — the site does that part first; The call starts further along; Nobody waits on an email attachment
+6. Delivery rider pulling away at night. Nobody picks up the phone any more.
+7. A parcel handed across a counter. All four are live. Go and look. What would 'after' look like for you?
 
 ---
 
@@ -670,7 +710,15 @@ Fifth tag: `#businessowner`
 
 **Meta description** · How a Brand Mint build runs: a 30-minute call, a fixed price in writing, nothing due until you sign. Hyderabad.
 
-**Alt text** · 1 Dark slide "AFTER YOU SAY YES". 2 Cream slide "NO DISCOVERY FEE". 3 The three steps. 4 What the client portal is. 5 What is in the agreement before you pay. 6 50/50 payment and GST invoices. 7 Book the 30 minutes.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Two men shaking hands over a counter. "AFTER YOU SAY YES". What actually happens between the first message and a live site.
+2. Cream slide. "NO DISCOVERY FEE". Thirty minutes on WhatsApp or a call. You leave that call with a scope and a price whether or not you go ahead.
+3. Dark slide. Three steps, that's all. Book a call — 30 minutes, no pitch deck, no fee; A fixed price in writing, before you pay; Sign, pay 50%, and your portal goes live
+4. Two pairs of hands over a sheet of paper. You watch it happen.
+5. Dark slide. All of it, before you pay. Exactly what is being built, page by page; The price, and that it does not move; What is not included, written down; Whose name the domain and accounts go in
+6. Papers and a calculator under a desk lamp. 50% to start, 50% before launch.
+7. A parcel handed across a counter. Book the 30 minutes. What's stopping you starting?
 
 ---
 
@@ -706,7 +754,15 @@ Fifth tag: `#onlinestore`
 
 **Meta description** · The four things we need before building your store: catalogue, GST details, brand assets, domain and Razorpay. Hyderabad.
 
-**Alt text** · 1 Dark slide "WHAT WE NEED FROM YOU". 2 Cream slide "FOUR THINGS THAT'S ALL". 3 Catalogue and GST details. 4 Brand assets, domain and Razorpay. 5 If you have none of it, that's normal. 6 Fill in the catalogue template early. 7 Ask for the template now.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman photographing a product on a table. "WHAT WE NEED FROM YOU". Four things. If you have none of them, say so — that is a normal answer and it changes nothing.
+2. Cream slide. "FOUR THINGS THAT'S ALL". A build almost never runs late because of code. It runs late waiting for product photos. Here is the whole list, up front.
+3. Dark slide. Your side of it. Product list and photos, with prices and stock; Business and GST details — name, address, GSTIN
+4. Dark slide. Accounts and assets. Logo and brand assets — whatever you have; Your domain, and a Razorpay account in your name
+5. A small shop before opening. That is a normal answer.
+6. Woman packing orders into parcels. Fill in the catalogue template early.
+7. A parcel handed across a counter. Ask for the template now. Which of the four don't you have?
 
 ---
 
@@ -745,7 +801,15 @@ Fifth tag: `#localbusiness`
 
 **Meta description** · Search your own shop on Google. A map pin and no prices is costing you customers you never hear about. Hyderabad, from ₹14,999.
 
-**Alt text** · 1 Dark slide "SEARCH YOUR OWN SHOP". 2 Cream slide "TRY IT BEFORE YOU SWIPE ON". 3 Four searches to type. 4 A lot of people find a map pin and nothing else. 5 There is no missed call for this. 6 What fixes it — a page with the answers. 7 Comment what came up.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman on a night street looking at her phone. "SEARCH YOUR OWN SHOP". Open Google. Type your shop name and your area. Look at what a customer sees.
+2. Cream slide. "TRY IT BEFORE YOU SWIPE ON". Whatever comes up is what a customer decides on. It is rarely what you would have chosen for them.
+3. Dark slide. Exactly what a customer types. Your shop name plus your area; What you sell plus 'near me'; What you sell plus your suburb; Your shop name plus 'price'
+4. Woman on a lit pavement with her phone. A map pin and nothing else.
+5. Customer walking away from a lit shop. There is no missed call for this.
+6. Stocked shelves in a kirana shop. A page with the answers on it.
+7. A Hyderabad market lane at dusk. We'll search it with you. What came up when you searched?
 
 ---
 
@@ -781,7 +845,15 @@ Fifth tag: `#whatsappbusiness`
 
 **Meta description** · A WhatsApp catalogue can't take money, track stock or invoice. WhatsApp Store ₹49,999, run from your phone. Hyderabad.
 
-**Alt text** · 1 Dark slide "YOUR CATALOGUE ISN'T A SHOP". 2 Cream slide "IT WORKS UNTIL IT DOESN'T". 3 Four things a catalogue can't do. 4 You are the checkout. 5 WhatsApp stays. 6 WhatsApp Store ₹49,999, GST extra. 7 Comment how many orders a week.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Man scrolling photos among unsent parcels. "YOUR CATALOGUE ISN'T A SHOP". It works, right up until the day it doesn't. Here is where the line is.
+2. Cream slide. "IT WORKS UNTIL IT DOESN'T". Nobody is telling you to stop selling on WhatsApp. The question is what happens on the days you cannot answer it.
+3. Dark slide. Four things it will never do. Take the money while you're asleep; Stop selling something you've run out of; Send a GST invoice on its own; Tell you what people looked at and didn't buy
+4. Hands on a phone beside a ledger at night. You are the checkout.
+5. People waiting at a shop counter. WhatsApp stays.
+6. Dark slide. WhatsApp Store ₹49,999, GST extra · run from your phone
+7. A parcel handed across a counter. Ask before you spend anything. How many orders a week are you at?
 
 ---
 
@@ -818,7 +890,15 @@ Fifth tag: `#festiveseason`
 
 **Meta description** · Your busiest season is the one you lose most customers in. A store takes orders while you serve someone else. ₹49,999, Hyderabad.
 
-**Alt text** · 1 Shopkeeper in a lit doorway at night, "THE RUSH YOU CAN'T SERVE". 2 Cream slide "YOU CAN SERVE ONE AT A TIME". 3 The ones who gave up never told you. 4 You can't hire your way out of a rush. 5 Four things a store does in a rush. 6 WhatsApp Store ₹49,999, GST extra. 7 Comment what you sell most of.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Shopkeeper in a doorway strung with festival lights. "THE RUSH YOU CAN'T SERVE". Your busiest season is the one where you lose the most customers.
+2. Cream slide. "YOU CAN SERVE ONE AT A TIME". Everyone else is waiting, scrolling, or already messaging the shop down the road. A page serves all of them at once.
+3. Customer walking away from a lit shop. The ones who gave up never told you.
+4. People waiting at a shop counter. You can't hire your way out of a rush.
+5. Dark slide. It doesn't queue. Takes the order while you're serving someone else; Stops selling what you've run out of; Sends the GST invoice on its own; Keeps taking orders after you've closed
+6. Dark slide. WhatsApp Store ₹49,999, GST extra · four tiers
+7. A Hyderabad market lane at dusk. Ask before your busy season. What do you sell most of?
 
 ---
 
@@ -858,7 +938,15 @@ Fifth tag: `#smallbusinesstips`
 
 **Meta description** · Free 20-point launch checklist: Lighthouse, mobile QA, WCAG AA, checkout tests, DNS and SSL. No email required. Hyderabad.
 
-**Alt text** · 1 Dark slide "THE 20 POINT CHECK". 2 Cream slide "NO FORM NO EMAIL NO CATCH". 3 Four performance and accessibility checks. 4 Four checks that break quietly. 5 Use it against us too. 6 The catalogue template and scope worksheet. 7 Message the word CHECKLIST.
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman reading down a printed sheet. "THE 20 POINT CHECK". The pass every Brand Mint store clears before it goes live. Run it against a site you already have.
+2. Cream slide. "NO FORM NO EMAIL NO CATCH". It is a PDF. Message us the word CHECKLIST on WhatsApp and it comes back. We do not add you to anything.
+3. Dark slide. Before anything goes live. Lighthouse across all four axes; Real-device mobile QA, not a browser resize; Cross-browser check; WCAG AA accessibility
+4. Dark slide. The things that break quietly. End-to-end form and checkout tests; Link-preview validation; DNS and SSL verification; Analytics firing before launch, not after
+5. Two pairs of hands over a sheet of paper. Including on our own work.
+6. Papers and a calculator under a desk lamp. The other free ones.
+7. A parcel handed across a counter. Message the word CHECKLIST. Which of the three do you want?
 
 ---
 

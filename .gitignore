@@ -36,3 +36,4 @@ reports/
 # Generated carousel cover photography. 16 x ~650 KB, regenerable with
 # scripts/gen-image.mjs --people followed by scripts/autocrop.cjs.
 images/ppl-*.png
+images/sc-*.png
