@@ -185,8 +185,20 @@ async function draftReply(text, turns = []) {
       }
     );
     if (!r.ok) {
-      console.error("[wa-hook] gemini error:", r.status, await r.text().catch(() => ""));
-      return "";
+      // A spend cap, a revoked key or an outage all land here. Return the
+      // shaped empty object, not "" — the caller reads draft.reply and
+      // draft.when off this, and a bare string silently yields undefined for
+      // both, so a customer proposing a time gets no reply AND no booking
+      // filed. 429 is called out separately because it is not transient:
+      // nothing works again until someone raises the cap in AI Studio.
+      const body = await r.text().catch(() => "");
+      console.error(
+        r.status === 429
+          ? "[wa-hook] GEMINI BLOCKED — spend cap or quota. Auto-reply is DOWN until this is cleared: "
+          : "[wa-hook] gemini error: ",
+        r.status, body.slice(0, 300)
+      );
+      return none;
     }
     const data = await r.json();
     // Not `text` — that is this function's own parameter, and shadowing it
