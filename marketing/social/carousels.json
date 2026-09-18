@@ -1059,6 +1059,764 @@
           "img": "/images/sc-handoff.png"
         }
       ]
+    },
+    {
+      "id": "gateway-holds",
+      "title": "Why the gateway is holding you",
+      "batch": "compliance",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Payments on hold",
+          "huge": "FIVE PAGES|OR NO|PAYMENTS",
+          "accent": true,
+          "sub": "The most common reason a payment account gets held has nothing to do with your business.",
+          "foot": "Swipe →",
+          "img": "/images/bc-gateway.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Before you can take money",
+          "huge": "MISSING|POLICIES",
+          "accent": true,
+          "sub": "Razorpay and every other gateway checks five pages exist and match what your store actually does. Copied ones fail too."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The part nobody warns you about",
+          "head": "Your account is held, not rejected.",
+          "body": "Money is coming in and you cannot settle it. Nobody tells you which page is missing — you find out by asking.",
+          "img": "/images/sc-paperwork.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "What every gateway checks for",
+          "head": "The five pages.",
+          "items": [
+            "Terms and conditions",
+            "Privacy policy",
+            "Shipping policy",
+            "Returns policy",
+            "Cancellation and refunds"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "Why copied ones fail",
+          "head": "They have to match the store.",
+          "body": "A returns policy promising 30 days on a store that says 7 is worse than none. The gateway reads both."
+        },
+        {
+          "kind": "statement",
+          "kicker": "How we handle it",
+          "head": "Drafted from your answers on the call.",
+          "body": "All five, written from what your store actually does, linked from the footer and the checkout. General guidance, not legal advice. Your CA or lawyer confirms what applies to your category and turnover.",
+          "img": "/images/sc-twohands.png"
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Send us your store link.",
+          "em": "Which of the five are you missing?",
+          "body": "Comment the number you have, 0 to 5. We'll tell you which one a gateway will stop on first — free, whether or not you build with us.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "ecommerce-rules",
+      "title": "What the law wants on your store",
+      "batch": "compliance",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "E-Commerce Rules, 2020",
+          "huge": "YOUR NAME|MUST BE|ON IT",
+          "accent": true,
+          "sub": "Four things the Consumer Protection (E-Commerce) Rules require on every Indian online store.",
+          "foot": "Swipe →",
+          "img": "/images/bc-rules.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Not optional",
+          "huge": "48 HOURS|TO REPLY",
+          "accent": true,
+          "sub": "Complaints acknowledged in 48 hours and resolved within a month. That is the rule, not a service promise."
+        },
+        {
+          "kind": "statement",
+          "kicker": "Most stores fail the first one",
+          "head": "Your legal name has to be visible.",
+          "body": "Not the brand name — the registered entity, its address and contact details, where a customer can find them.",
+          "img": "/images/sc-paperwork.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "What has to be on the store",
+          "head": "Four requirements.",
+          "items": [
+            "Legal name, address and contact",
+            "A named grievance officer",
+            "Return, refund and cancellation policies",
+            "Country of origin on imported goods"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "The one people forget",
+          "head": "A grievance officer has a name.",
+          "body": "Not an email alias. A person, named, with contact details, on the page. General guidance, not legal advice. Your CA or lawyer confirms what applies to your category and turnover."
+        },
+        {
+          "kind": "statement",
+          "kicker": "What we build in",
+          "head": "Pages, not paragraphs.",
+          "body": "Legal, contact and grievance pages; policies linked from checkout; country-of-origin as a real field on the product, not typed into a description.",
+          "img": "/images/sc-twohands.png"
+        },
+        {
+          "kind": "cta",
+          "kicker": "brandmintstudios.in",
+          "head": "We build these into every store.",
+          "em": "Is your legal name on your site?",
+          "body": "Go and look, then comment yes or no. It is the single most common gap we find, on stores that have been trading for years.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "licences",
+      "title": "The licence on your listing",
+      "batch": "compliance",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Category licences",
+          "huge": "FSSAI|BIS|HALLMARK",
+          "accent": true,
+          "sub": "If you sell food, electronics, gold or medicine, a number has to be on your listing.",
+          "foot": "Swipe →",
+          "img": "/images/bc-licence.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Gateways ask too",
+          "huge": "NOT JUST|THE LAW",
+          "accent": true,
+          "sub": "Marketplaces and payment gateways ask for these before they let you sell. Missing one stalls the account, not just the listing."
+        },
+        {
+          "kind": "statement",
+          "kicker": "It belongs on the page",
+          "head": "The pack is not enough.",
+          "body": "The licence number has to appear where the customer sees the product, not only on the physical packaging.",
+          "img": "/images/sc-shelves.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "Who needs what",
+          "head": "Common ones.",
+          "items": [
+            "FSSAI — food and supplements",
+            "BIS marks — some electronics and toys",
+            "Drug licence — pharmacy",
+            "Hallmarking — gold jewellery"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "How it usually goes wrong",
+          "head": "Typed into the description.",
+          "body": "It gets lost in an edit, or copied to the wrong product. General guidance, not legal advice. Your CA or lawyer confirms what applies to your category and turnover."
+        },
+        {
+          "kind": "statement",
+          "kicker": "How we build it",
+          "head": "A field, not a sentence.",
+          "body": "Licence numbers and marks are first-class fields on the product, shown where the rules want them shown.",
+          "img": "/images/sc-emptyshop.png"
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask what your category needs.",
+          "em": "What do you sell?",
+          "body": "Comment your category and we'll tell you which licence a gateway will ask for. We are not your lawyer, but we have seen which ones stop accounts.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "dpdp",
+      "title": "Consent is not a checkbox",
+      "batch": "compliance",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "DPDP Act, 2023",
+          "huge": "WHOSE DATA|IS IT",
+          "accent": true,
+          "sub": "You are collecting names, numbers and addresses. There are now rules about what you may do with them.",
+          "foot": "Swipe →",
+          "img": "/images/bc-dpdp.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Marketing is separate",
+          "huge": "BUYING IS NOT|CONSENT",
+          "accent": true,
+          "sub": "A customer giving you their number to receive an order has not agreed to receive your campaigns. Those are two different permissions."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The common mistake",
+          "head": "One tick for everything.",
+          "body": "A single checkbox covering purchase, marketing and analytics is the thing the Act is written against.",
+          "img": "/images/sc-phonepile.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "What it asks of you",
+          "head": "Four duties.",
+          "items": [
+            "Collect only with notice and consent",
+            "State the purpose, and keep to it",
+            "Let people correct or delete their data",
+            "Report a breach"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "And the policy has to be true",
+          "head": "A copied privacy policy is worse than none.",
+          "body": "It has to describe what your store actually does, including the analytics you actually run. General guidance, not legal advice. Your CA or lawyer confirms what applies to your category and turnover."
+        },
+        {
+          "kind": "statement",
+          "kicker": "What we ship",
+          "head": "Consent copy matched to the integrations.",
+          "body": "Marketing opt-in separate from purchase, a privacy policy that names the tools on your store, and nothing collected that you cannot explain.",
+          "img": "/images/sc-twohands.png"
+        },
+        {
+          "kind": "cta",
+          "kicker": "brandmintstudios.in",
+          "head": "Ask us what you are collecting.",
+          "em": "Do you send marketing to order numbers?",
+          "body": "Comment yes or no — honestly. Most shops do, most did not think about it, and it is fixable in an afternoon.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "nephew",
+      "title": "Your nephew can build it",
+      "batch": "objection",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Said kindly, every time",
+          "huge": "MY NEPHEW|CAN BUILD|IT",
+          "accent": true,
+          "sub": "He probably can. Here is the part that is not about building.",
+          "foot": "Swipe →",
+          "img": "/images/bc-nephew.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "It is not the code",
+          "huge": "BUILDING IS|THE EASY|HALF",
+          "accent": true,
+          "sub": "A working site is a weekend. The rest is the part that decides whether it still works in a year."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The question is not can he",
+          "head": "It is who answers at 9pm.",
+          "body": "In March, when a payment fails and the orders stop, is he free? Is he still in the city? Is he still speaking to you?",
+          "img": "/images/sc-shutter.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "What usually is not done",
+          "head": "The unglamorous half.",
+          "items": [
+            "Domain and hosting in your business name",
+            "Gateway policies that pass review",
+            "GST invoices that are actually correct",
+            "Someone to call when it breaks"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "And we mean this",
+          "head": "Sometimes he is the right answer.",
+          "body": "If you need five pages and a WhatsApp button and he will maintain it, use him. We will tell you that on the call."
+        },
+        {
+          "kind": "price",
+          "kicker": "Fixed price, in writing",
+          "head": "Static website",
+          "price": "₹14,999",
+          "sub": "one time · GST extra",
+          "body": "Five pages, your domain, SSL and email, analytics, Search Console. If that is all you need, that is all you pay."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask us before you decide.",
+          "em": "Who maintains it in a year?",
+          "body": "Comment the honest answer. If it is your nephew and he is reliable, we will say go with him — we say it more often than you would think.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "later",
+      "title": "After the season",
+      "batch": "objection",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Every shop says it",
+          "huge": "I'LL DO IT|AFTER THE|SEASON",
+          "accent": true,
+          "sub": "The season is when you need it. That is what makes it the season.",
+          "foot": "Swipe →",
+          "img": "/images/bc-later.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "It never gets quieter",
+          "huge": "AFTER THIS|IS ANOTHER|AFTER THIS",
+          "accent": true,
+          "sub": "Festive, then stock-taking, then the new range, then festive again. There is no quiet month coming."
+        },
+        {
+          "kind": "statement",
+          "kicker": "What waiting costs",
+          "head": "Nothing you can see.",
+          "body": "No missed call, no complaint. Just people who looked, found nothing, and bought from somebody who had a page.",
+          "img": "/images/sc-walkaway.png"
+        },
+        {
+          "kind": "statement",
+          "kicker": "And it is not a big project",
+          "head": "You are not rebuilding the shop.",
+          "body": "Five pages with your prices, your timings and a WhatsApp button. You keep selling exactly as you do while it is built."
+        },
+        {
+          "kind": "list",
+          "kicker": "What you actually have to do",
+          "head": "Your side of it.",
+          "items": [
+            "One call, thirty minutes",
+            "Send photos and prices",
+            "Say yes or no to two drafts",
+            "Nothing else"
+          ]
+        },
+        {
+          "kind": "price",
+          "kicker": "Fixed price, in writing",
+          "head": "Static website",
+          "price": "₹14,999",
+          "sub": "one time · GST extra",
+          "body": "Stores from ₹49,999. Scope and price signed before anyone starts, so there is nothing to manage."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask what yours would take.",
+          "em": "What are you waiting for exactly?",
+          "body": "Comment it — money, time, not sure it is worth it. We answer every one, including the ones where waiting is the right call.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "expensive",
+      "title": "Compared to what",
+      "batch": "objection",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "The honest question",
+          "huge": "IS ₹49,999|EXPENSIVE?",
+          "accent": true,
+          "sub": "It depends entirely on what you are comparing it to.",
+          "foot": "Swipe →",
+          "img": "/images/bc-expensive.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Ask it properly",
+          "huge": "EXPENSIVE|COMPARED|TO WHAT",
+          "accent": true,
+          "sub": "One month of rent? One festive weekend of orders you could not answer? A year of a platform's commission?"
+        },
+        {
+          "kind": "statement",
+          "kicker": "What it is not compared to",
+          "head": "Another website.",
+          "body": "Comparing it to a cheaper website is comparing two numbers. Compare it to what it does, or do not buy it.",
+          "img": "/images/sc-paperwork.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "Things it sits next to",
+          "head": "Your other costs.",
+          "items": [
+            "A month of shop rent",
+            "One staff salary",
+            "A season of marketplace commission",
+            "A single bad festive week"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "And when it is expensive",
+          "head": "If you will not use it.",
+          "body": "A store you do not keep stocked is expensive at any price. That is a real answer and we give it."
+        },
+        {
+          "kind": "price",
+          "kicker": "Four tiers, GST extra",
+          "head": "Online store",
+          "price": "from ₹49,999",
+          "sub": "each tier includes the one before",
+          "body": "Moving up later is an add-on, never a rebuild. Start where you actually are."
+        },
+        {
+          "kind": "cta",
+          "kicker": "brandmintstudios.in",
+          "head": "Every price is on the site.",
+          "em": "What does a month of rent cost you?",
+          "body": "You do not have to tell us. Just put it next to ₹49,999 and see which one you argue about longer.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "cod",
+      "title": "The COD problem",
+      "batch": "operations",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Cash on delivery",
+          "huge": "COD IS NOT|FREE MONEY",
+          "accent": true,
+          "sub": "It is the payment method most Indian shops launch on, and the one that quietly costs the most.",
+          "foot": "Swipe →",
+          "img": "/images/bc-cod.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Two different problems",
+          "huge": "FAKE ORDERS|AND MISSING|REMITTANCE",
+          "accent": true,
+          "sub": "One wastes a shipment. The other wastes a month finding out the courier owes you."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The first one",
+          "head": "An order that was never real.",
+          "body": "No card, no commitment. A confirmation step before dispatch cuts most of it, and costs you nothing.",
+          "img": "/images/sc-scooter.png"
+        },
+        {
+          "kind": "statement",
+          "kicker": "The second one",
+          "head": "The courier collected. Did you?",
+          "body": "Cash the courier takes has to come back to you, and be matched to the orders it came from. Unreconciled, it just disappears.",
+          "img": "/images/sc-paperwork.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "What a store should do",
+          "head": "Four things.",
+          "items": [
+            "A confirmation step before dispatch",
+            "Every COD order marked and tracked",
+            "Courier remittances matched to orders",
+            "The split watched for the first quarter"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "Most shops launch with both",
+          "head": "And that is right.",
+          "body": "Online and COD together, then watch which way your customers actually go. The answer differs by category and by area."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask how yours should be set up.",
+          "em": "What share of your orders is COD?",
+          "body": "Comment a rough percentage. If it is over half, there is a reconciliation conversation worth having before you build anything.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "returns",
+      "title": "The part nobody plans",
+      "batch": "operations",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Returns",
+          "huge": "YOU WILL|GET RETURNS",
+          "accent": true,
+          "sub": "Every store does. The ones that cope decided how before the first one arrived.",
+          "foot": "Swipe →",
+          "img": "/images/bc-returns.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Three decisions",
+          "huge": "WINDOW|CONDITION|REFUND PATH",
+          "accent": true,
+          "sub": "Make them now, in writing, or make them badly in an argument with a customer."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The window",
+          "head": "Say a number.",
+          "body": "Seven days, fourteen, thirty. Any of them works. Not stating one is what does not work.",
+          "img": "/images/sc-emptyshop.png"
+        },
+        {
+          "kind": "statement",
+          "kicker": "The condition",
+          "head": "What counts as returnable.",
+          "body": "Unopened? Unused? Tags on? Decide it, write it, and put it where the customer reads it before they buy."
+        },
+        {
+          "kind": "list",
+          "kicker": "And the money back",
+          "head": "The refund path.",
+          "items": [
+            "Back by the original method",
+            "Inside the window your policy states",
+            "Through the gateway, not by UPI to a stranger",
+            "COD refunds reconciled, not guessed"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "Where this lives in the build",
+          "head": "Growth tier and up.",
+          "body": "Courier integration, tracking and the refund path from your admin start at the Growth tier. Below that, returns are handled by hand."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask what your category needs.",
+          "em": "What is your return window today?",
+          "body": "Comment it. If the answer is 'we decide case by case', that is the thing to fix before you sell online.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "catalogue",
+      "title": "Your catalogue is the product",
+      "batch": "operations",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Before design",
+          "huge": "THE DATA|IS THE|PRODUCT",
+          "accent": true,
+          "sub": "Search, filters and every recommendation run off structured data. Not photographs.",
+          "foot": "Swipe →",
+          "img": "/images/bc-catalogue.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "The honest order",
+          "huge": "A REDESIGN|WON'T FIX|BAD DATA",
+          "accent": true,
+          "sub": "Consistent categories and real variant attributes do more for sales than any redesign we could sell you."
+        },
+        {
+          "kind": "statement",
+          "kicker": "Why it matters",
+          "head": "Nothing can find what is not described.",
+          "body": "A customer filtering by size finds nothing if size lives inside a sentence in the description.",
+          "img": "/images/sc-shelves.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "What structured means",
+          "head": "Fields, not prose.",
+          "items": [
+            "Consistent categories across every product",
+            "Real variants — size, colour, pack",
+            "Honest stock counts",
+            "HSN codes and weights for courier rating"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "And it is what we wait for",
+          "head": "Timelines run from receipt of assets.",
+          "body": "This is the input builds most often stall on. A catalogue ready on day one directly shortens yours.",
+          "img": "/images/ppl-need.png"
+        },
+        {
+          "kind": "statement",
+          "kicker": "We send a template",
+          "head": "The exact fields, before the call.",
+          "body": "Free, no sign-up. Fill it in while you decide whether to build with us at all — it is useful either way."
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Message the word CATALOGUE.",
+          "em": "How many products do you sell?",
+          "body": "Comment a rough number. Under 30 and this is one evening's work. Over 300 and it is the thing that decides your timeline.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "gst",
+      "title": "The number after GST",
+      "batch": "price",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Stated in public",
+          "huge": "GST GOES|ON TOP",
+          "accent": true,
+          "sub": "Every price we publish is exclusive of 18% GST. Here is what that actually means on an invoice.",
+          "foot": "Swipe →",
+          "img": "/images/bc-gst.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "No surprises",
+          "huge": "₹99,000|INVOICES AT|₹1,16,820",
+          "accent": true,
+          "sub": "That is the Starter Store with GST on it. We would rather you saw the number now than on the invoice."
+        },
+        {
+          "kind": "statement",
+          "kicker": "Why we quote it this way",
+          "head": "It is the honest way round.",
+          "body": "GST is not ours, it is the government's. Folding it into the headline price hides which part of your money we actually get.",
+          "img": "/images/sc-paperwork.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "Every price on the site",
+          "head": "Exclusive of GST.",
+          "items": [
+            "Static website ₹14,999 + GST",
+            "Online store from ₹49,999 + GST",
+            "Site + CRM ₹79,999 + GST",
+            "And ₹9,999/mo + GST after that"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "And your own GST is separate",
+          "head": "Your product rates are yours.",
+          "body": "They depend on HSN code and have to be right in the catalogue from day one. Retro-fixing tax on live orders is painful."
+        },
+        {
+          "kind": "statement",
+          "kicker": "If you are registered",
+          "head": "You claim it back.",
+          "body": "Most businesses buying a store are GST registered, in which case the input credit makes the exclusive number the one that matters. General guidance, not legal advice. Your CA or lawyer confirms what applies to your category and turnover."
+        },
+        {
+          "kind": "cta",
+          "kicker": "brandmintstudios.in",
+          "head": "Every number is on the site.",
+          "em": "Are you GST registered yet?",
+          "body": "Comment yes or no. If no and you are selling across state lines, that is a conversation to have before the store, not after.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
+    },
+    {
+      "id": "where-order",
+      "title": "Where is my order",
+      "batch": "operations",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "The message you get daily",
+          "huge": "WHERE IS|MY ORDER?",
+          "accent": true,
+          "sub": "Every shop selling online answers this one. It is the easiest one to stop receiving.",
+          "foot": "Swipe →",
+          "img": "/images/bc-tracking.png"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "It is not a support problem",
+          "huge": "THEY ASK|BECAUSE THEY|CANNOT SEE",
+          "accent": true,
+          "sub": "Nobody messages for fun. They message because there is nowhere to look."
+        },
+        {
+          "kind": "statement",
+          "kicker": "What causes it",
+          "head": "A shipment nobody can follow.",
+          "body": "You know where it is. The customer does not, and has no way to find out except asking you.",
+          "img": "/images/sc-phonepile.png"
+        },
+        {
+          "kind": "list",
+          "kicker": "What a courier integration does",
+          "head": "Automatically.",
+          "items": [
+            "Turns the order into a shipment",
+            "Gives the customer a live tracking link",
+            "Emails at dispatch and delivery",
+            "Stops most of the asking"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "Where it sits",
+          "head": "Growth tier and up.",
+          "body": "Courier API, tracking and the automated mails start at the Growth tier. Below that, dispatch is manual and so is the answering."
+        },
+        {
+          "kind": "statement",
+          "kicker": "The point is your time",
+          "head": "This is hours a week.",
+          "body": "Not a feature. Hours, every week, spent typing the same reply to people who only want to know a date.",
+          "img": "/images/sc-thinking.png"
+        },
+        {
+          "kind": "cta",
+          "kicker": "WhatsApp +91 77999 34943",
+          "head": "Ask which tier you need.",
+          "em": "How many of these do you answer a day?",
+          "body": "Comment a number. Under five and it is not worth the tier yet — we will say so.",
+          "img": "/images/sc-handoff.png"
+        }
+      ]
     }
   ]
 }

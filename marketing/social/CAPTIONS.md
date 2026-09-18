@@ -991,3 +991,631 @@ to serve — one leads on a number, one leads on a comparison. Compare them on
 
 Everything else — the eight numbers to watch, the UTM scheme on the bio link,
 what to ignore — is in `marketing/social/PLAYBOOK.md`.
+
+---
+---
+
+# Batch 3 — twelve carousels: the law, the objections, the operations
+
+Batch 2 sold the offer. This batch earns the right to sell it, on material
+nobody else in this market posts: what the law actually requires on an Indian
+online store, the three things people say instead of buying, and the
+operational facts that decide whether a store works after launch.
+
+Every fact here comes from `shared/resources.js` — the COMPLIANCE and LESSONS
+entries the portal already shows signed-in clients. None of it is invented and
+none of it is softened to sell.
+
+**The compliance posts carry a disclaimer and it is not optional.**
+`COMPLIANCE_NOTE` in that file reads: *"This is general guidance, not legal
+advice. Your CA or lawyer confirms what applies to your category and
+turnover."* It is on the slides and it goes in the caption. We are a web
+studio, not a law firm, and a shop owner acting on a carousel instead of an
+accountant is a harm we would have caused.
+
+**Why this batch is worth posting at all.** The ten-questions post worked
+because it was useful to someone who never hires us. All twelve of these are
+the same shape. A shop owner who reads the gateway post and fixes their five
+policy pages without ever messaging us has still learned that we knew the
+answer.
+
+| Week | Tue/Wed | Thu |
+|---|---|---|
+| 1 | `gateway-holds` | `nephew` |
+| 2 | `ecommerce-rules` | `expensive` |
+| 3 | `cod` | `later` |
+| 4 | `gst` | `returns` |
+| 5 | `licences` | `catalogue` |
+| 6 | `dpdp` | `where-order` |
+
+Compliance and objection posts alternate on purpose: three legal posts in a
+row reads as a law firm, three objection posts in a row reads as desperation.
+
+---
+
+## 17 · Why the gateway is holding you · `gateway-holds` — 7 slides
+Fifth tag: `#onlinebusiness`
+
+> Razorpay holding your payments in Hyderabad? It is usually five missing pages, not your business.
+>
+> Every payment gateway checks that five pages exist on your store and match
+> what the store actually does:
+>
+> 1. Terms and conditions
+> 2. Privacy policy
+> 3. Shipping policy
+> 4. Returns policy
+> 5. Cancellation and refunds
+>
+> Missing or copied policies are the single most common reason a payments
+> account gets held. Not rejected — held. Money coming in that you cannot
+> settle, and nobody tells you which page is the problem.
+>
+> Copied ones fail too. A returns policy promising 30 days on a store that says
+> 7 is worse than having none, because the gateway reads both.
+>
+> We draft all five from your answers on the call, linked from the footer and
+> the checkout. General guidance, not legal advice — your CA or lawyer confirms
+> what applies to your category and turnover.
+>
+> How many of the five do you have? **Comment a number, 0 to 5, and we'll tell
+> you which one a gateway stops on first.** Free, whether or not you ever build
+> with us.
+>
+> WhatsApp +91 77999 34943.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #onlinebusiness
+
+**Meta description** · Payment account on hold? Five policy pages every gateway checks, and why copied ones fail. Hyderabad web studio.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman frowning at a laptop in a bright office. "FIVE PAGES OR NO PAYMENTS". The most common reason a payment account gets held has nothing to do with your business.
+2. Cream slide. "MISSING POLICIES". Razorpay and every other gateway checks five pages exist and match what your store actually does. Copied ones fail too.
+3. Papers and a laptop on a tidy desk. Your account is held, not rejected.
+4. Dark slide. The five pages. Terms and conditions; Privacy policy; Shipping policy; Returns policy; Cancellation and refunds
+5. Dark slide. They have to match the store.
+6. Two pairs of hands over a sheet of paper. Drafted from your answers on the call.
+7. A parcel handed across a counter. Send us your store link. Which of the five are you missing?
+
+---
+
+## 18 · What the law wants on your store · `ecommerce-rules` — 7 slides
+Fifth tag: `#ecommerceindia`
+
+> Selling online from Hyderabad? Four things the E-Commerce Rules require on your store.
+>
+> The Consumer Protection (E-Commerce) Rules, 2020 are not optional and most
+> stores fail the first one:
+>
+> — Your legal name, address and contact details, visible. Not the brand name —
+> the registered entity.
+> — A named grievance officer, with contact details. A person, not an email
+> alias.
+> — Return, refund, exchange and cancellation policies, stated before purchase.
+> — Country of origin on listings for imported goods.
+>
+> Complaints acknowledged within 48 hours and resolved within a month. That is
+> the rule, not a service promise you get to set.
+>
+> We build these in as pages and fields rather than paragraphs — country of
+> origin is a real field on the product, not something typed into a
+> description where an edit can lose it.
+>
+> General guidance, not legal advice. Your CA or lawyer confirms what applies
+> to your category and turnover.
+>
+> Is your legal name on your site right now? **Go and look, then comment yes or
+> no.** It is the most common gap we find, on stores that have been trading for
+> years.
+>
+> brandmintstudios.in
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #ecommerceindia
+
+**Meta description** · Legal name, grievance officer, policies, country of origin — what India's E-Commerce Rules require on your store. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Man reading a printed sheet in a modern shop. "YOUR NAME MUST BE ON IT". Four things the Consumer Protection (E-Commerce) Rules require on every Indian online store.
+2. Cream slide. "48 HOURS TO REPLY". Complaints acknowledged in 48 hours and resolved within a month. That is the rule, not a service promise.
+3. Papers and a laptop on a tidy desk. Your legal name has to be visible.
+4. Dark slide. Four requirements. Legal name, address and contact; A named grievance officer; Return, refund and cancellation policies; Country of origin on imported goods
+5. Dark slide. A grievance officer has a name.
+6. Two pairs of hands over a sheet of paper. Pages, not paragraphs.
+7. A parcel handed across a counter. We build these into every store. Is your legal name on your site?
+
+---
+
+## 19 · The licence on your listing · `licences` — 7 slides
+Fifth tag: `#businessowner`
+
+> Selling food, gold or electronics online in Hyderabad? A licence number has to be on the listing.
+>
+> Not on the pack. On the page, where the customer sees the product.
+>
+> — FSSAI for food and supplements
+> — BIS marks for certain electronics and toys
+> — A drug licence for pharmacy
+> — Hallmarking for gold jewellery
+>
+> And it is not only the law asking. Marketplaces and payment gateways check
+> for these before they let you sell, so a missing number stalls the whole
+> account, not just one listing.
+>
+> The usual failure is typing it into the product description, where an edit
+> loses it or a copy-paste puts it on the wrong product. We make licence
+> numbers and marks first-class fields, shown where the rules want them shown.
+>
+> General guidance, not legal advice. Your CA or lawyer confirms what applies
+> to your category and turnover.
+>
+> What do you sell? **Comment your category and we'll tell you which licence a
+> gateway will ask for.** We are not your lawyer — but we have seen which ones
+> stop accounts.
+>
+> WhatsApp +91 77999 34943.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #businessowner
+
+**Meta description** · FSSAI, BIS, drug licence, hallmarking — which licence number has to appear on your online listing in India. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman examining a sealed jar in a food shop. "FSSAI BIS HALLMARK". If you sell food, electronics, gold or medicine, a number has to be on your listing.
+2. Cream slide. "NOT JUST THE LAW". Marketplaces and payment gateways ask for these before they let you sell. Missing one stalls the account, not just the listing.
+3. Merchandised shelving in a store. The pack is not enough.
+4. Dark slide. Common ones. FSSAI — food and supplements; BIS marks — some electronics and toys; Drug licence — pharmacy; Hallmarking — gold jewellery
+5. Dark slide. Typed into the description.
+6. A merchandised store before opening. A field, not a sentence.
+7. A parcel handed across a counter. Ask what your category needs. What do you sell?
+
+---
+
+## 20 · Consent is not a checkbox · `dpdp` — 7 slides
+Fifth tag: `#businessowner`
+
+> Collecting customer numbers in Hyderabad? The DPDP Act changed what you may do with them.
+>
+> A customer giving you their number so you can deliver an order has not agreed
+> to receive your campaigns. Those are two different permissions, and one
+> checkbox covering purchase, marketing and analytics is the thing the Act is
+> written against.
+>
+> What it asks of you:
+> — Collect only with notice and consent
+> — State the purpose, and keep to it
+> — Let people correct or delete their data
+> — Report a breach
+>
+> And the privacy policy has to be true. A copied one is worse than none,
+> because it describes a store that is not yours — including analytics you do
+> not run, or missing the ones you do.
+>
+> We ship consent copy matched to the integrations actually on your store, with
+> marketing opt-in separate from purchase.
+>
+> General guidance, not legal advice. Your CA or lawyer confirms what applies
+> to your category and turnover.
+>
+> Do you send marketing to numbers customers gave you for orders? **Comment yes
+> or no, honestly.** Most shops do, most never thought about it, and it is
+> fixable in an afternoon.
+>
+> brandmintstudios.in
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #businessowner
+
+**Meta description** · India's DPDP Act: consent, purpose, deletion, breach reporting — and why marketing consent is separate from a purchase. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Man with a phone, looking questioningly at camera. "WHOSE DATA IS IT". You are collecting names, numbers and addresses. There are now rules about what you may do with them.
+2. Cream slide. "BUYING IS NOT CONSENT". A customer giving you their number to receive an order has not agreed to receive your campaigns. Those are two different permissions.
+3. A phone face up on a desk. One tick for everything.
+4. Dark slide. Four duties. Collect only with notice and consent; State the purpose, and keep to it; Let people correct or delete their data; Report a breach
+5. Dark slide. A copied privacy policy is worse than none.
+6. Two pairs of hands over a sheet of paper. Consent copy matched to the integrations.
+7. A parcel handed across a counter. Ask us what you are collecting. Do you send marketing to order numbers?
+
+---
+
+## 21 · Your nephew can build it · `nephew` — 7 slides
+Fifth tag: `#webdesign`
+
+> Thinking of getting a website built by family in Hyderabad? Read this first — we mean it kindly.
+>
+> He probably can build it. A working site is a weekend. That is the easy half.
+>
+> The question is not whether he can build it. It is who answers at 9pm in
+> March, when a payment fails and the orders stop. Is he free? Is he still in
+> the city? Is he still speaking to you?
+>
+> What usually does not get done:
+> — Domain and hosting in your business name, not his
+> — Gateway policies that actually pass review
+> — GST invoices that are correct from day one
+> — Someone to call when it breaks
+>
+> And we mean this: sometimes he is the right answer. If you need five pages
+> and a WhatsApp button and he will maintain it, use him. We will say so on the
+> call — we say it more often than you would think.
+>
+> Static website ₹14,999, one time, GST extra. If that is all you need, that is
+> all you pay.
+>
+> Who maintains it in a year? **Comment the honest answer.**
+>
+> WhatsApp +91 77999 34943.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #webdesign
+
+**Meta description** · Family can build the site. The question is who answers at 9pm when payments fail. Fixed price from ₹14,999. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Young man at a laptop, older relative behind. "MY NEPHEW CAN BUILD IT". He probably can. Here is the part that is not about building.
+2. Cream slide. "BUILDING IS THE EASY HALF". A working site is a weekend. The rest is the part that decides whether it still works in a year.
+3. A closed modern storefront at night. It is who answers at 9pm.
+4. Dark slide. The unglamorous half. Domain and hosting in your business name; Gateway policies that pass review; GST invoices that are actually correct; Someone to call when it breaks
+5. Dark slide. Sometimes he is the right answer.
+6. Dark slide. Static website ₹14,999, one time · GST extra
+7. A parcel handed across a counter. Ask us before you decide. Who maintains it in a year?
+
+---
+
+## 22 · After the season · `later` — 7 slides
+Fifth tag: `#smallbusinesstips`
+
+> "I'll do it after the season" — the most expensive sentence a Hyderabad shop owner says.
+>
+> The season is when you need it. That is what makes it the season.
+>
+> And it never gets quieter. Festive, then stock-taking, then the new range,
+> then festive again. There is no quiet month coming.
+>
+> What waiting costs is nothing you can see. No missed call, no complaint. Just
+> people who looked, found nothing, and bought from somebody who had a page.
+>
+> It is also not a big project. You are not rebuilding the shop — five pages
+> with your prices, your timings and a WhatsApp button, while you keep selling
+> exactly as you do now.
+>
+> Your side of it: one call of thirty minutes, send photos and prices, say yes
+> or no to two drafts. Nothing else.
+>
+> ₹14,999 one time, GST extra. Stores from ₹49,999. Scope and price signed
+> before anyone starts, so there is nothing for you to manage.
+>
+> What are you waiting for, exactly? **Comment it — money, time, not sure it is
+> worth it.** We answer every one, including the ones where waiting is the
+> right call.
+>
+> WhatsApp +91 77999 34943.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #smallbusinesstips
+
+**Meta description** · The season is when you need the website. Five pages, ₹14,999, and thirty minutes of your time. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Shop owner carrying stock, hands full. "I'LL DO IT AFTER THE SEASON". The season is when you need it. That is what makes it the season.
+2. Cream slide. "AFTER THIS IS ANOTHER AFTER THIS". Festive, then stock-taking, then the new range, then festive again. There is no quiet month coming.
+3. Customer walking away from a lit shop. Nothing you can see.
+4. Dark slide. You are not rebuilding the shop.
+5. Dark slide. Your side of it. One call, thirty minutes; Send photos and prices; Say yes or no to two drafts; Nothing else
+6. Dark slide. Static website ₹14,999, one time · GST extra
+7. A parcel handed across a counter. Ask what yours would take. What are you waiting for exactly?
+
+---
+
+## 23 · Compared to what · `expensive` — 7 slides
+Fifth tag: `#businessowner`
+
+> Is ₹49,999 expensive for an online store in Hyderabad? Depends entirely on the comparison.
+>
+> Ask the question properly. Expensive compared to what — one month of rent?
+> One festive weekend of orders you could not answer? A year of a marketplace's
+> commission?
+>
+> What it should not be compared to is another website. That is comparing two
+> numbers. Compare it to what it does, or do not buy it.
+>
+> Things it sits next to:
+> — A month of shop rent
+> — One staff salary
+> — A season of marketplace commission
+> — A single bad festive week
+>
+> And here is when it genuinely is expensive: if you will not use it. A store
+> you do not keep stocked is expensive at any price. That is a real answer and
+> we give it on the call.
+>
+> Stores from ₹49,999, four tiers, GST extra. Each tier includes everything in
+> the one before, so moving up later is an add-on and never a rebuild — start
+> where you actually are.
+>
+> What does a month of rent cost you? **You do not have to tell us. Just put it
+> next to ₹49,999 and see which one you argue about longer.** Then comment
+> which won.
+>
+> Every price in full at brandmintstudios.in.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #businessowner
+
+**Meta description** · Is ₹49,999 expensive for an online store? Compare it to rent, commission, or one bad festive week. Hyderabad, four fixed tiers.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman at a desk, weighing something up. "IS ₹49,999 EXPENSIVE?". It depends entirely on what you are comparing it to.
+2. Cream slide. "EXPENSIVE COMPARED TO WHAT". One month of rent? One festive weekend of orders you could not answer? A year of a platform's commission?
+3. Papers and a laptop on a tidy desk. Another website.
+4. Dark slide. Your other costs. A month of shop rent; One staff salary; A season of marketplace commission; A single bad festive week
+5. Dark slide. If you will not use it.
+6. Dark slide. Online store from ₹49,999, each tier includes the one before
+7. A parcel handed across a counter. Every price is on the site. What does a month of rent cost you?
+
+---
+
+## 24 · The COD problem · `cod` — 7 slides
+Fifth tag: `#ecommerceindia`
+
+> Cash on delivery in Hyderabad: the payment method that quietly costs the most.
+>
+> It is what most Indian shops launch on, and it carries two different problems.
+>
+> The first is orders that were never real. No card, no commitment, and a
+> wasted shipment. A confirmation step before dispatch cuts most of it and
+> costs you nothing.
+>
+> The second is worse: the courier collected the cash. Did you? Money the
+> courier takes has to come back to you and be matched to the orders it came
+> from. Unreconciled, it just disappears — and you find out a month later.
+>
+> What a store should do:
+> — A confirmation step before dispatch
+> — Every COD order marked and tracked
+> — Courier remittances matched against orders
+> — The online-versus-COD split watched for the first quarter
+>
+> Most shops launch with both, and that is right. Watch which way your
+> customers actually go — the answer differs by category and by area.
+>
+> What share of your orders is COD? **Comment a rough percentage.** Over half
+> and there is a reconciliation conversation worth having before you build
+> anything.
+>
+> WhatsApp +91 77999 34943.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #ecommerceindia
+
+**Meta description** · COD has two costs: fake orders and unreconciled courier remittances. What an Indian online store should do about both. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Man counting banknotes behind a counter. "COD IS NOT FREE MONEY". It is the payment method most Indian shops launch on, and the one that quietly costs the most.
+2. Cream slide. "FAKE ORDERS AND MISSING REMITTANCE". One wastes a shipment. The other wastes a month finding out the courier owes you.
+3. Delivery rider loading parcels. An order that was never real.
+4. Papers and a laptop on a tidy desk. The courier collected. Did you?
+5. Dark slide. Four things. A confirmation step before dispatch; Every COD order marked and tracked; Courier remittances matched to orders; The split watched for the first quarter
+6. Dark slide. And that is right.
+7. A parcel handed across a counter. Ask how yours should be set up. What share of your orders is COD?
+
+---
+
+## 25 · The part nobody plans · `returns` — 7 slides
+Fifth tag: `#onlinestore`
+
+> Returns policy for a Hyderabad online store — three decisions to make before the first one arrives.
+>
+> Every store gets returns. The ones that cope decided how in advance, in
+> writing, instead of badly in an argument with a customer.
+>
+> THE WINDOW — say a number. Seven days, fourteen, thirty. Any of them works.
+> Not stating one is what does not work.
+>
+> THE CONDITION — unopened? unused? tags on? Decide it, write it, and put it
+> where the customer reads it before they buy, not after.
+>
+> THE REFUND PATH —
+> — Back by the original method
+> — Inside the window your policy states
+> — Through the gateway, not by UPI to a stranger
+> — COD refunds reconciled, not guessed
+>
+> Courier integration, tracking and the refund path from your own admin start
+> at the Growth tier. Below that, returns are handled by hand — which is fine
+> at low volume and is not fine later.
+>
+> What is your return window today? **Comment it.** If the answer is "we decide
+> case by case", that is the thing to fix before you sell online at all.
+>
+> WhatsApp +91 77999 34943.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #onlinestore
+
+**Meta description** · Returns need three decisions: window, condition, refund path. Decide them before the first return, not during. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman looking into an opened box. "YOU WILL GET RETURNS". Every store does. The ones that cope decided how before the first one arrived.
+2. Cream slide. "WINDOW CONDITION REFUND PATH". Make them now, in writing, or make them badly in an argument with a customer.
+3. A merchandised store before opening. Say a number.
+4. Dark slide. What counts as returnable.
+5. Dark slide. The refund path. Back by the original method; Inside the window your policy states; Through the gateway, not by UPI to a stranger; COD refunds reconciled, not guessed
+6. Dark slide. Growth tier and up.
+7. A parcel handed across a counter. Ask what your category needs. What is your return window today?
+
+---
+
+## 26 · Your catalogue is the product · `catalogue` — 7 slides
+Fifth tag: `#onlinestore`
+
+> Starting an online store in Hyderabad? Your product data matters more than the design.
+>
+> Search, filters, related products and every recommendation run off structured
+> data. Not photographs.
+>
+> A customer filtering by size finds nothing if size lives inside a sentence in
+> the description. No redesign fixes that — and we could happily sell you one.
+>
+> What structured means:
+> — Consistent categories across every product
+> — Real variants: size, colour, pack
+> — Honest stock counts
+> — HSN codes and weights, so courier rating works
+>
+> It is also the input builds most often stall on. Our timelines run from
+> receipt of assets, so a catalogue ready on day one directly shortens yours.
+>
+> We send the exact template before the call. Free, no sign-up, and useful
+> whether or not you build with us — fill it in while you decide.
+>
+> How many products do you sell? **Comment a rough number.** Under 30 and this
+> is one evening's work. Over 300 and it is the thing that decides your
+> timeline.
+>
+> WhatsApp +91 77999 34943 and message the word CATALOGUE.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #onlinestore
+
+**Meta description** · Search, filters and recommendations run off product data, not photos. The fields that decide whether a store converts. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Woman arranging products on a table. "THE DATA IS THE PRODUCT". Search, filters and every recommendation run off structured data. Not photographs.
+2. Cream slide. "A REDESIGN WON'T FIX BAD DATA". Consistent categories and real variant attributes do more for sales than any redesign we could sell you.
+3. Merchandised shelving in a store. Nothing can find what is not described.
+4. Dark slide. Fields, not prose. Consistent categories across every product; Real variants — size, colour, pack; Honest stock counts; HSN codes and weights for courier rating
+5. Woman photographing a product. Timelines run from receipt of assets.
+6. Dark slide. The exact fields, before the call.
+7. A parcel handed across a counter. Message the word CATALOGUE. How many products do you sell?
+
+---
+
+## 27 · The number after GST · `gst` — 7 slides
+Fifth tag: `#gst`
+
+> Website prices in Hyderabad, GST included in the explanation: ₹99,000 invoices at ₹1,16,820.
+>
+> Every price we publish is exclusive of 18% GST, and we would rather you saw
+> what that means now than on the invoice.
+>
+> — Static website ₹14,999 + GST
+> — Online store from ₹49,999 + GST
+> — Site + CRM ₹79,999 + GST, then ₹9,999/mo + GST
+>
+> We quote it this way because it is the honest way round. GST is not ours, it
+> is the government's. Folding it into a headline price hides which part of
+> your money the studio actually receives.
+>
+> Your own product GST is separate and it is yours: rates depend on HSN code
+> and have to be right in the catalogue from day one. Retro-fixing tax on live
+> orders is painful.
+>
+> And if you are GST registered — as most businesses buying a store are — you
+> claim the input credit back, which makes the exclusive number the one that
+> actually matters to you.
+>
+> General guidance, not legal advice. Your CA confirms what applies to you.
+>
+> Are you GST registered yet? **Comment yes or no.** If no and you are selling
+> across state lines, that is a conversation to have before the store, not
+> after it.
+>
+> Every number is on brandmintstudios.in.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #gst
+
+**Meta description** · Every Brand Mint price is exclusive of 18% GST. ₹99,000 invoices at ₹1,16,820 — stated up front, not on the invoice. Hyderabad.
+
+---
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Man reading a printed invoice. "GST GOES ON TOP". Every price we publish is exclusive of 18% GST. Here is what that actually means on an invoice.
+2. Cream slide. "₹99,000 INVOICES AT ₹1,16,820". That is the Starter Store with GST on it. We would rather you saw the number now than on the invoice.
+3. Papers and a laptop on a tidy desk. It is the honest way round.
+4. Dark slide. Exclusive of GST. Static website ₹14,999 + GST; Online store from ₹49,999 + GST; Site + CRM ₹79,999 + GST; And ₹9,999/mo + GST after that
+5. Dark slide. Your product rates are yours.
+6. Dark slide. You claim it back.
+7. A parcel handed across a counter. Every number is on the site. Are you GST registered yet?
+
+---
+
+## 28 · Where is my order · `where-order` — 7 slides
+Fifth tag: `#ecommerceindia`
+
+> "Where is my order?" — the message every Hyderabad shop answers daily, and the easiest one to stop getting.
+>
+> Nobody messages for fun. They message because there is nowhere to look.
+>
+> You know where the parcel is. The customer does not, and has no way to find
+> out except asking you — so they ask you, every time, and you type the same
+> reply.
+>
+> What a courier integration does automatically:
+> — Turns the order into a shipment
+> — Gives the customer a live tracking link
+> — Emails at dispatch and at delivery
+> — Stops most of the asking
+>
+> Courier API, tracking and the automated mails start at the Growth tier. Below
+> that, dispatch is manual and so is the answering.
+>
+> The point is not the feature. It is hours a week, every week, spent telling
+> people a date they could have read themselves.
+>
+> How many of these do you answer a day? **Comment a number.** Under five and
+> it is not worth the tier yet — we will say so.
+>
+> WhatsApp +91 77999 34943.
+>
+> #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
+> #smallbusinessindia #ecommerceindia
+
+**Meta description** · Customers ask "where is my order" because there is nowhere to look. Courier tracking stops most of it. Hyderabad, Growth tier.
+
+**Alt text** — Instagram reads this for accessibility and for Google.
+
+1. Shopkeeper holding a phone and a parcel. "WHERE IS MY ORDER?". Every shop selling online answers this one. It is the easiest one to stop receiving.
+2. Cream slide. "THEY ASK BECAUSE THEY CANNOT SEE". Nobody messages for fun. They message because there is nowhere to look.
+3. A phone face up on a desk. A shipment nobody can follow.
+4. Dark slide. Automatically. Turns the order into a shipment; Gives the customer a live tracking link; Emails at dispatch and delivery; Stops most of the asking
+5. Dark slide. Growth tier and up.
+6. Founder sitting alone in her studio. This is hours a week.
+7. A parcel handed across a counter. Ask which tier you need. How many of these do you answer a day?
+
+---
+

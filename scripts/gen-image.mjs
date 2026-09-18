@@ -30,6 +30,10 @@ const KEY =
   (process.argv.includes("--key") ? process.argv[process.argv.indexOf("--key") + 1] : "");
 
 const MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-3-pro-image";
+/** --size 1K|2K|4K, default 4K. */
+const SIZE = (process.argv.includes("--size")
+  ? process.argv[process.argv.indexOf("--size") + 1]
+  : process.env.GEMINI_IMAGE_SIZE || "4K").toUpperCase();
 const API = "https://generativelanguage.googleapis.com/v1beta/models";
 
 /** The palette, repeated into every prompt so the set looks like one studio
@@ -254,16 +258,21 @@ async function generate(id) {
   // times. Everything else carries its own {file, aspect, prompt}.
   const shot = SHOTS[id] || AVATARS[id] || HOOKS[id] || COVERS[id]
     || (PEOPLE[id] ? { file: id, aspect: "4:5", prompt: PEOPLE[id] } : null)
-    || (SCENES[id] ? { file: id, aspect: "4:5", prompt: SCENES[id] } : null);
+    || (SCENES[id] ? { file: id, aspect: "4:5", prompt: SCENES[id] } : null)
+    || (BATCH3[id] ? { file: id, aspect: "4:5", prompt: BATCH3[id] } : null);
   if (!shot) throw new Error(`Unknown shot "${id}". Try --list.`);
 
   const house = AVATARS[id] ? PRESENTER : HOOKS[id] ? SCALE
-    : COVERS[id] ? COVER : (PEOPLE[id] || SCENES[id]) ? PEOPLE_BASE : PALETTE;
+    : COVERS[id] ? COVER : (PEOPLE[id] || SCENES[id] || BATCH3[id]) ? PEOPLE_BASE : PALETTE;
   const body = {
     contents: [{ parts: [{ text: `${shot.prompt}\n\n${house}` }] }],
     generationConfig: {
       responseModalities: ["IMAGE"],
-      imageConfig: { aspectRatio: shot.aspect },
+      // 1K, 2K or 4K. 4K costs $0.24 an image against $0.134 for 1K and 2K,
+      // and the carousels render at 1080x1350 — 2K already clears that, so 4K
+      // buys nothing on Instagram. It buys headroom: cropping into a shot,
+      // print, and anything that wants the source larger than the post.
+      imageConfig: { aspectRatio: shot.aspect, imageSize: SIZE },
     },
   };
 
@@ -299,9 +308,9 @@ async function generate(id) {
   // per generation, including the ones that get thrown away — the discarded
   // ones are most of the bill.
   fs.appendFileSync("images/.gen-log.tsv",
-    `${new Date().toISOString()}\t${MODEL}\t${id}\t${shot.aspect}\t${kb}\n`);
+    `${new Date().toISOString()}\t${MODEL}\t${SIZE}\t${id}\t${shot.aspect}\t${kb}\n`);
 
-  console.log(`  ok  ${out}  ${kb} KB  ${shot.aspect}`);
+  console.log(`  ok  ${out}  ${kb} KB  ${shot.aspect} ${SIZE}`);
   return out;
 }
 
@@ -407,13 +416,36 @@ const SCENES = {
   "sc-counter":   "A clean modern checkout counter, empty, one card reader and a small plant on it, soft daylight, the store softly out of focus behind.",
 };
 
-const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && a !== KEY);
+/* ------------------------- BATCH THREE COVERS -----------------------------
+   Compliance, objections and operations. Same rule as PEOPLE and SCENES:
+   stock photography, never evidence. Nothing here depicts a real client, a
+   real document or a real licence — a generated FSSAI certificate on a slide
+   would be a fabricated record, so every document in frame is angled,
+   cropped or out of focus with nothing readable on it. */
+const BATCH3 = {
+  "bc-gateway":   "An Indian woman in her thirties at a tidy desk in a bright office, looking at a laptop with her hand paused over the trackpad, mildly exasperated. The laptop screen is dark and blank. Warm daylight.",
+  "bc-rules":     "An Indian man in his forties standing at a counter in a bright modern shop, holding a single printed sheet at waist height and reading down it, brow slightly furrowed. Nothing on the page is readable.",
+  "bc-licence":   "An Indian woman in a bright modern food or spice shop, holding one sealed product jar up at chest height and examining its side, considering. Shelves of neat identical jars behind her. No readable labels.",
+  "bc-dpdp":      "An Indian man in his thirties in a bright office, holding his phone in one hand and looking at the camera with a questioning expression, eyebrows slightly raised. Phone screen dark.",
+  "bc-nephew":    "A young Indian man in his early twenties sitting at a laptop in a warm domestic living room, relaxed and confident, half-turned toward the camera with a slight grin. An older relative is softly out of focus behind him. Laptop screen dark.",
+  "bc-later":     "An Indian shop owner in his forties standing in his own busy bright shop with both hands full of stock, looking off to one side as if being asked something he has no time for. Customers blurred behind.",
+  "bc-expensive": "Close three-quarter portrait of an Indian woman in her forties seated at a pale wood desk, chin resting on one hand, weighing something up, looking slightly past the camera. Head and shoulders fill the upper half of the frame — she is close to camera, not small in a wide room. Calm and unhurried, not worried. Bright office, one plant, one emerald cushion.",
+  "bc-cod":       "Close three-quarter view of an Indian man standing behind a shop counter, counting a thick stack of banknotes with both hands held up at chest height, head slightly down, concentrating. He fills the upper half of the frame. A modern shop with shelves behind him. Notes are plain and no denominations are readable. The counter runs across the lower frame — no empty floor, no isolated furniture.",
+  "bc-returns":   "An Indian woman in a bright packing room holding one opened cardboard box and looking into it with a resigned expression. The box is rigid and cubic. A neat row of closed boxes behind her.",
+  "bc-catalogue": "An Indian woman leaning over a pale wood table closely arranging a dense grid of identical small products, both hands adjusting one of them, concentrating. She fills the upper half of the frame and the products fill the lower half — the table is full, not empty. Bright studio, warm daylight, one emerald vase. No phone, no camera, no screen in frame.",
+  "bc-gst":       "An Indian man in his forties at a tidy desk in a bright office, holding a printed invoice at chest height and reading it calmly, a pen in his other hand. Nothing on the page is readable.",
+  "bc-tracking":  "An Indian shopkeeper standing behind a counter holding a phone in one hand and a parcel in the other, glancing between them, slightly harried. Bright modern shop. Phone screen dark.",
+};
+
+const _skipVals = new Set([KEY, SIZE, SIZE.toLowerCase()]);
+const args = process.argv.slice(2).filter((a) => !a.startsWith("--") && !_skipVals.has(a));
 const ids = process.argv.includes("--all") ? Object.keys(SHOTS)
   : process.argv.includes("--avatars") ? Object.keys(AVATARS)
   : process.argv.includes("--hooks") ? Object.keys(HOOKS)
   : process.argv.includes("--covers") ? Object.keys(COVERS)
   : process.argv.includes("--people") ? Object.keys(PEOPLE)
   : process.argv.includes("--scenes") ? Object.keys(SCENES)
+  : process.argv.includes("--batch3") ? Object.keys(BATCH3)
   : args;
 
 if (process.argv.includes("--list") || !ids.length) {
@@ -427,7 +459,7 @@ if (!KEY) {
 
 /** $0.134 per 1K-2K image on gemini-3-pro-image, Sept 2026. Imagen 4 Fast is
  *  $0.02 if a run is only about composition and not final quality. */
-const USD_PER_IMAGE = Number(process.env.GEMINI_IMAGE_USD || 0.134);
+const USD_PER_IMAGE = Number(process.env.GEMINI_IMAGE_USD || (SIZE === "4K" ? 0.24 : 0.134));
 
 let failed = 0;
 for (const id of ids) {
