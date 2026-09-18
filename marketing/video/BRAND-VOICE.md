@@ -1,7 +1,14 @@
 # The Brand Mint voice
 
+**Chosen: ElevenLabs — `Santhi Prakash — Warm Indian Narrator`**
+**`voice_id` UCYikFhJ1MxdJf40ZcRX** · model `eleven_multilingual_v2`
+
 One voice, used on every film, ad and reel from here on. A brand that changes
 voice every post has no voice.
+
+⚠️ **Not yet usable.** The voice is gated: every call returns *"You need to be
+on the creator tier or above to use this voice."* The tier check runs before
+generation, so a blocked attempt costs nothing — this has been tested twice.
 
 ## The brief, in the client's words
 
@@ -45,7 +52,7 @@ voice of someone who speaks English well and happens to be Indian.
 |---|---|
 | Gemini TTS — Charon, Sulafat, Puck | Rejected. Generic, poor pronunciation. |
 | ElevenLabs — Amit, Indian Commercial | **Rejected by the client: reads as a performed accent, "getting mocked".** |
-| ElevenLabs — Santhi Prakash | Best written match: "neutral Indian accent, crisp diction, steady articulate delivery", late thirties. Telugu name. **Tier-locked — needs the creator tier.** Preview at `out/santhi-prakash.mp3`. |
+| ElevenLabs — Santhi Prakash | **CHOSEN.** "Neutral Indian accent, crisp diction, steady articulate delivery", late thirties. Telugu name. Tier-locked. Preview at `out/santhi-prakash.mp3`. |
 | ElevenLabs — Pranab | "Mature, confident, natural and engaging **without sounding overly polished or theatrical**" — the phrase that matters here. Preview at `out/pranab.mp3`. |
 
 Not auditioned, previews blocked by the sandbox egress proxy — audition these
@@ -74,8 +81,31 @@ Run the QC loop in `VO-QC.md` — generate, transcribe with Scribe, diff against
 the script. It has already caught "four **ships** so far" and "a **card** that
 works everywhere". Generated speech is not proofread by generating it.
 
-## Cost
+## What it takes to unlock it
 
-ElevenLabs charges about one credit per character; the 30s brand script is
-369 credits, roughly $0.04. The account currently has **51 credits** and the
-full script cannot run until it is topped up.
+Two blockers, and one purchase clears both:
+
+| | |
+|---|---|
+| Creator tier | Required for this voice. $22/month, or $18.33 on annual billing. |
+| Credits | 369 needed for the 30s script, **51 on the account**. Creator includes 121,000 credits a month. |
+
+So the credit shortfall is not worth solving separately — 121,000 credits is
+roughly 320 runs of the full brand script, which is more voiceover than this
+studio will record in a year. Creator also unlocks Professional Voice Cloning,
+which is the route to a genuinely owned brand voice later: record a real
+Telugu-speaking Hyderabad voice artist once, clone it, and the brand voice
+stops depending on which library voices a vendor keeps in stock.
+
+ElevenLabs charges about one credit per character. The 30s brand script is
+369 credits — roughly $0.04 a read.
+
+## Once the tier is live
+
+1. Generate the script in `voice_id UCYikFhJ1MxdJf40ZcRX`.
+2. Run the QC loop in `VO-QC.md` — transcribe and diff. Do not skip this.
+3. Save the WAV to `marketing/video/out/vo-santhi.wav`.
+4. Re-time and burn the subtitles against the new read — the timings are
+   derived from the audio, so they follow automatically:
+   `node marketing/video/subtitles.mjs --script brand --audio out/vo-santhi.wav --font "BrandMint Display" --until 24 --burn out/brandmint-30s.mp4`
+5. Remux the film with the new voiceover via `cut-30.sh`.
