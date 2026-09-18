@@ -10,6 +10,12 @@ python3 -m http.server 8000
 NODE_PATH=$(npm root -g) node marketing/social/render-carousels.cjs
 ```
 
+The renderer fails loudly rather than quietly: it warns if a slide's content
+overflows, if a cover headline runs past the edge, or if a cover line wraps.
+A warning is a blocker — those are the failures that only become visible once
+the post is live. The cover headline auto-shrinks to fit, so a long line comes
+out smaller rather than clipped.
+
 **Every price on these slides is the price on the site.** ₹14,999 static, from
 ₹49,999 store, ₹79,999 + ₹9,999/mo for Site + CRM, GST extra throughout. If a
 price changes on `shared/services.js` or `shared/tiers.js`, change
@@ -20,6 +26,49 @@ takedown, not an edit.
 "X% more sales", no client logos we have not shipped. The only numbers are
 prices, `25+ projects`, `8+ years` and `Hyderabad + UK` — all of which are on
 `shared/work.js` and the live site.
+
+---
+
+## The three rules the slides are built on
+
+Full reasoning and sources in `marketing/social/PLAYBOOK.md`.
+
+**1 · Slide 2 is a second cover.** An unswiped carousel gets re-served starting
+from the first slide the viewer never reached, so slide 2 is the slide a large
+share of people actually meet cold. It gets its own hook, its own tag and a
+line stating the offer, rather than continuing a sentence from slide 1. It is
+set on the cream ground so the swipe from slide 1 lands as a visual beat.
+
+**2 · Every caption asks a question and asks for a comment.** Metricool's 2026
+study (24.36M posts) found posts containing a question get **36.70% more
+comments** and posts with a comment-focused CTA get **202.78% more**. The ask
+is always something a person can answer in four words — a number, a trade, a
+suburb — because the cost of a comment is the whole battle.
+
+This is **not** a comment-to-DM automation funnel. Those are built for course
+sellers where volume is the right variable; a meaningful share of auto-DMs to
+non-followers land in the requests folder and are never seen. We answer the
+comments ourselves, in the thread, within the hour. Fifteen local buyers, not
+eight hundred commenters.
+
+**3 · No AI imagery on any slide.** The generated cover plates
+(`images/bg-*.png`) and the scale-hook images (`images/hook-*.png`) have been
+pulled. The covers are typographic on a CSS ground, which at thumbnail size
+reads louder than a dark photograph under a scrim did, and never arrives with
+a grey hairline baked into the edge.
+
+The reason is not the US survey data on AI backlash — that is real but it is
+US data and nobody has measured what a Hyderabad shop owner thinks. The reason
+is inferential and it transfers regardless: we sell "a real working site for a
+real fixed price" to a cautious first-time buyer, and a grid of generated
+storefronts invites exactly one inference — that the portfolio might be
+generated too. The screenshots of shipped work are the hardest-to-fake asset
+in a category full of stock mockups, and generated imagery sitting next to
+them is what makes them look cheap.
+
+An `img` on a slide is now reserved for a **real screenshot of shipped work**.
+`scripts/gen-image.mjs` still generates the old plates; nothing stops anyone
+re-adding them, which is why the reason is written down here.
 
 ---
 
@@ -103,6 +152,8 @@ Instagram ranking has no primary source behind it.
 
 **Caption**
 
+> Website for a Hyderabad shop, ₹14,999 fixed — here is what it actually saves you.
+>
 > You answer the same four questions every day. Price. Timing. Do you deliver.
 > Where are you.
 >
@@ -118,8 +169,11 @@ Instagram ranking has no primary source behind it.
 > Fixed price, in writing, before anyone starts work — GST extra, and that is the
 > whole number.
 >
-> HITEC City, Hyderabad. WhatsApp +91 77999 34943 and ask what yours would cost.
-> If a cheaper option is the honest answer, we will say so.
+> So which one is it for you — the price question, the timing question, or "do
+> you deliver to my area"? **Comment the question you answer most and we'll
+> show you exactly where it lives on a page.** We reply to every one.
+>
+> HITEC City, Hyderabad. WhatsApp +91 77999 34943.
 >
 > #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
 > #smallbusinessindia #whatsappbusiness
@@ -131,20 +185,22 @@ Instagram ranking has no primary source behind it.
 
 **Alt text, per slide** — Instagram reads this for accessibility and search.
 
-1. Dark slide: "You're not running a business. You're running a reply machine."
-2. Dark slide asking "Price?" with the other three questions shops answer daily.
+1. Dark green slide, huge type: "REPLY MACHINE". You answer the same four questions all day; a website answers them once.
+2. Cream slide, huge type: "SAME FOUR QUESTIONS EVERY DAY". Price, timing, delivery, location — answered once for ₹14,999.
 3. Dark slide: a customer searched, found nothing, and called a competitor.
 4. Dark slide listing four things a website answers: prices, delivery, payment methods, WhatsApp orders.
 5. Dark slide: static website ₹14,999 one time, GST extra; online stores from ₹49,999.
-6. Dark slide: book a 30-minute call with Brand Mint, HITEC City Hyderabad.
+6. Dark slide: book a 30-minute call with Brand Mint, or comment the question you answer most.
 
 ---
 
 ## 2 · Own it or rent it
-`marketing/social/out/own-it/` — 6 slides
+`marketing/social/out/own-it/` — 7 slides
 
 **Caption**
 
+> Online store for a Hyderabad shop that currently sells on Instagram — from ₹49,999.
+>
 > Your shop runs off Instagram. The page looks good. The orders come in.
 >
 > One thing worth knowing: that page is not yours. If the account goes tomorrow,
@@ -161,6 +217,10 @@ Instagram ranking has no primary source behind it.
 > Online stores from ₹49,999, GST extra. Four tiers, each including everything in
 > the one before it, so moving up later is an add-on and never a rebuild.
 >
+> Which tier does a shop like yours actually need? **Comment what you sell —
+> boutique, bakery, gym, wholesale — and we'll tell you the honest answer in the
+> replies, including if the ₹14,999 static site is enough.**
+>
 > Every price in full at brandmintstudios.in — no form, no discovery call to find
 > out what it costs.
 >
@@ -174,20 +234,23 @@ Instagram ranking has no primary source behind it.
 
 **Alt text, per slide**
 
-1. Dark slide: "That page isn't yours."
-2. Dark slide: if the account goes, the photos, prices and customer conversations go with it.
-3. Dark slide listing what you own with Brand Mint: domain, hosting, payment account, customer records.
-4. Dark slide: keep posting on Instagram exactly as you do now.
-5. Dark slide: online stores from ₹49,999, GST extra, four to twelve weeks.
-6. Dark slide: see the four store tiers at brandmintstudios.in.
+1. Dark green slide, huge type: "THAT PAGE ISN'T YOURS."
+2. Cream slide, huge type: "GONE IN ONE MORNING". A domain in your own name cannot be taken away.
+3. Dark slide: the account goes and the business goes with it — no warning, no appeal.
+4. Dark slide listing what you own with Brand Mint: domain, hosting, payment account, customer records.
+5. Dark slide: keep posting on Instagram exactly as you do now.
+6. Dark slide: online stores from ₹49,999, GST extra, four to twelve weeks.
+7. Dark slide: see the four store tiers at brandmintstudios.in, or comment your trade.
 
 ---
 
 ## 3 · Why the price is fixed
-`marketing/social/out/fixed-price/` — 6 slides
+`marketing/social/out/fixed-price/` — 7 slides
 
 **Caption**
 
+> Website design price in Hyderabad, stated in public: ₹14,999 static, from ₹49,999 for a store.
+>
 > It started at one number and ended at three. Everyone who has paid for a
 > website has a version of that story.
 >
@@ -204,8 +267,11 @@ Instagram ranking has no primary source behind it.
 >
 > 25+ projects delivered, Hyderabad and the UK.
 >
-> WhatsApp +91 77999 34943 and ask what yours would cost. Straight answer on the
-> first message.
+> What did the last quote you got actually cover? **Post it in the comments — no
+> names, just the number and what it included — and we'll tell you what's
+> missing from it.** If a cheaper option is the honest one, we'll say that too.
+>
+> WhatsApp +91 77999 34943.
 >
 > #hyderabadbusiness #websitedesignhyderabad #hyderabadsmallbusiness
 > #smallbusinessindia #webdesign
@@ -217,44 +283,18 @@ Instagram ranking has no primary source behind it.
 
 **Alt text, per slide**
 
-1. Dark slide: "Your price. In writing."
-2. Dark slide: the usual story — started at one number, ended at three.
-3. Dark slide listing four terms: signed scope and price, 50/50 payment, GST invoices, no hourly billing.
-4. Dark slide: the person on the call is the person building it, 8+ years on every build.
-5. Dark slide: Site + CRM ₹79,999 setup then ₹9,999 a month, GST extra.
-6. Dark slide: WhatsApp +91 77999 34943 to ask what yours would cost.
-
----
-
-## Posting notes
-
-- **One a week, same day, same time.** Three carousels is three weeks. Posting
-  all three in one day spends the whole set on the same impression.
-- **Slide 1 is the entire post.** Nobody swipes past a weak cover, so the
-  strongest line goes there and nowhere else.
-- **Reply to every comment within the hour** — on a local account that reach is
-  worth more than the post itself.
-- **The caption's first line is what shows before "more".** Each of these opens
-  on the problem, not on the studio's name, for exactly that reason.
-- **Point the link in bio at `/pricing`**, not the home page. These posts all
-  promise a number; send people to where the numbers are.
+1. Dark green slide, huge type: "A WEBSITE ₹14,999". One time, GST extra, in writing before anyone starts.
+2. Cream slide, huge type: "ONE NUMBER THEN THREE". Scope and price signed before a rupee moves.
+3. Dark slide: the usual story — started at one number, ended at three.
+4. Dark slide listing four terms: signed scope and price, 50/50 payment, GST invoices, no hourly billing.
+5. Dark slide: the person on the call is the person building it, 8+ years on every build.
+6. Dark slide: Site + CRM ₹79,999 setup then ₹9,999 a month, GST extra.
+7. Dark slide: WhatsApp +91 77999 34943, or post your last quote in the comments.
 
 ---
 
 ## 4 · Before you pay anyone
-`marketing/social/out/before-you-pay/` — 7 slides
-
-The scale-hook format, borrowed from the prompt-pack carousels that run on
-Explore. **The mechanic is what transfers, not the content.** Those posts get
-shares roughly equal to likes because slide five hands over the exact AI
-prompt — the image only buys the first second, the giveaway does the rest.
-Their audience is designers, so the giveaway is a prompt. This audience is
-shop owners, so the giveaway is the ten questions that protect them from a bad
-build. A prompt pack here would buy followers who will never purchase.
-
-The checklist is deliberately answerable by any studio, including competitors.
-A giveaway that only we pass is an advert wearing a checklist's clothes, and
-people can tell.
+`marketing/social/out/before-you-pay/` — 8 slides
 
 **Caption**
 
@@ -278,6 +318,10 @@ people can tell.
 > Number ten is the one that catches people. If the answer is an account
 > manager, a ticket form, or silence — you already know.
 >
+> So: which one would your current developer fail? **Comment the number, 1 to
+> 10, and we'll tell you exactly what to ask next.** One digit is all it takes
+> and we answer every one.
+>
 > Ask any studio in Hyderabad these ten. Ask us. We answer all of them in
 > writing before a rupee moves: static site ₹14,999, stores from ₹49,999, GST
 > extra, price and scope fixed before anyone starts.
@@ -294,28 +338,38 @@ people can tell.
 
 **Alt text, per slide**
 
-1. A giant man kneeling in an old Hyderabad street beside a small shopfront. "Before you pay anyone for a website."
-2. Dark slide: the problem is never the code, it is what was never agreed in writing.
-3. Dark slide, four ownership questions: domain, hosting, payment account, data export.
-4. Dark slide, four cost questions: fixed or hourly, signed agreement, GST, mid-project changes.
-5. Dark slide: "Who do I call when it breaks at 9pm?"
-6. A giant man sitting on Charminar. Ten questions, no wrong answers, only honest ones.
-7. Dark slide: Brand Mint answers all ten in writing. Prices and WhatsApp number.
+1. Dark green slide, huge type: "10 QUESTIONS". Ask these before you pay anyone to build your website.
+2. Cream slide, huge type: "WOULD YOURS PASS ALL TEN?" Any honest Hyderabad studio answers all ten.
+3. Dark slide: the problem is never the code, it is what was never agreed in writing.
+4. Dark slide, four ownership questions: domain, hosting, payment account, data export.
+5. Dark slide, four cost questions: fixed or hourly, signed agreement, GST, mid-project changes.
+6. Dark slide: "Who do I call when it breaks at 9pm?"
+7. Cream slide, huge type: "NO WRONG ANSWERS. ONLY HONEST". Screenshot it and ask any studio.
+8. Dark slide: Brand Mint answers all ten in writing. Comment which number yours would fail.
 
 **Why this one is the lead post.** It is the only carousel in the set that is
 useful to someone who never hires us, which is exactly why it gets saved and
-sent to a friend opening a shop. Post it first.
+sent to a friend opening a shop. Post it first — and its comment CTA is the
+cheapest in the set, because the answer is a single digit.
 
-### On the scale-hook images
+---
 
-`images/hook-shop.png`, `hook-charminar.png`, `hook-hitec.png` — generated,
-4:5, regenerate with `node scripts/gen-image.mjs --hooks`.
+## Posting notes
 
-Hyderabad landmarks on purpose: a giant man on the Arc de Triomphe says nothing
-to a boutique in Kukatpally, and Charminar and the autos say "this is for you"
-before a word is read. The figure is generic and is never presented as a
-client, a customer or studio staff.
-
-These are obviously impossible images, so nobody reads them as documentary —
-but if one is ever used where it could be mistaken for a photograph of real
-work, label it. The same rule as the presenter avatars.
+- **Two a week**, Tuesday to Thursday, **6–9pm IST**. That evening window is
+  the only slot where Buffer's 9.6M-post study and Metricool's 24.36M-post
+  study independently agree, and neither publishes a best-versus-worst effect
+  size — so post in it and give timing no further thought.
+- **Never let a calendar week pass with zero posts.** The zero-post week is
+  the only penalty Buffer's fixed-effects model actually measures.
+- **Slide 1 is the post. Slide 2 is the post for everyone who didn't swipe.**
+  Both carry a hook that works with nothing before it.
+- **Reply to every comment within the hour.** The captions now ask for a
+  comment; an unanswered one is worse than never having asked.
+- **The caption's first line is what shows before "more"** — and it is now
+  also a Google result. Each opens on a phrase a person would type into a
+  search box, with "Hyderabad" in it.
+- **Point the link in bio at `/pricing`**, not the home page. These posts all
+  promise a number; send people to where the numbers are. Put UTMs on it —
+  `shared/analytics.js` reads them into the `events` collection, which is the
+  only attribution this account will ever get.

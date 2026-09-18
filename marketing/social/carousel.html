@@ -98,7 +98,17 @@
 
      No condensed face is licensed here, so scaleX fakes one. Real condensed
      type would be better; this is close enough at 1080px and costs nothing. */
-  .slide.loud{padding:0;background:var(--bm-deep);overflow:hidden}
+  /* The ground is CSS, not a photograph. The AI cover plates were pulled
+     because a grid full of generated imagery quietly argues that the
+     portfolio is generated too — and real client screenshots are the one
+     asset a competitor cannot fake. A gradient costs nothing, never renders
+     a grey hairline, and at thumbnail size reads louder than a dark photo
+     under a scrim did. .shot/.veil stay below for a REAL screenshot. */
+  .slide.loud{padding:0;overflow:hidden;
+    background:
+      radial-gradient(760px 700px at 84% 12%, rgba(0,200,151,.30), transparent 62%),
+      radial-gradient(900px 800px at 6% 96%, rgba(4,120,87,.34), transparent 66%),
+      linear-gradient(168deg, #0e2b24 0%, var(--bm-ink) 46%, var(--bm-deep) 100%)}
   .loud .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.05)}
   .loud .veil{position:absolute;inset:0;background:linear-gradient(180deg,
       rgba(6,20,15,.55) 0%, rgba(6,20,15,.15) 40%, rgba(6,20,15,.70) 100%)}
@@ -110,10 +120,19 @@
   .loud .mid{flex:1;display:flex;flex-direction:column;justify-content:center}
   .loud .huge{font-family:"Plus Jakarta Sans";font-weight:800;color:var(--cream);
      font-size:248px;line-height:.82;letter-spacing:-.055em;text-transform:uppercase;
+     /* -.055em tracking plus the .86 horizontal squeeze closes the word space
+        to almost nothing, so "SAME FOUR" reads as one word at thumbnail size.
+        Put back what the tracking takes out, on spaces only. */
+     word-spacing:.16em;
      transform:scaleX(.86);transform-origin:left center;
      text-shadow:0 6px 60px rgba(0,0,0,.55)}
   .loud .huge.two{font-size:206px}
   .loud .huge.three{font-size:158px}
+  /* nowrap is load-bearing, not cosmetic. Allowed to wrap, a too-long line
+     silently becomes two lines of the wrong size and every measurement below
+     reports it as fitting — so the auto-fit never fires and the guard never
+     trips. Forced onto one line it overflows instead, which is measurable. */
+  .loud .huge .ln{display:block;white-space:nowrap}
   .loud .huge em{font-style:normal;color:var(--emerald);display:block}
   /* The price runs in the mono face — tabular figures, and the rupee is
      borrowed from Inter above so it does not render as a hole. */
@@ -126,7 +145,11 @@
   .loud .foot{border-top-color:rgba(245,241,234,.3);color:var(--cream)}
   .loud .swipe,.loud .dot{color:var(--emerald)}
   /* Cream variant — the "BRANDS THAT OWN RED" treatment. */
-  .slide.loud.light{background:var(--paper)}
+  .slide.loud.light{
+    background:
+      radial-gradient(820px 720px at 88% 8%, rgba(16,185,129,.20), transparent 60%),
+      radial-gradient(760px 700px at 4% 100%, rgba(201,161,74,.16), transparent 64%),
+      linear-gradient(172deg, #fbf8f2 0%, var(--paper) 52%, #e9e2d6 100%)}
   .loud.light .huge{color:var(--ink);text-shadow:none}
   .loud.light .huge em{color:var(--mint-deep)}
   .loud.light .sub{color:var(--muted);text-shadow:none}
@@ -197,7 +220,8 @@
         <div class="mid">
           <div class="huge ${size} ${S.num ? "num" : ""}">${
             words.map((w, i) => i === words.length - 1 && S.accent
-              ? `<em>${esc(w)}</em>` : esc(w)).join("<br>")}</div>
+              ? `<em class="ln">${esc(w)}</em>`
+              : `<span class="ln">${esc(w)}</span>`).join("")}</div>
           ${S.sub ? `<p class="sub">${esc(S.sub)}</p>` : ""}
         </div>
         <div class="foot">
@@ -207,6 +231,38 @@
         </div>
       </div>`;
     el.innerHTML = body;
+
+    // Shrink the headline until every line fits between the inner padding.
+    // The three size classes are a starting guess; the real width depends on
+    // which letters are in the word (a W at weight 800 is nearly twice an I),
+    // so guessing from a character count is how a cover ships with its last
+    // letters sliced off. Measured with a Range, because .ln is display:block
+    // and therefore always exactly as wide as its parent no matter how far
+    // the letters run past it. Fonts must be loaded first or every line
+    // measures at the fallback face's width.
+    document.fonts.ready.then(() => {
+      const huge = el.querySelector(".huge");
+      const inner = el.querySelector(".inner");
+      if (!huge || !inner) { window.__FIT_DONE = true; return; }
+      const cs = getComputedStyle(inner);
+      const limit = inner.getBoundingClientRect().width
+        - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const widest = () => {
+        let w = 0;
+        for (const ln of huge.querySelectorAll(".ln")) {
+          const r = document.createRange();
+          r.selectNodeContents(ln);
+          for (const rc of r.getClientRects()) w = Math.max(w, rc.width);
+        }
+        return w;
+      };
+      let size = parseFloat(getComputedStyle(huge).fontSize);
+      while (size > 96 && widest() > limit) {
+        size -= 3;
+        huge.style.fontSize = size + "px";
+      }
+      window.__FIT_DONE = true;
+    });
   } else {
 
   el.innerHTML = shell(`
@@ -220,6 +276,7 @@
       ${S.foot ? `<span class="swipe">${esc(S.foot)}</span>`
                : `<span class="dot">${esc(S.n || "")} / ${esc(S.of || "")}</span>`}
     </div>`);
+    window.__FIT_DONE = true;
   }
 </script>
 </body>

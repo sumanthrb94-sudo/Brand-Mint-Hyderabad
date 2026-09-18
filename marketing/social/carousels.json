@@ -1,7 +1,8 @@
 {
   "_": [
     "Instagram carousels, 1080x1350 (4:5 — the tallest the feed allows, so it",
-    "takes the most screen on a phone).",
+    "takes the most screen on a phone). Same ratio on EVERY slide: slide one",
+    "sets the crop for the whole set.",
     "",
     "EVERY NUMBER HERE IS ON THE LIVE SITE. 14,999 static, from 49,999 store,",
     "79,999 Site + CRM, 25+ projects, 8+ years, Hyderabad and the UK. No revenue",
@@ -9,7 +10,15 @@
     "carries. If a price changes on the site, change it here and re-render —",
     "these are the same claims in a different medium, not marketing licence.",
     "",
-    "kind: cover | statement | list | price | cta",
+    "SLIDE 2 IS A SECOND COVER. An unswiped carousel is re-served starting from",
+    "the first slide the viewer never reached, so slide 2 is the one a lot of",
+    "people meet cold. It carries its own hook and states the offer, rather",
+    "than continuing a sentence from slide 1. See marketing/social/PLAYBOOK.md.",
+    "",
+    "NO AI IMAGERY ON ANY SLIDE. The covers are typographic on a CSS ground.",
+    "An `img` here is for a REAL screenshot of shipped work and nothing else.",
+    "",
+    "kind: cover | statement | list | price | cta | photo | loud",
     "Render: NODE_PATH=$(npm root -g) node marketing/social/render-carousels.cjs"
   ],
   "carousels": [
@@ -23,14 +32,15 @@
           "huge": "REPLY|MACHINE",
           "accent": true,
           "sub": "You answer the same four questions all day. A website answers them once.",
-          "foot": "Swipe →",
-          "img": "/images/bg-reply.png"
+          "foot": "Swipe →"
         },
         {
-          "kind": "statement",
-          "kicker": "Every single day",
-          "head": "Price?",
-          "body": "Timing? Do you deliver? Where are you? The same four questions, from a different person, every hour."
+          "kind": "loud",
+          "light": true,
+          "tag": "Every shop, every day",
+          "huge": "SAME FOUR|QUESTIONS|EVERY DAY",
+          "accent": true,
+          "sub": "Price. Timing. Do you deliver. Where are you. A page answers all four once — ₹14,999, one time, GST extra."
         },
         {
           "kind": "statement",
@@ -55,13 +65,14 @@
           "head": "Static website",
           "price": "₹14,999",
           "sub": "one time · GST extra",
-          "body": "An online store starts at ₹49,999. Price and scope agreed before anyone starts work."
+          "body": "An online store starts at ₹49,999. Price and scope agreed before anyone starts work. Ask us what yours would cost on WhatsApp."
         },
         {
           "kind": "cta",
           "kicker": "Hyderabad · HITEC City",
           "head": "Book a 30-minute call.",
-          "body": "We'll tell you which tier you need — or that you don't need us yet."
+          "em": "Or just comment your question.",
+          "body": "Tell us the one question you answer most and we'll show you where it lives on a page. We'll also tell you if you don't need us yet."
         }
       ]
     },
@@ -75,14 +86,21 @@
           "huge": "THAT PAGE|ISN'T|YOURS",
           "accent": true,
           "sub": "If the Instagram account goes tomorrow, the business goes with it.",
-          "foot": "Swipe →",
-          "img": "/images/bg-own.png"
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "The part nobody plans for",
+          "huge": "GONE|IN ONE|MORNING",
+          "accent": true,
+          "sub": "Your photos, your prices, every customer conversation — on a platform you don't control. A domain in your own name cannot be taken away."
         },
         {
           "kind": "statement",
           "kicker": "It happens quietly",
           "head": "The account goes. The business goes with it.",
-          "body": "Your photos, your prices, every customer conversation — on a platform you don't control, with nobody to appeal to."
+          "body": "No warning, no appeal, nobody to call. It is not rare and it is not your fault when it happens."
         },
         {
           "kind": "list",
@@ -107,13 +125,14 @@
           "head": "Online store",
           "price": "from ₹49,999",
           "sub": "GST extra · four to twelve weeks",
-          "body": "Four tiers. Each includes everything in the one before it, so moving up later is an add-on, never a rebuild."
+          "body": "Four tiers. Each includes everything in the one before it, so moving up later is an add-on, never a rebuild. Ask which one fits on WhatsApp."
         },
         {
           "kind": "cta",
           "kicker": "brandmintstudios.in",
           "head": "See the four tiers.",
-          "body": "Every price in full on the site. No form, no discovery call to find out what it costs."
+          "em": "Comment your trade and we'll say which.",
+          "body": "Boutique, bakery, gym, wholesale — comment what you sell and we'll tell you which tier is the honest answer, here in the replies."
         }
       ]
     },
@@ -128,8 +147,15 @@
           "accent": true,
           "num": false,
           "sub": "One time. GST extra. Price and scope in writing before anyone starts.",
-          "foot": "Swipe →",
-          "img": "/images/bg-price.png"
+          "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "The quote you were given",
+          "huge": "ONE NUMBER|THEN|THREE",
+          "accent": true,
+          "sub": "Every website story ends the same way. This one doesn't — the scope and the price are signed before a rupee moves."
         },
         {
           "kind": "statement",
@@ -160,13 +186,14 @@
           "head": "Site + CRM",
           "price": "₹79,999",
           "sub": "setup · then ₹9,999/mo · GST extra",
-          "body": "Your site, a lead CRM, WhatsApp both ways and the analytics behind both. One login."
+          "body": "Your site, a lead CRM, WhatsApp both ways and the analytics behind both. One login. WhatsApp us for the number on yours."
         },
         {
           "kind": "cta",
           "kicker": "WhatsApp +91 77999 34943",
           "head": "Ask what yours would cost.",
-          "body": "Straight answer on the first message. If a cheaper option is the honest one, we'll say so."
+          "em": "Or post the last quote you got.",
+          "body": "No names, just the number and what it covered — comment it and we'll tell you what's missing from it. If a cheaper option is the honest one, we'll say so."
         }
       ]
     },
@@ -176,12 +203,19 @@
       "slides": [
         {
           "kind": "loud",
-          "img": "/images/hook-shop.png",
           "tag": "Steal this checklist",
           "huge": "10|QUESTIONS",
           "accent": true,
           "sub": "Ask these before you pay anyone to build your website.",
           "foot": "Swipe →"
+        },
+        {
+          "kind": "loud",
+          "light": true,
+          "tag": "Screenshot this",
+          "huge": "WOULD YOURS|PASS ALL|TEN?",
+          "accent": true,
+          "sub": "Ten questions that decide whether a website build goes well. Any honest studio in Hyderabad answers all ten — including us."
         },
         {
           "kind": "statement",
@@ -218,18 +252,19 @@
           "body": "If the answer is an account manager, a ticket form or silence, you already know. Ask it on the first call."
         },
         {
-          "kind": "photo",
-          "img": "/images/hook-charminar.png",
-          "kicker": "Save this before your next quote",
-          "head": "Ten questions.",
-          "em": "No wrong answers, only honest ones.",
-          "body": "Screenshot it. Ask any studio — including us."
+          "kind": "loud",
+          "light": true,
+          "tag": "Save this before your next quote",
+          "huge": "NO WRONG|ANSWERS.|ONLY HONEST",
+          "accent": true,
+          "sub": "Screenshot it and ask any studio you are talking to. We answer all ten in writing before a rupee moves."
         },
         {
           "kind": "cta",
           "kicker": "brandmintstudios.in · WhatsApp +91 77999 34943",
           "head": "We answer all ten, in writing.",
-          "body": "Static site ₹14,999. Stores from ₹49,999. GST extra. Fixed before anyone starts."
+          "em": "Which one would yours fail?",
+          "body": "Comment the number — 1 to 10 — and we'll tell you what to ask next. Static site ₹14,999. Stores from ₹49,999. GST extra."
         }
       ]
     }

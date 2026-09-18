@@ -49,6 +49,9 @@ const only = process.argv.slice(2).filter((a) => !a.startsWith("--"));
       await page.addInitScript((s) => { window.__SLIDE = s; }, slide);
       await page.goto(`${ORIGIN}/marketing/social/carousel.html`, { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts && document.fonts.ready);
+      // The template auto-fits a loud cover's headline after the fonts land.
+      // Screenshot before that settles and the slide is captured mid-shrink.
+      await page.waitForFunction(() => window.__FIT_DONE === true, null, { timeout: 5000 });
       await page.waitForTimeout(160);
 
       // Catch a headline that has overflowed its slide — it renders happily and
@@ -63,6 +66,38 @@ const only = process.argv.slice(2).filter((a) => !a.startsWith("--"));
         return Math.max(0, box.scrollHeight - box.clientHeight);
       });
       if (over > 2) warnings.push(`${car.id} slide ${i + 1}: content overflows by ${over}px`);
+
+      // Vertical overflow is not the failure mode on a loud cover — horizontal
+      // is. .slide.loud is overflow:hidden, so a headline one word too long
+      // does not scroll or wrap, it simply loses its last letters, and the
+      // only place that shows up is the posted image. Each line is measured
+      // after the scaleX squeeze, because getBoundingClientRect includes the
+      // parent transform.
+      const wide = await page.evaluate(() => {
+        const inner = document.querySelector(".loud .inner");
+        if (!inner) return null;
+        const cs = getComputedStyle(inner);
+        const limit = inner.getBoundingClientRect().width
+          - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        let over = 0, wrapped = 0;
+        for (const ln of document.querySelectorAll(".loud .huge .ln")) {
+          // A Range measures the text as laid out, not the block box. The
+          // block is display:block and therefore always exactly as wide as
+          // its parent, so measuring the element itself reports no overflow
+          // however far the letters run past the edge.
+          const r = document.createRange();
+          r.selectNodeContents(ln);
+          const rects = [...r.getClientRects()];
+          if (!rects.length) continue;
+          if (rects.length > 1) wrapped++;   // a cover line is never allowed to wrap
+          for (const rc of rects) over = Math.max(over, Math.round(rc.width - limit));
+        }
+        return { over, wrapped };
+      });
+      if (wide && wide.over > 0)
+        warnings.push(`${car.id} slide ${i + 1}: cover headline runs ${wide.over}px past the edge — shorten a word or split the line with |`);
+      if (wide && wide.wrapped)
+        warnings.push(`${car.id} slide ${i + 1}: ${wide.wrapped} cover line(s) wrapped — split them with | instead`);
 
       const file = path.join(dir, `${String(i + 1).padStart(2, "0")}.png`);
       await page.screenshot({ path: file });
