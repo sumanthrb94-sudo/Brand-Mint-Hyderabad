@@ -18,10 +18,11 @@
       "title": "The reply machine",
       "slides": [
         {
-          "kind": "cover",
-          "kicker": "For shops running on WhatsApp",
-          "head": "You're not running a business.",
-          "em": "You're running a reply machine.",
+          "kind": "loud",
+          "tag": "Hyderabad shops",
+          "huge": "REPLY|MACHINE",
+          "accent": true,
+          "sub": "You answer the same four questions all day. A website answers them once.",
           "foot": "Swipe →"
         },
         {
@@ -68,10 +69,12 @@
       "title": "Own it or rent it",
       "slides": [
         {
-          "kind": "cover",
-          "kicker": "If your shop lives on Instagram",
-          "head": "That page",
-          "em": "isn't yours.",
+          "kind": "loud",
+          "light": true,
+          "tag": "Read this first",
+          "huge": "THAT PAGE|ISN'T|YOURS",
+          "accent": true,
+          "sub": "If the Instagram account goes tomorrow, the business goes with it.",
           "foot": "Swipe →"
         },
         {
@@ -118,10 +121,12 @@
       "title": "Why the price is fixed",
       "slides": [
         {
-          "kind": "cover",
-          "kicker": "You've been burned before",
-          "head": "Your price.",
-          "em": "In writing.",
+          "kind": "loud",
+          "tag": "No hourly billing",
+          "huge": "A WEBSITE|₹14,999",
+          "accent": true,
+          "num": false,
+          "sub": "One time. GST extra. Price and scope in writing before anyone starts.",
           "foot": "Swipe →"
         },
         {
@@ -168,11 +173,12 @@
       "title": "Before you pay anyone",
       "slides": [
         {
-          "kind": "photo",
+          "kind": "loud",
           "img": "/images/hook-shop.png",
-          "kicker": "Hyderabad shop owners",
-          "head": "Before you pay anyone",
-          "em": "for a website.",
+          "tag": "Steal this checklist",
+          "huge": "10|QUESTIONS",
+          "accent": true,
+          "sub": "Ask these before you pay anyone to build your website.",
           "foot": "Swipe →"
         },
         {

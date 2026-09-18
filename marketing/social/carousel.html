@@ -85,6 +85,50 @@
   .photo .foot{border-top-color:rgba(245,241,234,.26);color:var(--cream)}
   .photo .swipe,.photo .dot{color:var(--emerald)}
 
+  /* ---------------------------- LOUD COVERS -------------------------------
+     Explore is not a feed. A cover competes against "HOOK" at 1M views and
+     "CONDENSED FONTS" in red on black, at thumbnail size, in a grid of nine.
+     The rest of this file is the brand's indoor voice; this is the outdoor
+     one. Loud cover, disciplined interior — which is exactly what every
+     account in that grid actually does.
+
+     No condensed face is licensed here, so scaleX fakes one. Real condensed
+     type would be better; this is close enough at 1080px and costs nothing. */
+  .slide.loud{padding:0;background:var(--bm-deep);overflow:hidden}
+  .loud .shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .loud .veil{position:absolute;inset:0;background:linear-gradient(180deg,
+      rgba(6,20,15,.55) 0%, rgba(6,20,15,.15) 40%, rgba(6,20,15,.70) 100%)}
+  .loud .inner{position:absolute;inset:0;padding:56px 48px;display:flex;
+               flex-direction:column}
+  /* The type block takes every pixel between the tag and the footer and
+     centres in it. Anchored top or bottom it left a third of the cover empty,
+     which at thumbnail size just reads as a smaller post. */
+  .loud .mid{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .loud .huge{font-family:"Plus Jakarta Sans";font-weight:800;color:var(--cream);
+     font-size:248px;line-height:.82;letter-spacing:-.055em;text-transform:uppercase;
+     transform:scaleX(.86);transform-origin:left center;
+     text-shadow:0 6px 60px rgba(0,0,0,.55)}
+  .loud .huge.two{font-size:206px}
+  .loud .huge.three{font-size:158px}
+  .loud .huge em{font-style:normal;color:var(--emerald);display:block}
+  /* The price runs in the mono face — tabular figures, and the rupee is
+     borrowed from Inter above so it does not render as a hole. */
+  .loud .huge.num{font-family:"JetBrains Mono";font-weight:700;letter-spacing:-.06em}
+  .loud .tag{align-self:flex-start;background:var(--emerald);color:var(--bm-deep);
+     font:800 30px/1 "Plus Jakarta Sans";letter-spacing:.02em;text-transform:uppercase;
+     padding:16px 24px;border-radius:10px;transform:rotate(-2deg)}
+  .loud .sub{margin-top:28px;font:600 36px/1.32 "Inter";color:var(--cream);max-width:24ch;
+     text-shadow:0 2px 24px rgba(0,0,0,.6)}
+  .loud .foot{border-top-color:rgba(245,241,234,.3);color:var(--cream)}
+  .loud .swipe,.loud .dot{color:var(--emerald)}
+  /* Cream variant — the "BRANDS THAT OWN RED" treatment. */
+  .slide.loud.light{background:var(--paper)}
+  .loud.light .huge{color:var(--ink);text-shadow:none}
+  .loud.light .huge em{color:var(--mint-deep)}
+  .loud.light .sub{color:var(--muted);text-shadow:none}
+  .loud.light .foot{border-top-color:rgba(10,14,12,.18);color:var(--ink)}
+  .loud.light .swipe,.loud.light .dot{color:var(--mint-deep)}
+
   .foot{display:flex;align-items:center;justify-content:space-between;
         padding-top:30px;border-top:1px solid rgba(10,14,12,.14);font-size:24px}
   .dark .foot{border-top-color:rgba(245,241,234,.18)}
@@ -118,6 +162,7 @@
   const el = document.getElementById("slide");
   if (dark) el.classList.add("dark");
   if (S.kind === "photo") el.classList.add("photo");
+  if (S.kind === "loud") { el.classList.add("loud"); if (S.light) el.classList.add("light"); }
 
   let mid = "";
   if (S.kind === "list") {
@@ -139,6 +184,30 @@
     ? `<img class="shot" src="${S.img}" alt=""><div class="scrim"></div><div class="inner">${inner}</div>`
     : inner;
 
+  // The loud cover ignores the shared layout entirely — it is one block of
+  // type and nothing else, which is the whole point of it.
+  if (S.kind === "loud") {
+    const words = (S.huge || "").split("|");
+    const size = words.length >= 3 ? "three" : words.length === 2 ? "two" : "";
+    const body = `
+      ${S.img ? `<img class="shot" src="${S.img}" alt=""><div class="veil"></div>` : ""}
+      <div class="inner">
+        <div>${S.tag ? `<span class="tag">${esc(S.tag)}</span>` : ""}</div>
+        <div class="mid">
+          <div class="huge ${size} ${S.num ? "num" : ""}">${
+            words.map((w, i) => i === words.length - 1 && S.accent
+              ? `<em>${esc(w)}</em>` : esc(w)).join("<br>")}</div>
+          ${S.sub ? `<p class="sub">${esc(S.sub)}</p>` : ""}
+        </div>
+        <div class="foot">
+          <span class="brand">${MARK} Brand Mint</span>
+          ${S.foot ? `<span class="swipe">${esc(S.foot)}</span>`
+                   : `<span class="dot">${esc(S.n || "")} / ${esc(S.of || "")}</span>`}
+        </div>
+      </div>`;
+    el.innerHTML = body;
+  } else {
+
   el.innerHTML = shell(`
     <div class="main">
       ${S.kicker ? `<p class="kicker">${esc(S.kicker)}</p>` : ""}
@@ -150,6 +219,7 @@
       ${S.foot ? `<span class="swipe">${esc(S.foot)}</span>`
                : `<span class="dot">${esc(S.n || "")} / ${esc(S.of || "")}</span>`}
     </div>`);
+  }
 </script>
 </body>
 </html>
