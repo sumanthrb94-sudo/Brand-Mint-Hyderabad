@@ -18,7 +18,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v26" />
+<link rel="stylesheet" href="/styles.css?v=v27" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
@@ -145,6 +145,7 @@
     <script type="module">
       import { TIERS, CARE_PLANS, inr } from "/shared/tiers.js?v=v10";
       import { SERVICES } from "/shared/services.js?v=v10";
+      import { WHATSAPP } from "/shared/resources.js?v=v10";
 
       // ---- the five categories
       const svcHost = document.getElementById("services-list");
@@ -197,6 +198,22 @@
         svcHost.appendChild(el);
       });
 
+      /* THE UNGATED EXIT.
+         "Choose <tier>" is the highest-intent click on the site and it lands
+         on a Google sign-in. That is the right destination for someone ready
+         to become a tracked lead, and the wrong one for someone who just
+         wants to ask a question before committing their identity — and we
+         had no door for the second person anywhere near the point of
+         decision. This is that door. It carries the tier in the message, so
+         a WhatsApp enquiry arrives already qualified rather than as "hi".
+
+         Deliberately secondary: small, no button chrome, under the CTA. The
+         signed-in path is still the one we want, because it opens the portal
+         and puts the lead on a profile. This is the escape hatch, not a
+         second front door. */
+      const waText = (t) => encodeURIComponent(
+        `Hi Brand Mint — I'd like to ask about the ${t.name} (${inr(t.price)}).`);
+
       // ---- the four store tiers
       const host = document.getElementById("tiers");
       for (const t of TIERS) {
@@ -212,6 +229,9 @@
           </div>
           <details class="tier-groups"><summary>What's included</summary></details>
           <a class="btn tier-cta ${t.featured ? "btn-primary" : ""}" href="/login?tier=${t.id}">Choose ${t.name}<span class="arrow" aria-hidden="true">→</span></a>
+          <p class="tier-alt">
+            or <a href="https://wa.me/${WHATSAPP}?text=${waText(t)}" rel="noopener">ask about this tier on WhatsApp</a>
+          </p>
         `;
         card.querySelector(".tier-blurb").textContent = t.blurb;
         const groups = card.querySelector(".tier-groups");

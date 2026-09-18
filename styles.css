@@ -430,6 +430,22 @@ html.js .bm-mark-m { stroke-dasharray: 100; stroke-dashoffset: 100; animation: b
   background: transparent;
 }
 .tier-groups + .tier-cta, .tier-cta { margin-top: var(--s-5); }
+
+/* The ungated exit under each tier CTA. Deliberately quiet — the signed-in
+   path is still the one we want, this is the door for someone not ready to
+   hand over an identity to ask a question. --faint would fail AA at this
+   size; --muted is 5.56:1. */
+.tier-alt {
+  margin: var(--s-2) 0 0;
+  font: 400 13px/1.45 var(--sans);
+  color: var(--muted);
+  text-align: center;
+}
+.tier-alt a { color: var(--mint-deep); text-decoration: underline; text-underline-offset: 2px; }
+.tier-alt a:hover { color: var(--ink); }
+.tier--featured .tier-alt { color: var(--cream-mute); }
+.tier--featured .tier-alt a { color: var(--emerald); }
+.tier--featured .tier-alt a:hover { color: var(--cream); }
 .tier-cta .arrow { display: inline-block; margin-left: 6px; transition: transform 0.2s var(--ease); }
 .tier-cta:hover { background: var(--mint-wash); border-color: var(--mint-deep); box-shadow: none; }
 .tier-cta:hover .arrow { transform: translateX(3px); }
