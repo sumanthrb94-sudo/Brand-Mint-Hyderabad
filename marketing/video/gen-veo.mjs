@@ -415,6 +415,27 @@ if (resumeArgs.length) {
   }
   process.exit(bad ? 1 : 0);
 }
+/* --prompt <id|all> prints the full composed prompt and generates nothing.
+ *
+ * The API's Veo quota is a daily cap on the billing tier, and raising the
+ * spend cap does not lift it. Google AI Pro — which the Jio offer provides —
+ * includes Flow, which reaches Veo through an entirely separate pool of
+ * credits. So when the API says 429 for the rest of the day the shot is not
+ * blocked: paste this into Flow, download the clip into marketing/video/out/
+ * under the shot's id, and run cut-30.sh. Same prompt, same house style,
+ * different meter. */
+if (argv.includes("--prompt")) {
+  const want = argv[argv.indexOf("--prompt") + 1];
+  const ids = want && want !== "all" ? [want] : Object.keys(ACTIVE.shots);
+  for (const id of ids) {
+    const shot = ACTIVE.shots[id];
+    if (!shot) { console.error(`Unknown shot "${id}". Try --list.`); process.exit(1); }
+    console.log(`\n──────── ${id} · ${shot.title} · ${secondsFor(shot)}s · ${AR} · save as out/${id}.mp4 ────────\n`);
+    console.log(`${shot.prompt}\n\n${ACTIVE.house}\n`);
+  }
+  process.exit(0);
+}
+
 if (argv.includes("--list") || (!argv.length && !argv.includes("--all"))) {
   console.log(`Model: ${MODEL}   ${AR}\n`);
   for (const [id, s] of Object.entries(SHOTS)) console.log(`  ${s.n}. ${id.padEnd(7)} ${s.title}`);
