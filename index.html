@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v27" />
+<link rel="stylesheet" href="/styles.css?v=v30" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -228,10 +228,12 @@
     <a class="skip" href="#main">Skip to content</a>
     <!-- The one line above everything answers the objection that stops the
          sale: an agency price that moves after you commit. -->
-    <aside class="announce">
-      <p>Hyderabad studio, HITEC City — <strong>fixed prices, in writing</strong>, before anyone starts work.</p>
-    </aside>
-
+    <!-- The announce bar used to sit here reading "Hyderabad studio, HITEC
+         City — fixed prices, in writing, before anyone starts work." The H1
+         150px below it reads "Your price, in writing. Before anyone starts."
+         It was the same claim, twice, and the smaller, weaker copy went
+         first — spending the headline before the headline landed. The kicker
+         carries the location on its own, which is its job. -->
     <header class="nav">
       <a class="brand" href="/" aria-label="Brand Mint, Hyderabad — home">
         <svg class="bm-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true" focusable="false"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="bm-mark-m" pathLength="100" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -541,6 +543,7 @@
     <script>document.documentElement.classList.add("js");</script>
     <script type="module">
       import { TIERS, STEPS, FAQ, NEEDS, inr } from "/shared/tiers.js?v=v11";
+      import { WHATSAPP } from "/shared/resources.js?v=v11";
       import { SERVICES } from "/shared/services.js?v=v11";
       import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v10";
       import { PERKS } from "/shared/resources.js?v=v10";
@@ -565,6 +568,7 @@
             <p class="rung-blurb"></p>
             <p class="rung-inherits"></p>
             <a class="rung-cta"></a>
+            <a class="rung-alt"></a>
           </div>
         `;
         li.querySelector("h3").textContent = t.name;
@@ -577,6 +581,15 @@
         const cta = li.querySelector(".rung-cta");
         cta.href = "/login?tier=" + t.id;
         cta.textContent = "Choose " + t.name + " →";
+        /* The same ungated exit /pricing carries. It matters MORE here: the
+           hero's primary CTA points at this ladder, so for most visitors this
+           is the decision point, and until now every path out of it was the
+           Google sign-in. */
+        const alt = li.querySelector(".rung-alt");
+        alt.href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(
+          `Hi Brand Mint — I'd like to ask about the ${t.name} (${inr(t.price)}).`);
+        alt.rel = "noopener";
+        alt.textContent = "or ask about this tier on WhatsApp";
         tierList.appendChild(li);
       }
 
@@ -690,8 +703,7 @@
         const store = SERVICES.find((x) => x.id === "store");
         if (site && store) {
           hp.innerHTML = `Websites from <strong>${inr(site.from)}</strong>. `
-                       + `Online stores from <strong>${inr(store.from)}</strong>. `
-                       + `<a href="/pricing">Every price, on one page \u2192</a>`;
+                       + `Online stores from <strong>${inr(store.from)}</strong>.`;
         }
       }
 
@@ -814,15 +826,24 @@
       const hero = document.querySelector(".hero");
       const sticky = document.getElementById("sticky-cta");
       const closing = document.getElementById("book");
-      let pastHero = false, atEnd = false;
+      // The tier ladder. While it is on screen the sticky bar is duplicating
+      // the choice the visitor is already looking at — each card carries its
+      // own "Choose <tier>" and its own WhatsApp link, so the bar adds a
+      // fourth and fifth path to the same two destinations at the exact
+      // moment attention should be on the four cards. It exists to catch
+      // people who scrolled past the hero with nothing in front of them;
+      // that is not this moment.
+      const ladder = document.getElementById("stores");
+      let pastHero = false, atEnd = false, atLadder = false;
       const paint = () => {
-        const show = pastHero && !atEnd;
+        const show = pastHero && !atEnd && !atLadder;
         sticky.classList.toggle("is-on", show);
         sticky.setAttribute("aria-hidden", String(!show));
         sticky.querySelector("a").tabIndex = show ? 0 : -1;
       };
       new IntersectionObserver(([e]) => { pastHero = !e.isIntersecting && e.boundingClientRect.top < 0; nav.classList.toggle("is-scrolled", pastHero); paint(); }, { threshold: 0 }).observe(hero);
       new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; paint(); }, { threshold: 0.2 }).observe(closing);
+      if (ladder) new IntersectionObserver(([e]) => { atLadder = e.isIntersecting; paint(); }, { threshold: 0 }).observe(ladder);
     </script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
   </body>
