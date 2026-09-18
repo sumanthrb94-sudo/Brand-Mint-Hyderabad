@@ -28,3 +28,7 @@ images/avatar-host-*.png
 marketing/social/out/
 images/hook-*.png
 images/bg-*.png
+
+# Deep-research working files. The finished playbook lives in marketing/social/.
+research_notes/
+reports/
