@@ -290,6 +290,17 @@ html.js .bm-mark-m { stroke-dasharray: 100; stroke-dashoffset: 100; animation: b
   line-height: 1.6;
   color: var(--ink-2);
 }
+/* The price line sits between the lede and the CTAs — the last thing read
+   before the click, and the only number on the page a competitor won't print. */
+.hero-price {
+  margin: var(--s-4) 0 0;
+  font: 400 16.5px/1.55 var(--sans);
+  color: var(--ink-2);
+}
+.hero-price strong { font-weight: 650; color: var(--ink); font-variant-numeric: tabular-nums; }
+.hero-price a { color: var(--mint-deep); text-decoration: none; font-weight: 600; white-space: nowrap; }
+.hero-price a:hover { text-decoration: underline; }
+
 .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
 .hero-proof {
   list-style: none; margin: var(--s-7) 0 0; padding: var(--s-5) 0 0;
