@@ -20,3 +20,7 @@ dist/
 images/studio-desk.png
 images/packing-bench.png
 images/crm-flow.png
+
+# Generated video. The clips are regenerable with gen-veo.mjs and the reel
+# with cut-30.sh; 10 MB of mp4 does not belong in git history.
+marketing/video/out/

@@ -1,0 +1,324 @@
+#!/usr/bin/env node
+/**
+ * Generate the three clips for the 30-second Instagram promo, using Veo
+ * through the Gemini API — the same key api/wa-hook.js already uses.
+ *
+ *   export GEMINI_API_KEY=...
+ *   node marketing/video/gen-veo.mjs --list
+ *   node marketing/video/gen-veo.mjs --all
+ *   node marketing/video/gen-veo.mjs before          # re-roll one beat
+ *
+ * Writes marketing/video/out/<id>.mp4. Compose with cut-30.sh afterwards.
+ *
+ * WHY THREE CLIPS AND AN END CARD. Veo caps a generation at 8 seconds, so
+ * 3 x 8 = 24s of footage. The last 6s is the end card, which is where the
+ * call to action belongs anyway and costs nothing to produce.
+ *
+ * THE RULES BELOW COME FROM marketing/video/OMNI-30-VIDEO-PLAN.md, which was
+ * written from clips that were actually delivered. They are findings, not
+ * preferences:
+ *
+ *   - NO TEXT ANYWHERE IN FRAME. Generative models garble letterforms, and a
+ *     mangled ₹ price in a paid ad is worse than no ad. Every word and the
+ *     logo go on in post, from marketing/video/assets/.
+ *   - MATCH THE ESTABLISHED ROOM. Sage/olive wall, dark walnut desk, one warm
+ *     practical lamp at camera left, soft key from the left. Earlier clips
+ *     drifted warmer and more olive than the original brief; the plan's own
+ *     conclusion was to stop fighting it, because consistency across a series
+ *     beats a palette note.
+ *   - NO FACES. Hands only. A generated face in an ad for a studio that sells
+ *     "you deal with the person doing the work" is the wrong promise.
+ *   - ONE CONTINUOUS SHOT PER CLIP. Asking for cuts inside 8 seconds returns
+ *     mush.
+ *
+ * CLAIMS. Nothing in these prompts states a number, because nothing in frame
+ * is allowed to be text. Every claim lives on the end card and the overlays,
+ * and must match the live site: brandmintstudios.in, +91 77999 34943, HITEC
+ * City. No revenue figures and no ROI percentages, ever.
+ */
+
+const KEY =
+  process.env.GEMINI_API_KEY ||
+  (process.argv.includes("--key") ? process.argv[process.argv.indexOf("--key") + 1] : "");
+
+const MODEL = process.env.VEO_MODEL || "veo-3.1-fast-generate-preview";
+const API = "https://generativelanguage.googleapis.com/v1beta";
+
+/** Appended to every prompt. The negative constraints matter more than the
+ *  positive ones — this is the sentence that keeps letterforms out. */
+const HOUSE =
+  "Shot on an 85mm lens at T2.0, very shallow depth of field, 24fps, filmic " +
+  "low-contrast grade. The room is a quiet studio in Hyderabad: a sage " +
+  "olive-green wall, a dark walnut desk, one warm practical lamp just out of " +
+  "frame at camera left throwing a soft key across the wood. " +
+  "Absolutely no text, letters, numbers, words, signage, icons, notifications, " +
+  "user interface, logos, watermarks or printing anywhere in frame. No faces, " +
+  "no people visible above the wrist — hands only.";
+
+const SHOTS = {
+  before: {
+    n: 1,
+    title: "The before",
+    prompt:
+      "Cinematic advertisement shot, 9:16 vertical, one continuous take with no " +
+      "cuts. A cluttered corner of the desk: a paper order book lying open with " +
+      "handwriting that is illegible and out of focus, a smartphone face-down " +
+      "beside it buzzing gently so it shivers against the wood, and three " +
+      "unlabelled brown paper parcels stacked unevenly behind. A hand reaches in, " +
+      "turns the phone over, and lets it fall face-down again. The camera holds " +
+      "nearly still, drifting a few centimetres closer across the shot. The lamp " +
+      "is the only warmth; the overall feeling is cold, cluttered and behind. No " +
+      "mint or green accent anywhere in this shot.",
+  },
+  build: {
+    n: 2,
+    title: "The build",
+    prompt:
+      "Cinematic advertisement shot, 9:16 vertical, one continuous take with no " +
+      "cuts. The same desk, now clear. Two monitors stand facing away from " +
+      "camera, casting a soft blank mint-green glow across the walnut and up the " +
+      "olive wall — their screens are not visible. A pair of hands rests on a " +
+      "low-profile keyboard in the foreground, framed from behind and slightly to " +
+      "one side, moving unhurriedly. A glass cup of chai sits beside them with " +
+      "steam rising through the lamplight. The camera pushes in very slowly. " +
+      "Focused, warm, deliberate — the feeling of careful work being done.",
+  },
+  after: {
+    n: 3,
+    title: "The after",
+    prompt:
+      "Cinematic advertisement shot, 9:16 vertical, one continuous take with no " +
+      "cuts. The same desk at the end of a day. A hand places a neatly wrapped " +
+      "brown paper parcel down onto a tidy stack of three identical parcels, each " +
+      "tied with the same twine, then withdraws. Beside them a smartphone lies " +
+      "face-up, its screen a soft blank mint-green glow with no interface or text " +
+      "on it. Steam has gone from the chai cup. The camera pulls back a few " +
+      "centimetres, opening the frame. Calm, ordered, finished — the mint glow is " +
+      "the brightest thing on the desk.",
+  },
+};
+
+const AR = "9:16";
+const SECONDS = 8;
+
+/** Veo answers 503 with an empty body under load, often enough that a single
+ *  attempt is not a fair test of a prompt. Three tries with backoff; anything
+ *  that is not a 5xx fails immediately, because a bad prompt or a bad key will
+ *  not fix itself on the next attempt. */
+/** POSTs go through curl, not fetch.
+ *
+ *  Node's fetch to :predictLongRunning fails every time from inside the Claude
+ *  Code sandbox — the egress gateway answers
+ *      503 text/plain  "upstream connect error or disconnect/reset before
+ *                       headers ... reset reason: connection timeout"
+ *  which is the proxy talking, not Google. curl with a byte-identical body
+ *  succeeds every time. Polling and downloading are ordinary GETs and work on
+ *  fetch, so only this one call is shelled out.
+ *
+ *  The body goes via a temp file rather than the command line: it is over a
+ *  kilobyte of prose and would otherwise be visible in the process list and
+ *  subject to shell quoting. */
+async function curlPost(url, bodyObj) {
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+
+  const tmp = path.join(os.tmpdir(), `veo-${Date.now()}-${Math.random().toString(36).slice(2)}.json`);
+  fs.writeFileSync(tmp, JSON.stringify(bodyObj));
+  try {
+    const { stdout } = await promisify(execFile)(
+      "curl",
+      ["-sS", "--max-time", "120", "-X", "POST", url,
+       "-H", "Content-Type: application/json",
+       "--data-binary", `@${tmp}`,
+       "-w", "\n%{http_code}"],
+      { maxBuffer: 8 * 1024 * 1024 }
+    );
+    const nl = stdout.lastIndexOf("\n");
+    const status = parseInt(stdout.slice(nl + 1).trim(), 10);
+    let json = {};
+    try { json = JSON.parse(stdout.slice(0, nl)); } catch {}
+    return { status, json, raw: stdout.slice(0, nl) };
+  } finally {
+    try { fs.unlinkSync(tmp); } catch {}
+  }
+}
+
+async function start(shot, attempt = 1) {
+  const r = await curlPost(`${API}/models/${MODEL}:predictLongRunning?key=${KEY}`, {
+      instances: [{ prompt: `${shot.prompt}\n\n${HOUSE}` }],
+      parameters: {
+        aspectRatio: AR,
+        durationSeconds: SECONDS,
+        // No personGeneration here. The API rejects "allow_adult" outright —
+        // 400 "allow_adult for personGeneration is currently not supported" —
+        // and it was redundant anyway: the prompts ask for hands only and the
+        // negative list below excludes faces.
+        negativePrompt:
+          "text, letters, numbers, words, captions, subtitles, signage, logos, " +
+          "watermarks, user interface, app screens, notifications, faces, people, " +
+          "portraits, cartoon, illustration, oversaturated colour, lens flare",
+      },
+  });
+  if (r.status !== 200) {
+    if (r.status >= 500 && attempt < 3) {
+      const back = attempt * 20;
+      console.log(`  ${r.status} from Veo — retrying in ${back}s`);
+      await new Promise((s) => setTimeout(s, back * 1000));
+      return start(shot, attempt + 1);
+    }
+    throw new Error(`${r.status} ${r.json?.error?.message || r.raw.slice(0, 300)}`);
+  }
+  if (!r.json?.name) throw new Error(`no operation name: ${r.raw.slice(0, 300)}`);
+  return r.json.name;
+}
+
+/** Veo runs for minutes, not seconds. Poll rather than hold one long request. */
+async function wait(op, label) {
+  const deadline = Date.now() + 10 * 60 * 1000;
+  let waited = 0;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 15000));
+    waited += 15;
+    const r = await curlGet(`${API}/${op}?key=${KEY}`);
+    // The same gateway that breaks POST breaks these polls, so a 5xx here is
+    // the proxy rather than a dead job — keep waiting instead of giving up on
+    // a generation that is already running and already billed.
+    if (r.status !== 200) {
+      process.stdout.write(`\r  ${label}: gateway ${r.status}, still waiting… ${waited}s`);
+      continue;
+    }
+    const j = r.json || {};
+    if (j.error) throw new Error(`generation failed: ${j.error.message || JSON.stringify(j.error)}`);
+    if (j.done) return j;
+    process.stdout.write(`\r  ${label}: generating… ${waited}s`);
+  }
+  throw new Error("timed out after 10 minutes");
+}
+
+/** The response shape has moved between Veo revisions, so probe rather than
+ *  index blindly — a silent undefined here looks like a network failure. */
+function videoUri(done) {
+  const r = done.response || {};
+  const cand =
+    r.generateVideoResponse?.generatedSamples?.[0]?.video?.uri ||
+    r.generatedSamples?.[0]?.video?.uri ||
+    r.videos?.[0]?.uri ||
+    r.predictions?.[0]?.video?.uri;
+  if (cand) return cand;
+  throw new Error(`no video uri in response: ${JSON.stringify(r).slice(0, 400)}`);
+}
+
+/** GET through curl, for the same gateway reason as curlPost. */
+async function curlGet(url) {
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const { stdout } = await promisify(execFile)(
+    "curl",
+    ["-sS", "--max-time", "90", url, "-w", "\n%{http_code}"],
+    { maxBuffer: 16 * 1024 * 1024 }
+  );
+  const nl = stdout.lastIndexOf("\n");
+  let json = null;
+  try { json = JSON.parse(stdout.slice(0, nl)); } catch {}
+  return { status: parseInt(stdout.slice(nl + 1).trim(), 10), json, raw: stdout.slice(0, nl) };
+}
+
+/** curl writes the mp4 straight to disk. Pulling megabytes of video through
+ *  fetch and Buffer would work, but this also sidesteps the gateway's habit of
+ *  resetting long Node connections. */
+async function download(uri, out) {
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const fs = await import("node:fs");
+  const url = uri.includes("key=") ? uri : `${uri}${uri.includes("?") ? "&" : "?"}key=${KEY}`;
+
+  const { stdout } = await promisify(execFile)(
+    "curl",
+    ["-sS", "-L", "--max-time", "600", "-o", out, url, "-w", "%{http_code}"],
+    { maxBuffer: 1024 * 1024 }
+  );
+  const status = parseInt(stdout.trim(), 10);
+  if (status !== 200) {
+    const peek = fs.existsSync(out) ? fs.readFileSync(out, "utf8").slice(0, 200) : "";
+    throw new Error(`download ${status} ${peek}`);
+  }
+  const size = fs.statSync(out).size;
+  // An error page saved as .mp4 is the failure mode worth catching here.
+  const head = fs.readFileSync(out).subarray(4, 8).toString("latin1");
+  if (head !== "ftyp") throw new Error(`downloaded file is not an mp4 (starts "${head}")`);
+  return Math.round(size / 1024);
+}
+
+async function make(id) {
+  const shot = SHOTS[id];
+  if (!shot) throw new Error(`Unknown shot "${id}"`);
+  const label = `${shot.n}/3 ${id}`;
+  const op = await start(shot);
+  const done = await wait(op, label);
+  const uri = videoUri(done);
+  const fs = await import("node:fs");
+  fs.mkdirSync("marketing/video/out", { recursive: true });
+  const out = `marketing/video/out/${id}.mp4`;
+  const kb = await download(uri, out);
+  process.stdout.write("\r".padEnd(50) + "\r");
+  console.log(`  ok  ${out}  ${kb} KB  ${SECONDS}s ${AR}  (${shot.title})`);
+}
+
+/** Attach to a generation that is already running and save its result.
+ *
+ *  A Veo call is billed the moment the operation is created, so an operation
+ *  whose name you still have is already paid for — losing the name is what
+ *  wastes the money, not the failure that followed. Used when a run dies after
+ *  the job started.
+ *
+ *      node marketing/video/gen-veo.mjs --resume before=models/.../operations/xyz
+ */
+async function resume(spec) {
+  const [id, ...rest] = spec.split("=");
+  const op = rest.join("=");
+  if (!SHOTS[id] || !op) throw new Error(`--resume takes <id>=<operation name>`);
+  const done = await wait(op, `resume ${id}`);
+  const uri = videoUri(done);
+  const fs = await import("node:fs");
+  fs.mkdirSync("marketing/video/out", { recursive: true });
+  const out = `marketing/video/out/${id}.mp4`;
+  const kb = await download(uri, out);
+  process.stdout.write("\r".padEnd(50) + "\r");
+  console.log(`  ok  ${out}  ${kb} KB  (resumed)`);
+}
+
+const argv = process.argv.slice(2);
+const resumeArgs = argv.filter((a) => a.startsWith("--resume=")).map((a) => a.slice(9));
+if (resumeArgs.length) {
+  if (!KEY) { console.error("No GEMINI_API_KEY."); process.exit(1); }
+  let bad = 0;
+  for (const spec of resumeArgs) {
+    try { await resume(spec); } catch (e) { console.error(`  FAIL  ${spec}: ${e.message}`); bad += 1; }
+  }
+  process.exit(bad ? 1 : 0);
+}
+if (argv.includes("--list") || (!argv.length && !argv.includes("--all"))) {
+  console.log(`Model: ${MODEL}   ${SECONDS}s each, ${AR}\n`);
+  for (const [id, s] of Object.entries(SHOTS)) console.log(`  ${s.n}. ${id.padEnd(7)} ${s.title}`);
+  console.log(`\n  node marketing/video/gen-veo.mjs --all   |   <id> [<id>...]`);
+  process.exit(0);
+}
+if (!KEY) {
+  console.error("No GEMINI_API_KEY (or --key).");
+  process.exit(1);
+}
+
+const ids = argv.includes("--all") ? Object.keys(SHOTS) : argv.filter((a) => !a.startsWith("--") && a !== KEY);
+let failed = 0;
+for (const id of ids) {
+  try {
+    await make(id);
+  } catch (e) {
+    console.error(`  FAIL  ${id}: ${e.message}`);
+    failed += 1;
+  }
+}
+process.exit(failed ? 1 : 0);
