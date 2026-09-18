@@ -72,73 +72,84 @@ const HOUSE =
   "user interface, logos, watermarks or printing anywhere in frame, and no " +
   "legible phone or laptop screens.";
 
+/* ONE ACTION PER SHOT, FOUR SECONDS EACH.
+ *
+ * This film was three eight-second takes and both of its continuity failures
+ * came from that: a parcel that morphed through four different objects while
+ * being handed over, and a phone that vanished from a woman's hand between
+ * 9s and 11s. An eight-second take asks the model to hold every object, every
+ * garment and every prop steady for eight seconds, and it will not.
+ *
+ * So six shots of four seconds, each containing exactly one action, cut
+ * together. Two rules fall out of the failures:
+ *
+ *   - ONE ACTION. Not "she looks at her phone, then looks up, then walks on".
+ *     One verb, for four seconds.
+ *   - ANY OBJECT THAT MUST PERSIST is held continuously by one person for the
+ *     whole shot, or is not in the shot at all. Nothing is picked up, put
+ *     down, passed over or produced from off-screen mid-take.
+ *
+ * Veo takes 4, 6 or 8 seconds; 5 is rejected. 6 x 4 = 24s of footage, plus
+ * the 6s end card, is the 30.00s reel.
+ */
 const SHOTS = {
   // Beat 1, over "Your customers are already looking for you. They find a
   // phone number, a WhatsApp, and nothing else."
-  before: {
-    n: 1,
-    title: "Looking for you",
+  look: { n: 1, seconds: 4, title: "Looking for you",
     prompt:
-      "A young Indian woman stands on a clean modern Indian shopping street at " +
-      "golden hour, looking down at her phone, then lifts her eyes to a shopfront " +
-      "just off camera, waits a beat, and walks on out of frame. Well-designed " +
-      "shopfronts and a few passers-by softly out of focus behind her. Her phone " +
-      "screen is dark and blank. The camera holds nearly still and drifts a few " +
-      "centimetres with her. Warm, unhurried, faintly disappointed.",
-  },
+      "A young Indian woman stands still on a clean modern Indian shopping " +
+      "street at golden hour, reading something on the phone she is holding in " +
+      "both hands. She holds the phone the entire time and never lowers it, " +
+      "puts it away or changes her grip. Her only movement is a small shake of " +
+      "the head. Well-designed shopfronts blurred behind her. Phone screen dark." },
+  pass: { n: 2, seconds: 4, title: "And moves on",
+    prompt:
+      "A young Indian woman walks away from camera down a clean modern Indian " +
+      "shopping street at golden hour, seen from behind, unhurried. She carries " +
+      "nothing in her hands and holds nothing at any point. Shopfronts and a few " +
+      "passers-by on either side. One continuous walk, no turning back." },
+
   // Beat 2, over "So you answer the same four questions all day."
-  build: {
-    n: 2,
-    title: "The same four questions",
+  call: { n: 3, seconds: 4, title: "On the phone again",
     prompt:
-      "Inside a bright modern clothing boutique, the owner — an Indian woman in " +
-      "her thirties — stands behind a pale wood counter with a phone to her ear, " +
-      "mid-conversation, while a customer waits a little way behind her looking at " +
-      "a rail. She glances toward the waiting customer, then back down. Large " +
-      "windows, rails of clothes, a plant, one emerald cushion on a bench. The " +
-      "camera pushes in very slowly. Pulled in two directions at once, not frantic.",
-  },
+      "An Indian woman in her thirties stands behind the pale wood counter of a " +
+      "bright modern clothing boutique, talking on a phone she holds to her ear " +
+      "with her right hand. The phone stays pressed to her ear for the entire " +
+      "shot — it never leaves her hand, never disappears, never moves to the " +
+      "other hand and is never put down. Her free hand rests on the counter and " +
+      "stays there. Rails of clothes, a plant, one emerald cushion behind her." },
+  wait: { n: 4, seconds: 4, title: "Someone is waiting",
+    prompt:
+      "Inside a bright modern clothing boutique, a customer stands at a rail of " +
+      "clothes with her back half to camera, holding one garment on its hanger " +
+      "out in front of her and looking at it, then glancing off toward the " +
+      "counter. She holds the same single hanger throughout and picks up nothing " +
+      "else. Nobody else is in frame. Warm daylight, pale wood, one emerald " +
+      "cushion on a bench." },
+
   // Beat 3, over "We build the thing that answers them for you... orders
   // straight to WhatsApp."
-  //
-  // The first version of this shot handed a parcel from her hands to his, and
-  // the parcel did not survive the journey: a floppy blob at 5.8s, a flat slab
-  // at 6.4s, a thin disc at 7.0s, a sheet of paper by 7.6s. An object passing
-  // between two pairs of hands is the hardest thing to ask of these models —
-  // it has to stay the same object while both its supports change. So the
-  // handoff is gone. She sets the box down, he lifts it; the box is only ever
-  // held by one person at a time, and the prompt nails its shape down hard.
-  after: {
-    n: 3,
-    title: "It runs itself",
+  tape: { n: 5, seconds: 4, title: "Packed",
     prompt:
-      "A bright clean packing room. An Indian woman in her thirties places ONE " +
-      "rigid brown corrugated cardboard shipping box, closed and taped, down " +
-      "onto a pale wood bench beside three identical finished boxes, and takes " +
-      "her hands away. A delivery rider then steps in from the right and lifts " +
-      "that same box off the bench. Only one person touches the box at a time — " +
-      "she has fully let go before he takes it, and there is no moment where " +
-      "both are holding it. " +
-      "THE BOX IS RIGID AND KEEPS ITS EXACT SHAPE, SIZE, PROPORTIONS AND COLOUR " +
-      "for every frame: a firm cubic cardboard carton with square corners and " +
-      "flat faces. It never becomes soft, floppy, flat, thin, a disc, a tray, a " +
-      "sheet of paper or a bag, and it never changes size. " +
-      "The courier is a young Indian man in plain ordinary clothes — a simple " +
-      "dark polo shirt and trousers. NO helmet, NO crash helmet, NO large " +
-      "insulated food-delivery backpack, NO bright blue or branded uniform, no " +
-      "food-delivery livery of any kind. He is collecting a parcel, not " +
-      "delivering a meal. What he wears stays identical throughout; nothing " +
-      "appears or disappears. " +
-      "She is working, not posing — she places her box, straightens the row and " +
-      "turns back to the next one. " +
-      "The room is the warm premium one from the rest of this film: generous " +
-      "golden daylight through a large window, pale wood bench, off-white walls, " +
-      "greenery, one small emerald-green glass vase on the bench. Warm and " +
-      "inviting, never a cold white clinical warehouse, never flat bright " +
-      "fluorescent light. " +
-      "The camera pulls back slowly, opening the frame. Calm and ordered.",
-  },
+      "Close on a pale wood bench in a bright packing room: a woman's hands fold " +
+      "the flaps of ONE rigid brown corrugated cardboard box closed and press a " +
+      "strip of tape along the seam. Hands and forearms only, no face. The box " +
+      "is firm and cubic with square corners and keeps its exact shape, size and " +
+      "colour for every frame — it never becomes soft, flat, thin or a bag. Two " +
+      "identical closed boxes sit beside it, unmoving. A small emerald vase at " +
+      "the edge of frame. Warm daylight." },
+  lift: { n: 6, seconds: 4, title: "And gone",
+    prompt:
+      "In a bright packing room a young Indian man in a plain dark polo shirt " +
+      "lifts ONE rigid brown corrugated cardboard box off a pale wood bench with " +
+      "both hands and turns away from camera carrying it. He is the only person " +
+      "in frame and nobody hands him anything — the box is on the bench, then in " +
+      "his hands. It is firm and cubic and keeps its exact shape and size " +
+      "throughout. NO helmet, no insulated food-delivery backpack, no branded or " +
+      "bright blue uniform. Warm golden daylight, pale wood, a small emerald " +
+      "vase on the bench." },
 };
+
 
 
 /* ------------------------------ UGC SHOT SET ------------------------------
@@ -193,7 +204,9 @@ const UGC = {
 };
 
 const AR = "9:16";
-const SECONDS = 8;
+const SECONDS = 8;                       // default; a shot may override it
+/** Veo accepts 4, 6 or 8 — 5 is rejected as "out of bound". */
+const secondsFor = (shot) => shot.seconds || SECONDS;
 
 const SET = process.argv.includes("--set")
   ? process.argv[process.argv.indexOf("--set") + 1]
@@ -253,7 +266,7 @@ async function start(shot, attempt = 1) {
       instances: [{ prompt: `${shot.prompt}\n\n${ACTIVE.house}` }],
       parameters: {
         aspectRatio: AR,
-        durationSeconds: SECONDS,
+        durationSeconds: secondsFor(shot),
         // No personGeneration here. The API rejects "allow_adult" outright —
         // 400 "allow_adult for personGeneration is currently not supported" —
         // and it was redundant anyway: the prompts ask for hands only and the
@@ -366,7 +379,7 @@ async function make(id) {
   const out = `marketing/video/out/${ACTIVE.prefix}${id}.mp4`;
   const kb = await download(uri, out);
   process.stdout.write("\r".padEnd(50) + "\r");
-  console.log(`  ok  ${out}  ${kb} KB  ${SECONDS}s ${AR}  (${shot.title})`);
+  console.log(`  ok  ${out}  ${kb} KB  ${secondsFor(shot)}s ${AR}  (${shot.title})`);
 }
 
 /** Attach to a generation that is already running and save its result.
@@ -403,7 +416,7 @@ if (resumeArgs.length) {
   process.exit(bad ? 1 : 0);
 }
 if (argv.includes("--list") || (!argv.length && !argv.includes("--all"))) {
-  console.log(`Model: ${MODEL}   ${SECONDS}s each, ${AR}\n`);
+  console.log(`Model: ${MODEL}   ${AR}\n`);
   for (const [id, s] of Object.entries(SHOTS)) console.log(`  ${s.n}. ${id.padEnd(7)} ${s.title}`);
   console.log(`\n  node marketing/video/gen-veo.mjs --all   |   <id> [<id>...]`);
   process.exit(0);
