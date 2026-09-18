@@ -187,6 +187,12 @@ function ass(lines, font, maxWords, maxChars, until) {
     // Mint. Hyderabad." the voiceover says over it prints the name twice, on
     // top of itself. Anything starting after the handover is dropped.
     if (until && ln.start >= until) continue;
+    // Dropping only what STARTS after the handover is not enough: a chunk
+    // beginning at 22.98 and running to 24.78 sits on the end card for nearly
+    // a second, across the WhatsApp number. Clamp the end instead, so the
+    // subtitle simply stops at the cut. The karaoke sweep freezes mid-phrase,
+    // which nobody sees — the frame changes underneath it at the same moment.
+    if (until && ln.end > until) ln.end = until;
     // \k takes centiseconds. Rounding each word independently drifts the line
     // out of step with the audio, so the remainder is carried forward.
     let carried = 0;

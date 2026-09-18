@@ -1,14 +1,28 @@
 # The Brand Mint voice
 
-**Chosen: ElevenLabs — `Santhi Prakash — Warm Indian Narrator`**
-**`voice_id` UCYikFhJ1MxdJf40ZcRX** · model `eleven_multilingual_v2`
+**Chosen: Gemini TTS — `Alnilam`** · model `gemini-3.1-flash-tts-preview`
+Generate with `node marketing/video/gen-vo.mjs --script brand alnilam`.
 
 One voice, used on every film, ad and reel from here on. A brand that changes
 voice every post has no voice.
 
-⚠️ **Not yet usable.** The voice is gated: every call returns *"You need to be
-on the creator tier or above to use this voice."* The tier check runs before
-generation, so a blocked attempt costs nothing — this has been tested twice.
+Santhi Prakash on ElevenLabs was the first choice and is gated behind the
+creator tier, so the brief went back to Gemini — where the earlier rejection
+turned out to be two fixable mistakes rather than a limit of the platform. See
+the audition log.
+
+**The read needs its pauses tightened before it is cut in.** Alnilam runs
+30.9s against a 30.0s film whose audio fades at 28.6s, so the last word falls
+off the end. Fitting it by speed would need atempo 1.079, an 8% speed-up that
+undoes the unhurried delivery the direction asks for. Compressing the silences
+instead costs nothing audible, because the direction deliberately asks for long
+pauses at paragraph breaks and that is exactly where the excess sits:
+
+```
+ffmpeg -i out/vo-brand-alnilam.wav \
+  -af "silenceremove=stop_periods=-1:stop_duration=0.34:stop_threshold=-40dB:detection=peak" \
+  out/vo-alnilam-tight.wav      # 30.88s -> 27.56s, last word at 27.2s
+```
 
 ## The brief, in the client's words
 
@@ -50,9 +64,12 @@ voice of someone who speaks English well and happens to be Indian.
 
 | Voice | Verdict |
 |---|---|
-| Gemini TTS — Charon, Sulafat, Puck | Rejected. Generic, poor pronunciation. |
+| Gemini TTS — Charon, Sulafat, Puck | Rejected as generic. The fault was ours, not the platform's: the script was pinned to the older `gemini-2.5-pro-preview-tts`, and the direction was a single sentence — "read this as a calm, warm Indian English voiceover" — which is a mood, not a brief. |
 | ElevenLabs — Amit, Indian Commercial | **Rejected by the client: reads as a performed accent, "getting mocked".** |
-| ElevenLabs — Santhi Prakash | **CHOSEN.** "Neutral Indian accent, crisp diction, steady articulate delivery", late thirties. Telugu name. Tier-locked. Preview at `out/santhi-prakash.mp3`. |
+| ElevenLabs — Santhi Prakash | Best written match and the client's first pick, but gated behind the creator tier ($22/mo). Preview at `out/santhi-prakash.mp3`. Still the fallback if Gemini's voices ever regress. |
+| Gemini — Iapetus | Rejected by QC: says "Brandment" for "Brand Mint". |
+| Gemini — Gacrux, Rasalgethi | Passed QC, not chosen. |
+| **Gemini — Alnilam** | **CHOSEN.** Firm, even, low register. Passes QC clean. |
 | ElevenLabs — Pranab | "Mature, confident, natural and engaging **without sounding overly polished or theatrical**" — the phrase that matters here. Preview at `out/pranab.mp3`. |
 
 Not auditioned, previews blocked by the sandbox egress proxy — audition these
