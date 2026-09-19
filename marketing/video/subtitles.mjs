@@ -123,18 +123,77 @@ function align(phrases, segs) {
   const totalSyl = syl.reduce((a, b) => a + b, 0);
   const spoken = segs.reduce((a, [s, e]) => a + (e - s), 0);
 
-  // Walk a single clock through the segments, spending each phrase's share of
-  // the total speaking time. Silence between segments is skipped rather than
-  // counted, which is what keeps a long pause from dragging a caption with it.
-  const flat = [];
-  for (const [s, e] of segs) for (let t = s; t < e; t += 0.001) flat.push(t);
-  const at = (frac) => flat[Math.min(flat.length - 1, Math.round(frac * (flat.length - 1)))];
+  // THE SEGMENTS ARE THE TRUTH; SYLLABLES ARE ONLY A FALLBACK.
+  // This used to spend each phrase's syllable share of the TOTAL speaking
+  // time against a single flattened clock, and never looked at where the
+  // speech runs actually were. Syllable count is a decent predictor of how
+  // long a phrase takes and a poor one: a held word, an emphasis, a breath
+  // inside a clause all cost time the count does not know about, and because
+  // the clock is cumulative every error pushes everything after it. Measured
+  // on the UGC read, "automatic." was landing 3.6s from its onset.
+  //
+  // A silence between two phrases IS the boundary between them. When the
+  // reader took exactly as many pauses as the script marks — which is what
+  // the "|" markers are for — the mapping is one phrase per run and needs no
+  // estimation at all.
+  let bounds;
+  if (phrases.length === segs.length) {
+    bounds = segs.map(([s, e]) => [s, e]);
+  } else if (phrases.length < segs.length) {
+    // THE READER TOOK MORE PAUSES THAN THE SCRIPT MARKS — a breath inside a
+    // clause, a beat for emphasis. Every phrase still starts and ends on a
+    // run, but some phrases own SEVERAL consecutive runs, and which ones
+    // cannot be guessed from a running total: fitting proportionally put
+    // "UPI," on the 0.38s of silence before it and gave its actual run to
+    // "cash on delivery,".
+    //
+    // So choose the grouping properly. Each phrase takes a contiguous block
+    // of runs, blocks are in order and cover every run, and the split is the
+    // one whose durations best match the phrases' syllable shares. Small
+    // enough (15 x 17 here) that exact beats clever.
+    const n = phrases.length, m = segs.length;
+    const dsum = [0];
+    for (const [s0, e0] of segs) dsum.push(dsum[dsum.length - 1] + (e0 - s0));
+    const totalDur = dsum[m];
+    const share = syl.map((v) => v / totalSyl);
 
-  let acc = 0;
+    const INF = Infinity;
+    const dp = Array.from({ length: n + 1 }, () => new Float64Array(m + 1).fill(INF));
+    const back = Array.from({ length: n + 1 }, () => new Int32Array(m + 1).fill(-1));
+    dp[0][0] = 0;
+    for (let i = 1; i <= n; i++) {
+      for (let j = i; j <= m - (n - i); j++) {          // leave >=1 run per remaining phrase
+        for (let k = i - 1; k < j; k++) {
+          if (dp[i - 1][k] === INF) continue;
+          const cost = dp[i - 1][k] + Math.abs((dsum[j] - dsum[k]) / totalDur - share[i - 1]);
+          if (cost < dp[i][j]) { dp[i][j] = cost; back[i][j] = k; }
+        }
+      }
+    }
+    const cut = new Array(n + 1);
+    cut[n] = m;
+    for (let i = n; i > 0; i--) cut[i - 1] = back[i][cut[i]];
+    bounds = phrases.map((_, i) => [segs[cut[i]][0], segs[cut[i + 1] - 1][1]]);
+  } else {
+    // More phrases than runs: several ran together inside one breath. Split
+    // each run between the phrases that share it, by syllable weight.
+    const per = Math.ceil(phrases.length / segs.length);
+    bounds = phrases.map((_, i) => {
+      const seg = segs[Math.min(segs.length - 1, Math.floor(i / per))];
+      const group = phrases.filter((_, k) => Math.floor(k / per) === Math.floor(i / per));
+      const gSyl = group.map((g) => g.split(/\s+/).filter(Boolean)
+        .reduce((x, w) => x + syllables(w), 0));
+      const gTot = gSyl.reduce((x, y) => x + y, 0) || 1;
+      const idx = i % per;
+      const before = gSyl.slice(0, idx).reduce((x, y) => x + y, 0);
+      const span = seg[1] - seg[0];
+      return [seg[0] + span * (before / gTot),
+              seg[0] + span * ((before + gSyl[idx]) / gTot)];
+    });
+  }
+
   return phrases.map((text, i) => {
-    const start = at(acc / totalSyl);
-    acc += syl[i];
-    const end = at(acc / totalSyl);
+    const [start, end] = bounds[i];
     const words = text.split(/\s+/).filter(Boolean);
     const wSyl = words.map(syllables);
     const wTot = wSyl.reduce((a, b) => a + b, 0);
