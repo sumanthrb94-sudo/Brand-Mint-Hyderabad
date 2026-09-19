@@ -209,6 +209,53 @@ const UGC = {
     "and steadies for the first time. Daylight, calm." },
 };
 
+/* ---------------------------------------------------------- the 10s spot
+   marketing/video/OMNI-10S-AD.md, shot at last. A paid-ad cutdown: four
+   beats, no word spoken by the picture, every piece of type composited in
+   post — because a garbled AI-rendered price in a paid ad is worse than no
+   ad at all.
+
+   The spec calls for 2.5s a beat and Veo only accepts 4, 6 or 8, so each
+   plate is generated at 4s and trimmed to 2.5 in cut-10.sh. That is the
+   right way round: trimming a good 4s take is free, and asking for 2.5
+   is rejected outright ("out of bound"). */
+const SPOT_HOUSE =
+  "A cinematic product advertisement, 9:16 vertical, shot on a 50mm lens at " +
+  "T2.0, shallow depth of field, 24fps with natural motion blur. SETTING: a " +
+  "small artisan workshop table in Hyderabad, India. Warm cream linen surface, " +
+  "kraft-brown packaging, a few sprigs of dried botanicals. Soft morning window " +
+  "light from camera left, gentle falloff, visible dust motes. Calm, editorial, " +
+  "premium — not corporate, not stock. COLOUR: mint green #10B981 as the only " +
+  "saturated accent, warm cream #F5F1EA surfaces, deep ink green #0B1F1A " +
+  "shadows. Muted, filmic, low contrast in the midtones. MOTION: slow and " +
+  "controlled throughout. No whip pans, no snap zooms, no speed ramps. " +
+  "CRITICAL — the render must contain absolutely NO text of any kind: no words, " +
+  "no letters, no numbers, no logos, no watermarks, no brand marks, no signage, " +
+  "no packaging labels, no screen interfaces, no captions. Plain unmarked " +
+  "packaging only. No human faces. No stock-photo smiles, no generic office. " +
+  "No spoken dialogue and no voices — ambient room tone only.";
+
+const SPOT = {
+  fold: { n: 1, seconds: 4, title: "The fold", prompt:
+    "Extreme close-up, macro. Two Indian hands with plain unpainted nails fold " +
+    "and seal a kraft paper parcel. Fingers only, no faces. Slow, deliberate " +
+    "movement. Focus on the crease of the fold." },
+  glow: { n: 2, seconds: 4, title: "The turn", prompt:
+    "The hands place a smartphone face-up on the table beside the parcel. The " +
+    "phone screen shows only a soft, defocused mint-green glow — completely " +
+    "blank, no interface, no icons, no writing. Rack focus from the parcel to " +
+    "the glow." },
+  nine: { n: 3, seconds: 4, title: "Scale", prompt:
+    "Slow dolly back. Nine identical sealed parcels now sit stacked in a neat " +
+    "grid on the same table, ready for dispatch. Same light, same surface, " +
+    "unbranded plain packaging. No hands in frame." },
+  land: { n: 4, seconds: 4, title: "Landing", prompt:
+    "The camera pulls back and rises slightly. The frame settles into deep dark " +
+    "green-black negative space filling the upper two thirds, with the parcels " +
+    "small and low in frame. Hold steady and static. Nothing moves in the upper " +
+    "two thirds — it is empty space for type to be composited onto." },
+};
+
 const AR = "9:16";
 const SECONDS = 8;                       // default; a shot may override it
 /** Veo accepts 4, 6 or 8 — 5 is rejected as "out of bound". */
@@ -218,8 +265,9 @@ const SET = process.argv.includes("--set")
   ? process.argv[process.argv.indexOf("--set") + 1]
   : "film";
 const SHOTSETS = { film: { shots: SHOTS, house: HOUSE, prefix: "" },
-                   ugc:  { shots: UGC,   house: UGC_HOUSE, prefix: "ugc-" } };
-if (!SHOTSETS[SET]) { console.error(`Unknown --set "${SET}". Try: film, ugc`); process.exit(1); }
+                   ugc:  { shots: UGC,   house: UGC_HOUSE, prefix: "ugc-" },
+                   spot: { shots: SPOT,  house: SPOT_HOUSE, prefix: "spot-" } };
+if (!SHOTSETS[SET]) { console.error(`Unknown --set "${SET}". Try: film, ugc, spot`); process.exit(1); }
 const ACTIVE = SHOTSETS[SET];
 
 /** Veo answers 503 with an empty body under load, often enough that a single
@@ -444,7 +492,9 @@ if (argv.includes("--prompt")) {
 
 if (argv.includes("--list") || (!argv.length && !argv.includes("--all"))) {
   console.log(`Model: ${MODEL}   ${AR}\n`);
-  for (const [id, s] of Object.entries(SHOTS)) console.log(`  ${s.n}. ${id.padEnd(7)} ${s.title}`);
+  // ACTIVE.shots, not SHOTS — --list ignored --set and always printed the
+  // brand film, so a new shot set looked like it had not registered.
+  for (const [id, s] of Object.entries(ACTIVE.shots)) console.log(`  ${s.n}. ${id.padEnd(7)} ${s.title}`);
   console.log(`\n  node marketing/video/gen-veo.mjs --all   |   <id> [<id>...]`);
   process.exit(0);
 }

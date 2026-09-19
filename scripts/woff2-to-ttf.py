@@ -24,6 +24,11 @@ OUT.mkdir(parents=True, exist_ok=True)
 FACES = [
     ("plus-jakarta-sans.woff2", 800, "BrandMint Display"),
     ("inter.woff2",             600, "BrandMint Text"),
+    # The 10s spot sets its price in mono, the same as every numeral on the
+    # site. JetBrains Mono has no rupee glyph — styles.css works around that
+    # with a unicode-range rule serving Inter's — so the spot composites the
+    # ₹ from the text face and only the digits from this one.
+    ("jetbrains-mono.woff2",    700, "BrandMint Mono"),
 ]
 
 for name, weight, family in FACES:
