@@ -6,22 +6,25 @@
 # ffmpeg comes from pip (`pip install imageio-ffmpeg`), same as compose.sh —
 # there is no system ffmpeg on this box and no package.json to add one to.
 #
-# THE ARITHMETIC, because "about thirty seconds" is what gets a reel cropped:
+# THE ARITHMETIC, cut to the voiceover's OWN pauses, not a 4s grid.
+# silencedetect on vo-alnilam-tight.wav gives the phrase gaps. On a plain
+# 4s grid FIVE of the six cuts land mid-phrase, so the timings below are
+# pulled to the nearest gap instead. Every shot is <= its 4.00s source.
 #
-#   look     4.0   0.0  ->  4.0     \  "already looking for you"
-#   pass     4.0   4.0  ->  8.0     /
-#   call     4.0   8.0  -> 12.0     \  "the same four questions all day"
-#   wait     4.0  12.0  -> 16.0     /
-#   tape     4.0  16.0  -> 20.0     \  "answers them for you"
-#   lift     4.0  20.0  -> 24.0     /
-#   endcard  6.0  24.0  -> 30.0
-#                        ---------
+#   look    3.10    0.00 ->  3.10   gap 2.89-3.27
+#   pass    3.99    3.10 ->  7.09   gap 6.89-7.29
+#   call    3.51    7.09 -> 10.60   gap 10.41-10.79
+#   wait    3.99   10.60 -> 14.59   gap 14.59-14.94
+#   tape    3.46   14.59 -> 18.05   gap 18.05-18.41
+#   lift    3.50   18.05 -> 21.55   gap 21.34-21.74
+#   endcard 8.45   21.55 -> 30.00
+#                        ----------
 #                        30.00 exactly
 #
-# Six four-second shots rather than three eight-second ones. Eight seconds is
-# longer than this model holds continuity: the first cut lost a parcel through
-# four different shapes mid-handover, and a phone vanished out of a woman'"'"'s
-# hand between 9s and 11s. One action per shot, four seconds, cut together.
+# The end card is long because the footage runs out: six 4s shots is 24s of
+# material and the read does not finish until 27.56s. It is not holding
+# silence — "fixed price, in writing, before anyone starts" and "Brand Mint.
+# Hyderabad." both play over it.
 #
 # A plain four-way concat, with the end card fading up on its own rather than
 # crossfading from the footage. xfade was the first attempt and it is not worth
@@ -64,7 +67,26 @@ for i in "${SHOTS[@]}"; do
   [ "$n" -eq 0 ] && { echo "$i.mp4 has no audio stream; add anullsrc handling" >&2; exit 1; }
 done
 
-V="scale=1080:1920:flags=lanczos,fps=24,format=yuv420p,setpts=PTS-STARTPTS"
+# VEO RETURNS LETTERBOXED CLIPS AND DOES NOT SAY SO. look.mp4 reported
+# 720x1280 with 98px of black baked in top and bottom; lift.mp4 came back the
+# same way with 110px. Two of six, from separate runs — it recurs, so the crop
+# is detected per clip rather than hardcoded. A clean clip reports
+# 720:1280:0:0 and goes through untouched; a letterboxed one is cropped to its
+# real picture, scaled to COVER 1080x1920 and centre-cropped, so it fills the
+# frame without stretching.
+DUR=(3.10 3.99 3.51 3.99 3.46 3.50)
+vfilter () {                       # $1 = clip path
+  local det w h x y
+  det=$("$FF" -hide_banner -ss 2 -t 0.5 -i "$1" -vf cropdetect=limit=24:round=2 \
+        -f null - 2>&1 | grep -o "crop=[0-9:]*" | tail -1)
+  IFS=: read -r w h x y <<< "${det#crop=}"
+  if [ "$w" = "720" ] && [ "$h" = "1280" ]; then
+    echo "scale=1080:1920:flags=lanczos,fps=24,format=yuv420p,setsar=1,setpts=PTS-STARTPTS"
+  else
+    echo "  letterbox: $(basename "$1") is ${w}x${h} at ${x},${y} — cropping" >&2
+    echo "crop=$w:$h:$x:$y,scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:1920,fps=24,format=yuv420p,setsar=1,setpts=PTS-STARTPTS"
+  fi
+}
 
 # THE CLIPS' OWN AUDIO IS DISCARDED WHEN THERE IS A VOICEOVER, and that is not
 # a taste call. Veo 3.1 generates native audio, and what it generated here was
@@ -89,10 +111,16 @@ V="scale=1080:1920:flags=lanczos,fps=24,format=yuv420p,setpts=PTS-STARTPTS"
 VO="${2:-marketing/video/out/vo-alnilam-tight.wav}"
 BED_VOL="${BED_VOL:-0}"
 
-VIDEO_FC="\
-[0:v]$V[v0];[1:v]$V[v1];[2:v]$V[v2];[3:v]$V[v3];[4:v]$V[v4];[5:v]$V[v5];\
-[6:v]scale=1080:1920,fps=24,format=yuv420p,fade=t=in:st=0:d=0.5,setpts=PTS-STARTPTS[v6];\
-[v0][v1][v2][v3][v4][v5][v6]concat=n=7:v=1:a=0[vout];"
+# Build the per-clip inputs and filters from the detected crops.
+INPUTS=(); VIDEO_FC=""; CONCAT=""
+for i in "${!SHOTS[@]}"; do
+  INPUTS+=(-t "${DUR[$i]}" -i "$IN/${SHOTS[$i]}.mp4")
+  VIDEO_FC="${VIDEO_FC}[$i:v]$(vfilter "$IN/${SHOTS[$i]}.mp4")[v$i];"
+  CONCAT="${CONCAT}[v$i]"
+done
+EC_IDX=${#SHOTS[@]}
+VIDEO_FC="${VIDEO_FC}[$EC_IDX:v]scale=1080:1920,fps=24,format=yuv420p,setsar=1,fade=t=in:st=0:d=0.5,setpts=PTS-STARTPTS[v$EC_IDX];"
+VIDEO_FC="${VIDEO_FC}${CONCAT}[v$EC_IDX]concat=n=$((EC_IDX+1)):v=1:a=0[vout];"
 
 if [ -f "$VO" ]; then
   VO_IN=(-i "$VO")
@@ -102,7 +130,7 @@ if [ -f "$VO" ]; then
     # No amix at all: the clips' audio is never routed in, so there is nothing
     # to leak through at some later edit.
     AUDIO_FC="\
-[7:a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=30,\
+[$((EC_IDX+1)):a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=30,\
 afade=t=out:st=28.6:d=1.4,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
     echo "  voiceover: $VO  (clips' own audio discarded)"
   else
@@ -111,7 +139,7 @@ afade=t=out:st=28.6:d=1.4,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
     AUDIO_FC="\
 [0:a][1:a][2:a][3:a][4:a][5:a]concat=n=6:v=0:a=1,aresample=48000,aformat=channel_layouts=stereo,\
 apad=whole_dur=30,volume=$BED_VOL[bed];\
-[7:a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=30[vo];\
+[$((EC_IDX+1)):a]aresample=48000,aformat=channel_layouts=stereo,apad=whole_dur=30[vo];\
 [bed][vo]amix=inputs=2:duration=first:normalize=0,afade=t=out:st=28.6:d=1.4,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
     echo "  voiceover: $VO  (bed at $BED_VOL — CHECK the clips for speech)"
   fi
@@ -124,9 +152,8 @@ else
 fi
 
 "$FF" -y -hide_banner -loglevel error \
-  -i "$IN/look.mp4" -i "$IN/pass.mp4" -i "$IN/call.mp4" \
-  -i "$IN/wait.mp4" -i "$IN/tape.mp4" -i "$IN/lift.mp4" \
-  -framerate 24 -loop 1 -t 6 -i "$EC" \
+  "${INPUTS[@]}" \
+  -framerate 24 -loop 1 -t 8.45 -i "$EC" \
   "${VO_IN[@]}" \
   -filter_complex "${VIDEO_FC}${AUDIO_FC}" \
   -map "[vout]" -map "[aout]" \
