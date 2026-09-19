@@ -169,7 +169,13 @@ const UGC_HOUSE =
   "it is happening to, not by a crew. " +
   "Absolutely no text, letters, numbers, words, signage, icons, notifications, " +
   "readable user interface, logos or watermarks anywhere in frame. No faces, no " +
-  "people visible above the wrist — hands only.";
+  "people visible above the wrist — hands only. " +
+  // The brand set says "Indian people" in every shot; this set only said
+  // "hands", and the first run came back with several pale European-looking
+  // hands. At wrist scale it is subtle and it still reads as stock to the
+  // audience this is sold to.
+  "The hands are INDIAN — South Indian skin tone, and where jewellery shows it " +
+  "is Indian (thin gold bangles, a simple ring). Never pale European hands.";
 
 const UGC = {
   scroll: { n: 1, title: "The reply machine", prompt:

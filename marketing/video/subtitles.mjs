@@ -53,10 +53,18 @@ const SCRIPTS = {
     UPI,| cash on delivery,| GST invoices,| orders straight to WhatsApp.|
     Fixed price, in writing, before anyone starts.|
     Brand Mint.| Hyderabad.`,
-  ugc: `Okay — if you run a shop in Hyderabad| and you're still taking orders on WhatsApp,| watch this.|
-    Same four questions.| All day.| Price.| Timing.| Do you deliver.|
-    You're not running a business.| You're running a reply machine.|
-    So — a proper store.| Your own domain.| UPI, cash on delivery, GST invoice,| automatic.|
+  /* A "|" marks a pause the reader ACTUALLY TAKES, not every place a comma
+     could go. This script had 17 markers and the read only pauses 10 times —
+     its own direction says "run the sentences together the way people
+     actually talk, and only pause where there is a full stop" — so the
+     matcher had to spread 17 phrases over 9 detected segments and pushed the
+     opening line from 0.0s to 4.5s. Marked to the read, not to the grammar.
+     Long phrases still break into readable lines via --words/--chars. */
+  ugc: `Okay — if you run a shop in Hyderabad and you're still taking orders on WhatsApp,| watch this.|
+    Same four questions. All day.| Price. Timing. Do you deliver.|
+    You're not running a business. You're running a reply machine.|
+    So — a proper store. Your own domain.|
+    UPI, cash on delivery, GST invoice, automatic.|
     Fixed price, in writing, before anyone starts.|
     Brand Mint.| Hyderabad.`,
 };
@@ -87,7 +95,17 @@ function segments(audio) {
     .slice(1).reduce((a, v, i) => a + +v * [3600, 60, 1][i], 0);
 
   const segs = [];
-  let speaking = marks.length && marks[0][0] === "end" ? 0 : null;
+  // A FILE THAT BEGINS WITH SPEECH LOSES ITS FIRST RUN WITHOUT THIS.
+  // silencedetect only reports silences, so a read that starts talking
+  // immediately emits its first mark as silence_start at t>0 — there is no
+  // preceding silence_end to open a segment with, and the opening run was
+  // dropped entirely, sliding every later phrase late by its length.
+  // vo-alnilam-tight.wav happens to begin with 0.28s of silence, which is why
+  // the brand film never showed this; the UGC read starts on the first frame
+  // and lost its opening 4.2 seconds — the hook.
+  // A leading silence still opens with silence_start at ~0, and that case
+  // must stay null or the silence itself gets treated as speech.
+  let speaking = marks.length && marks[0][0] === "start" && marks[0][1] > 0.05 ? 0 : null;
   for (const [kind, t] of marks) {
     if (kind === "start" && speaking !== null) { segs.push([speaking, t]); speaking = null; }
     else if (kind === "end") speaking = t;
