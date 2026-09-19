@@ -59,6 +59,41 @@ Fixed price, in writing, before anyone starts.
 
 Brand Mint. Hyderabad.`;
 
+/* THE STORY FILM. Same voice and register as SCRIPTS.brand — this is the
+   long-form piece, so the read is the brand narrator, not a UGC character.
+   No client is named and no number is quoted that is not on the live site:
+   a named "customer" in a scripted film reads as a testimonial, and this is
+   an illustration, not one. */
+SCRIPTS.story = `Speak as a male Indian English voiceover artist in his early forties from \
+Hyderabad. Telugu is his mother tongue and he was schooled in English medium, so his English \
+is fluent, neutral and precise — the register of a university lecturer or a national news \
+anchor. This is NOT a performed, thick or comic accent, and never a caricature. Consonants are \
+crisp but not exaggerated. Intonation is level — every sentence lands flat and finished, never \
+rising at the end. Mid-to-low resonant register. Unhurried: take a real pause at every full \
+stop and a longer one at each paragraph break. He is telling someone what happened, not \
+selling to them.
+
+The shop opens at nine.
+
+By quarter past, the same four questions have been asked four times. Price. Size. Do you \
+deliver. Is it in stock.
+
+A customer waits at the rail while the answers are typed. Then she puts the dress back, and \
+leaves.
+
+So one evening, the thing that keeps getting put off gets done. Photographs. Sizes. Prices. \
+Written down once.
+
+A store, on your own domain. UPI, cash on delivery, GST invoices. Orders arriving on WhatsApp, \
+already answered.
+
+The shop still opens at nine. The phone still lights up. You are simply no longer the one who \
+has to answer it.
+
+Fixed price, in writing, before anyone starts.
+
+Brand Mint. Hyderabad.`;
+
 SCRIPTS.brand = `Speak as a male Indian English voiceover artist in his early forties from \
 Hyderabad. Telugu is his mother tongue and he was schooled in English medium, so his English \
 is fluent, neutral and precise — the register of a university lecturer or a national news \

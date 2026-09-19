@@ -60,6 +60,19 @@ const SCRIPTS = {
      matcher had to spread 17 phrases over 9 detected segments and pushed the
      opening line from 0.0s to 4.5s. Marked to the read, not to the grammar.
      Long phrases still break into readable lines via --words/--chars. */
+  story: `The shop opens at nine.|
+    By quarter past, the same four questions have been asked four times.|
+    Price.| Size.| Do you deliver.| Is it in stock.|
+    A customer waits at the rail while the answers are typed.|
+    Then she puts the dress back,| and leaves.|
+    So one evening, the thing that keeps getting put off gets done.|
+    Photographs.| Sizes.| Prices.| Written down once.|
+    A store, on your own domain.| UPI,| cash on delivery,| GST invoices.|
+    Orders arriving on WhatsApp,| already answered.|
+    The shop still opens at nine.| The phone still lights up.|
+    You are simply no longer the one who has to answer it.|
+    Fixed price, in writing, before anyone starts.|
+    Brand Mint.| Hyderabad.`,
   ugc: `Okay — if you run a shop in Hyderabad and you're still taking orders on WhatsApp,| watch this.|
     Same four questions. All day.| Price. Timing. Do you deliver.|
     You're not running a business. You're running a reply machine.|

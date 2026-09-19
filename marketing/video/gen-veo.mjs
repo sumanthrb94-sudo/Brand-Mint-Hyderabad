@@ -256,6 +256,101 @@ const SPOT = {
     "two thirds — it is empty space for type to be composited onto." },
 };
 
+/* ------------------------------------------------------- the story film
+   The long one. Four acts, sixteen shots, one protagonist, real coverage —
+   a wide to place her, a mid to play the scene, an insert for the detail.
+   The 30s cuts are arguments; this one is a story, and the difference is
+   that the same woman is in every shot and something changes for her.
+
+   HER, in every prompt, because Veo has no memory between generations and
+   continuity is the whole film: a woman in her early thirties, South Indian,
+   in a deep green cotton kurta, hair tied back, no jewellery but small gold
+   studs. Same shop throughout: a small modern clothing boutique, pale wood,
+   off-white walls, one rail of clothes, one emerald cushion on a bench.
+
+   Act I  (shots 1-4)  the day starts and the questions start with it
+   Act II (shots 5-8)  the cost: a customer leaves while she types
+   Act III(shots 9-12) the evening she does the thing she has been avoiding
+   Act IV (shots 13-16) the same shop, different day */
+const HER = "A woman in her early thirties, South Indian, wearing a deep green cotton " +
+  "kurta, hair tied back, small gold stud earrings and no other jewellery. ";
+const SHOP = "A small modern Indian clothing boutique: pale wood, off-white walls, one " +
+  "rail of clothes, a low bench with one emerald-green cushion, a plant by the window. ";
+
+const STORY = {
+  // ---- Act I
+  shutter: { n: 1, seconds: 4, title: "Nine o'clock", prompt:
+    HER + "seen from across a quiet, clean Indian high street in early morning light, " +
+    "pushing up the metal shutter of her boutique and stepping inside. Wide, static, " +
+    "the street empty around her." },
+  counter: { n: 2, seconds: 8, title: "Already asking", prompt:
+    SHOP + HER + "stands behind the counter with her bag still on her shoulder, looking " +
+    "down at a phone held in both hands. She does not put the bag down. Mid shot, " +
+    "static, morning light from the left." },
+  qprice: { n: 3, seconds: 4, title: "Price. Size.", prompt:
+    "Insert, close on a phone held in a woman's hands over a pale wood counter. Her " +
+    "thumbs type continuously. The screen shows a column of plain grey message bubbles " +
+    "with no readable text in any of them. Nothing else in frame." },
+  qdeliver: { n: 4, seconds: 4, title: "Do you deliver", prompt:
+    SHOP + HER + "at the counter, phone in one hand, the other hand reaching for a " +
+    "paper notebook and then stopping halfway. Close on her face and hands, she does " +
+    "not look up. Static." },
+
+  // ---- Act II
+  waiting: { n: 5, seconds: 8, title: "Someone is at the rail", prompt:
+    SHOP + "Wide two-shot: a customer stands at the rail holding a garment on its " +
+    "hanger, looking toward the counter and waiting. " + HER + "is behind the counter " +
+    "in the background, head down, typing. Neither speaks. Static, both in frame." },
+  thumbs: { n: 6, seconds: 4, title: "Still typing", prompt:
+    "Insert, very close on two thumbs typing fast on a phone screen showing plain grey " +
+    "message bubbles with no readable text. Shallow focus, warm daylight, a pale wood " +
+    "counter blurred beneath." },
+  walkout: { n: 7, seconds: 4, title: "She puts it back", prompt:
+    SHOP + "A customer hangs a garment back on the rail, turns, and walks out of the " +
+    "shop door into daylight. Seen from behind at mid distance. One continuous move, " +
+    "she does not look back." },
+  noticed: { n: 8, seconds: 4, title: "Too late", prompt:
+    SHOP + HER + "finally lifts her eyes from the phone toward the empty doorway. Close " +
+    "on her face. She does not move. Static, the shop quiet around her." },
+
+  // ---- Act III
+  empty: { n: 9, seconds: 8, title: "After closing", prompt:
+    SHOP + "Evening, the shop closed and lit by one warm lamp. " + HER + "sits alone on " +
+    "the low bench with the emerald cushion, a laptop unopened on her knees, looking at " +
+    "the room. Wide, static, long hold." },
+  laptop: { n: 10, seconds: 8, title: "The thing put off", prompt:
+    "Close over a woman's shoulder onto an open laptop on her knees in a warm, dim " +
+    "shop at night. The screen is a soft blank pale glow with no interface, no icons " +
+    "and no writing. Her hands rest on the keys, still, then begin to move." },
+  shoot: { n: 11, seconds: 8, title: "Photographs", prompt:
+    HER + "photographing a single garment laid flat on a plain pale backdrop, holding " +
+    "her phone above it with both hands. Overhead-ish mid shot, daylight, calm and " +
+    "methodical. The garment is unbranded and plain." },
+  tape: { n: 12, seconds: 4, title: "Boxes", prompt:
+    "Insert, close on a pale wood bench: a woman's hands fold one rigid brown " +
+    "corrugated cardboard box closed and press tape along the seam. The box is firm " +
+    "and cubic and keeps its exact shape and size in every frame. Two identical closed " +
+    "boxes beside it. Hands and forearms only." },
+
+  // ---- Act IV
+  orders: { n: 13, seconds: 8, title: "They arrive answered", prompt:
+    SHOP + HER + "at the counter in morning light, glancing once at a phone lying " +
+    "face-up beside her and then away, unbothered. She is folding a garment with both " +
+    "hands and keeps folding. Mid shot, static, unhurried." },
+  morning2: { n: 14, seconds: 8, title: "Nine o'clock again", prompt:
+    HER + "seen from across the same quiet clean Indian high street in early morning " +
+    "light, unlocking her boutique and walking in without hurrying. Wide, static, " +
+    "identical framing to the opening shot, but her pace is easy." },
+  facedown: { n: 15, seconds: 4, title: "It can wait", prompt:
+    "Insert, close on a phone lying face-down on a pale wood counter beside a folded " +
+    "garment and a small emerald vase. A hand comes into frame, does not pick the phone " +
+    "up, and takes the garment instead. Warm daylight." },
+  serving: { n: 16, seconds: 4, title: "With someone real", prompt:
+    SHOP + HER + "standing at the rail beside a customer, both looking at a garment " +
+    "she is holding up, talking. The phone is nowhere in frame. Mid two-shot, warm " +
+    "daylight, relaxed." },
+};
+
 const AR = "9:16";
 const SECONDS = 8;                       // default; a shot may override it
 /** Veo accepts 4, 6 or 8 — 5 is rejected as "out of bound". */
@@ -266,8 +361,9 @@ const SET = process.argv.includes("--set")
   : "film";
 const SHOTSETS = { film: { shots: SHOTS, house: HOUSE, prefix: "" },
                    ugc:  { shots: UGC,   house: UGC_HOUSE, prefix: "ugc-" },
-                   spot: { shots: SPOT,  house: SPOT_HOUSE, prefix: "spot-" } };
-if (!SHOTSETS[SET]) { console.error(`Unknown --set "${SET}". Try: film, ugc, spot`); process.exit(1); }
+                   spot: { shots: SPOT,  house: SPOT_HOUSE, prefix: "spot-" },
+                   story:{ shots: STORY, house: HOUSE,      prefix: "st-" } };
+if (!SHOTSETS[SET]) { console.error(`Unknown --set "${SET}". Try: film, ugc, spot, story`); process.exit(1); }
 const ACTIVE = SHOTSETS[SET];
 
 /** Veo answers 503 with an empty body under load, often enough that a single
