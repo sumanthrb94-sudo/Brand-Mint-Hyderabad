@@ -1817,6 +1817,80 @@
           "img": "/images/sc-handoff.png"
         }
       ]
+    },
+    {
+      "id": "the-one-who-left",
+      "title": "The one who left",
+      "batch": "film",
+      "note": "The carousel companion to the 30s film. Every photo is a frame cut from the reel itself — same woman, same street, same boutique — so a follower who saw the reel recognises this in the grid instead of reading it as a different account.",
+      "slides": [
+        {
+          "kind": "loud",
+          "tag": "Hyderabad shops",
+          "huge": "SHE WAS|LOOKING|FOR YOU",
+          "accent": true,
+          "sub": "She found a phone number, a WhatsApp, and nothing else.",
+          "foot": "Swipe →",
+          "img": "/images/film-look.jpg"
+        },
+        {
+          "kind": "loud",
+          "tag": "And then",
+          "huge": "SO SHE|WENT|SOMEWHERE ELSE",
+          "accent": true,
+          "sub": "No missed call. No message. Nothing that tells you it happened.",
+          "img": "/images/film-pass.jpg",
+          "note": "No 'light' here: the light treatment sets near-black ink, which is what the bright plates want. film-pass is a dark street frame and 'SO SHE WENT' disappeared into it."
+        },
+        {
+          "kind": "statement",
+          "kicker": "Meanwhile, at the counter",
+          "head": "You are on the phone answering the same four questions.",
+          "body": "Price. Size. Do you deliver. Is it in stock. Every day, to different people, in your own handwriting.",
+          "img": "/images/film-call.jpg"
+        },
+        {
+          "kind": "statement",
+          "kicker": "The cost nobody counts",
+          "head": "Someone is at the rail while you type.",
+          "body": "She waits. You keep typing. She puts it back and walks out — and that one is not a missed call either.",
+          "img": "/images/film-wait.jpg"
+        },
+        {
+          "kind": "list",
+          "kicker": "What a store answers for you",
+          "head": "Four questions, written down once.",
+          "items": [
+            "Prices, on the page, in writing",
+            "Sizes and stock, without a reply",
+            "UPI, cards, cash on delivery",
+            "GST invoices, generated automatically",
+            "Orders straight to WhatsApp, already answered"
+          ]
+        },
+        {
+          "kind": "statement",
+          "kicker": "And then it just goes out",
+          "head": "Packed, taped, gone — while you serve the person in front of you.",
+          "body": "You still open at nine. The phone still lights up. You are simply not the one who has to answer it.",
+          "img": "/images/film-tape.jpg"
+        },
+        {
+          "kind": "price",
+          "kicker": "Fixed price, in writing",
+          "head": "Online store",
+          "price": "₹49,999",
+          "sub": "from · one time · GST extra",
+          "body": "Four tiers, each including everything in the one before it. A static website starts at ₹14,999. Price and scope agreed in an agreement before anyone starts work — nothing is due until you sign it."
+        },
+        {
+          "kind": "cta",
+          "kicker": "Hyderabad · HITEC City",
+          "head": "Book a 30-minute call.",
+          "em": "Or just tell us who walked out.",
+          "body": "Comment the question you answer most and we will show you exactly where it lives on a page. Every price is on brandmintstudios.in — no call needed to see it."
+        }
+      ]
     }
   ]
 }

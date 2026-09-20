@@ -1619,3 +1619,38 @@ Fifth tag: `#ecommerceindia`
 
 ---
 
+
+
+## 29 · The one who left  — `the-one-who-left`
+
+The carousel companion to the 30s film. Every photo is a frame cut from the
+reel itself, so a follower who saw the reel recognises this in the grid.
+**Post it 2–3 days after the reel, not the same day** — the point is that the
+second post is already familiar, and that only works once the first has been
+seen.
+
+> A Hyderabad shop owner never finds out about the customer who left.
+
+> She searched, found a phone number and a WhatsApp, and went somewhere else.
+> There is no missed call for that. No message. Nothing that tells you it
+> happened.
+>
+> Meanwhile you are on the phone answering the same four questions — price,
+> size, do you deliver, is it in stock — while someone stands at the rail
+> waiting for you to look up.
+>
+> A store answers all four once. Your own domain. UPI, cash on delivery, GST
+> invoices, orders straight to WhatsApp, already answered.
+>
+> From ₹49,999. Fixed price, in writing, before anyone starts work.
+>
+> Which of the four do you answer most? Tell us in the comments and we will
+> show you exactly where it lives on a page.
+>
+> #hyderabadbusiness #smallbusinessindia #hyderabadshops #onlinestoreindia
+> #shopowners
+
+**Alt text:** Eight slides. A woman on a Hyderabad street looks at her phone;
+she walks away; a boutique owner takes a call while a customer waits at a
+clothes rail; a list of the four questions a store answers on its own; an
+order being taped shut; the price, ₹49,999; and a closing card inviting a call.
