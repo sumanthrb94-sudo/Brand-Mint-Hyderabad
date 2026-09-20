@@ -1,0 +1,14 @@
+[
+  { "id": "1", "name": "Chanderi silk kurta", "price": 2400, "mrp": 2999,
+    "category": "New in", "variants": ["S", "M", "L", "XL"], "stock": 6,
+    "blurb": "Hand-block printed, unlined, with a mandarin collar.", "images": [] },
+  { "id": "2", "name": "Cotton straight pants", "price": 1250, "mrp": 0,
+    "category": "Best sellers", "variants": ["S", "M", "L"], "stock": 12,
+    "blurb": "Wide waistband, two deep pockets.", "images": [] },
+  { "id": "3", "name": "Ikat dupatta", "price": 1800, "mrp": 0,
+    "category": "New in", "variants": [], "stock": 0,
+    "blurb": "Pochampally weave, 2.4 metres.", "images": [] },
+  { "id": "4", "name": "Linen shirt dress", "price": 3200, "mrp": 3800,
+    "category": "Best sellers", "variants": ["M", "L"], "stock": null,
+    "blurb": "Full-length placket, side slits.", "images": [] }
+]

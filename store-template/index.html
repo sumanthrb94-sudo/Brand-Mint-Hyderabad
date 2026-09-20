@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>{store}</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="top-in">
+      <a class="brand" href="/">
+        <span data-store-name>Store</span>
+        <small data-store-tagline></small>
+      </a>
+      <span class="spacer"></span>
+      <a class="cart-btn" href="/cart.html">
+        Cart <span class="cart-n" data-cart-count hidden>0</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1 data-store-name>Store</h1>
+      <p data-store-tagline></p>
+    </section>
+
+    <div class="bar">
+      <div id="cats" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      <input class="search" id="q" type="search" placeholder="Search" aria-label="Search products" />
+    </div>
+
+    <section class="grid" id="grid" aria-live="polite"></section>
+  </main>
+
+<script type="module">
+  import { STORE } from "/store.config.js";
+  import { chrome } from "/shared/boot.js";
+  import * as cat from "/shared/catalogue.js";
+  import { inr } from "/shared/money.js";
+
+  chrome();
+
+  const grid = document.getElementById("grid");
+  const cats = document.getElementById("cats");
+  const q = document.getElementById("q");
+  let active = "All";
+
+  for (const c of STORE.categories) {
+    const b = document.createElement("button");
+    b.className = "chip"; b.type = "button"; b.textContent = c;
+    b.setAttribute("aria-pressed", String(c === active));
+    b.onclick = () => { active = c; paintChips(); render(); };
+    cats.appendChild(b);
+  }
+  const paintChips = () => [...cats.children].forEach((b) =>
+    b.setAttribute("aria-pressed", String(b.textContent === active)));
+
+  function card(p) {
+    const a = document.createElement("a");
+    a.className = "card";
+    a.href = `/product.html?id=${encodeURIComponent(p.id)}`;
+    const shot = p.images[0]
+      ? `<img class="shot" src="${p.images[0]}" alt="${p.name}" loading="lazy" width="430" height="537" />`
+      : `<div class="shot">${STORE.name}</div>`;
+    // MRP is only struck through when it is genuinely higher than the price.
+    // A "was" price that is not a real previous price is a legal problem for
+    // the shop under the consumer protection rules, not a design flourish.
+    const mrp = p.mrp > p.price ? `<span class="mrp">${inr(p.mrp)}</span>` : "";
+    a.innerHTML = `${shot}
+      <div class="card-b">
+        <h3>${p.name}</h3>
+        <p class="price">${inr(p.price)}${mrp}</p>
+        ${cat.inStock(p) ? "" : '<span class="soldout">Sold out</span>'}
+      </div>`;
+    return a;
+  }
+
+  async function render() {
+    const term = q.value.trim();
+    let list = term ? await cat.search(term) : await cat.byCategory(active);
+    if (term && active !== "All") list = list.filter((p) => p.category === active);
+    grid.replaceChildren();
+    if (!list.length) {
+      const e = document.createElement("p");
+      e.className = "empty";
+      e.textContent = term ? `Nothing matches “${term}”.` : "Nothing here yet.";
+      grid.appendChild(e);
+      return;
+    }
+    // In-stock first: a grid that opens on three sold-out items reads as a
+    // dead shop, and the client notices that on the demo call.
+    list.sort((a, b) => Number(cat.inStock(b)) - Number(cat.inStock(a)));
+    for (const p of list) grid.appendChild(card(p));
+  }
+
+  let t; q.addEventListener("input", () => { clearTimeout(t); t = setTimeout(render, 120); });
+  render();
+</script>
+</body>
+</html>
