@@ -52,3 +52,53 @@ double them up and land lower.
 **The last 4.65s is the end card**, holding the URL and the WhatsApp number
 while the reel loops. Do not trim the tail to "tighten" it — that is the only
 part of the film carrying a way to get in touch.
+
+
+---
+
+# The all-Veo cut — `brandmint-veo-30s-subs.mp4`
+
+Same voiceover and same subtitles as the film above; the difference is beat 3.
+The screen cut shows the actual site on a phone, this one shows the shop
+floor. **Do not post them on the same day with the same caption** — to anyone
+who saw the first, a near-identical caption on near-identical footage reads as
+a repost. This caption leads with the story rather than the offer, so the two
+posts earn their own place.
+
+## Caption
+
+> A Hyderabad shop owner loses a sale every time she is mid-reply.
+>
+> Someone is at the rail with a question. The phone has four more. She answers
+> the phone, and the person in front of her puts it back and walks out.
+>
+> That is not a service problem. It is a missing storefront.
+>
+> Price, sizes, stock and delivery — written down once, on your own domain.
+> UPI, cash on delivery, GST invoices, orders straight to WhatsApp.
+>
+> Fixed price, in writing, before anyone starts work.
+>
+> Be honest — how many sales have you lost while typing? Tell us in the
+> comments, and comment TIERS and we will send the four store tiers.
+>
+> #hyderabadbusiness #retailindia #hyderabadshops #smallbusinessowner
+> #boutiquebusiness
+
+## Alt text
+
+> A 30-second film: a woman on a Hyderabad street checks her phone and walks
+> on; a boutique owner takes yet another call while a customer waits at the
+> rail; an order is boxed, taped and carried out; the film ends on Brand
+> Mint's name, web address and WhatsApp number.
+
+## Posting notes
+
+Five hashtags again, and only one repeated from the caption above
+(`#hyderabadbusiness`) — reusing an identical set across two posts is what
+makes both look automated.
+
+The three notes from the first film all still apply: music goes in the
+composer and not in the file, do not let Instagram add its own captions over
+the burned-in ones, and do not trim the tail — the end card is the only place
+the film gives anyone a way to make contact.
