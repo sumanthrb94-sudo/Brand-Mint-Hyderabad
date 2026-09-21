@@ -76,6 +76,7 @@ export const WORK = [
 export const BUILDING = [
   { id: "modcon-hr", name: "Modcon HR", kind: "HR tool", status: "In development" },
   { id: "realestate-crm", name: "Real Estate CRM", kind: "Sales CRM", status: "Upcoming" },
+  { id: "lehart", name: "Lehart", kind: "Online store", status: "In development" },
 ];
 
 /**
