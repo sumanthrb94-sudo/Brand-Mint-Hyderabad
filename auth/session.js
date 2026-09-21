@@ -268,7 +268,12 @@ async function claimPendingInvites(fb, user) {
  * Idempotent per (uid, tier): re-signing in with the same tier updates the
  * profile but does not create a second lead.
  */
-export async function recordSignup({ tier = null, newsletter = false } = {}) {
+/** sendToolkit: whether this sign-in should trigger the free-toolkit email.
+ *  Defaults on, because a tier pick and a toolkit request both want it. A
+ *  returning client using "Client login" does NOT — before this flag every
+ *  re-authentication re-sent them the PDF pack, which reads as spam from the
+ *  studio that built their store. */
+export async function recordSignup({ tier = null, newsletter = false, sendToolkit = true } = {}) {
   const fb = await getClient();
   const user = await getUser();
   if (!user) return;
@@ -291,7 +296,7 @@ export async function recordSignup({ tier = null, newsletter = false } = {}) {
   // Join the mailing list and get the free toolkit emailed over. Fire and
   // forget on purpose: signing in must succeed even if Resend is down or
   // isn't configured yet, so nothing here is awaited or thrown.
-  try {
+  if (sendToolkit) try {
     fetch("/api/subscribe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -127,13 +127,19 @@
       <div class="mark"><svg class="bm-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true" focusable="false"><defs><linearGradient id="bmg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF6C8"/><stop offset="1" stop-color="#10B981"/></linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#bmg)"/><path class="bm-mark-m" pathLength="100" d="M18 44V20l14 12 14-12v24" stroke="#0B1F1A" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg> Brand Mint</div>
 
       <div class="form">
-      <h1 id="title">Get the free store toolkit</h1>
+      <!-- THE DEFAULT IS THE CLIENT STATE. This page is reached three ways
+           and the markup used to assume the least common one: it opened on
+           "Get the free store toolkit" for everyone, so a returning client
+           clicking the nav — and anyone arriving from ?next=, ?signedout=1 or
+           ?denied=1 — was offered a PDF. The script below switches to the
+           toolkit or tier copy only when the URL says so. -->
+      <h1 id="title">Sign in to your project</h1>
       <p class="sub" id="subtitle">
-        Sign in with Google and we'll email it over straight away. Yours to
-        keep whether or not you ever work with us.
+        Your timeline, files and invoices are in the portal. Use the Google
+        account you signed up with.
       </p>
 
-      <ul class="perks" id="perks">
+      <ul class="perks" id="perks" hidden>
         <li><strong>Launch-readiness checklist</strong><span>The 20-point pass every store we build clears before it goes live.</span></li>
         <li><strong>Product catalogue template</strong><span>Every field we ask a client for, on one printable page.</span></li>
         <li><strong>Scope worksheet</strong><span>Work out what you need before anyone quotes you.</span></li>
@@ -196,7 +202,7 @@
         recordSignup,
         cleanAuthParamsFromUrl,
         peekSession,
-      } from "/auth/session.js?v=clean2";
+      } from "/auth/session.js?v=clean3";
       import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean5";
       import { SERVICE_BY_ID, priceLabel } from "/shared/services.js?v=2";
       import { track } from "/shared/analytics.js?v=1";
@@ -241,10 +247,30 @@
         statusEl.hidden = false;
       }
 
+      /* One page, three arrivals, three headlines:
+           tier     ?tier=growth           "Almost there"     a buyer, mid-decision
+           toolkit  ?for=toolkit           "Get the free…"    came for the PDFs
+           client   bare, ?next, ?signedout, ?denied — a client (or someone
+                    who clicked "Client login" and is about to find out it
+                    is not for them, which is the honest outcome).
+         Before this, the nav's "Sign in" and the tier CTAs were the same
+         button with two jobs, and the nav one landed on the toolkit pitch. */
+      const mode = tier ? "tier" : params.get("for") === "toolkit" ? "toolkit" : "client";
+
+      if (mode === "toolkit") {
+        document.getElementById("perks").hidden = false;
+        document.getElementById("title").textContent = "Get the free store toolkit";
+        document.getElementById("subtitle").textContent =
+          "Sign in with Google and we'll email it over straight away. Yours to keep whether or not you ever work with us.";
+      }
+      if (mode === "client") {
+        // A returning client is not asked to re-consent to a newsletter.
+        document.querySelector(".opt").hidden = true;
+      }
+
       // Show which store they picked, so the sign-in feels like step one of
       // that choice rather than a generic login wall.
       if (tier) {
-        document.getElementById("perks").hidden = true;
         document.getElementById("tier").hidden = false;
         document.getElementById("tier-name").textContent = tier.name;
         document.getElementById("tier-weeks").textContent = svc
@@ -278,7 +304,7 @@
           const profile = await getProfile({ force: true });
           if (!profile) { stage(null); return; }
           // A signed-in visitor picking a new tier still gets it recorded.
-          if (tier) await recordSignup({ tier: tier.id, newsletter: newsletter.checked });
+          if (tier) await recordSignup({ tier: tier.id, newsletter: newsletter.checked, sendToolkit: true });
           stage(2);
           location.replace(next && next.startsWith("/") ? next : homeFor(profile));
         } catch (e) {
@@ -302,7 +328,8 @@
 
           // Consent is implied by the button per the line above it; the
           // newsletter is the one genuinely optional thing, so it's a tick.
-          await recordSignup({ tier: tier?.id || null, newsletter: newsletter.checked });
+          await recordSignup({ tier: tier?.id || null, newsletter: newsletter.checked,
+                               sendToolkit: mode !== "client" });
           track("signin_success", { tier: tier?.id || null, newsletter: newsletter.checked });
 
           stage(2);

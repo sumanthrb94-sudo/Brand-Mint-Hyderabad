@@ -18,7 +18,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v30" />
+<link rel="stylesheet" href="/styles.css?v=v31" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
@@ -52,7 +52,7 @@
         <a href="/platform">Site + CRM</a>
       </nav>
       <div class="nav-actions">
-        <a class="btn btn-ghost" href="/login" data-auth-show="signed-out">Sign in</a>
+        <a class="nav-login" href="/login" data-auth-show="signed-out">Client login</a>
         <a class="btn btn-primary" href="/portal" data-auth-show="client">My project</a>
         <a class="btn btn-primary" href="/admin" data-auth-show="admin">Admin</a>
       </div>
@@ -122,7 +122,7 @@
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20pricing." rel="noopener">Book a call on WhatsApp</a>
-          <a class="btn btn-ghost btn-lg" href="/login">Sign in for the free resources</a>
+          <a class="btn btn-ghost btn-lg" href="/login?for=toolkit">Get the free resources</a>
         </div>
       </section>
     </main>
@@ -137,7 +137,7 @@
         <a href="/platform">Site + CRM</a>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
-        <a href="/login">Sign in</a>
+        <a href="/login">Client login</a>
       </nav>
     </footer>
 
