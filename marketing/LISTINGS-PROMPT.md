@@ -20,7 +20,7 @@ something not in the facts, ask me — do not guess.
 - Pricing page: https://brandmintstudios.in/pricing
 - Category: Website designer (secondary: web development / e-commerce development / internet marketing)
 - Founded: 2026
-- Team size: 1–10
+- Team size: 1 (solo founder). On every site pick the smallest bracket offered — LinkedIn "0–1 employees", Clutch "1", others "1–10" only if nothing smaller exists. Never a bracket that implies staff.
 - Business type: service-area business, no storefront, no walk-in address
 - Service area: Hyderabad, Secunderabad, and all of Telangana
 - City / state / country: Hyderabad, Telangana, India
@@ -67,7 +67,7 @@ Go to https://business.google.com/create.
 
 Go to https://www.linkedin.com/company/setup/new/.
 - Page type → Company. Name → Brand Mint Studios. LinkedIn public URL → linkedin.com/company/brandmintstudios (if taken, try brand-mint-studios).
-- Website, industry (IT Services and IT Consulting), company size (2–10), type (Self-Owned), tagline → the one-liner.
+- Website, industry (IT Services and IT Consulting), company size (0–1 employees), type (Self-Owned), tagline → the one-liner.
 - About → the long description. Location → Hyderabad, Telangana (headquarters, no street needed).
 - Pause at the logo upload.
 - Tell me the page URL when done.
@@ -87,7 +87,7 @@ Go to https://www.sulekha.com/free-listing (or search "Sulekha business listing 
 ## Site 5 — Clutch (free agency profile)
 
 Go to https://clutch.co/get-listed.
-- Company name, website, email, founder name, location Hyderabad, employees 1–10, founded 2026, min project size $500 (₹49,999 ≈ $600), hourly rate: choose "< $25 / hr".
+- Company name, website, email, founder name, location Hyderabad, employees 1, founded 2026, min project size $500 (₹49,999 ≈ $600), hourly rate: choose "< $25 / hr".
 - Service lines → Web Development 60%, E-Commerce Development 30%, Web Design 10%.
 - Description → long version. Skip anything asking for client references or reviews for now.
 - Stop at email verification.
