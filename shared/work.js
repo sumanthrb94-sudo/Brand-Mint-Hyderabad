@@ -29,7 +29,7 @@ export const WORK = [
     url: "https://simplysip.in",
     kind: "Online store",
     summary:
-      "Sold through WhatsApp DMs. Now customers check out themselves — UPI, cards or cash on delivery — and every order arrives priced and recorded.",
+      "Sold through WhatsApp DMs, one at a time, the ordinary way. Now it runs itself — UPI, cards or cash on delivery — and every order arrives priced and recorded, no one typing it up by hand.",
     result: "",
     quote: "",
     quoteFrom: "",
@@ -41,7 +41,7 @@ export const WORK = [
     url: "https://tresorcouture.in",
     kind: "Online store",
     summary:
-      "Sold to whoever walked in. Now the label reaches past the shop floor, with its own checkout and a GST invoice on every order.",
+      "Orders used to be tracked by hand — a notebook, a memory. Now every order is recorded the moment it's placed, with its own checkout and a GST invoice, and nothing depends on someone remembering it.",
     result: "",
     quote: "",
     quoteFrom: "",
@@ -53,7 +53,7 @@ export const WORK = [
     url: "https://thegreenteam.in",
     kind: "Website",
     summary:
-      "The pitch used to be a PDF catalogue, sent on request. Now the site does that part before the call, not after it.",
+      "The pitch used to be a PDF catalogue, sent on request after someone already called. Now the site brings people in and makes the case itself, before the call ever happens.",
     result: "",
     quote: "",
     quoteFrom: "",
