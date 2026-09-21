@@ -18,7 +18,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v31" />
+<link rel="stylesheet" href="/styles.css?v=v32" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
@@ -35,6 +35,154 @@
         } catch (e) {}
         html.setAttribute("data-auth-state", "signed-out");
       })();
+    </script>
+      <!-- STATIC ON PURPOSE. Search engines read markup far more reliably than
+         prices rendered by JavaScript, so these are written out rather than
+         pulled from shared/tiers.js. When a price changes there, change it
+         here too — SEO.md carries the same warning for index.html. -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "OfferCatalog",
+  "name": "Brand Mint — online store tiers and care plans",
+  "url": "https://brandmintstudios.in/pricing",
+  "itemListElement": [
+    {
+      "@type": "Offer",
+      "name": "WhatsApp Store",
+      "price": "49999",
+      "priceCurrency": "INR",
+      "url": "https://brandmintstudios.in/pricing",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "WhatsApp Store",
+        "description": "A complete online store run from your phone: orders, returns and customers handled on WhatsApp. 4 weeks.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Brand Mint",
+          "url": "https://brandmintstudios.in/"
+        }
+      }
+    },
+    {
+      "@type": "Offer",
+      "name": "Starter Store",
+      "price": "99000",
+      "priceCurrency": "INR",
+      "url": "https://brandmintstudios.in/pricing",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Starter Store",
+        "description": "Everything in the WhatsApp Store plus customer accounts, order emails and GST invoice PDFs. 8 weeks.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Brand Mint",
+          "url": "https://brandmintstudios.in/"
+        }
+      }
+    },
+    {
+      "@type": "Offer",
+      "name": "Growth Store",
+      "price": "200000",
+      "priceCurrency": "INR",
+      "url": "https://brandmintstudios.in/pricing",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Growth Store",
+        "description": "Everything in Starter plus courier integration, live tracking, coupons, abandoned-cart recovery and reporting. 12 weeks.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Brand Mint",
+          "url": "https://brandmintstudios.in/"
+        }
+      }
+    },
+    {
+      "@type": "Offer",
+      "name": "Commerce Store",
+      "price": "300000",
+      "priceCurrency": "INR",
+      "url": "https://brandmintstudios.in/pricing",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Commerce Store",
+        "description": "Everything in Growth plus staff roles, advanced reporting, reviews, wishlist and loyalty. 12+ weeks.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Brand Mint",
+          "url": "https://brandmintstudios.in/"
+        }
+      }
+    },
+    {
+      "@type": "Offer",
+      "name": "Care plan",
+      "priceCurrency": "INR",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "12500",
+        "priceCurrency": "INR",
+        "unitText": "per month",
+        "billingIncrement": 1
+      },
+      "url": "https://brandmintstudios.in/pricing#care",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Care plan",
+        "description": "Hosting, SSL, security updates, backups, uptime monitoring and small fixes.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Brand Mint"
+        }
+      }
+    },
+    {
+      "@type": "Offer",
+      "name": "Growth plan",
+      "priceCurrency": "INR",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "25000",
+        "priceCurrency": "INR",
+        "unitText": "per month",
+        "billingIncrement": 1
+      },
+      "url": "https://brandmintstudios.in/pricing#care",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Growth plan",
+        "description": "Everything in Care, plus content updates, a monthly report and one small feature each month.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Brand Mint"
+        }
+      }
+    },
+    {
+      "@type": "Offer",
+      "name": "Managed Commerce plan",
+      "priceCurrency": "INR",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "50000",
+        "priceCurrency": "INR",
+        "unitText": "per month",
+        "billingIncrement": 1
+      },
+      "url": "https://brandmintstudios.in/pricing#care",
+      "itemOffered": {
+        "@type": "Service",
+        "name": "Managed Commerce plan",
+        "description": "Everything in Growth, plus catalogue operations, campaign management and priority support.",
+        "provider": {
+          "@type": "Organization",
+          "name": "Brand Mint"
+        }
+      }
+    }
+  ]
+}
     </script>
   </head>
 

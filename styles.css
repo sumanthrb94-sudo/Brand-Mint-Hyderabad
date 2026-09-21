@@ -749,7 +749,6 @@ html.js [data-reveal].is-in { opacity: 1; transform: none; }
 .feature h3 { font-size: 16px; font-weight: 600; }
 .feature p { margin-top: 8px; font-size: 14px; line-height: 1.55; color: var(--muted); }
 
-
 /* ---------------------------------------------------------- services ---- */
 
 .services { display: flex; flex-direction: column; gap: var(--s-4); }
@@ -1082,33 +1081,6 @@ html.js [data-reveal].is-in { opacity: 1; transform: none; }
 
 /* ---- What we need. Numbered because it is a checklist of four, and the
         count is the reassurance — it is four things, not an open list. ---- */
-.needs {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  counter-reset: need;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--s-6) var(--s-7);
-}
-.needs li { counter-increment: need; }
-.needs li::before {
-  content: counter(need, decimal-leading-zero);
-  display: block;
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  color: var(--mint-deep);
-  margin-bottom: var(--s-2);
-}
-.needs h3 {
-  font-family: var(--display);
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 var(--s-2);
-  text-wrap: balance;
-}
-.needs p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.6; }
 
 /* ---- Sticky bar, two actions. A form is a commitment and a WhatsApp
         message is not, which in India is what decides whether an enquiry
@@ -1171,66 +1143,10 @@ html.js [data-reveal].is-in { opacity: 1; transform: none; }
   padding-block: var(--s-7);
 }
 
-/* ====================================================== showcase band ====
-   The register a phone launch uses — near-black ground, a coloured rim light,
-   the product standing in its own reflection. Everything here is drawn: a
-   photograph of a real handset would carry someone else's trademark and imply
-   a relationship that does not exist, and the screen is our own storefront.
-   ======================================================================== */
-.showcase {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background:
-    radial-gradient(120% 90% at 50% 115%, var(--bm-ink-2), transparent 62%),
-    linear-gradient(180deg, var(--bm-ink-deep), var(--bm-ink) 55%, var(--bm-ink-deep));
-  color: var(--cream);
-  padding-block: clamp(56px, 9vw, 104px);
-}
 /* One light source, behind the device, in the brand's green. Spending the
    colour in a single place is what keeps the section calm. */
-.showcase-glow {
-  position: absolute;
-  inset: auto -10% -30% auto;
-  right: 6%;
-  width: min(620px, 78vw);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 200, 151, 0.5), rgba(0, 200, 151, 0.12) 42%, transparent 68%);
-  filter: blur(46px);
-  z-index: -1;
-  pointer-events: none;
-}
-.showcase-inner {
-  max-width: var(--wrap, 1140px);
-  margin: 0 auto;
-  padding-inline: var(--s-5);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
-  gap: clamp(32px, 6vw, 72px);
-  align-items: center;
-}
-.showcase-copy .kicker { color: var(--emerald); }
-.showcase-copy h2 {
-  font-family: var(--display);
-  font-size: clamp(28px, 4.6vw, 46px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.06;
-  margin: var(--s-3) 0 0;
-  text-wrap: balance;
-}
-.showcase-copy h2 em { font-style: italic; color: var(--emerald); }
-.showcase-copy p {
-  margin: var(--s-4) 0 0;
-  max-width: 46ch;
-  color: var(--cream-mute);
-  line-height: 1.65;
-}
-.showcase-copy .btn { margin-top: var(--s-5); }
 
 /* ---- the device ---- */
-.showcase-stage { display: grid; justify-items: center; }
 .device {
   width: min(268px, 66vw);
   aspect-ratio: 9 / 19;
@@ -1290,9 +1206,6 @@ html.js [data-reveal].is-in { opacity: 1; transform: none; }
 }
 
 @media (max-width: 860px) {
-  .showcase-inner { grid-template-columns: 1fr; }
-  .showcase-stage { order: -1; }
-  .showcase-glow { right: 50%; transform: translateX(50%); bottom: auto; top: -12%; }
 }
 
 /* ======================================================================

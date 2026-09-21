@@ -11,7 +11,8 @@ told Google the Vercel URL was the real site.
 |---|---|---|
 | Title + description | `index.html` `<head>` | Title leads with the service, not the brand — nobody searches "Brand Mint" yet |
 | Canonical + Open Graph | every page `<head>` | All absolute, all on `brandmintstudios.in` |
-| Structured data (JSON-LD) | `index.html` | `ProfessionalService` (name, phone, HITEC City address, price range), an `OfferCatalog` of the four tiers with real prices, `WebSite`, and `FAQPage` |
+| Structured data (JSON-LD) | `index.html` | `ProfessionalService` (name, phone, HITEC City address, price range), an `OfferCatalog` of the five service lines (prices from `shared/services.js`), `WebSite`, and `FAQPage` |
+| Structured data (JSON-LD) | `pricing.html` | `OfferCatalog` of the four store tiers and the three care plans, prices from `shared/tiers.js` |
 | `robots.txt` | root | Allows the public pages, blocks `/admin`, `/portal`, `/login` and `?tier=` URLs |
 | `sitemap.xml` | root | Home, privacy, terms and the three free PDFs, with `lastmod` |
 | `noindex` | `portal.html`, `admin.html`, `login.html` | Belt and braces on top of robots.txt |
