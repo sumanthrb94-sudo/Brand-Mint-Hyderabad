@@ -1147,29 +1147,6 @@ html.js [data-reveal].is-in { opacity: 1; transform: none; }
    colour in a single place is what keeps the section calm. */
 
 /* ---- the device ---- */
-.device {
-  width: min(268px, 66vw);
-  aspect-ratio: 9 / 19;
-  padding: 9px;
-  border-radius: 34px;
-  background: linear-gradient(145deg, #6d7c76, #1b2b25 42%, #0a1512);
-  box-shadow:
-    0 0 0 1px rgba(245, 241, 234, 0.08),
-    0 40px 80px rgba(0, 0, 0, 0.55),
-    0 0 90px rgba(0, 200, 151, 0.18);
-}
-.device-screen {
-  height: 100%;
-  border-radius: 26px;
-  background: var(--paper);
-  color: var(--ink);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 12px 11px;
-  font-size: 10.5px;
-}
 .ds-bar { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 9px; }
 .ds-bar span { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); flex: none; }
 .ds-bar b { font-weight: 600; letter-spacing: 0.01em; }
@@ -1194,16 +1171,6 @@ html.js [data-reveal].is-in { opacity: 1; transform: none; }
   font-size: 10.5px;
 }
 /* The reflection is what makes a product shot read as a product shot. */
-.device-floor {
-  width: min(268px, 66vw);
-  height: 54px;
-  margin-top: -2px;
-  border-radius: 0 0 30px 30px;
-  background: linear-gradient(180deg, rgba(0, 200, 151, 0.16), transparent 72%);
-  filter: blur(7px);
-  transform: scaleY(-1);
-  opacity: 0.55;
-}
 
 @media (max-width: 860px) {
 }
