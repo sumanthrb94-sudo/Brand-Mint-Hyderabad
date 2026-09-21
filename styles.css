@@ -875,6 +875,9 @@ html.js [data-reveal].is-in { opacity: 1; transform: none; }
 .work-kind { font: 600 10.5px/1.4 var(--sans); letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
 .work-summary { margin-top: 6px; font-size: 14px; line-height: 1.55; color: var(--muted); }
 .work-result { margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--mint-deep); }
+.work-quote { margin: 10px 0 0; padding: 10px 0 0 12px; border-left: 2px solid var(--line); }
+.work-quote p { font-size: 13.5px; line-height: 1.55; color: var(--ink); font-style: italic; }
+.work-quote cite { display: block; margin-top: 4px; font: 600 12px/1.4 var(--sans); font-style: normal; color: var(--faint); }
 .work-link { margin-top: auto; padding-top: var(--s-4); font-size: 13.5px; }
 .work-link a { color: var(--mint-deep); font-weight: 600; text-decoration: none; text-underline-offset: 3px; }
 .work-link a:hover { text-decoration: underline; }

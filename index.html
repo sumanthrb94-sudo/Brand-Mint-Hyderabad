@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v32" />
+<link rel="stylesheet" href="/styles.css?v=v33" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -498,7 +498,7 @@
     <script type="module">
       import { TIERS, STEPS, FAQ, inr } from "/shared/tiers.js?v=v11";
       import { SERVICES } from "/shared/services.js?v=v11";
-      import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v10";
+      import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v11";
       // One import, one URL. Two imports of the same module under different
       // ?v= strings are two different URLs to the browser: it downloads the
       // file twice and instantiates two copies of the module graph.
@@ -585,6 +585,7 @@
             <p class="work-kind"></p>
             <p class="work-summary"></p>
             <p class="work-result num"></p>
+            <blockquote class="work-quote"><p></p><cite></cite></blockquote>
             <span class="work-link"></span>
           </div>
         `;
@@ -596,6 +597,12 @@
         if (w.summary) sum.textContent = w.summary; else sum.remove();
         const res = card.querySelector(".work-result");
         if (w.result) res.textContent = w.result; else res.remove();
+        const quote = card.querySelector(".work-quote");
+        if (w.quote) {
+          quote.querySelector("p").textContent = `"${w.quote}"`;
+          const cite = quote.querySelector("cite");
+          if (w.quoteFrom) cite.textContent = "— " + w.quoteFrom; else cite.remove();
+        } else quote.remove();
         const link = card.querySelector(".work-link");
         if (w.url) {
           const a = document.createElement("a");

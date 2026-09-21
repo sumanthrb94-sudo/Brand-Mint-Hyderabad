@@ -11,6 +11,12 @@
  * as nothing rather than as a guess, so a half-filled entry still looks
  * deliberate. Never write a metric here that isn't real.
  *
+ * `quote` and `quoteFrom` work the same way: empty renders as nothing. A
+ * quote goes in here only once the named person actually said it — paste
+ * their own words, in WhatsApp or wherever they sent it, not a paraphrase.
+ * `quoteFrom` is who said it and their role (e.g. "Priya, founder") — never
+ * a title you're guessing at.
+ *
  * IMAGES: drop a screenshot at /work/<id>.jpg (1600×1000, under 300 KB).
  * Missing images fall back to a typographic card automatically.
  */
@@ -25,6 +31,8 @@ export const WORK = [
     summary:
       "Sold through WhatsApp DMs. Now customers check out themselves — UPI, cards or cash on delivery — and every order arrives priced and recorded.",
     result: "",
+    quote: "",
+    quoteFrom: "",
   },
   {
     id: "tresorcouture",
@@ -35,6 +43,8 @@ export const WORK = [
     summary:
       "Sold to whoever walked in. Now the label reaches past the shop floor, with its own checkout and a GST invoice on every order.",
     result: "",
+    quote: "",
+    quoteFrom: "",
   },
   {
     id: "greenteam",
@@ -45,6 +55,8 @@ export const WORK = [
     summary:
       "The pitch used to be a PDF catalogue, sent on request. Now the site does that part before the call, not after it.",
     result: "",
+    quote: "",
+    quoteFrom: "",
   },
   {
     id: "freshkart",
@@ -55,6 +67,8 @@ export const WORK = [
     summary:
       "Wholesale orders came in by phone, one at a time. Now buyers place their own, priced correctly, without anyone picking up.",
     result: "",
+    quote: "",
+    quoteFrom: "",
   },
 ];
 
