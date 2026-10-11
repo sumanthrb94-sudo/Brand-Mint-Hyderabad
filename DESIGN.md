@@ -106,3 +106,35 @@ Two-series lines use the validated pair mint-deep `#047857` + gold `#C9A14A`
 chart carries a legend, direct end labels and a "Show as table" view.
 Single-series bars are mint-deep only. The heat map is one sequential hue,
 mint light → dark, never a rainbow.
+
+---
+
+## Mint v2 (Oct 2026) — the redesign layer
+
+The visual layer was redesigned without touching markup, data, routes or
+rules. Each stylesheet (`styles.css`, `portal/styles.css`,
+`admin/styles.css`) ends with a "MINT v2" block that overrides the original
+system above it — edit there first.
+
+- **Public pages**: a dark, lit hero (ink gradient, mint light pools, faint
+  engineering grid) with the floating glass-pill nav tucked over it; the nav
+  turns light once the hero scrolls away. Sections stay light; the service
+  ladder, tiers, fears, steps, care plans and FAQ are rounded cards (radius
+  12 / 18 / 26 / 32), pill buttons, the primary a mint gradient with a shine.
+- **Motion** (`shared/motion.js`, ported from motion-primitives): word-by-word
+  fade-in-blur on the hero headline, shimmer on the italic word, a border
+  trail on the featured tier/service, prices rolling up to their value on
+  scroll, a cursor spotlight on cards. Scroll reveals are a backwards-fill
+  animation, so hover lifts keep working. Everything is off under
+  `prefers-reduced-motion`.
+- **Portal and admin** follow the same tokens but stay light and quick:
+  fades ≤ 200 ms, nothing animated in the way of a click.
+
+### Prices read "Starting from"
+
+Every published price is a starting price; the exact figure is fixed in
+writing on the first call. The numbers live where they always did
+(`shared/services.js`, `shared/tiers.js`, `shared/platform.js`) and did not
+change. The label is added at render time (`priceLabel()`, the home and
+pricing templates, the portal's lead-state views). Invoices and amounts due
+are never labelled "from".
