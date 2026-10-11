@@ -8,8 +8,10 @@
 .wa-fab {
   position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom));
   z-index: 70;
-  display: inline-flex; align-items: center; gap: 10px;
-  height: 60px; padding: 0 15px; border-radius: 999px;
+  /* A true circle at rest: height = width = glyph + 2 × padding, and no gap
+     until the label opens, or the hidden label's gap pushes the mark off centre. */
+  display: inline-flex; align-items: center; justify-content: center; gap: 0;
+  height: 60px; min-width: 60px; padding: 0 15px; border-radius: 999px;
   background: linear-gradient(135deg, #7cf6c8 0%, #10b981 55%, #00c897 100%);
   color: #06140f; text-decoration: none;
   font: 700 15px/1 "Inter", system-ui, sans-serif;
@@ -18,9 +20,9 @@
   transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s cubic-bezier(0.23, 1, 0.32, 1), bottom 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   animation: waGlow 2.8s ease-in-out infinite;
 }
-.wa-fab .wa-glyph { vertical-align: 0; }
-.wa-fab-label { max-width: 0; overflow: hidden; white-space: nowrap; opacity: 0;
-  transition: max-width 0.35s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.25s; }
+.wa-fab .wa-glyph { vertical-align: 0; display: block; }
+.wa-fab-label { max-width: 0; margin-left: 0; overflow: hidden; white-space: nowrap; opacity: 0;
+  transition: max-width 0.35s cubic-bezier(0.23, 1, 0.32, 1), margin-left 0.35s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.25s; }
 /* the shine sweep */
 .wa-fab::after {
   content: ""; position: absolute; top: -20%; bottom: -20%; left: -70%; width: 45%; z-index: -1;
@@ -33,7 +35,8 @@
   box-shadow: 0 0 0 0 rgba(124, 246, 200, 0.6); animation: waRing 2.8s ease-out infinite; }
 @media (hover: hover) and (pointer: fine) {
   .wa-fab:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45) inset, 0 18px 44px -6px rgba(16, 185, 129, 0.85), 0 0 56px rgba(124, 246, 200, 0.6); }
-  .wa-fab:hover .wa-fab-label { max-width: 140px; opacity: 1; }
+  .wa-fab:hover { padding-right: 20px; }
+  .wa-fab:hover .wa-fab-label { max-width: 140px; margin-left: 10px; opacity: 1; }
 }
 .wa-fab:active { transform: scale(0.96); }
 .wa-fab:focus-visible { outline: 3px solid #7cf6c8; outline-offset: 3px; }
@@ -44,7 +47,7 @@
 /* Clear the home page's sticky phone bar and the portal's bottom tab bar. */
 body:has(.sticky-cta.is-on) .wa-fab { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 74px); }
 @media (max-width: 640px) {
-  .wa-fab { height: 56px; padding: 0 13px; }
+  .wa-fab { height: 56px; min-width: 56px; padding: 0 13px; }
   body:has(.p-tabs .p-tab) .wa-fab { bottom: calc(env(safe-area-inset-bottom) + 92px); }
 }
 /* The footer contact link */
