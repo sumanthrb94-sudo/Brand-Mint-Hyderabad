@@ -21,7 +21,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v33" />
+<link rel="stylesheet" href="/styles.css?v=v34" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -334,12 +334,13 @@
       <!-- WHAT WE DO -->
       <section class="section section--dark" id="services">
         <header class="section-head" data-reveal>
-          <p class="kicker">Five things, five prices</p>
+          <p class="kicker">Five things, five starting prices</p>
           <h2>Pick the one that matches where your business <em>actually is.</em></h2>
           <p>
-            Every price below is the price. There is no &ldquo;starting from&rdquo;
-            that quietly doubles, no discovery fee, and no quote that takes a
-            week to arrive. All prices exclude 18% GST.
+            Every price below is where that build starts. Your exact price is
+            fixed in writing on the first call, before any work begins — no
+            discovery fee, no quote that takes a week to arrive. All prices
+            exclude 18% GST.
           </p>
         </header>
         <ol class="offer-lines" id="offer-lines" data-reveal-group><!-- shared/services.js --></ol>
@@ -519,7 +520,7 @@
             <h3></h3>
             <p class="rung-weeks"></p>
           </div>
-          <p class="rung-price num"></p>
+          <p class="rung-price"><span class="from">Starting from</span><span class="num"></span></p>
           <div class="rung-body">
             <p class="rung-blurb"></p>
             <p class="rung-inherits"></p>
@@ -528,7 +529,7 @@
           </div>
         `;
         li.querySelector("h3").textContent = t.name;
-        li.querySelector(".rung-price").textContent = inr(t.price);
+        li.querySelector(".rung-price .num").textContent = inr(t.price);
         li.querySelector(".rung-weeks").textContent = t.weeks;
         li.querySelector(".rung-blurb").textContent = t.blurb;
         const inh = li.querySelector(".rung-inherits");
@@ -656,8 +657,8 @@
         const site = SERVICES.find((x) => x.id === "website");
         const store = SERVICES.find((x) => x.id === "store");
         if (site && store) {
-          hp.innerHTML = `Websites from <strong>${inr(site.from)}</strong>. `
-                       + `Online stores from <strong>${inr(store.from)}</strong>.`;
+          hp.innerHTML = `<span class="chip"><small>Websites · starting from</small> <strong>${inr(site.from)}</strong></span> `
+                       + `<span class="chip"><small>Online stores · starting from</small> <strong>${inr(store.from)}</strong></span>`;
         }
       }
 
@@ -671,10 +672,9 @@
         li.querySelector("div p:last-of-type").textContent = sv.blurb;
         const status = li.querySelector(".offer-status");
         if (sv.status) status.textContent = sv.status; else status.remove();
-        // "from" belongs on a range, not on a fixed one-time price — saying it
-        // everywhere is what makes a published price stop being believed.
-        li.querySelector(".offer-price .from").textContent =
-          sv.hidePrice ? "" : /from/i.test(sv.note || "") || sv.id === "store" ? "from" : "";
+        // Every published price is a starting price; the exact figure is
+        // fixed in writing on the first call.
+        li.querySelector(".offer-price .from").textContent = sv.hidePrice ? "" : "Starting from";
         li.querySelector(".offer-price .num").textContent =
           sv.hidePrice ? "Free trial" : inr(sv.from);
         lines.appendChild(li);
@@ -799,6 +799,7 @@
       new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; paint(); }, { threshold: 0.2 }).observe(closing);
       if (ladder) new IntersectionObserver(([e]) => { atLadder = e.isIntersecting; paint(); }, { threshold: 0 }).observe(ladder);
     </script>
+    <script type="module" src="/shared/motion.js?v=1"></script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
   </body>
 </html>

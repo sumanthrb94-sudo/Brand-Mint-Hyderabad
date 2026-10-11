@@ -18,7 +18,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v33" />
+<link rel="stylesheet" href="/styles.css?v=v34" />
 
     <!-- Prices mirror shared/platform.js — change both together. -->
     <script type="application/ld+json">
@@ -155,8 +155,8 @@
           <a class="btn btn-ghost btn-lg" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20Site%20%2B%20CRM." rel="noopener">WhatsApp us</a>
         </div>
         <ul class="hero-proof" data-enter style="--i:4">
-          <li><span class="num">₹79,999</span> setup</li>
-          <li><span class="num">₹9,999</span> per month</li>
+          <li>Setup starting from <span class="num">₹79,999</span></li>
+          <li>Monthly starting from <span class="num">₹9,999</span></li>
           <li><span class="num">6</span> weeks to live</li>
         </ul>
         <ul class="trust" data-enter style="--i:5" aria-label="What's connected">
@@ -275,12 +275,12 @@
         <div class="care" data-reveal-group>
           <div class="care-plan">
             <h3>Setup</h3>
-            <p class="care-price"><span class="num">₹79,999</span></p>
+            <p class="care-price"><span class="from">Starting from</span><span class="num">₹79,999</span></p>
             <p class="care-body">One-time, GST extra. 50% to start, 50% at launch.</p>
           </div>
           <div class="care-plan">
             <h3>Monthly</h3>
-            <p class="care-price"><span class="num">₹9,999/mo</span></p>
+            <p class="care-price"><span class="from">Starting from</span><span class="num">₹9,999/mo</span></p>
             <p class="care-body">GST extra. Hosting, support, updates, and the CRM staying up. 12-month minimum.</p>
           </div>
           <div class="care-plan">
@@ -410,6 +410,7 @@
       const nav = document.querySelector(".nav");
       new IntersectionObserver(([e]) => nav.classList.toggle("is-scrolled", !e.isIntersecting && e.boundingClientRect.top < 0), { threshold: 0 }).observe(document.querySelector(".hero"));
     </script>
+    <script type="module" src="/shared/motion.js?v=1"></script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
   </body>
 </html>

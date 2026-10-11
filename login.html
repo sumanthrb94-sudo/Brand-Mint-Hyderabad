@@ -28,13 +28,32 @@
         margin: 0; min-height: 100dvh; display: grid; place-items: center;
         padding: 32px 20px; font-family: var(--sans); color: var(--ink);
         background:
-          radial-gradient(900px 600px at 15% -10%, rgba(16,185,129,.16), transparent 60%),
-          #f5f1ea;
+          radial-gradient(900px 600px at 85% -10%, rgba(16,185,129,.30), transparent 60%),
+          radial-gradient(700px 500px at 0% 110%, rgba(0,200,151,.16), transparent 60%),
+          linear-gradient(165deg, #0b1f1a 0%, #06140f 70%, #040d0a 100%);
+        position: relative; isolation: isolate;
       }
+      /* Mint v2: the engineering grid and a drifting light, as on the site hero. */
+      body::before {
+        content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+        background-image: linear-gradient(rgba(245,241,234,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(245,241,234,.045) 1px, transparent 1px);
+        background-size: 64px 64px;
+        -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
+                mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
+      }
+      body::after {
+        content: ""; position: fixed; z-index: -1; pointer-events: none;
+        width: 560px; height: 560px; left: 55%; top: 10%; border-radius: 50%;
+        background: radial-gradient(circle, rgba(124,246,200,.22), transparent 70%); filter: blur(20px);
+        animation: drift 18s cubic-bezier(.77,0,.175,1) infinite alternate;
+      }
+      @keyframes drift { to { transform: translate(-420px, 260px) scale(1.2); } }
+      @keyframes cardIn { from { opacity: 0; transform: translateY(18px) scale(.98); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
       .card {
         width: 100%; max-width: 460px; background: #fff;
-        border: 1px solid var(--line); border-radius: 24px; padding: 38px 34px 30px;
-        box-shadow: 0 30px 80px rgba(11,31,26,.12);
+        border: 1px solid rgba(255,255,255,.6); border-radius: 28px; padding: 38px 34px 30px;
+        box-shadow: 0 40px 120px -20px rgba(0,0,0,.6), 0 0 0 1px rgba(124,246,200,.08);
+        animation: cardIn .8s cubic-bezier(.23,1,.32,1) both;
       }
       .mark { display: flex; align-items: center; gap: 10px; font: 700 17px var(--display); letter-spacing: -.02em; margin-bottom: 24px; }
       .mark .bm-mark { width: 30px; height: 30px; display: block; }
@@ -43,12 +62,12 @@
 
       .tier {
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
-        padding: 12px 14px; border-radius: 13px; margin-bottom: 20px;
-        background: var(--mint-wash); border: 1px solid #b8e8d3;
+        padding: 14px 16px; border-radius: 18px; margin-bottom: 20px;
+        background: linear-gradient(135deg, #e6f7f0, #d6f5e6); border: 1px solid #b8e8d3;
       }
       .tier b { font-family: var(--display); font-size: 15px; }
       .tier small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
-      .tier .price { font: 600 15px var(--mono); color: var(--mint-deep); white-space: nowrap; }
+      .tier .price { font: 600 14px var(--mono); color: var(--mint-deep); text-align: right; }
       .tier[hidden] { display: none; }
 
       .perks { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 11px; }
@@ -63,15 +82,16 @@
 
       .btn {
         width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
-        padding: 13px 18px; border-radius: 12px; font: 600 15px/1.3 var(--sans); text-align: center; cursor: pointer;
+        padding: 15px 18px; border-radius: 999px; font: 600 15px/1.3 var(--sans); text-align: center; cursor: pointer;
         border: 1px solid var(--line); background: #fff; color: var(--ink);
-        transition: border-color .15s, box-shadow .15s, transform .08s;
+        box-shadow: 0 1px 2px rgba(10,14,12,.05), 0 8px 24px -10px rgba(4,120,87,.35);
+        transition: border-color .15s, box-shadow .2s, transform .16s cubic-bezier(.23,1,.32,1);
       }
-      .btn:hover { border-color: #b9c8b8; box-shadow: 0 6px 20px rgba(11,31,26,.08); }
-      .btn:active { transform: translateY(1px); }
+      .btn:hover { border-color: var(--mint); box-shadow: 0 14px 34px -10px rgba(16,185,129,.55); transform: translateY(-1px); }
+      .btn:active { transform: scale(.98); }
       .btn[disabled] { opacity: .55; cursor: not-allowed; }
       :focus-visible { outline: 2px solid var(--mint-deep); outline-offset: 3px; border-radius: 4px; }
-      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } body::after, .card { animation: none !important; } }
 
       .consent { margin: 16px 0 4px; font-size: 13px; color: var(--muted); line-height: 1.55; }
       .consent a { color: var(--mint-deep); text-underline-offset: 3px; }
@@ -119,6 +139,9 @@
 
       .foot { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--faint); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
       .foot a { color: var(--muted); text-underline-offset: 3px; }
+      .mark { font-size: 18px; }
+      .mark .bm-mark { width: 34px; height: 34px; }
+      h1 { font-size: 30px; letter-spacing: -.035em; }
     </style>
     <script type="module" src="/shared/clarity.js?v=2"></script>
   </head>
@@ -204,7 +227,7 @@
         peekSession,
       } from "/auth/session.js?v=clean3";
       import { TIER_BY_ID, inr } from "/shared/tiers.js?v=clean5";
-      import { SERVICE_BY_ID, priceLabel } from "/shared/services.js?v=2";
+      import { SERVICE_BY_ID, priceLabel } from "/shared/services.js?v=3";
       import { track } from "/shared/analytics.js?v=1";
 
       const params = new URLSearchParams(location.search);
@@ -278,7 +301,7 @@
           : `Tier ${tier.tier} · ${tier.weeks}`;
         document.getElementById("tier-price").textContent = svc
           ? priceLabel(svc)
-          : inr(tier.price);
+          : `Starting from ${inr(tier.price)}`;
         document.getElementById("title").textContent = "Almost there";
         document.getElementById("subtitle").textContent =
           "Sign in with Google and we'll call you within one working day. You'll get the free toolkit either way.";

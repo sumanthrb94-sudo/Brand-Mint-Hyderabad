@@ -181,7 +181,7 @@ function tierCard(tierId) {
   if (!t) return null;
   return card(
     t.name,
-    `Tier ${t.tier} · ${inr(t.price)} · ${t.weeks} · GST extra`,
+    `Tier ${t.tier} · starting from ${inr(t.price)} · ${t.weeks} · GST extra`,
     h("p", { class: "p-muted", style: "margin:0 0 14px", text: t.blurb }),
     h("div", { class: "p-stack" }, t.groups.map((g) =>
       h("div", {}, [
@@ -231,11 +231,11 @@ function renderLeadState() {
       ? "Below is everything your store includes, what we'll need from you, and what happens next. Nothing is due until the agreement is signed."
       : "Everything we build is below, in detail. Choose one and we'll call you within one working day to confirm the scope." }),
     svc ? h("div", { class: "p-hero-stats" }, [
-      stat(svc.hidePrice ? "Pricing at launch" : inr(svc.from), svc.hidePrice ? "we'll tell you first" : svc.unit + ", GST extra"),
+      stat(svc.hidePrice ? "Pricing at launch" : inr(svc.from), svc.hidePrice ? "we'll tell you first" : "starting from, " + svc.unit + ", GST extra"),
       stat(svc.note || "—", svc.status || "what's included"),
       stat(svc.id === PLATFORM.id ? PLATFORM.weeks : "On the call", svc.id === PLATFORM.id ? "to live" : "we scope it"),
     ]) : tier ? h("div", { class: "p-hero-stats" }, [
-      stat(inr(tier.price), "one-time, GST extra"),
+      stat(inr(tier.price), "starting from, one-time, GST extra"),
       stat(tier.weeks, "to launch"),
       stat("50%", "deposit to start"),
     ]) : null,
@@ -389,7 +389,7 @@ function quizResult(r, repaint) {
         h("p", { class: "p-mono p-quiz-kicker", text: "Store readiness" }),
         h("h2", { text: scoreLabel(r.score) }),
         h("p", { class: "p-muted", text: fit
-          ? (isCurrent ? `The ${fit.name} matches how you operate — the one you picked.` : `How you operate fits the ${fit.name} (${inr(fit.price)}, ${fit.weeks}).`)
+          ? (isCurrent ? `The ${fit.name} matches how you operate — the one you picked.` : `How you operate fits the ${fit.name} (from ${inr(fit.price)}, ${fit.weeks}).`)
           : "" }),
         h("div", { class: "p-row", style: "margin-top:10px" }, [
           chooseBtn,
@@ -532,7 +532,7 @@ function inclusionsCard(tier) {
     ])
   );
   const total = chain.reduce((n, { tier: t }) => n + t.groups.reduce((m, g) => m + g.items.length, 0), 0);
-  return card(`Your store, in full`, `${total} deliverables · ${inr(tier.price)} + GST · ${tier.weeks}`, ...blocks);
+  return card(`Your store, in full`, `${total} deliverables · starting from ${inr(tier.price)} + GST · ${tier.weeks}`, ...blocks);
 }
 
 /** The other three tiers, each switchable in one click. */
@@ -543,7 +543,7 @@ function alternativesCard(tier) {
 }
 
 function allTiersCard() {
-  return card("The four stores", "One fixed price each, in INR, exclusive of 18% GST.",
+  return card("The four stores", "Starting prices, in INR, exclusive of 18% GST. Your exact price is fixed in writing on the call.",
     h("div", { class: "p-alts" }, TIERS.map((t) => tierAlt(t, null))));
 }
 
@@ -569,7 +569,7 @@ function tierAlt(t, current) {
     h("div", { class: "p-mono p-muted", style: "font-size:11px;letter-spacing:.14em;text-transform:uppercase", text: `Tier ${t.tier}` }),
     h("h3", { text: t.name }),
     h("p", { class: "p-muted", text: t.blurb }),
-    h("div", { class: "p-alt-price" }, [h("strong", { class: "p-mono", text: inr(t.price) }), h("span", { class: "p-muted", text: t.weeks })]),
+    h("div", { class: "p-alt-price" }, [h("small", { class: "p-muted", text: "Starting from" }), h("strong", { class: "p-mono", text: inr(t.price) }), h("span", { class: "p-muted", text: t.weeks })]),
     h("ul", { class: "p-alt-list" }, t.groups.flatMap((g) => g.items).slice(0, 4).map((it) => h("li", { text: it }))),
     btn,
   ]);
@@ -580,7 +580,7 @@ function tierAlt(t, current) {
 function serviceCard(svc) {
   const isPlatform = svc.id === PLATFORM.id;
   const sub = isPlatform
-    ? `${inr(PLATFORM.setup)} setup + ${inr(PLATFORM.monthly)}/mo, GST extra · ${PLATFORM.weeks} to live`
+    ? `Starting from ${inr(PLATFORM.setup)} setup + ${inr(PLATFORM.monthly)}/mo, GST extra · ${PLATFORM.weeks} to live`
     : `${priceLabel(svc)}${svc.note ? " · " + svc.note : ""}`;
   const body = isPlatform
     ? PLATFORM_INCLUDES.map((f) =>
@@ -610,11 +610,11 @@ function needsCard() {
 }
 
 function careCard() {
-  return card("After launch", "Optional monthly care plans. Per month, exclusive of GST. Cancel with 30 days' notice.",
+  return card("After launch", "Optional monthly care plans. Starting prices per month, exclusive of GST. Cancel with 30 days' notice.",
     h("div", { class: "p-care" }, CARE_PLANS.map((c) =>
       h("div", { class: "p-care-row" }, [
         h("strong", { text: c.name }),
-        h("span", { class: "p-mono", text: `${inr(c.price)}/mo` }),
+        h("span", { class: "p-mono", text: `from ${inr(c.price)}/mo` }),
         h("p", { class: "p-muted", text: c.body }),
       ])
     )));

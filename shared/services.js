@@ -117,5 +117,5 @@ export function inr(n) {
 /** What to print where a price goes. Never invents one. */
 export function priceLabel(svc) {
   if (!svc) return "";
-  return svc.hidePrice ? "Pricing at launch" : `${inr(svc.from)} ${svc.unit}`;
+  return svc.hidePrice ? "Pricing at launch" : `Starting from ${inr(svc.from)} ${svc.unit}`;
 }

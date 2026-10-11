@@ -18,7 +18,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="stylesheet" href="/styles.css?v=v33" />
+<link rel="stylesheet" href="/styles.css?v=v34" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
@@ -211,8 +211,9 @@
         <p class="kicker" data-enter style="--i:0">Pricing</p>
         <h1 data-enter style="--i:1">Every price, on <em>one</em> page.</h1>
         <p class="lede" data-enter style="--i:2">
-          All prices are in INR and exclusive of 18% GST. Fixed and agreed
-          before we start — no hourly billing, no discovery fee. If a cheaper
+          All prices are starting prices, in INR and exclusive of 18% GST.
+          Your exact price is fixed in writing before we start — no hourly
+          billing, no discovery fee. If a cheaper
           option on this page is the honest answer for you, we will say so on
           the call.
         </p>
@@ -236,7 +237,7 @@
           <h2>Four stores. Pick the one that fits <em>yours.</em></h2>
           <p>
             Each tier includes everything in the one before it. Prices are
-            one-time, in INR, exclusive of 18% GST.
+            one-time starting prices, in INR, exclusive of 18% GST.
           </p>
         </header>
         <div class="tiers" id="tiers" data-reveal-group><!-- shared/tiers.js --></div>
@@ -304,7 +305,7 @@
           <div class="service-head">
             <p class="service-n num">0${i + 1}</p>
             <h3></h3>
-            <p class="service-price"><span class="from">from</span> <span class="num"></span> <span class="unit"></span></p>
+            <p class="service-price"><span class="from">Starting from</span> <span class="num"></span> <span class="unit"></span></p>
             <p class="service-note"></p>
             <a class="btn service-cta"></a>
           </div>
@@ -372,6 +373,7 @@
           <h3>${t.name}</h3>
           <p class="tier-blurb"></p>
           <div class="tier-price">
+            <span class="from">Starting from</span>
             <span class="num">${inr(t.price)}</span>
             <span class="tier-weeks num">${t.weeks}</span>
           </div>
@@ -411,7 +413,7 @@
       for (const c of CARE_PLANS) {
         const el = document.createElement("article");
         el.className = "care-plan";
-        el.innerHTML = `<h3></h3><p class="care-price"><span class="num">${inr(c.price)}</span><span>/month</span></p><p class="care-body"></p>`;
+        el.innerHTML = `<h3></h3><p class="care-price"><span class="from">Starting from</span><span class="num">${inr(c.price)}</span><span>/month</span></p><p class="care-body"></p>`;
         el.querySelector("h3").textContent = c.name;
         el.querySelector(".care-body").textContent = c.body;
         care.appendChild(el);
@@ -433,6 +435,7 @@
       const nav = document.querySelector(".nav");
       new IntersectionObserver(([e]) => nav.classList.toggle("is-scrolled", !e.isIntersecting && e.boundingClientRect.top < 0), { threshold: 0 }).observe(document.querySelector(".hero"));
     </script>
+    <script type="module" src="/shared/motion.js?v=1"></script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
   </body>
 </html>
