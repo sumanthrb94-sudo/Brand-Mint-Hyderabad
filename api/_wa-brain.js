@@ -24,16 +24,16 @@ import { PLATFORM, PLATFORM_FAQ } from "../shared/platform.js";
 const line = (s) => s.replace(/\s+/g, " ").trim();
 
 const services = SERVICES.map((s) => {
-  const price = s.hidePrice ? "price not announced yet" : `${inr(s.from)} ${s.unit}${s.note ? `, ${s.note}` : ""}`;
+  const price = s.hidePrice ? "price not announced yet" : `starting from ${inr(s.from)} ${s.unit}${s.note ? `, ${s.note}` : ""}`;
   return `- ${s.name} (${price})${s.status ? ` [${s.status}]` : ""}: ${line(s.blurb)}`;
 }).join("\n");
 
 const tiers = TIERS.map(
   (t) =>
-    `- ${t.name}: ${inr(t.price)}, ${t.weeks}.${t.includesPrevious ? ` Includes everything in ${t.includesPrevious}.` : ""} ${line(t.blurb)}\n  Adds: ${t.groups.flatMap((g) => g.items).join("; ")}`
+    `- ${t.name}: starting from ${inr(t.price)}, ${t.weeks}.${t.includesPrevious ? ` Includes everything in ${t.includesPrevious}.` : ""} ${line(t.blurb)}\n  Adds: ${t.groups.flatMap((g) => g.items).join("; ")}`
 ).join("\n");
 
-const care = CARE_PLANS.map((c) => `- ${c.name}: ${inr(c.price)}/month. ${line(c.body)}`).join("\n");
+const care = CARE_PLANS.map((c) => `- ${c.name}: starting from ${inr(c.price)}/month. ${line(c.body)}`).join("\n");
 
 // Only shipped work with a live URL. BUILDING is deliberately excluded — it is
 // not delivered, and offering it as proof is the kind of small lie that loses
@@ -188,10 +188,12 @@ studio's admin next to the ones booked on the website. So:
 FACTS, in this message, right now. Never promise to send them.
 
 "How much?": ask nothing first. Give the starting price for the thing they
-mentioned. If it's unclear, give the two most likely and let them pick.
+mentioned, always worded "starting from". If it's unclear, give the two most
+likely and let them pick. The exact price is fixed in writing on the call.
 
-"Too expensive" / "can you do it cheaper": prices are fixed and the same for
-everyone, which is why there is no haggling. Point at the tier that fits their
+"Too expensive" / "can you do it cheaper": starting prices are the same for
+everyone, and the exact price is agreed in writing before work starts, which
+is why there is no haggling. Point at the tier that fits their
 budget. Never discount.
 
 "How long?": quote the weeks from FACTS, and say timelines run from the day we
@@ -227,7 +229,7 @@ THE FOUR STORE TIERS (one-time, GST extra; each includes everything below it)
 ${tiers}
 
 SITE + CRM
-${PLATFORM.name}: ${inr(PLATFORM.setup)} setup plus ${inr(PLATFORM.monthly)}/month, ${PLATFORM.weeks}. ${PLATFORM.term}. ${line(PLATFORM.blurb)}
+${PLATFORM.name}: starting from ${inr(PLATFORM.setup)} setup plus ${inr(PLATFORM.monthly)}/month, ${PLATFORM.weeks}. ${PLATFORM.term}. ${line(PLATFORM.blurb)}
 
 CARE PLANS (optional, after launch, per month, GST extra)
 ${care}
@@ -255,7 +257,7 @@ ${needs}
 CONTACT
 Email hello@brandmintstudios.in. Website brandmintstudios.in. Based in HITEC
 City, Hyderabad. Payment is 50% on signing, 50% before launch, GST invoice for
-each. All prices exclude 18% GST.
+each. All prices are starting prices and exclude 18% GST.
 
 ANSWERS WE ALREADY STAND BEHIND — reuse these, shortened for WhatsApp
 ${faq}`;

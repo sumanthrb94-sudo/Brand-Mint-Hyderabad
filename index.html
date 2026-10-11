@@ -264,12 +264,6 @@
             own portal — and you own the domain, the hosting and the payment
             account the day it ships.
           </p>
-          <!-- THE NUMBER, not the adjective. Every competitor in this market
-               says "affordable" and hides the price behind a call; the one
-               structural advantage here is that ours is public. Saying "fixed
-               price" without saying what it is throws that away. Filled from
-               SERVICES below so it can never drift from /pricing. -->
-          <p class="hero-price" data-enter style="--i:3" id="hero-price"></p>
           <div class="hero-actions" data-enter style="--i:4">
             <a class="btn btn-primary btn-lg" href="#stores">See the four store tiers</a>
             <a class="btn btn-ghost btn-lg" href="#book">Book a 30-minute call</a>
@@ -650,7 +644,8 @@
       //      Modcon HR's free early trial is a real source of enquiries.
       //      Reading SERVICES means adding a service adds it here too.
       const lines = document.getElementById("offer-lines");
-      // Hero price line, from the same SERVICES the ladder below is built from.
+      // Hero price line. The hero no longer carries prices — they live in
+      // the services and store sections — so this no-ops unless it returns.
       const hp = document.getElementById("hero-price");
       if (hp) {
         const inr = (n) => "\u20b9" + n.toLocaleString("en-IN");
