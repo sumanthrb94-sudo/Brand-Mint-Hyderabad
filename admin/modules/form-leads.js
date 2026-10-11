@@ -231,8 +231,8 @@ function showCampaignModal(id, leads) {
   if (!lead) return;
 
   const msg = prompt(
-    `Send WhatsApp to ${lead.name}?\n\nDefaults to:\n\nHi ${lead.name}! Thanks for your interest in ${lead.service}. Ready to discuss? Reply here or call +91 77999 34943`,
-    `Hi ${lead.name}! Thanks for your interest in ${lead.service}. Ready to discuss? Reply here or call +91 77999 34943`
+    `Send WhatsApp to ${lead.name}?\n\nDefaults to:\n\nHi ${lead.name}! Thanks for your interest in ${lead.service}. Ready to discuss? Just reply here on WhatsApp.`,
+    `Hi ${lead.name}! Thanks for your interest in ${lead.service}. Ready to discuss? Just reply here on WhatsApp.`
   );
 
   if (!msg) return;

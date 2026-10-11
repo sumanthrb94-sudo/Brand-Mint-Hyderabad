@@ -22,7 +22,7 @@ import {
 } from "/portal/data.js";
 import { renderWizard, briefSummaryCard } from "/portal/wizard.js";
 import { TIERS, TIER_BY_ID, STEPS, CARE_PLANS, NEEDS, FAQ, inclusionsFor } from "/shared/tiers.js";
-import { PERKS, LESSONS, COMPLIANCE, COMPLIANCE_NOTE, PRODUCTS, WHATSAPP_DISPLAY, waLink } from "/shared/resources.js";
+import { PERKS, LESSONS, COMPLIANCE, COMPLIANCE_NOTE, PRODUCTS, waLink } from "/shared/resources.js";
 import { PLATFORM, PLATFORM_INCLUDES } from "/shared/platform.js";
 import { SERVICE_BY_ID, priceLabel } from "/shared/services.js";
 import { QUIZ, scoreQuiz, scoreLabel } from "/shared/quiz.js";
@@ -274,7 +274,7 @@ function renderResources() {
     h("div", { class: "p-hero p-hero--slim" }, [
       h("p", { class: "p-mono p-hero-kicker", text: "Free, because you signed in" }),
       h("h1", { text: "Things we'll do for you, and things worth knowing." }),
-      h("p", { text: `Ask for any of these on WhatsApp (${WHATSAPP_DISPLAY}) and we do it — no charge, no tier required.` }),
+      h("p", { text: "Ask for any of these on WhatsApp and we do it — no charge, no tier required." }),
     ]),
     quizCard(),
     perksCard(),
@@ -443,7 +443,7 @@ async function record(kind, item, label, btn) {
 }
 
 function perksCard() {
-  return card("Free for you, right now", `The documents download instantly. For the rest, ask on WhatsApp ${WHATSAPP_DISPLAY} and we do it. No tier needed, nothing to pay.`,
+  return card("Free for you, right now", "The documents download instantly. For the rest, ask us on WhatsApp and we do it. No tier needed, nothing to pay.",
     h("div", { class: "p-perks" }, PERKS.map((pk) => {
       const msg = `Hi Brand Mint — ${pk.ask} (signed in as ${profile.email})`;
       const wa = h("a", {

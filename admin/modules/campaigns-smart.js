@@ -67,7 +67,7 @@ export async function render(ctx) {
 
         <label>
           <input type="checkbox" id="campaign-test" />
-          <span>Send test message first (to +91 77999 34943)</span>
+          <span>Send test message first (to the studio WhatsApp)</span>
         </label>
 
         <div class="form-actions">

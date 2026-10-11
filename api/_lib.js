@@ -98,7 +98,7 @@ export function shell(heading, bodyHtml, footNote = "") {
     <h1 style="margin:0 0 12px;font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.25">${heading}</h1>
     ${bodyHtml}
     <div style="margin-top:28px;padding-top:16px;border-top:1px solid rgba(10,14,12,.12);font-size:12.5px;color:#5b625e">
-      Brand Mint · HITEC City, Hyderabad · <a href="https://wa.me/917799934943" style="color:#047857">+91 77999 34943</a><br />
+      Brand Mint · HITEC City, Hyderabad · <a href="https://wa.me/917799934943" style="color:#047857">WhatsApp us</a><br />
       ${footNote}
     </div>
   </div>

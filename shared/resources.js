@@ -11,7 +11,6 @@
  */
 
 export const WHATSAPP = "917799934943";
-export const WHATSAPP_DISPLAY = "+91 77999 34943";
 
 /** wa.me link with a prefilled message. */
 export function waLink(message) {
@@ -77,7 +76,7 @@ export const LESSONS = [
   {
     tag: "Tax",
     title: "GST, and where it applies",
-    body: "The build price is exclusive of 18% GST, so a ₹99,000 Starter Store invoices at ₹1,16,820. Separately, your own product GST rates depend on HSN code and have to be right in the catalogue from day one. Retro-fixing tax on live orders is painful. You supply the business and GST details; we wire them into invoicing and order documents.",
+    body: "The build price is exclusive of 18% GST, so a ₹99,999 Starter Store invoices at ₹1,17,999. Separately, your own product GST rates depend on HSN code and have to be right in the catalogue from day one. Retro-fixing tax on live orders is painful. You supply the business and GST details; we wire them into invoicing and order documents.",
   },
   {
     tag: "Logistics",

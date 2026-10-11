@@ -38,7 +38,7 @@
       "image": "https://brandmintstudios.in/og-image.png",
       "description": "Brand Mint designs and builds online stores for Indian brands, in four fixed-price tiers. Based in HITEC City, Hyderabad.",
       "telephone": "+91-77999-34943",
-      "priceRange": "₹49,999–₹3,00,000",
+      "priceRange": "₹14,999–₹2,99,999",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Hyderabad",
@@ -478,7 +478,7 @@
     <footer class="footer">
       <div>
         <strong>Brand Mint</strong> · HITEC City, Hyderabad · Serving India &amp; the UK
-        <span class="num">+91 77999 34943</span>
+        <a class="footer-wa" href="https://wa.me/917799934943?text=Hi%20Brand%20Mint%20%E2%80%94%20I%27d%20like%20to%20talk%20about%20a%20project." rel="noopener">WhatsApp us</a>
       </div>
       <nav class="footer-links" aria-label="Legal">
         <a href="/pricing">Pricing</a>
@@ -491,13 +491,13 @@
 
     <script>document.documentElement.classList.add("js");</script>
     <script type="module">
-      import { TIERS, STEPS, FAQ, inr } from "/shared/tiers.js?v=v11";
-      import { SERVICES } from "/shared/services.js?v=v11";
+      import { TIERS, STEPS, FAQ, inr } from "/shared/tiers.js?v=v12";
+      import { SERVICES } from "/shared/services.js?v=v12";
       import { WORK, BUILDING, PROOF } from "/shared/work.js?v=v13";
       // One import, one URL. Two imports of the same module under different
       // ?v= strings are two different URLs to the browser: it downloads the
       // file twice and instantiates two copies of the module graph.
-      import { PERKS, WHATSAPP } from "/shared/resources.js?v=v10";
+      import { PERKS, WHATSAPP } from "/shared/resources.js?v=v11";
       import { saveBooking } from "/shared/booking.js?v=1";
       import { initFormAutomation } from "/shared/form-automation.js?v=1";
 
@@ -751,7 +751,7 @@
           say("Got it. We'll call you within one working day.", true);
           try { window.bmTrack?.("book_request", { service: data.service || null, stored, mailed }); } catch {}
         } else {
-          say("That didn't send. WhatsApp us on +91 77999 34943 and we'll sort it.", false);
+          say("That didn't send. Message us on WhatsApp — the green button — and we'll sort it.", false);
         }
         btn.disabled = false; btn.textContent = "Request a call";
       });
@@ -796,5 +796,7 @@
     </script>
     <script type="module" src="/shared/motion.js?v=1"></script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
+    <link rel="stylesheet" href="/shared/whatsapp.css?v=1" />
+    <script type="module" src="/shared/whatsapp.js?v=1"></script>
   </body>
 </html>
