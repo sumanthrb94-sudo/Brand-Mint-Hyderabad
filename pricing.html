@@ -19,6 +19,7 @@
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/styles.css?v=v33" />
+    <link rel="stylesheet" href="/shared/motion.css?v=1" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Nav state before first paint. A display hint only — firestore.rules is the boundary. -->
@@ -433,6 +434,7 @@
       const nav = document.querySelector(".nav");
       new IntersectionObserver(([e]) => nav.classList.toggle("is-scrolled", !e.isIntersecting && e.boundingClientRect.top < 0), { threshold: 0 }).observe(document.querySelector(".hero"));
     </script>
+    <script type="module" src="/shared/motion.js?v=1"></script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
   </body>
 </html>

@@ -22,6 +22,7 @@
     <link rel="preload" href="/fonts/plus-jakarta-sans.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/styles.css?v=v33" />
+    <link rel="stylesheet" href="/shared/motion.css?v=1" />
     <script type="module" src="/shared/clarity.js?v=2"></script>
 
     <!-- Structured data. Prices mirror shared/tiers.js — change both together. -->
@@ -799,6 +800,7 @@
       new IntersectionObserver(([e]) => { atEnd = e.isIntersecting; paint(); }, { threshold: 0.2 }).observe(closing);
       if (ladder) new IntersectionObserver(([e]) => { atLadder = e.isIntersecting; paint(); }, { threshold: 0 }).observe(ladder);
     </script>
+    <script type="module" src="/shared/motion.js?v=1"></script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
   </body>
 </html>

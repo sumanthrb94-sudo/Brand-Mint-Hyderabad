@@ -1,0 +1,106 @@
+/* =========================================================================
+   Motion layer — the mint-motion reel's vocabulary, ported to the page.
+   Recipes after ibelick/motion-primitives (MIT): TextEffect fade-in-blur,
+   TextShimmer, TextScramble, SlidingNumber, BorderTrail, GlowEffect,
+   Spotlight. Driven by shared/motion.js; every rule here is scoped to
+   html.mm, which that script only sets when motion is allowed — so with no
+   JS, or under prefers-reduced-motion, the page is exactly what it was.
+   ========================================================================= */
+
+@property --mm-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+/* ---- TextEffect: headings arrive word by word, out of a blur ---------- */
+html.mm .mm-w { display: inline-block; white-space: nowrap; }
+html.mm .mm-split:not(.mm-on) .mm-w { opacity: 0; transform: translateY(0.28em); filter: blur(10px); }
+html.mm .mm-split .mm-w {
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out), filter 0.7s var(--ease-out);
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+/* the italic word waits a beat, like it is being stressed out loud */
+html.mm .mm-split em .mm-w { transition-delay: calc(var(--d, 0) * 1ms + 90ms); }
+
+/* ---- TextShimmer: one light sweep across the stressed word ------------
+   Painted per word, not on the <em>: Safari will not clip a parent's
+   background to children that carry their own transform/filter layer. */
+html.mm .mm-split.mm-on em .mm-w {
+  background-image: linear-gradient(100deg, var(--mm-em, var(--mint-deep)) 0 38%, var(--mint-2) 50%, var(--mm-em, var(--mint-deep)) 62% 100%);
+  background-size: 300% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: mmShimmer 1.3s var(--ease) forwards;
+  animation-delay: calc(var(--d, 0) * 1ms + 750ms);
+  /* text-clip only paints inside the box: give the italic overhang and the
+     descenders room, then hand the space back so nothing reflows */
+  padding: 0 0.12em 0.18em 0.04em;
+  margin: 0 -0.12em -0.18em -0.04em;
+}
+html.mm .section--dark .mm-split, html.mm .cta .mm-split { --mm-em: var(--emerald); }
+@keyframes mmShimmer { to { background-position: 0 0; } }
+
+/* ---- TextScramble: kickers resolve out of noise ----------------------- */
+html.mm .mm-scr { font-variant-numeric: tabular-nums; }
+
+/* ---- SlidingNumber: digits roll into place ---------------------------- */
+html.mm .mm-dg { display: inline-block; height: 1.15em; line-height: 1.15em; overflow: hidden; vertical-align: bottom;
+  -webkit-mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+          mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
+html.mm .mm-dg > span { display: block; transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1); }
+html.mm .mm-dg > span::before { content: "0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9"; white-space: pre; }
+html.mm .mm-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* the stat's own "li span" rule (13.5px, muted) must not reach the reels */
+html.mm .num .mm-tail { display: inline-block; height: 1.15em; line-height: 1.15em; vertical-align: bottom; }
+html.mm .num .mm-dg, html.mm .num .mm-dg span, html.mm .num .mm-tail { font-size: inherit; color: inherit; font-weight: inherit; letter-spacing: inherit; }
+
+/* ---- BorderTrail: a point of light runs the edge once ----------------- */
+html.mm .mm-trail { position: relative; isolation: isolate; }
+html.mm .mm-trail::after {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1.5px; pointer-events: none; z-index: 2;
+  background: conic-gradient(from var(--mm-a), transparent 0 78%, var(--mint-2) 88%, var(--mint) 94%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0;
+}
+html.mm .mm-trail.mm-run::after { animation: mmTrail 2.4s linear 1 forwards; }
+@media (hover: hover) and (pointer: fine) {
+  html.mm .mm-trail-hover:hover::after { animation: mmTrail 1.8s linear infinite; }
+}
+@keyframes mmTrail {
+  0%   { --mm-a: 0deg;   opacity: 0; }
+  12%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { --mm-a: 360deg; opacity: 0; }
+}
+
+/* ---- GlowEffect: the primary action breathes ---------------------------- */
+html.mm .btn-primary.btn-lg { position: relative; isolation: isolate; overflow: visible; }
+html.mm .btn-primary.btn-lg::before {
+  content: ""; position: absolute; inset: -6px; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: conic-gradient(from var(--mm-a), var(--mint-2), var(--mint), var(--emerald), var(--mint-2));
+  filter: blur(14px); opacity: 0.45;
+  animation: mmSpin 6s linear infinite;
+}
+@keyframes mmSpin { to { --mm-a: 360deg; } }
+/* the shine that crosses the button when it lands and on hover */
+html.mm .btn-primary.btn-lg { background-image: linear-gradient(110deg, transparent 0 40%, rgba(255,255,255,.55) 50%, transparent 60% 100%);
+  background-size: 250% 100%; background-position: 130% 0; background-repeat: no-repeat; }
+html.mm .btn-primary.btn-lg.mm-shine { animation: mmShine 1s var(--ease) 1 both; }
+@media (hover: hover) and (pointer: fine) {
+  html.mm .btn-primary.btn-lg:hover { animation: mmShine 0.9s var(--ease) 1 both; }
+}
+@keyframes mmShine { from { background-position: 130% 0; } to { background-position: -30% 0; } }
+
+/* ---- Spotlight: soft mint light that follows the pointer ---------------- */
+html.mm .mm-spot { position: relative; isolation: isolate; }
+html.mm .mm-spot::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: -1; border-radius: inherit;
+  background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 30%), var(--mm-spot, rgba(16, 185, 129, 0.10)), transparent 60%);
+  opacity: var(--mo, 0); transition: opacity 0.4s var(--ease);
+}
+html.mm .section--dark.mm-spot, html.mm .cta.mm-spot { --mm-spot: rgba(124, 246, 200, 0.12); }
+
+/* Belt and braces: the global reduced-motion rule already zeroes animation,
+   but motion.js never sets html.mm in that case anyway. */
+@media (prefers-reduced-motion: reduce) {
+  html.mm .mm-split .mm-w { opacity: 1 !important; transform: none !important; filter: none !important; }
+}
