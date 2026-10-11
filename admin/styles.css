@@ -2909,6 +2909,19 @@ tr.row-clickable:hover td {
 .view .badge-failed,
 .view .badge-error { color: var(--danger); background: rgba(226, 59, 59, 0.10); border-color: rgba(226, 59, 59, 0.2); }
 
+/* .stats-table lays out its children as key/value rows. When a module puts a
+   whole <table> in it, that rule turned the table into a flex row and set its
+   header beside its body. A table stays a table. */
+.stats-table > table {
+  display: table;
+  width: 100%;
+  padding: 0;
+  border-bottom: 0;
+}
+.stats-table {
+  overflow-x: auto;
+}
+
 /* ---- kanban ------------------------------------------------------------- */
 .kanban {
   gap: 14px;
@@ -3205,9 +3218,11 @@ tr.row-clickable:hover td {
   }
   /* Give a scrolled table room to read rather than squeezing every name
      onto three lines; the card scrolls sideways instead. */
-  .panel > table,
-  .card > table {
+  .panel > table {
     min-width: 560px;
+  }
+  .card > table {
+    min-width: 720px;
   }
   /* The main grids carry an actions column of nowrap buttons; below this
      width every other column folds onto three lines. */
