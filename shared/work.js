@@ -70,13 +70,36 @@ export const WORK = [
     quote: "",
     quoteFrom: "",
   },
+  {
+    id: "lehart",
+    name: "LeHart",
+    domain: "lehart.co.uk",
+    url: "https://lehart.co.uk",
+    kind: "Online store · UK",
+    summary:
+      "Certified refurbished phones, tablets and tech, sold across the UK — 12-month warranty, next-day delivery and 30-day returns, with checkout built in. It installs on a phone like an app.",
+    result: "",
+    quote: "",
+    quoteFrom: "",
+  },
+  {
+    id: "rarecottages",
+    name: "Rare Cottages",
+    domain: "rarecottages.vercel.app",
+    url: "https://rarecottages.vercel.app",
+    kind: "Booking site",
+    summary:
+      "Farm houses, villas and party venues around Rajahmundry. Night stays, hourly stays and birthday packages, with the cake, decor and photographer booked in the same place.",
+    result: "",
+    quote: "",
+    quoteFrom: "",
+  },
 ];
 
 /** In development. Shown as what's being built, never as delivered work. */
 export const BUILDING = [
   { id: "modcon-hr", name: "Modcon HR", kind: "HR tool", status: "In development" },
   { id: "realestate-crm", name: "Real Estate CRM", kind: "Sales CRM", status: "Upcoming" },
-  { id: "lehart", name: "Lehart", kind: "Online store", status: "In development" },
 ];
 
 /**
