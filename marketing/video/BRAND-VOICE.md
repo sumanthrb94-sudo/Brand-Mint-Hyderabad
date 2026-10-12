@@ -1,10 +1,18 @@
 # The Brand Mint voice
 
-**Chosen: Gemini TTS — `Alnilam`** · model `gemini-3.1-flash-tts-preview`
-Generate with `node marketing/video/gen-vo.mjs --script brand alnilam`.
+**Chosen: ElevenLabs — `Amit - Indian Commercial Voice`** · voice_id `GmxTc9oJaW27NFnQFhtv` · model `eleven_v4`
+Finalised by the client on 12 Oct 2026, after the "2 AM" and "One dashboard" reels.
+Everything needed to reproduce the read — settings, how to direct it, timings,
+and the reference takes — is in [`voice/amit/README.md`](voice/amit/README.md).
 
 One voice, used on every film, ad and reel from here on. A brand that changes
 voice every post has no voice.
+
+> **History.** Amit was auditioned first and rejected ("reads as a performed
+> accent"); Gemini TTS `Alnilam` was chosen in its place. The client reversed
+> that on 12 Oct 2026 after hearing Amit on the 2 AM reels, and Amit is now the
+> brand voice. The Alnilam notes below stay as the record of how we got here,
+> and as the fallback if Amit is ever withdrawn from the ElevenLabs library.
 
 Santhi Prakash on ElevenLabs was the first choice and is gated behind the
 creator tier, so the brief went back to Gemini — where the earlier rejection
@@ -65,11 +73,11 @@ voice of someone who speaks English well and happens to be Indian.
 | Voice | Verdict |
 |---|---|
 | Gemini TTS — Charon, Sulafat, Puck | Rejected as generic. The fault was ours, not the platform's: the script was pinned to the older `gemini-2.5-pro-preview-tts`, and the direction was a single sentence — "read this as a calm, warm Indian English voiceover" — which is a mood, not a brief. |
-| ElevenLabs — Amit, Indian Commercial | **Rejected by the client: reads as a performed accent, "getting mocked".** |
+| **ElevenLabs — Amit, Indian Commercial** | First rejected ("reads as a performed accent"). **Reversed 12 Oct 2026 — now the brand voice.** See `voice/amit/`. |
 | ElevenLabs — Santhi Prakash | Best written match and the client's first pick, but gated behind the creator tier ($22/mo). Preview at `out/santhi-prakash.mp3`. Still the fallback if Gemini's voices ever regress. |
 | Gemini — Iapetus | Rejected by QC: says "Brandment" for "Brand Mint". |
 | Gemini — Gacrux, Rasalgethi | Passed QC, not chosen. |
-| **Gemini — Alnilam** | **CHOSEN.** Firm, even, low register. Passes QC clean. |
+| Gemini — Alnilam | Chosen until 12 Oct 2026, now the fallback. Firm, even, low register. Passes QC clean. |
 | ElevenLabs — Pranab | "Mature, confident, natural and engaging **without sounding overly polished or theatrical**" — the phrase that matters here. Preview at `out/pranab.mp3`. |
 
 Not auditioned, previews blocked by the sandbox egress proxy — audition these
