@@ -35,18 +35,6 @@ export const WORK = [
     quoteFrom: "",
   },
   {
-    id: "tresorcouture",
-    name: "Trésor Couture",
-    domain: "tresorcouture.in",
-    url: "https://tresorcouture.in",
-    kind: "Online store",
-    summary:
-      "Orders used to be tracked by hand — a notebook, a memory. Now every order is recorded the moment it's placed, with its own checkout and a GST invoice, and nothing depends on someone remembering it.",
-    result: "",
-    quote: "",
-    quoteFrom: "",
-  },
-  {
     id: "greenteam",
     name: "GreenTeam",
     domain: "thegreenteam.in",

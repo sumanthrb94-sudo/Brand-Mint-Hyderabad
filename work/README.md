@@ -3,7 +3,6 @@
 Drop one image per project here, named by its `id` in `shared/work.js`:
 
     work/simplysip.jpg
-    work/tresorcouture.jpg
     work/greenteam.jpg
     work/freshkart.jpg
 
