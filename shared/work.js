@@ -17,6 +17,10 @@
  * `quoteFrom` is who said it and their role (e.g. "Priya, founder") — never
  * a title you're guessing at.
  *
+ * `showcase: false` keeps a build on record here but off every public
+ * surface — the website and the WhatsApp agent both skip it. Use it when a
+ * client would rather not be named.
+ *
  * IMAGES: drop a screenshot at /work/<id>.jpg (1600×1000, under 300 KB).
  * Missing images fall back to a typographic card automatically.
  */
@@ -30,6 +34,21 @@ export const WORK = [
     kind: "Online store",
     summary:
       "Sold through WhatsApp DMs, one at a time, the ordinary way. Now it runs itself — UPI, cards or cash on delivery — and every order arrives priced and recorded, no one typing it up by hand.",
+    result: "",
+    quote: "",
+    quoteFrom: "",
+  },
+  {
+    id: "tresorcouture",
+    name: "Trésor Couture",
+    domain: "tresorcouture.in",
+    url: "https://tresorcouture.in",
+    kind: "Online store",
+    // Kept as our record of the build, but never shown publicly: the client
+    // asked not to be named. The website and the WhatsApp agent skip it.
+    showcase: false,
+    summary:
+      "Orders used to be tracked by hand — a notebook, a memory. Now every order is recorded the moment it's placed, with its own checkout and a GST invoice, and nothing depends on someone remembering it.",
     result: "",
     quote: "",
     quoteFrom: "",
@@ -102,3 +121,6 @@ export const PROOF = [
   { value: "8+ yrs", label: "senior operator on every build" },
   { value: "Hyderabad + UK", label: "India and the United Kingdom" },
 ];
+
+/** The builds we may name in public. Every public surface reads this, not WORK. */
+export const SHOWCASE = WORK.filter((w) => w.showcase !== false);

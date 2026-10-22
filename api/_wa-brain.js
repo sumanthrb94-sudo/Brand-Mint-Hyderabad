@@ -18,7 +18,7 @@
  */
 import { TIERS, CARE_PLANS, FAQ, NEEDS, STEPS, inr } from "../shared/tiers.js";
 import { SERVICES } from "../shared/services.js";
-import { WORK } from "../shared/work.js";
+import { SHOWCASE as WORK } from "../shared/work.js";
 import { PLATFORM, PLATFORM_FAQ } from "../shared/platform.js";
 
 const line = (s) => s.replace(/\s+/g, " ").trim();
