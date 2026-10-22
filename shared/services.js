@@ -18,17 +18,18 @@ export const SERVICES = [
   {
     id: "website",
     name: "Static Website",
-    from: 14999,
+    from: 24999,
     unit: "one-time",
     note: "GST extra",
     blurb:
-      "A fast, honest website that says who you are and how to reach you. Up to five pages, your domain, your content, live in two weeks.",
+      "A fast, honest website that says who you are and how to reach you. Up to five pages, your domain, your content, SEO set up once and properly, live in two weeks.",
     points: [
       "Up to 5 pages, written and built with you",
       "Your domain, SSL and email set up",
       "WhatsApp and call buttons that work on a phone",
-      "Google Search Console verified and submitted",
+      "SEO set up once: titles, descriptions, sitemap, Google Search Console verified and submitted",
       "Visitor analytics from day one",
+      "Optional after launch: ongoing SEO at ₹4,999 a month",
     ],
     cta: { label: "Start with a website", href: "/login?tier=website" },
   },

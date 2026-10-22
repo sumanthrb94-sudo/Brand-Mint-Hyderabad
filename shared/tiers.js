@@ -183,6 +183,12 @@ export function inr(n) {
 /** Monthly care plans, added after launch. Per month, exclusive of GST. */
 export const CARE_PLANS = [
   {
+    id: "seo",
+    name: "SEO",
+    price: 4999,
+    body: "For websites after launch: keyword tracking, new pages and content updates, technical fixes, Search Console monitoring and a monthly report on what moved.",
+  },
+  {
     id: "care",
     name: "Care",
     price: 12499,
