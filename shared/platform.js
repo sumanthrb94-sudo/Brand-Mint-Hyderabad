@@ -85,8 +85,8 @@ export const PLATFORM_VERTICALS = [
 
 /** Said plainly, because hiding it is how these deals sour in month three. */
 export const PLATFORM_COSTS = [
-  { item: "Setup", who: "One-time to us", note: "₹79,999, GST extra. 50% to start, 50% at launch." },
-  { item: "Monthly", who: "To us", note: "₹9,999/month, GST extra. Hosting, support, updates, and the CRM staying up. 12-month minimum." },
+  { item: "Setup", who: "One-time to us", note: "₹79,999. 50% to start, 50% at launch." },
+  { item: "Monthly", who: "To us", note: "₹9,999/month. Hosting, support, updates, and the CRM staying up. 12-month minimum." },
   { item: "WhatsApp messages", who: "Meta, on your account", note: "Meta bills per template message, and the WhatsApp provider adds a small monthly fee. Your account, your card — so you keep it if you ever leave us." },
   { item: "Chat agent usage", who: "On your account", note: "Charged per conversation by the AI provider. Typically a few hundred rupees a month at normal volumes." },
   { item: "Domain and ads", who: "Yours", note: "Your domain, and whatever you spend on Meta or Google. We never mark these up." },

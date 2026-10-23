@@ -392,7 +392,7 @@ export async function render(ctx) {
 
     return panel(
       "Onboarding",
-      tier ? `${tier.name} · ${inrTier(tier.price)} + GST` : "Waiting on agreement and deposit",
+      tier ? `${tier.name} · ${inrTier(tier.price)}` : "Waiting on agreement and deposit",
       h("div", { class: "vstack", style: "gap:8px" }, [
         gate("Agreement signed", signed, c.agreementSignedAt, () => {
           db.update("clients", c.id, { agreementSignedAt: new Date().toISOString() });

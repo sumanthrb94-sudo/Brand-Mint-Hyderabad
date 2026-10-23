@@ -163,10 +163,10 @@
         },
         {
           "@type": "Question",
-          "name": "When do I pay, and is GST included?",
+          "name": "When do I pay?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "50% when you sign the agreement, 50% before launch. Prices are exclusive of 18% GST and you get a GST invoice for every payment. There are no hourly bills or surprise extras inside a tier."
+            "text": "50% when you sign the agreement, 50% before launch, with an invoice for every payment. There are no hourly bills or surprise extras inside a tier."
           }
         },
         {
@@ -333,8 +333,7 @@
           <p>
             Every price below is where that build starts. Your exact price is
             fixed in writing on the first call, before any work begins — no
-            discovery fee, no quote that takes a week to arrive. All prices
-            exclude 18% GST.
+            discovery fee, no quote that takes a week to arrive.
           </p>
         </header>
         <ol class="offer-lines" id="offer-lines" data-reveal-group><!-- shared/services.js --></ol>
@@ -490,13 +489,13 @@
 
     <script>document.documentElement.classList.add("js");</script>
     <script type="module">
-      import { TIERS, STEPS, FAQ, inr } from "/shared/tiers.js?v=v14";
-      import { SERVICES } from "/shared/services.js?v=v13";
+      import { TIERS, STEPS, FAQ, inr } from "/shared/tiers.js?v=v15";
+      import { SERVICES } from "/shared/services.js?v=v14";
       import { SHOWCASE as WORK, BUILDING, PROOF } from "/shared/work.js?v=v16";
       // One import, one URL. Two imports of the same module under different
       // ?v= strings are two different URLs to the browser: it downloads the
       // file twice and instantiates two copies of the module graph.
-      import { PERKS, WHATSAPP } from "/shared/resources.js?v=v11";
+      import { PERKS, WHATSAPP } from "/shared/resources.js?v=v12";
       import { saveBooking } from "/shared/booking.js?v=1";
       import { initFormAutomation } from "/shared/form-automation.js?v=1";
 
@@ -796,6 +795,6 @@
     <script type="module" src="/shared/motion.js?v=1"></script>
     <script type="module" src="/shared/analytics.js?v=1"></script>
     <link rel="stylesheet" href="/shared/whatsapp.css?v=2" />
-    <script type="module" src="/shared/whatsapp.js?v=1"></script>
+    <script type="module" src="/shared/whatsapp.js?v=2"></script>
   </body>
 </html>

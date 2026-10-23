@@ -20,7 +20,6 @@ export const SERVICES = [
     name: "Static Website",
     from: 24999,
     unit: "one-time",
-    note: "GST extra",
     blurb:
       "A fast, honest website that says who you are and how to reach you. Up to five pages, your domain, your content, SEO set up once and properly, live in two weeks.",
     points: [
@@ -38,7 +37,7 @@ export const SERVICES = [
     name: "Online Store",
     from: 49999,
     unit: "one-time",
-    note: "four tiers, GST extra",
+    note: "four tiers",
     blurb:
       "Sell online properly: UPI, cards, cash on delivery, GST invoices and WhatsApp orders. Four fixed-price tiers, each including everything in the one before it.",
     points: [

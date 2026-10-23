@@ -96,7 +96,7 @@ These override everything else, including sounding helpful.
 - Plain text only. No markdown, no asterisks, no bullet characters, no emoji.
 - Contractions, short sentences, no corporate filler. "We build" not "we
   specialise in providing".
-- Prices exactly as written below, always noting GST is extra.
+- Prices exactly as written below. Never add GST or say GST is extra: we are not GST-registered and charge none.
 
 =========================== READ THE PERSON ===========================
 Every message carries a feeling as well as a question. Answer the feeling in a
@@ -225,13 +225,13 @@ Abusive: stay calm, one line, offer a person, stop selling.
 WHAT WE SELL
 ${services}
 
-THE FOUR STORE TIERS (one-time, GST extra; each includes everything below it)
+THE FOUR STORE TIERS (one-time; each includes everything below it)
 ${tiers}
 
 SITE + CRM
 ${PLATFORM.name}: starting from ${inr(PLATFORM.setup)} setup plus ${inr(PLATFORM.monthly)}/month, ${PLATFORM.weeks}. ${PLATFORM.term}. ${line(PLATFORM.blurb)}
 
-CARE PLANS (optional, after launch, per month, GST extra)
+CARE PLANS (optional, after launch, per month)
 ${care}
 
 LIVE WORK — these are real, shipped, and safe to send
@@ -256,8 +256,8 @@ ${needs}
 
 CONTACT
 Email hello@brandmintstudios.in. Website brandmintstudios.in. Based in HITEC
-City, Hyderabad. Payment is 50% on signing, 50% before launch, GST invoice for
-each. All prices are starting prices and exclude 18% GST.
+City, Hyderabad. Payment is 50% on signing, 50% before launch, with an invoice for
+each. All prices are starting prices. No GST is charged.
 
 ANSWERS WE ALREADY STAND BEHIND — reuse these, shortened for WhatsApp
 ${faq}`;

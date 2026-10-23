@@ -8,7 +8,7 @@
  *   admin/       → tier column on leads, tier on the client record
  *
  * Copy is taken verbatim from the live brandmintstudios.in pricing page.
- * Prices are one-time, in INR, exclusive of 18% GST.
+ * Prices are one-time, in INR. No GST is charged: the studio is not GST-registered.
  */
 
 export const TIERS = [
@@ -154,8 +154,8 @@ export const FAQ = [
     a: "We get your email, your WhatsApp number and the store you picked, nothing else. Within one working day we message you on WhatsApp to set up a 30-minute conversation: confirm the tier, walk the scope, agree a start date. No obligation, no pitch deck.",
   },
   {
-    q: "When do I pay, and is GST included?",
-    a: "50% when you sign the agreement, 50% before launch. Prices are exclusive of 18% GST and you get a GST invoice for every payment. There are no hourly bills or surprise extras inside a tier.",
+    q: "When do I pay?",
+    a: "50% when you sign the agreement, 50% before launch, with an invoice for every payment. There are no hourly bills or surprise extras inside a tier.",
   },
   {
     q: "Do I own the store?",
@@ -180,7 +180,7 @@ export function inr(n) {
   return "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
-/** Monthly care plans, added after launch. Per month, exclusive of GST. */
+/** Monthly care plans, added after launch. Per month. */
 export const CARE_PLANS = [
   {
     id: "seo",
