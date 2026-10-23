@@ -14,8 +14,13 @@ import {
   renderTopbar,
   inr,
 } from "/admin/components.js";
-import { db } from "/admin/db.js";
 import { auth } from "/admin/auth.js";
+
+// The live cache comes in on ctx. This module used to import /admin/db.js
+// itself; app.js imports it with a ?v= query, which the browser treats as a
+// different module — a second copy that was never hydrated, so Settings
+// showed blank fields and Export saved nothing.
+let db;
 
 const SECTIONS = [
   { id: "profile", label: "Studio profile" },
@@ -26,6 +31,7 @@ const SECTIONS = [
 ];
 
 export async function render(ctx) {
+  db = ctx.db;
   renderTopbar({
     breadcrumb: "SYSTEM",
     title: "Settings",

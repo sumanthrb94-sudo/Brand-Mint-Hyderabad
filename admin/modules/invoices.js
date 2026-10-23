@@ -238,7 +238,9 @@ export async function render(ctx) {
           client: "",
           issueDate: todayISO(),
           dueDate: addDaysISO(todayISO(), 30),
-          gstRate: 18,
+          // Not registered under GST yet, so an invoice must not charge it.
+          // Set a rate here only once a GSTIN is in Settings.
+          gstRate: 0,
           lineItems: [{ desc: "", qty: 1, rate: 0 }],
           status: "draft",
           paidOn: "",
@@ -249,7 +251,20 @@ export async function render(ctx) {
     form.appendChild(
       h("div", { class: "field-row" }, [
         field({ label: "Invoice number", name: "number", value: data.number, required: true }),
-        field({ label: "Client", name: "client", value: data.client, required: true }),
+        (() => {
+          // A select, not free text: the portal reads invoices by clientId, so
+          // an invoice typed against a name never reached the client.
+          const clients = db.list("clients").slice().sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+          const current = data.clientId || clients.find((c) => c.name === data.client)?.id || "";
+          return field({
+            label: "Client",
+            name: "clientId",
+            type: "select",
+            value: current,
+            required: true,
+            options: [{ value: "", label: "Choose a client…" }, ...clients.map((c) => ({ value: c.id, label: c.name || "(unnamed)" }))],
+          });
+        })(),
       ])
     );
     form.appendChild(
@@ -359,7 +374,7 @@ export async function render(ctx) {
       min: "0",
       max: "100",
       step: "0.5",
-      value: String(data.gstRate ?? 18),
+      value: String(data.gstRate ?? 0),
       oninput: updateTotals,
     });
 
@@ -435,10 +450,12 @@ export async function render(ctx) {
 
     bindSubmit(form, async () => {
       const v = formToObject(form);
-      if (!v.number?.trim() || !v.client?.trim()) {
+      const chosen = db.list("clients").find((c) => c.id === v.clientId);
+      if (!v.number?.trim() || !chosen) {
         ctx.toast("Number and client are required.");
         return;
       }
+      v.client = chosen.name || "";
       const gstRate = Number(v.gstRate || 0);
       const { subtotal, gst, total } = recalc(data.lineItems, gstRate);
       const payload = {
@@ -472,7 +489,8 @@ export async function render(ctx) {
 
   function openPreview(inv) {
     const settings = db.settings.get() || {};
-    const client = db.list("clients").find((c) => c.name === inv.client);
+    const client = db.list("clients").find((c) => (inv.clientId ? c.id === inv.clientId : c.name === inv.client));
+    const taxed = Number(inv.gstRate) > 0 && !!settings.gstin;
 
     const preview = h("div", { class: "invoice-preview" }, [
       h("div", { class: "hstack", style: { justifyContent: "space-between", alignItems: "flex-start" } }, [
@@ -492,7 +510,7 @@ export async function render(ctx) {
           h("div", { class: "muted", style: { fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "6px" }, text: "From" }),
           h("div", { class: "strong", text: settings.legalName || "Brand Mint" }),
           h("div", { class: "muted", text: settings.address || "HITEC City, Hyderabad" }),
-          h("div", { class: "muted mono", style: { fontSize: "12px", marginTop: "6px" }, text: "GSTIN: " + (settings.gstin || "—") }),
+          taxed && h("div", { class: "muted mono", style: { fontSize: "12px", marginTop: "6px" }, text: "GSTIN: " + settings.gstin }),
           h("div", { class: "muted mono", style: { fontSize: "12px" }, text: "PAN: " + (settings.pan || "—") }),
           h("div", { class: "muted", style: { fontSize: "12px" }, text: settings.email || "" }),
         ]),
@@ -527,13 +545,13 @@ export async function render(ctx) {
       ]),
       h("div", { class: "totals" }, [
         h("div", { class: "row" }, [h("span", { text: "Subtotal" }), h("span", { text: inrFull(inv.subtotal) })]),
-        h("div", { class: "row" }, [h("span", { text: `GST (${inv.gstRate}%)` }), h("span", { text: inrFull(inv.gst) })]),
+        taxed && h("div", { class: "row" }, [h("span", { text: `GST (${inv.gstRate}%)` }), h("span", { text: inrFull(inv.gst) })]),
         h("div", { class: "row grand" }, [h("span", { text: "Total" }), h("span", { text: inrFull(inv.total) })]),
       ]),
       h("div", { class: "mt-6 muted", style: { fontSize: "12px", borderTop: "1px solid var(--line)", paddingTop: "16px" } }, [
         h("div", { class: "strong", style: { color: "var(--ink)", marginBottom: "4px" }, text: "Payable to " + (settings.legalName || "Brand Mint") }),
         h("div", { text: `Bank: ${settings.bank?.name || "—"} · A/C: ${settings.bank?.account || "—"} · IFSC: ${settings.bank?.ifsc || "—"}` }),
-        h("div", { class: "mt-4", text: "GST extra. Please remit within 30 days of issue. Reply with the UTR after payment." }),
+        h("div", { class: "mt-4", text: (taxed ? "" : "Supplier not registered under GST; no GST is charged. ") + "Please remit by the due date and reply with the UTR after payment." }),
       ]),
     ]);
 

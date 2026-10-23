@@ -22,7 +22,8 @@ export default async function handler(req, res) {
   const email = readEmail(body.email);
   if (!email) return res.status(400).json({ error: "valid email required" });
   const name = clean(body.name, 80);
-  const marketing = body.newsletter !== false;
+  // Marketing needs an explicit yes. A missing field is a no.
+  const marketing = body.newsletter === true;
   const site = "https://brandmintstudios.in";
 
   const out = { ok: true, contact: null, welcome: null };

@@ -16,6 +16,10 @@ function enabled() {
   try {
     const params = new URLSearchParams(window.location.search);
     if (window.self !== window.top) return false;
+    // Never on the signed-in surfaces: a replay of the portal or the admin
+    // would ship clients' project data and invoices to a third party.
+    // auth/session.js imports this module, so the path check has to live here.
+    if (/^\/(admin|portal)(\.html)?(\/|$)/.test(window.location.pathname)) return false;
     if (params.has("bm_nt")) return false;
     if (params.has("bm_track")) return true;
     if (navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return false;
