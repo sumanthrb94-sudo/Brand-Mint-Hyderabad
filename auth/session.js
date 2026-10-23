@@ -273,7 +273,9 @@ async function claimPendingInvites(fb, user) {
  *  returning client using "Client login" does NOT — before this flag every
  *  re-authentication re-sent them the PDF pack, which reads as spam from the
  *  studio that built their store. */
-export async function recordSignup({ tier = null, newsletter = false, sendToolkit = true } = {}) {
+/** phone: the WhatsApp number the tier sign-in asks for. Google sign-in gives
+ *  an email and nothing else, and the studio replies on WhatsApp. */
+export async function recordSignup({ tier = null, newsletter = false, sendToolkit = true, phone = "" } = {}) {
   const fb = await getClient();
   const user = await getUser();
   if (!user) return;
@@ -288,6 +290,7 @@ export async function recordSignup({ tier = null, newsletter = false, sendToolki
       avatarUrl: user.photoURL || "",
       consent: { privacy: true, terms: true, newsletter: !!newsletter, at: now },
       ...(tier ? { selectedTier: tier, selectedTierAt: now } : {}),
+      ...(phone ? { phone } : {}),
       updatedAt: now,
     },
     { merge: true }
@@ -323,7 +326,7 @@ export async function recordSignup({ tier = null, newsletter = false, sendToolki
     uid: user.uid,
     name: user.displayName || user.email || "",
     email: user.email || "",
-    phone: user.phoneNumber || "",
+    phone: phone || user.phoneNumber || "",
     tier,
     message: `Picked ${tier} on the site and signed in with Google.`,
     source: "Site — tier sign-in",

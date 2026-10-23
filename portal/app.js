@@ -224,12 +224,12 @@ function renderLeadState() {
 
   const hero = h("div", { class: "p-hero" }, [
     h("p", { class: "p-mono p-hero-kicker", text: svc ? svc.name : tier ? `Tier ${tier.tier} · ${tier.name}` : "Signed in" }),
-    h("h1", { text: tier || onPlatform ? `Thanks, ${first} — we'll call you within one working day.` : `Welcome, ${first}. Pick the store that fits.` }),
+    h("h1", { text: tier || onPlatform ? `Thanks, ${first} — we'll message you on WhatsApp within one working day.` : `Welcome, ${first}. Pick the store that fits.` }),
     h("p", { text: svc
       ? `Below is everything ${svc.name} includes and what happens next. Nothing is due until the agreement is signed.`
       : tier
       ? "Below is everything your store includes, what we'll need from you, and what happens next. Nothing is due until the agreement is signed."
-      : "Everything we build is below, in detail. Choose one and we'll call you within one working day to confirm the scope." }),
+      : "Everything we build is below, in detail. Choose one and we'll message you on WhatsApp within one working day to confirm the scope." }),
     svc ? h("div", { class: "p-hero-stats" }, [
       stat(svc.hidePrice ? "Pricing at launch" : inr(svc.from), svc.hidePrice ? "we'll tell you first" : "starting from, " + svc.unit + ", GST extra"),
       stat(svc.note || "—", svc.status || "what's included"),

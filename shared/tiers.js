@@ -151,7 +151,7 @@ export const NEEDS = [
 export const FAQ = [
   {
     q: "What happens after I sign in?",
-    a: "We get your email and the store you picked, nothing else. Within one working day we call you for a 30-minute conversation: confirm the tier, walk the scope, agree a start date. No obligation, no pitch deck.",
+    a: "We get your email, your WhatsApp number and the store you picked, nothing else. Within one working day we message you on WhatsApp to set up a 30-minute conversation: confirm the tier, walk the scope, agree a start date. No obligation, no pitch deck.",
   },
   {
     q: "When do I pay, and is GST included?",

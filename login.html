@@ -95,6 +95,12 @@
 
       .consent { margin: 16px 0 4px; font-size: 13px; color: var(--muted); line-height: 1.55; }
       .consent a { color: var(--mint-deep); text-underline-offset: 3px; }
+      label.wa { display: grid; gap: 6px; margin: 4px 0 14px; }
+      label.wa[hidden] { display: none; }
+      label.wa span { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+      label.wa input { font: inherit; font-size: 16px; padding: 12px 14px; border: 1px solid var(--line, rgba(10,14,12,.18)); border-radius: 12px; background: #fff; color: var(--ink); }
+      label.wa input:focus { outline: 2px solid var(--mint-deep); outline-offset: 2px; }
+      label.wa small { font-size: 12.5px; color: var(--muted, #5b625e); }
       label.opt { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 13.5px; color: var(--ink-2); cursor: pointer; }
       label.opt input { margin-top: 3px; accent-color: var(--mint-deep); width: 16px; height: 16px; }
 
@@ -177,6 +183,12 @@
         <span class="price" id="tier-price"></span>
       </div>
 
+      <label class="wa" id="wa-wrap" hidden>
+        <span>Your WhatsApp number</span>
+        <input id="wa-phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="98765 43210" />
+        <small>We message you here within one working day. Nothing else, no groups.</small>
+      </label>
+
       <div class="status" id="status" hidden></div>
 
       <button class="btn" id="google" type="button">
@@ -195,7 +207,7 @@
         <a href="/terms" target="_blank" rel="noopener">Terms</a>.
       </p>
       <label class="opt">
-        <input type="checkbox" id="newsletter" checked />
+        <input type="checkbox" id="newsletter" />
         <span>Email me occasional notes on running an online store in India. No spam, one click to stop.</span>
       </label>
       </div>
@@ -225,8 +237,8 @@
         recordSignup,
         cleanAuthParamsFromUrl,
         peekSession,
-      } from "/auth/session.js?v=clean3";
-      import { TIER_BY_ID, inr } from "/shared/tiers.js?v=v13";
+      } from "/auth/session.js?v=clean4";
+      import { TIER_BY_ID, inr } from "/shared/tiers.js?v=v14";
       import { SERVICE_BY_ID, priceLabel } from "/shared/services.js?v=4";
       import { track } from "/shared/analytics.js?v=1";
 
@@ -244,6 +256,26 @@
       const statusEl = document.getElementById("status");
       const googleBtn = document.getElementById("google");
       const newsletter = document.getElementById("newsletter");
+      const waWrap = document.getElementById("wa-wrap");
+      const waInput = document.getElementById("wa-phone");
+      const PHONE_KEY = "bm.signup.phone";
+      // Ten digits is an Indian mobile; anything else must carry its country
+      // code (8-15 digits after the +). Stored as +<digits>.
+      function normalisePhone(raw) {
+        const t = String(raw || "").trim();
+        const digits = t.replace(/\D/g, "");
+        if (t.startsWith("+")) return digits.length >= 8 && digits.length <= 15 ? "+" + digits : "";
+        if (digits.length === 10 && /^[6-9]/.test(digits)) return "+91" + digits;
+        if (digits.length === 12 && digits.startsWith("91") && /^[6-9]/.test(digits.slice(2))) return "+" + digits;
+        if (digits.length === 11 && digits.startsWith("0") && /^[6-9]/.test(digits.slice(1))) return "+91" + digits.slice(1);
+        return "";
+      }
+      // Survives the redirect fallback of Google sign-in.
+      function storedPhone() {
+        try { return sessionStorage.getItem(PHONE_KEY) || ""; } catch { return ""; }
+      }
+      try { const saved = storedPhone(); if (saved) waInput.value = saved; } catch {}
+      waInput.addEventListener("input", () => { if (statusEl.classList.contains("err")) statusEl.hidden = true; });
 
       const cardEl = document.querySelector(".card");
       const stagesEl = document.getElementById("stages");
@@ -304,7 +336,8 @@
           : `Starting from ${inr(tier.price)}`;
         document.getElementById("title").textContent = "Almost there";
         document.getElementById("subtitle").textContent =
-          "Sign in with Google and we'll call you within one working day. You'll get the free toolkit either way.";
+          "Add your WhatsApp number, sign in with Google, and we'll message you within one working day. You'll get the free toolkit either way.";
+        waWrap.hidden = false;
         document.getElementById("google-label").textContent = `Continue with Google — ${tier.name}`;
       }
 
@@ -327,7 +360,7 @@
           const profile = await getProfile({ force: true });
           if (!profile) { stage(null); return; }
           // A signed-in visitor picking a new tier still gets it recorded.
-          if (tier) await recordSignup({ tier: tier.id, newsletter: newsletter.checked, sendToolkit: true });
+          if (tier) await recordSignup({ tier: tier.id, newsletter: newsletter.checked, sendToolkit: true, phone: storedPhone() });
           stage(2);
           location.replace(next && next.startsWith("/") ? next : homeFor(profile));
         } catch (e) {
@@ -337,6 +370,17 @@
       })();
 
       googleBtn.addEventListener("click", async () => {
+        // A buyer must leave a number: Google sign-in carries an email only,
+        // and the reply goes out on WhatsApp.
+        if (tier && !waWrap.hidden) {
+          const phone = normalisePhone(waInput.value);
+          if (!phone) {
+            say("Add your WhatsApp number first — that's where we reply.", "err");
+            waInput.focus();
+            return;
+          }
+          try { sessionStorage.setItem(PHONE_KEY, phone); } catch {}
+        }
         googleBtn.disabled = true;
         cancelled = false;
         statusEl.hidden = true;
@@ -352,7 +396,7 @@
           // Consent is implied by the button per the line above it; the
           // newsletter is the one genuinely optional thing, so it's a tick.
           await recordSignup({ tier: tier?.id || null, newsletter: newsletter.checked,
-                               sendToolkit: mode !== "client" });
+                               sendToolkit: mode !== "client", phone: tier ? storedPhone() : "" });
           track("signin_success", { tier: tier?.id || null, newsletter: newsletter.checked });
 
           stage(2);
